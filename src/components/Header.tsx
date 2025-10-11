@@ -11,6 +11,7 @@ import {
   StickyNote,
   X,
 } from 'lucide-react'
+import { ThemeToggle } from './theme-toggle'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -20,19 +21,20 @@ export default function Header() {
 
   return (
     <>
-      <header className="p-4 flex items-center bg-black/80 text-white shadow-lg">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-          aria-label="Open menu"
-        >
-          <Menu size={24} />
-        </button>
-        <h1 className="ml-4 text-xl font-semibold">
-          <Link to="/">
-            leffaseura
-          </Link>
-        </h1>
+      <header className="p-4 justify-between flex items-center bg-background text-foreground shadow-lg">
+        <div className="flex items-center">
+          <button
+            onClick={() => setIsOpen(true)}
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="ml-4 text-xl font-semibold">
+            <Link to="/">leffaseura</Link>
+          </h1>
+        </div>
+        <ThemeToggle />
       </header>
 
       <aside
