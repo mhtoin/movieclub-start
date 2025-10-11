@@ -1,16 +1,7 @@
 import { Link } from '@tanstack/react-router'
 
+import { Home, Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import {
-  ChevronDown,
-  ChevronRight,
-  Home,
-  Menu,
-  Network,
-  SquareFunction,
-  StickyNote,
-  X,
-} from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 
 export default function Header() {
