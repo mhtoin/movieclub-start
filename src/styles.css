@@ -5,16 +5,29 @@
 .light {
   --background: oklch(0.97 0 0);
   --foreground: oklch(0.2 0.1 240);
+  --dialog-background: oklch(0.99 0 0);
+  --dialog-border: oklch(0.85 0.01 240);
+  --dialog-shadow: oklch(0.2 0.1 240 / 0.15);
 }
 
 .dark {
   --background: oklch(0.14 0 0);
-  --foreground: oklch(0.9 0.1 240);
+  --foreground: oklch(0.8542 0.062 192.82);
+  --primary: oklch(0.8542 0.052 192.82);
+  --primary-foreground: oklch(0.1 0.1 240);
+  --dialog-background: oklch(0.16 0 0);
+  --dialog-border: oklch(0.25 0.02 240);
+  --dialog-shadow: oklch(0 0 0 / 0.4);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-dialog-background: var(--dialog-background);
+  --color-dialog-border: var(--dialog-border);
+  --color-dialog-shadow: var(--dialog-shadow);
 }
 
 @layer base {
