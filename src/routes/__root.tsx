@@ -1,14 +1,19 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import {
+  HeadContent,
+  Scripts,
+  createRootRouteWithContext,
+} from '@tanstack/react-router'
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
-import Header from '../components/header'
-
-import appCss from '../styles.css?url'
-import { getThemeServerFn } from '@/lib/theme'
 import { ThemeProvider } from '@/components/theme-provider'
+import { getThemeServerFn } from '@/lib/theme'
+import type { QueryClient } from '@tanstack/react-query'
+import appCss from '../styles.css?url'
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient
+}>()({
   head: () => ({
     meta: [
       {
@@ -35,6 +40,7 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const theme = Route.useLoaderData()
+
   return (
     <html className={theme} lang="en" suppressHydrationWarning>
       <head>
@@ -43,7 +49,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
       <body>
         <ThemeProvider theme={theme}>
-          <Header />
           {children}
           <TanStackDevtools
             config={{

@@ -15,6 +15,13 @@
       "when": 1760299767409,
       "tag": "0001_tidy_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760730012494,
+      "tag": "0002_married_the_hand",
+      "breakpoints": true
     }
   ]
 }
