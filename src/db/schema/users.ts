@@ -4,6 +4,7 @@ export const user = pgTable("User", {
     id: text().primaryKey().notNull(),
     email: text().notNull(),
     emailVerified: timestamp({ precision: 3, mode: 'string' }),
+    password: text(),
     image: text().notNull(),
     name: text().notNull(),
     shortlistId: text(),
@@ -41,3 +42,9 @@ export const account = pgTable("Account", {
             name: "Account_userId_fkey"
         }).onUpdate("cascade").onDelete("cascade"),
 ]);
+
+export type SelectUser = typeof user.$inferSelect;
+export type InsertUser = typeof user.$inferInsert;
+
+export type SelectAccount = typeof account.$inferSelect;
+export type InsertAccount = typeof account.$inferInsert;
