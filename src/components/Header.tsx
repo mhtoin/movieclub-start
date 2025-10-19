@@ -1,14 +1,19 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 
-import { Home, Menu, X } from 'lucide-react'
+import { logoutFn } from '@/lib/auth/logout-action'
+import { Home, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { ThemeToggle } from './theme-toggle'
+import { Button } from './ui/button'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [groupedExpanded, setGroupedExpanded] = useState<
-    Record<string, boolean>
-  >({})
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logoutFn()
+    router.navigate({ to: '/' })
+  }
 
   return (
     <>
@@ -25,7 +30,16 @@ export default function Header() {
             <Link to="/">leffaseura</Link>
           </h1>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button
+            onClick={handleLogout}
+            variant="icon"
+            className="flex items-center gap-2"
+          >
+            <LogOut size={24} />
+          </Button>
+        </div>
       </header>
 
       <aside

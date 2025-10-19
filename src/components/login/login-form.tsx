@@ -1,5 +1,6 @@
 import { Tab, TabsIndicator, TabsList, TabsPanel, TabsRoot } from '../ui/tabs'
 import LoginView from './login-view'
+import RegisterView from './register-view'
 
 export default function LoginForm() {
   return (
@@ -17,7 +18,7 @@ export default function LoginForm() {
         <LoginView />
       </TabsPanel>
       <TabsPanel value="register">
-        <div>Registration form coming soon...</div>
+        <RegisterView />
       </TabsPanel>
     </TabsRoot>
   )

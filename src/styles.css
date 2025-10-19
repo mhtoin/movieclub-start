@@ -12,9 +12,12 @@
 
 .dark {
   --background: oklch(0.14 0 0);
-  --foreground: oklch(0.8542 0.062 192.82);
-  --primary: oklch(0.8542 0.052 192.82);
+  --foreground: oklch(0.92 0.03 50);
+  --primary: oklch(0.78 0.15 25);
   --primary-foreground: oklch(0.1 0.1 240);
+  --secondary: oklch(0.75 0.14 70);
+  --secondary-foreground: oklch(0.1 0.05 70);
+  --icon: oklch(0.75 0.02 50);
   --dialog-background: oklch(0.16 0 0);
   --dialog-border: oklch(0.25 0.02 240);
   --dialog-shadow: oklch(0 0 0 / 0.4);
@@ -25,6 +28,9 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-icon: var(--icon);
   --color-dialog-background: var(--dialog-background);
   --color-dialog-border: var(--dialog-border);
   --color-dialog-shadow: var(--dialog-shadow);
