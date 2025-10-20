@@ -1,4 +1,5 @@
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
   HeadContent,
   Scripts,
@@ -61,6 +62,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               },
             ]}
           />
+          <ReactQueryDevtools buttonPosition="bottom-left" />
         </ThemeProvider>
         <Scripts />
       </body>
