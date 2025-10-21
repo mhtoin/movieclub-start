@@ -1,6 +1,11 @@
 import Header from '@/components/header'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useMatches,
+} from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 // Server function to get the current user
@@ -24,10 +29,17 @@ export const Route = createFileRoute('/_authenticated')({
 })
 
 function AuthenticatedLayout() {
+  const matches = useMatches()
+  const isHomePage = matches.some(
+    (match) => match.routeId === '/_authenticated/home',
+  )
+
   return (
     <>
       <Header />
-      <Outlet />
+      <div className={isHomePage ? '' : 'pt-20'}>
+        <Outlet />
+      </div>
     </>
   )
 }
