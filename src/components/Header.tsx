@@ -17,7 +17,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="p-4 justify-between flex items-center bg-background text-foreground shadow-lg">
+      <header className="p-4 justify-between flex items-center bg-transparent text-foreground shadow-lg fixed top-0 left-0 w-full z-40">
         <div className="flex items-center">
           <button
             onClick={() => setIsOpen(true)}
@@ -43,11 +43,11 @@ export default function Header() {
       </header>
 
       <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-black text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed top-0 left-0 h-full w-80 bg-sidebar text-sidebar-foreground shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
           <h2 className="text-xl font-bold">Navigation</h2>
           <button
             onClick={() => setIsOpen(false)}
