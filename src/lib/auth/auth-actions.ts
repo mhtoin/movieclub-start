@@ -32,7 +32,7 @@ export const registerFn = createServerFn({ method: 'POST' })
             sessionToken: session.token,
         });
 
-        throw redirect({ to: '/dashboard' });
+        throw redirect({ to: '/home' });
         
     })
 export const loginFn = createServerFn({ method: 'POST' })
@@ -58,5 +58,5 @@ export const loginFn = createServerFn({ method: 'POST' })
             sessionToken: session.token, 
         });
 
-        throw redirect({ to: '/dashboard' });
+        throw redirect({ to: '/home' });
     });

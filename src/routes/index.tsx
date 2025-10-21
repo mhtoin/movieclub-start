@@ -16,9 +16,8 @@ export const Route = createFileRoute('/')({
   component: LandingPage,
   beforeLoad: async () => {
     const user = await getCurrentUserServerFn()
-    // If user is authenticated, redirect to dashboard
     if (user) {
-      throw redirect({ to: '/dashboard' })
+      throw redirect({ to: '/home' })
     }
   },
 })
