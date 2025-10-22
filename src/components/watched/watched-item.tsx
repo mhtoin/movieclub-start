@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { Calendar, Clock, Star, Users, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import Avatar from '../ui/avatar'
+import { Button } from '../ui/button'
 import {
   DialogBackdrop,
   DialogClose,
@@ -119,21 +120,24 @@ export function WatchedItem({ movie }: { movie: MovieWithUserAndReviews }) {
       <DialogPortal>
         <DialogBackdrop opacity="medium" />
         <DialogPopup size="xl" className="max-h-[90vh] overflow-y-auto">
+          <DialogClose>
+            <Button
+              variant={'icon'}
+              className="absolute top-4 right-4 z-[120] p-2 rounded-full bg-background/80 hover:bg-background border border-border transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogClose>
           <div className="relative">
-            <DialogClose>
-              <button className="absolute top-2 right-0 z-10 p-2 rounded-full bg-background/80 hover:bg-background border border-border transition-colors">
-                <X className="h-4 w-4" />
-              </button>
-            </DialogClose>
-
             {backdropUrl && (
-              <div className="relative w-full h-64 -mx-10 -mt-10 mb-6 rounded-t-lg overflow-hidden">
+              <div className="relative w-full h-64 -mx-10 -mt-10 mb-6 overflow-hidden">
                 <img
                   src={backdropUrl}
                   alt={movie.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-dialog-background via-dialog-background/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-l from-dialog-background via-dialog-background/30 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-l from-dialog-background via-dialog-background/30 to-transparent" />
               </div>
             )}
