@@ -4,7 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 const dialogBackdropVariants = cva(
-  'fixed inset-0 min-h-dvh bg-black transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute',
+  'fixed inset-0 min-h-dvh bg-black transition-all duration-300 ease-out data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute',
   {
     variants: {
       opacity: {
@@ -20,7 +20,7 @@ const dialogBackdropVariants = cva(
 )
 
 const dialogPopupVariants = cva(
-  'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-dialog-background text-foreground border border-dialog-border shadow-lg transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0',
+  'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-dialog-background text-foreground border border-dialog-border shadow-lg transition-all duration-300 ease-out data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
   {
     variants: {
       size: {

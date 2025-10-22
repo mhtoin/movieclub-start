@@ -118,3 +118,10 @@ export const movieToRaffle = pgTable("_MovieToRaffle", {
         }).onUpdate("cascade").onDelete("cascade"),
     primaryKey({ columns: [table.a, table.b], name: "_MovieToRaffle_AB_pkey"}),
 ]);
+
+export type Movie = typeof movie.$inferSelect;
+export type Review = typeof review.$inferSelect;
+export type MovieWithUserAndReviews = Movie & {
+  user: typeof user.$inferSelect | null;
+  reviews: Review[];
+};
