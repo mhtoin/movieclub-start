@@ -70,3 +70,26 @@ export async function fetchBackgroundMovies(count: number = 12, timeWindow: Time
     .filter(movie => movie.poster_path !== null)
     .slice(0, count)
 }
+
+export async function getFilters() {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/genre/movie/list?language=en-US&api_key=${TMDB_CONFIG.API_KEY}`,
+    {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${TMDB_CONFIG.API_KEY}`,
+      },
+    },
+  )
+
+  const responseBody = await res.json()
+
+  console.log('Fetched genres from TMDB:', responseBody)
+
+  if (responseBody.genres) {
+    return responseBody.genres.map((genre: { name: string; id: number }) => {
+      return { label: genre.name, value: genre.id.toString() }
+    }) as Array<{ label: string; value: string }>
+  }
+}
