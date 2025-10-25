@@ -1,6 +1,6 @@
 import { boolean, foreignKey, integer, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
-export const user = pgTable("User", {
+export const user = pgTable("user", {
     id: text().primaryKey().notNull(),
     email: text().notNull(),
     emailVerified: timestamp({ precision: 3, mode: 'string' }),
@@ -22,7 +22,7 @@ export const user = pgTable("User", {
     uniqueIndex("User_email_key").using("btree", table.email.asc().nullsLast().op("text_ops")),
 ]);
 
-export const account = pgTable("Account", {
+export const account = pgTable("account", {
     id: text().primaryKey().notNull(),
     accessToken: text("access_token"),
     expiresAt: integer("expires_at"),
@@ -43,7 +43,7 @@ export const account = pgTable("Account", {
         }).onUpdate("cascade").onDelete("cascade"),
 ]);
 
-export type SelectUser = typeof user.$inferSelect;
+export type User = typeof user.$inferSelect;
 export type InsertUser = typeof user.$inferInsert;
 
 export type SelectAccount = typeof account.$inferSelect;

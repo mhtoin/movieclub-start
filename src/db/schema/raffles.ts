@@ -1,13 +1,13 @@
 import { foreignKey, index, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 import { user } from "./users";
 
-export const raffle = pgTable("Raffle", {
+export const raffle = pgTable("raffle", {
     id: text().primaryKey().notNull(),
     winningMovieID: text().notNull(),
     date: text().notNull(),
 });
 
-export const raffleToUser = pgTable("_RaffleToUser", {
+export const raffleToUser = pgTable("_raffle_to_user", {
     a: text("A").notNull(),
     b: text("B").notNull(),
 }, (table) => [

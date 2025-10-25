@@ -1,7 +1,7 @@
 import { boolean, foreignKey, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 import { user } from "./users";
 
-export const shortlist = pgTable("Shortlist", {
+export const shortlist = pgTable("shortlist", {
     id: text().primaryKey().notNull(),
     userId: text().notNull(),
     isReady: boolean().default(false).notNull(),

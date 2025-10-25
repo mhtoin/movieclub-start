@@ -1,7 +1,7 @@
 import { foreignKey, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./users";
 
-export const sessionsTable = pgTable("Session", {
+export const sessionsTable = pgTable("session", {
     id: text().primaryKey().notNull(),
     userId: text().notNull(),
     secretHash: text().notNull(),
