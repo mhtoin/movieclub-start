@@ -35,11 +35,15 @@ function AuthenticatedLayout() {
   )
 
   return (
-    <>
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
-      <div className={isHomePage ? '' : 'pt-20'}>
+      <div
+        className={
+          isHomePage ? 'flex-1 overflow-auto' : 'pt-20 flex-1 overflow-auto'
+        }
+      >
         <Outlet />
       </div>
-    </>
+    </div>
   )
 }
