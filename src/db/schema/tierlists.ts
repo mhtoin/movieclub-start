@@ -3,7 +3,7 @@ import { movie } from "./movies";
 import { user } from "./users";
 
 
-export const tierlist = pgTable("Tierlist", {
+export const tierlist = pgTable("tierlist", {
     id: text().primaryKey().notNull(),
     userId: text().notNull(),
     title: text(),
@@ -17,7 +17,7 @@ export const tierlist = pgTable("Tierlist", {
         }).onUpdate("cascade").onDelete("cascade"),
 ]);
 
-export const tier = pgTable("Tier", {
+export const tier = pgTable("tier", {
     id: text().primaryKey().notNull(),
     label: text().notNull(),
     value: integer().notNull(),
@@ -30,7 +30,7 @@ export const tier = pgTable("Tier", {
         }).onUpdate("cascade").onDelete("cascade"),
 ]);
 
-export const moviesOnTiers = pgTable("MoviesOnTiers", {
+export const moviesOnTiers = pgTable("movies_on_tiers", {
     id: text().primaryKey().notNull(),
     position: integer().notNull(),
     movieId: text().notNull(),

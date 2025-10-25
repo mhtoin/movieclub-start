@@ -5,7 +5,7 @@ import { user } from "./users";
 
 export const trailer = pgEnum("Trailer", ['name', 'id', 'key'])
 
-export const movie = pgTable("Movie", {
+export const movie = pgTable("movie", {
     id: text().primaryKey().notNull(),
     adult: boolean().notNull(),
     tmdbId: integer().notNull(),
@@ -39,7 +39,7 @@ export const movie = pgTable("Movie", {
         }).onUpdate("cascade").onDelete("set null"),
 ]);
 
-export const review = pgTable("Review", {
+export const review = pgTable("review", {
     id: text().primaryKey().notNull(),
     content: text().notNull(),
     userId: text().notNull(),
@@ -59,7 +59,7 @@ export const review = pgTable("Review", {
         }).onUpdate("cascade").onDelete("restrict"),
 ]);
 
-export const recommendedMovie = pgTable("RecommendedMovie", {
+export const recommendedMovie = pgTable("recommended_movie", {
     id: text().primaryKey().notNull(),
     movieId: text().notNull(),
     userId: text().notNull(),
@@ -83,7 +83,7 @@ export const recommendedMovie = pgTable("RecommendedMovie", {
         }).onUpdate("cascade").onDelete("restrict"),
 ]);
 
-export const movieToShortlist = pgTable("_MovieToShortlist", {
+export const movieToShortlist = pgTable("_movie_to_shortlist", {
     a: text("A").notNull(),
     b: text("B").notNull(),
 }, (table) => [
@@ -101,7 +101,7 @@ export const movieToShortlist = pgTable("_MovieToShortlist", {
     primaryKey({ columns: [table.a, table.b], name: "_MovieToShortlist_AB_pkey"}),
 ]);
 
-export const movieToRaffle = pgTable("_MovieToRaffle", {
+export const movieToRaffle = pgTable("_movie_to_raffle", {
     a: text("A").notNull(),
     b: text("B").notNull(),
 }, (table) => [
@@ -121,7 +121,7 @@ export const movieToRaffle = pgTable("_MovieToRaffle", {
 
 export type Movie = typeof movie.$inferSelect;
 export type Review = typeof review.$inferSelect;
-export type MovieWithUserAndReviews = Movie & {
-  user: typeof user.$inferSelect | null;
-  reviews: Review[];
-};
+export type MovieWithUser = {
+    movie: Movie;
+    user: typeof user.$inferSelect;
+}
