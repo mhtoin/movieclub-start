@@ -1,30 +1,59 @@
 import Input from '@/components/ui/input'
+import Filters from '@/components/watched/filters'
 import { WatchedItem } from '@/components/watched/watched-item'
 import WatchedSkeleton from '@/components/watched/watched-skeleton'
 import { useDebouncedValue } from '@/lib/hooks'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  retainSearchParams,
+  stripSearchParams,
+} from '@tanstack/react-router'
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
 import { format } from 'date-fns'
 import { Calendar, Search } from 'lucide-react'
 import { Suspense, useEffect, useState } from 'react'
 import { z } from 'zod'
 
+const defaultValues = {
+  search: '',
+  user: '',
+  genre: '',
+}
+
 const watchedSearchSchema = z.object({
-  search: fallback(z.string(), '').default(''),
+  search: fallback(z.string(), '').default(defaultValues.search),
+  user: fallback(z.string(), '').default(defaultValues.user),
+  genre: fallback(z.string(), '').default(defaultValues.genre),
 })
 
 export const Route = createFileRoute('/_authenticated/watched')({
   validateSearch: zodValidator(watchedSearchSchema),
+  search: {
+    middlewares: [
+      stripSearchParams(defaultValues),
+      retainSearchParams(['user', 'genre']),
+    ],
+  },
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(movieQueries.watched())
   },
   component: RouteComponent,
 })
 
-function WatchedMoviesList({ searchQuery }: { searchQuery: string }) {
-  const { data } = useSuspenseQuery(movieQueries.watched(searchQuery))
+function WatchedMoviesList({
+  searchQuery,
+  user,
+  genre,
+}: {
+  searchQuery: string
+  user: string
+  genre: string
+}) {
+  const { data } = useSuspenseQuery(
+    movieQueries.watched(searchQuery, user, genre),
+  )
 
   const entries = Object.entries(data || {})
 
@@ -95,15 +124,19 @@ function RouteComponent() {
   const [search, setSearch] = useState(initialSearch)
   const [debouncedSearch] = useDebouncedValue(search, 300)
   const navigate = Route.useNavigate()
+  const { user, genre } = Route.useSearch()
 
   useEffect(() => {
     navigate({
       search: (prev) => {
         const searchValue =
           debouncedSearch.trim().length >= 2 ? debouncedSearch.trim() : ''
-        return {
-          ...prev,
-          search: searchValue,
+
+        if (searchValue) {
+          return { ...prev, search: searchValue }
+        } else {
+          const { search: _, ...rest } = prev
+          return rest
         }
       },
     })
@@ -115,19 +148,22 @@ function RouteComponent() {
 
   return (
     <div className="h-full container mx-auto px-4 py-8 flex flex-col overflow-hidden">
-      <div className="flex-shrink-0 relative">
+      <div className="flex-shrink-0 relative mb-6">
         <h1 className="text-3xl font-bold mb-2">Watch History</h1>
         <p className="text-muted-foreground mb-6">
           A timeline of all the movies watched
         </p>
-        <div className="relative max-w-md mb-6">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search movies..."
-            value={search}
-            onChange={handleSearchChange}
-            className="pl-10"
-          />
+        <div className="flex items-center gap-4">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search movies..."
+              value={search}
+              onChange={handleSearchChange}
+              className="pl-10"
+            />
+          </div>
+          <Filters />
         </div>
 
         {debouncedSearch.trim() && (
@@ -140,11 +176,15 @@ function RouteComponent() {
         )}
       </div>
 
-      <div className="relative flex-1 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+      <div className="relative flex-1 overflow-hidden isolate">
+        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-background to-transparent z-[1] pointer-events-none" />
         <div className="h-full overflow-y-auto -mx-4 px-10 pt-6">
           <Suspense fallback={<WatchedSkeleton />}>
-            <WatchedMoviesList searchQuery={debouncedSearch} />
+            <WatchedMoviesList
+              searchQuery={debouncedSearch}
+              user={user}
+              genre={genre}
+            />
           </Suspense>
         </div>
       </div>

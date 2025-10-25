@@ -1,9 +1,11 @@
 import type { Movie } from '@/db/schema/movies'
 import { User } from '@/db/schema/users'
 import { useElementInView } from '@/lib/hooks'
+import { Route } from '@/routes/_authenticated/watched'
+import { Link } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { Calendar, Clock, Users, X } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Avatar from '../ui/avatar'
 import { Button } from '../ui/button'
 import {
@@ -17,6 +19,7 @@ import {
 
 export function WatchedItem({ movie, user }: { movie: Movie; user: User }) {
   const [open, setOpen] = useState(false)
+  const search = Route.useSearch()
   const itemRef = useRef<HTMLDivElement>(null)
   const { isInView, intersectionRatio } = useElementInView(
     itemRef as React.RefObject<HTMLElement>,
@@ -25,6 +28,11 @@ export function WatchedItem({ movie, user }: { movie: Movie; user: User }) {
       rootMargin: '-20px 0px -20px 0px',
     },
   )
+
+  // Close dialog when search params change (e.g., when filtering by user)
+  useEffect(() => {
+    setOpen(false)
+  }, [search])
   const posterUrl = movie?.images?.posters?.[0]?.file_path
     ? `https://image.tmdb.org/t/p/w342${movie.images.posters[0].file_path}`
     : '/placeholder_movie_poster.png'
@@ -93,6 +101,7 @@ export function WatchedItem({ movie, user }: { movie: Movie; user: User }) {
                       name={user.name}
                       size={32}
                     />
+
                     <div className="text-sm">
                       <p className="font-medium">{user.name}</p>
                       <p className="text-muted-foreground">Chosen by</p>
@@ -166,31 +175,43 @@ export function WatchedItem({ movie, user }: { movie: Movie; user: User }) {
                   {movie?.genres && movie.genres.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {movie?.genres.map((genre) => (
-                        <span
-                          key={genre}
-                          className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                        <Link
+                          from={Route.fullPath}
+                          to="."
+                          search={{ genre: genre }}
                         >
-                          {genre}
-                        </span>
+                          <span
+                            key={genre}
+                            className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                          >
+                            {genre}
+                          </span>
+                        </Link>
                       ))}
                     </div>
                   )}
 
                   {user && (
-                    <div className="flex items-center gap-3 pt-2">
-                      <Avatar
-                        src={user.image}
-                        alt={`${user.name}'s avatar`}
-                        name={user.name}
-                        size={40}
-                      />
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Chosen by
-                        </p>
-                        <p className="font-semibold">{user.name}</p>
+                    <Link
+                      from={Route.fullPath}
+                      to="."
+                      search={{ user: user.name }}
+                    >
+                      <div className="flex items-center gap-3 pt-2">
+                        <Avatar
+                          src={user.image}
+                          alt={`${user.name}'s avatar`}
+                          name={user.name}
+                          size={40}
+                        />
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Chosen by
+                          </p>
+                          <p className="font-semibold">{user.name}</p>
+                        </div>
                       </div>
-                    </div>
+                    </Link>
                   )}
                 </div>
               </div>
