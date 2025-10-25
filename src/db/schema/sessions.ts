@@ -14,3 +14,6 @@ export const sessionsTable = pgTable("session", {
             name: "Session_userId_fkey"
         }).onUpdate("cascade").onDelete("cascade"),
 ]);
+
+// Export alias for relations
+export const session = sessionsTable;

@@ -1,9 +1,9 @@
 import { createDbMovie } from '@/lib/createDbMovie';
 import { TMDBMovieResponse } from '@/types/tmdb';
-import { neon } from '@neondatabase/serverless';
 import bcrypt from 'bcryptjs';
 import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import { movie, movieToShortlist } from '../src/db/schema/movies';
 import { shortlist } from '../src/db/schema/shortlists';
 import { moviesOnTiers, tier, tierlist } from '../src/db/schema/tierlists';
@@ -17,8 +17,8 @@ if (!process.env.VITE_TMDB_API_KEY) {
   throw new Error('VITE_TMDB_API_KEY environment variable is required');
 }
 
-const sql = neon(process.env.DATABASE_URL);
-const db = drizzle(sql);
+const queryClient = postgres(process.env.DATABASE_URL);
+const db = drizzle(queryClient);
 
 // TMDB API configuration
 const TMDB_CONFIG = {
