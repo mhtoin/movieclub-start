@@ -5,7 +5,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import * as React from 'react'
 
 const selectTriggerVariants = cva(
-  'inline-flex items-center justify-between gap-2 rounded-md border border-border bg-background text-foreground transition-colors hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 data-[popup-open]:bg-gray-50',
+  'inline-flex items-center justify-between gap-2 rounded-md border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 data-[popup-open]:outline data-[popup-open]:outline-primary',
   {
     variants: {
       size: {
@@ -21,7 +21,7 @@ const selectTriggerVariants = cva(
 )
 
 const selectPopupVariants = cva(
-  'overflow-y-auto rounded-md border border-border bg-background shadow-lg outline-none transition-all duration-200 ease-out data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 z-50',
+  'overflow-y-auto rounded-md border border-border bg-background shadow-lg outline-none transition-all duration-300 ease-out data-[ending-style]:scale-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-80 data-[starting-style]:opacity-0 z-50',
   {
     variants: {
       size: {
@@ -37,7 +37,7 @@ const selectPopupVariants = cva(
 )
 
 const selectItemVariants = cva(
-  'relative flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 data-[selected]:bg-primary/10 data-[highlighted]:bg-gray-100 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
+  'relative flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 outline-none transition-colors hover:bg-secondary focus-visible:bg-secondary data-[selected]:bg-primary/20 data-[highlighted]:bg-accent data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
   {
     variants: {
       size: {
@@ -111,7 +111,7 @@ const SelectPopup = React.forwardRef<
   SelectPopupProps
 >(({ className, size, children, ...props }, ref) => (
   <BaseSelect.Portal>
-    <BaseSelect.Positioner sideOffset={4}>
+    <BaseSelect.Positioner sideOffset={4} alignItemWithTrigger={false}>
       <BaseSelect.Popup
         ref={ref}
         className={cn(selectPopupVariants({ size, className }))}
