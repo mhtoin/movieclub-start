@@ -1,4 +1,3 @@
-import { Route } from '@/routes/_authenticated/watched'
 import {
   ComboboxInput,
   ComboboxItem,
@@ -9,20 +8,22 @@ import {
 export default function FilterCombobox({
   options,
   onChange,
+  value,
+  label,
 }: {
   options?: { value: string; label: string }[]
-  onChange: (value: string) => void
+  onChange: (value: string | null) => void
+  value: string | null
+  label?: string
 }) {
-  const { genre } = Route.useSearch()
-
   return (
     <ComboboxRoot
-      key={genre || 'all'}
+      key={value || 'all'}
       onValueChange={onChange}
-      value={genre || null}
+      value={value || null}
     >
-      <ComboboxInput placeholder="Genre" />
-      <ComboboxPopup>
+      <ComboboxInput placeholder={label} className={'w-46'} />
+      <ComboboxPopup size={'lg'} className={'lg'}>
         <ComboboxItem value={null}>All</ComboboxItem>
         {options?.map((option) => (
           <ComboboxItem key={option.value} value={option.label}>

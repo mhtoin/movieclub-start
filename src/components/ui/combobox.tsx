@@ -37,13 +37,13 @@ const comboboxInputVariants = cva(
 )
 
 const comboboxPopupVariants = cva(
-  'overflow-y-auto rounded-md border border-border bg-background shadow-lg outline-none transition-all duration-200 ease-out data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 z-50',
+  'overflow-y-auto rounded-md border border-border bg-background shadow-lg outline-none transition-all duration-300 ease-out data-[ending-style]:scale-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-80 data-[starting-style]:opacity-0 z-50',
   {
     variants: {
       size: {
         sm: 'min-w-[8rem] max-h-[15rem] p-1 text-sm',
         default: 'min-w-[10rem] max-h-[20rem] p-1.5 text-base',
-        lg: 'min-w-[12rem] max-h-[24rem] p-2 text-lg',
+        lg: 'min-w-[14rem] max-h-[24rem] p-2 text-lg',
       },
     },
     defaultVariants: {
@@ -53,7 +53,7 @@ const comboboxPopupVariants = cva(
 )
 
 const comboboxItemVariants = cva(
-  'relative flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 data-[selected]:bg-primary/10 data-[highlighted]:bg-gray-100 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
+  'relative flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 outline-none transition-colors hover:bg-accent focus-visible:bg-accent data-[selected]:bg-primary/20 data-[highlighted]:bg-accent data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
   {
     variants: {
       size: {
