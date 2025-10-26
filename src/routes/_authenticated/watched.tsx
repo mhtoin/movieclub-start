@@ -20,12 +20,14 @@ const defaultValues = {
   search: '',
   user: '',
   genre: '',
+  month: '',
 }
 
 const watchedSearchSchema = z.object({
   search: fallback(z.string(), '').default(defaultValues.search),
   user: fallback(z.string(), '').default(defaultValues.user),
   genre: fallback(z.string(), '').default(defaultValues.genre),
+  month: fallback(z.string(), '').default(defaultValues.month),
 })
 
 export const Route = createFileRoute('/_authenticated/watched')({
@@ -33,7 +35,7 @@ export const Route = createFileRoute('/_authenticated/watched')({
   search: {
     middlewares: [
       stripSearchParams(defaultValues),
-      retainSearchParams(['user', 'genre']),
+      retainSearchParams(['user', 'genre', 'month', 'search']),
     ],
   },
   loader: async ({ context }) => {
@@ -62,10 +64,14 @@ function WatchedMoviesList({
       <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-primary/20" />
       {entries.map(([yearMonth, movies]) => {
         return (
-          <div key={yearMonth} className="relative mb-12 last:mb-0">
+          <div
+            id={`${yearMonth}`}
+            key={yearMonth}
+            className="relative mb-12 last:mb-0"
+          >
             <div className="flex items-center gap-4 mb-6">
               <div className="relative flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 ring-4 ring-background z-10 relative">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 ring-4 ring-background relative">
                   <Calendar className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <div
@@ -78,7 +84,7 @@ function WatchedMoviesList({
                   {new Date(
                     parseInt(yearMonth.split('-')[0], 10),
                     parseInt(yearMonth.split('-')[1], 10) - 1,
-                  ).toLocaleString('default', {
+                  ).toLocaleString('en-US', {
                     year: 'numeric',
                     month: 'long',
                   })}
@@ -178,6 +184,7 @@ function RouteComponent() {
 
       <div className="relative flex-1 overflow-hidden isolate">
         <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-background to-transparent z-[1] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent z-[1] pointer-events-none" />
         <div className="h-full overflow-y-auto -mx-4 px-10 pt-6">
           <Suspense fallback={<WatchedSkeleton />}>
             <WatchedMoviesList
