@@ -167,7 +167,7 @@ function RouteComponent() {
         </div>
 
         {debouncedSearch.trim() && (
-          <div className="border-l-4 border-primary pl-4 mb-6">
+          <div className="border-l-4 border-primary pl-4 my-6 ml-4">
             <h2 className="text-lg font-semibold">Search Results</h2>
             <p className="text-sm text-muted-foreground">
               Showing results for &ldquo;{debouncedSearch}&rdquo;
