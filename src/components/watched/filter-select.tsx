@@ -17,8 +17,11 @@ export default function FilterSelect({
 
   return (
     <SelectRoot onValueChange={onChange} value={user || null}>
-      <SelectTrigger placeholder="User" className={'w-fit whitespace-nowrap'} />
-      <SelectPopup>
+      <SelectTrigger
+        placeholder="User"
+        className={'w-fit whitespace-nowrap min-w-46'}
+      />
+      <SelectPopup className={'whitespace-nowrap min-w-46'} size={'lg'}>
         <SelectItem value={null}>All</SelectItem>
         {options?.map((option) => (
           <SelectItem key={option.value} value={option.value}>
