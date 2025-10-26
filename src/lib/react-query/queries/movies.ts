@@ -35,6 +35,38 @@ export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
   },
 )
 
+export const getDistinctWatchedMonths = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const rows = await db
+      .select({
+        month: movie.watchDate,
+      })
+      .from(movie)
+
+    if (!rows) return null
+
+    const uniqueMonths = new Set<string>()
+    rows.forEach((row) => {
+      if (row.month) {
+        const date = new Date(row.month)
+        const monthString = format(date, 'yyyy-MM')
+        uniqueMonths.add(monthString)
+      }
+    })
+
+    const sortedMonths = Array.from(uniqueMonths).sort((a, b) =>
+      b.localeCompare(a),
+    )
+
+    const mappedRows = sortedMonths.map((month) => ({
+      value: month,
+      label: new Date(month + '-01').toLocaleString('default', { month: 'long', year: 'numeric' }),
+    }))
+
+    return mappedRows
+  },
+)
+
 const watchedByMonthSchema = z.object({
   search: z.string().optional(),
   username: z.string().optional(),
@@ -45,8 +77,6 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
   .inputValidator((data: z.infer<typeof watchedByMonthSchema>) => data)
   .handler(async ({ data }) => {
     const { search, username } = data
-
-    console.log('Fetching watched movies with filters:', { search, username })
 
     // Conditionally construct filter conditions
     const conditions: SQL[] = [isNotNull(movie.watchDate)]
@@ -94,6 +124,12 @@ export const movieQueries = {
         return result
       },
     }),
+    months: () =>
+    queryOptions({
+      queryKey: [...movieQueries.all(), 'months'],
+      queryFn: getDistinctWatchedMonths,
+    }),
+
   /* For now, we use simple query instead of infinite query
     watched: (search?: string) => infiniteQueryOptions({
         queryKey: [...movieQueries.all(), 'watched', search],
