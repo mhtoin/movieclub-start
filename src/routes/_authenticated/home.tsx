@@ -20,8 +20,8 @@ function Home() {
     <div className="w-screen h-screen flex justify-center items-center">
       <div className="w-full h-full relative">
         <img
-          src={`https://image.tmdb.org/t/p/original${latestMovie?.images?.backdrops[1].file_path}`}
-          alt={latestMovie.title}
+          src={`https://image.tmdb.org/t/p/original${latestMovie?.movie?.images?.backdrops[0].file_path}`}
+          alt={latestMovie.movie.title}
           className="object-cover w-full h-full "
           loading="eager"
         />
@@ -29,11 +29,11 @@ function Home() {
         <div className="absolute inset-0 bg-radial from-transparent to-black/80 flex flex-col justify-center items-center text-center" />
         <div className="absolute inset-0 content">
           <div className="title-section">
-            <h1 className="text-7xl font-bold">{latestMovie.title}</h1>
+            <h1 className="text-7xl font-bold">{latestMovie.movie.title}</h1>
           </div>
           <div className="overview-section">
             <div className="overview">
-              <p className="text-sm">{latestMovie.overview}</p>
+              <p className="text-sm">{latestMovie.movie.overview}</p>
             </div>
           </div>
         </div>
