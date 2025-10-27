@@ -1,4 +1,5 @@
 import Header from '@/components/header'
+import { ShortlistToolbar } from '@/components/shortlist-toolbar'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import {
   createFileRoute,
@@ -29,6 +30,7 @@ export const Route = createFileRoute('/_authenticated')({
 })
 
 function AuthenticatedLayout() {
+  const { user } = Route.useRouteContext()
   const matches = useMatches()
   const isHomePage = matches.some(
     (match) => match.routeId === '/_authenticated/home',
@@ -43,6 +45,7 @@ function AuthenticatedLayout() {
         }
       >
         <Outlet />
+        <ShortlistToolbar userId={user?.userId} />
       </div>
     </div>
   )
