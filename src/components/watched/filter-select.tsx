@@ -1,4 +1,4 @@
-import { Route } from '@/routes/_authenticated/watched'
+import { getRouteApi } from '@tanstack/react-router'
 import {
   SelectItem,
   SelectPopup,
@@ -13,7 +13,8 @@ export default function FilterSelect({
   options?: { value: string; label: string }[]
   onChange: (value: string) => void
 }) {
-  const { user } = Route.useSearch()
+  const routeApi = getRouteApi('/_authenticated/watched')
+  const { user } = routeApi.useSearch()
 
   return (
     <SelectRoot onValueChange={onChange} value={user || null}>

@@ -3,12 +3,13 @@ import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { userQueries } from '@/lib/react-query/queries/users'
 import { Route } from '@/routes/_authenticated/watched'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { getRouteApi } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import FilterCombobox from './filter-combobox'
 import FilterSelect from './filter-select'
 
 export default function Filters() {
+  const routeApi = getRouteApi('/_authenticated/watched')
   const { data: users } = useQuery(userQueries.all())
   const usersOptions = users?.map((user) => ({
     value: user.name,
@@ -17,7 +18,7 @@ export default function Filters() {
   const { data: genres } = useQuery(tmdbQueries.genres())
   const { data: months } = useQuery(movieQueries.months())
   const { genre, month } = Route.useSearch()
-  const navigate = useNavigate({ from: Route.fullPath })
+  const navigate = routeApi.useNavigate()
 
   const handleUserFilterChange = (value: string) => {
     const selectedOption = usersOptions?.find(

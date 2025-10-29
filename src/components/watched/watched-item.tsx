@@ -1,8 +1,7 @@
 import type { Movie } from '@/db/schema/movies'
 import { User } from '@/db/schema/users'
 import { useElementInView } from '@/lib/hooks'
-import { Route } from '@/routes/_authenticated/watched'
-import { Link } from '@tanstack/react-router'
+import { getRouteApi } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { Calendar, Clock, Users, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -18,8 +17,9 @@ import {
 } from '../ui/dialog'
 
 export function WatchedItem({ movie, user }: { movie: Movie; user: User }) {
+  const routeApi = getRouteApi('/_authenticated/watched')
   const [open, setOpen] = useState(false)
-  const search = Route.useSearch()
+  const search = routeApi.useSearch()
   const itemRef = useRef<HTMLDivElement>(null)
   const { isInView, intersectionRatio } = useElementInView(
     itemRef as React.RefObject<HTMLElement>,
@@ -175,28 +175,20 @@ export function WatchedItem({ movie, user }: { movie: Movie; user: User }) {
                   {movie?.genres && movie.genres.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {movie?.genres.map((genre) => (
-                        <Link
-                          from={Route.fullPath}
-                          to="."
-                          search={{ genre: genre }}
-                        >
+                        <routeApi.Link to="." search={{ genre: genre }}>
                           <span
                             key={genre}
                             className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
                           >
                             {genre}
                           </span>
-                        </Link>
+                        </routeApi.Link>
                       ))}
                     </div>
                   )}
 
                   {user && (
-                    <Link
-                      from={Route.fullPath}
-                      to="."
-                      search={{ user: user.name }}
-                    >
+                    <routeApi.Link to="." search={{ user: user.name }}>
                       <div className="flex items-center gap-3 pt-2">
                         <Avatar
                           src={user.image}
@@ -211,7 +203,7 @@ export function WatchedItem({ movie, user }: { movie: Movie; user: User }) {
                           <p className="font-semibold">{user.name}</p>
                         </div>
                       </div>
-                    </Link>
+                    </routeApi.Link>
                   )}
                 </div>
               </div>
