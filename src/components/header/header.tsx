@@ -1,10 +1,11 @@
 import { Link, useRouter } from '@tanstack/react-router'
 
 import { logoutFn } from '@/lib/auth/logout-action'
-import { Film, Home, LogOut, Menu, X } from 'lucide-react'
+import { Film, Home, LogOut, Menu, Search, X } from 'lucide-react'
 import { useState } from 'react'
-import { ThemeToggle } from './theme-toggle'
-import { Button } from './ui/button'
+import { ThemeToggle } from '../theme-toggle'
+import { Button } from '../ui/button'
+import HeaderLink from './header-link'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -17,7 +18,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="p-4 justify-between flex items-center bg-transparent text-foreground shadow-lg fixed top-0 left-0 w-full z-40">
+      <header className="p-4 justify-between flex items-center bg-transparent text-foreground shadow-lg fixed top-0 left-0 w-full z-40 border-b border-border">
         <div className="flex items-center">
           <button
             onClick={() => setIsOpen(true)}
@@ -59,30 +60,18 @@ export default function Header() {
         </div>
 
         <nav className="flex-1 p-4 overflow-y-auto">
-          <Link
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
-          >
+          <HeaderLink destination="/" setIsOpen={setIsOpen}>
             <Home size={20} />
             <span className="font-medium">Home</span>
-          </Link>
-          <Link
-            to="/watched"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
-          >
+          </HeaderLink>
+          <HeaderLink destination="/watched" setIsOpen={setIsOpen}>
             <Film size={20} />
             <span className="font-medium">Watched</span>
-          </Link>
+          </HeaderLink>
+          <HeaderLink destination="/discover" setIsOpen={setIsOpen}>
+            <Search size={20} />
+            <span className="font-medium">Discover</span>
+          </HeaderLink>
         </nav>
       </aside>
     </>
