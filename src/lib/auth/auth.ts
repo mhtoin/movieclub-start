@@ -55,17 +55,20 @@ export async function createSession(userId: string): Promise<SessionWithToken> {
         token,
     };
 
-    await db.insert(sessionsTable).values({ 
-        id: session.id,
-        userId: userId,
-        secretHash: session.secretHash,
-        expiresAt: expiresAt,
-        createdAt: now
-
-    });
+    try {
+        await db.insert(sessionsTable).values({ 
+            id: session.id,
+            userId: userId,
+            secretHash: session.secretHash,
+            expiresAt: expiresAt,
+            createdAt: now
+        });
+    } catch (error) {
+        console.error('Database error while creating session:', error);
+        throw new Error('Failed to connect to the database. Please ensure the database is running.', { cause: error });
+    }
 
     return session;
-
 }
 
 export async function validateSessionToken(token: string): Promise<Session | null> {
@@ -93,25 +96,30 @@ export async function validateSessionToken(token: string): Promise<Session | nul
 async function getSession(id: string): Promise<Session | null> {
     const now = new Date();
 
-    const sessionRecord = await db
-        .select()
-        .from(sessionsTable)
-        .where(eq(sessionsTable.id, id))
-        .limit(1)
-        .then((rows) => rows[0] || null);
+    try {
+        const sessionRecord = await db
+            .select()
+            .from(sessionsTable)
+            .where(eq(sessionsTable.id, id))
+            .limit(1)
+            .then((rows) => rows[0] || null);
 
-    if (!sessionRecord) {
-        return null;
+        if (!sessionRecord) {
+            return null;
+        }
+
+        // Check if the session has expired
+        const expiresAt = new Date(sessionRecord.expiresAt);
+        if (expiresAt <= now) {
+            await deleteSession(id);
+            return null;
+        }
+        return sessionRecord
+    } catch (error) {
+        // Log the error and rethrow with more context
+        console.error('Database error while fetching session:', error);
+        throw new Error('Failed to connect to the database. Please ensure the database is running.', { cause: error });
     }
-
-    // Check if the session has expired
-    const expiresAt = new Date(sessionRecord.expiresAt);
-    if (expiresAt <= now) {
-        await deleteSession(id);
-        return null;
-    }
-    return sessionRecord
-
 }
 
 async function deleteSession(id: string): Promise<void> {

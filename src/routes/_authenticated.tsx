@@ -1,4 +1,5 @@
-import Header from '@/components/header'
+import { ErrorComponent } from '@/components/error-component'
+import Header from '@/components/header/header'
 import { ShortlistToolbar } from '@/components/shortlist-toolbar'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import {
@@ -12,13 +13,29 @@ import { createServerFn } from '@tanstack/react-start'
 // Server function to get the current user
 const getCurrentUserServerFn = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const session = await useAppSession()
-    const sessionToken = session.data?.sessionToken
-    return await getSessionUser(sessionToken)
+    try {
+      const session = await useAppSession()
+      const sessionToken = session.data?.sessionToken
+      return await getSessionUser(sessionToken)
+    } catch (error) {
+      // If there's a database connection error, throw it to be caught by errorComponent
+      if (
+        error instanceof Error &&
+        (error.message.includes('connect') ||
+          error.message.includes('ECONNREFUSED'))
+      ) {
+        throw new Error(
+          'Failed to connect to the database. Please ensure the database is running.',
+          { cause: error },
+        )
+      }
+      throw error
+    }
   },
 )
 
 export const Route = createFileRoute('/_authenticated')({
+  errorComponent: ErrorComponent,
   beforeLoad: async () => {
     const user = await getCurrentUserServerFn()
     if (!user) {

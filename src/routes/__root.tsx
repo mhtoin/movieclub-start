@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
+import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
 import { getThemeServerFn } from '@/lib/theme'
 import type { QueryClient } from '@tanstack/react-query'
@@ -15,6 +16,7 @@ import appCss from '../styles.css?url'
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
 }>()({
+  errorComponent: ErrorComponent,
   head: () => ({
     meta: [
       {
