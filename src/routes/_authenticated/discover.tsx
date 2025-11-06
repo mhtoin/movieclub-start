@@ -1,6 +1,5 @@
 import DiscoverMoviesList from '@/components/discover/discover-movie-list'
 import { DiscoverFilters } from '@/components/discover/filters'
-import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { createFileRoute } from '@tanstack/react-router'
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
@@ -20,7 +19,6 @@ export const Route = createFileRoute('/_authenticated/discover')({
   validateSearch: zodValidator(discoverSearchSchema),
   loaderDeps: ({ search }) => search,
   loader: async ({ context, deps }) => {
-    const user = context.user
     await Promise.all([
       context.queryClient.ensureQueryData(tmdbQueries.genres()),
       context.queryClient.ensureQueryData(tmdbQueries.watchProviders()),
@@ -33,12 +31,6 @@ export const Route = createFileRoute('/_authenticated/discover')({
           sort_by: deps.sortBy,
         }),
       ),
-      // Preload shortlist data to ensure server function is registered
-      user?.userId
-        ? context.queryClient.ensureQueryData(
-            shortlistQueries.byUser(user.userId),
-          )
-        : Promise.resolve(),
     ])
   },
   component: RouteComponent,

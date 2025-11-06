@@ -1,16 +1,6 @@
-import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
-  loader: async ({ context }) => {
-    const user = context.user
-    // Preload shortlist data to ensure server function is registered
-    if (user?.userId) {
-      await context.queryClient.ensureQueryData(
-        shortlistQueries.byUser(user.userId),
-      )
-    }
-  },
   component: Dashboard,
 })
 

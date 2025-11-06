@@ -4,7 +4,6 @@ import { WatchedItem } from '@/components/watched/watched-item'
 import WatchedSkeleton from '@/components/watched/watched-skeleton'
 import { useDebouncedValue } from '@/lib/hooks'
 import { movieQueries } from '@/lib/react-query/queries/movies'
-import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   createFileRoute,
@@ -40,16 +39,7 @@ export const Route = createFileRoute('/_authenticated/watched')({
     ],
   },
   loader: async ({ context }) => {
-    const user = context.user
-    await Promise.all([
-      context.queryClient.ensureQueryData(movieQueries.watched()),
-      // Preload shortlist data to ensure server function is registered
-      user?.userId
-        ? context.queryClient.ensureQueryData(
-            shortlistQueries.byUser(user.userId),
-          )
-        : Promise.resolve(),
-    ])
+    await context.queryClient.ensureQueryData(movieQueries.watched())
   },
   component: RouteComponent,
 })

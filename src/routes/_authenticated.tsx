@@ -2,6 +2,7 @@ import { ErrorComponent } from '@/components/error-component'
 import Header from '@/components/header/header'
 import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolbar'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import {
   createFileRoute,
   Outlet,
@@ -42,6 +43,15 @@ export const Route = createFileRoute('/_authenticated')({
       throw redirect({ to: '/' })
     }
     return { user }
+  },
+  loader: async ({ context }) => {
+    const user = context.user
+    // Preload shortlist data to ensure server function is registered for all child routes
+    if (user?.userId) {
+      await context.queryClient.ensureQueryData(
+        shortlistQueries.byUser(user.userId),
+      )
+    }
   },
   component: AuthenticatedLayout,
 })
