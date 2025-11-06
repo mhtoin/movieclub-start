@@ -1,10 +1,20 @@
 import { movieQueries } from '@/lib/react-query/queries/movies'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(movieQueries.latest())
+    const user = context.user
+    await Promise.all([
+      context.queryClient.ensureQueryData(movieQueries.latest()),
+      // Preload shortlist data to ensure server function is registered
+      user?.userId
+        ? context.queryClient.ensureQueryData(
+            shortlistQueries.byUser(user.userId),
+          )
+        : Promise.resolve(),
+    ])
   },
   component: Home,
 })

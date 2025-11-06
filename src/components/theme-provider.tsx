@@ -25,6 +25,15 @@ export function ThemeProvider({ children, theme }: Props) {
 
 export function useTheme() {
   const val = useContext(ThemeContext)
-  if (!val) throw new Error('useTheme called outside of ThemeProvider!')
+  if (!val) {
+    // During SSR, return a default value instead of throwing
+    if (typeof window === 'undefined') {
+      return {
+        theme: 'dark' as Theme,
+        setTheme: () => {},
+      }
+    }
+    throw new Error('useTheme called outside of ThemeProvider!')
+  }
   return val
 }
