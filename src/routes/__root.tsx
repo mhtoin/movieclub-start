@@ -1,3 +1,4 @@
+import { Toast } from '@base-ui-components/react/toast'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
@@ -9,6 +10,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
+import ToastList from '@/components/ui/toast-list'
 import { getThemeServerFn } from '@/lib/theme'
 import type { QueryClient } from '@tanstack/react-query'
 import appCss from '../styles.css?url'
@@ -52,11 +54,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
       <body>
         <ThemeProvider theme={theme}>
-          {children}
+          <Toast.Provider>
+            {children}
+            <Toast.Portal>
+              <Toast.Viewport className="fixed z-[100000] top-auto right-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full flex w-[250px] sm:right-[2rem] sm:bottom-[2rem] sm:w-[300px]">
+                <ToastList />
+              </Toast.Viewport>
+            </Toast.Portal>
+          </Toast.Provider>
           <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
             plugins={[
               {
                 name: 'Tanstack Router',
