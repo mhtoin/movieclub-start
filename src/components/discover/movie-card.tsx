@@ -7,7 +7,7 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie, onClick }: MovieCardProps) {
-  const posterUrl = getImageUrl(movie.poster_path, 'w342')
+  const posterUrl = getImageUrl(movie.poster_path, 'w500')
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (onClick) {
@@ -18,7 +18,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
 
   return (
     <div
-      className="group relative overflow-hidden rounded-lg bg-card transition-all hover:scale-105 hover:shadow-xl cursor-pointer"
+      className="group relative overflow-hidden rounded-lg bg-card transition-all hover:shadow-xl cursor-pointer"
       onClick={handleClick}
     >
       <div className="aspect-[2/3] overflow-hidden">
@@ -26,7 +26,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
           <img
             src={posterUrl}
             alt={movie.title}
-            className="h-full w-full object-cover transition-transform group-hover:scale-110"
+            className="h-full w-full object-cover transition-transform group-hover:scale-102"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-muted">

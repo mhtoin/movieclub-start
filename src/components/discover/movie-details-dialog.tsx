@@ -1,8 +1,14 @@
-import { Button } from '@/components/ui/button'
+import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl, Movie } from '@/lib/tmdb-api'
-import { Calendar, Plus, Star, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { AnimatedPoster } from './animated-poster'
+import { DialogHeader } from './dialog-header'
+import { MovieDetailsView } from './movie-details-view'
+import { MovieOverviewView } from './movie-overview-view'
+import { useDialogAnimation } from './use-dialog-animation'
 
 interface MovieDetailsDialogProps {
   movie: Movie | null
@@ -17,142 +23,56 @@ export function MovieDetailsDialog({
   onOpenChange,
   triggerRect,
 }: MovieDetailsDialogProps) {
-  const [mounted, setMounted] = useState(false)
-  const [isClosing, setIsClosing] = useState(false)
-  const [showImage, setShowImage] = useState(false)
+  const { mutate: addToShortlist, isPending } = useAddToShortlistMutation()
+  const [currentView, setCurrentView] = useState<'overview' | 'details'>(
+    'overview',
+  )
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const posterUrl = movie ? getImageUrl(movie.poster_path, 'w500') : null
   const backdropUrl = movie ? getImageUrl(movie.backdrop_path, 'w1280') : null
 
-  useEffect(() => {
-    if (open && triggerRect) {
-      setIsClosing(false)
-      setMounted(false)
-      setShowImage(false)
+  // Fetch detailed movie information including watch providers and external IDs
+  const { data: movieDetails } = useQuery({
+    ...tmdbQueries.movieDetails(movie?.id ?? 0),
+    enabled: open && !!movie,
+  })
 
-      requestAnimationFrame(() => {
-        setShowImage(true)
-        requestAnimationFrame(() => {
-          setMounted(true)
-        })
-      })
-    } else if (!open) {
-      setMounted(false)
-      setShowImage(false)
-    }
-  }, [open, triggerRect])
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
-        handleClose()
-      }
-    }
-
-    if (open) {
-      document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden'
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = ''
-    }
-  }, [open])
-
-  const handleClose = () => {
-    setIsClosing(true)
-    setMounted(false)
-    setTimeout(() => {
-      setShowImage(false)
+  // Handle dialog animations and state
+  const {
+    mounted,
+    isClosing,
+    showImage,
+    handleClose,
+    handleBackdropClick,
+    backdropStyle,
+  } = useDialogAnimation({
+    open,
+    triggerRect,
+    onClose: () => {
       onOpenChange(false)
-    }, 350)
-  }
+      setCurrentView('overview')
+      setIsTransitioning(false)
+    },
+  })
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose()
-    }
+  const handleViewTransition = (view: 'overview' | 'details') => {
+    setIsTransitioning(true)
+    setTimeout(() => {
+      setCurrentView(view)
+      setIsTransitioning(false)
+      // Scroll to top when changing views
+      if (containerRef.current) {
+        const scrollContainer =
+          containerRef.current.querySelector('.overflow-y-auto')
+        if (scrollContainer) {
+          scrollContainer.scrollTop = 0
+        }
+      }
+    }, 200)
   }
 
   if (!movie || !open) return null
-
-  const getImageStyle = (): React.CSSProperties => {
-    if (!triggerRect) {
-      return {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '12rem',
-        height: 'auto',
-      }
-    }
-
-    const dialogWidth = Math.min(window.innerWidth * 0.9, 768)
-    const contentPadding = 24
-    const finalImageWidth = 192
-
-    const dialogLeft = (window.innerWidth - dialogWidth) / 2
-    const imageLeft = dialogLeft + contentPadding
-    const imageTop = (window.innerHeight - 600) / 2 + 264 + contentPadding
-
-    if (!showImage) {
-      return {
-        position: 'fixed',
-        top: `${triggerRect.top}px`,
-        left: `${triggerRect.left}px`,
-        width: `${triggerRect.width}px`,
-        height: `${triggerRect.height}px`,
-        zIndex: 200,
-        borderRadius: '0.5rem',
-        opacity: 0,
-        transition: 'none',
-      }
-    }
-
-    if (!mounted && !isClosing) {
-      return {
-        position: 'fixed',
-        top: `${triggerRect.top}px`,
-        left: `${triggerRect.left}px`,
-        width: `${triggerRect.width}px`,
-        height: `${triggerRect.height}px`,
-        zIndex: 200,
-        borderRadius: '0.5rem',
-        opacity: 1,
-        transition: 'opacity 0.15s ease-in',
-      }
-    }
-
-    if (!mounted && isClosing) {
-      return {
-        position: 'fixed',
-        top: `${triggerRect.top}px`,
-        left: `${triggerRect.left}px`,
-        width: `${triggerRect.width}px`,
-        height: `${triggerRect.height}px`,
-        zIndex: 200,
-        borderRadius: '0.5rem',
-        opacity: 0,
-        transition: 'all 0.35s cubic-bezier(0.4, 0, 0.6, 1)',
-        boxShadow: 'none',
-      }
-    }
-
-    return {
-      position: 'fixed',
-      top: `${imageTop}px`,
-      left: `${imageLeft}px`,
-      width: `${finalImageWidth}px`,
-      height: 'auto',
-      zIndex: 200,
-      borderRadius: '0.5rem',
-      opacity: 1,
-      transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
-      boxShadow:
-        '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-    }
-  }
 
   const getContainerStyle = (): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {
@@ -162,10 +82,13 @@ export function MovieDetailsDialog({
       transform: 'translate(-50%, -50%)',
       width: '90vw',
       maxWidth: '48rem',
+      height: '90vh',
       maxHeight: '90vh',
       zIndex: 110,
       borderRadius: '0.5rem',
       overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
     }
 
     if (isClosing || !mounted) {
@@ -183,11 +106,6 @@ export function MovieDetailsDialog({
     }
   }
 
-  const backdropStyle: React.CSSProperties = {
-    opacity: mounted && !isClosing ? 1 : 0,
-    transition: isClosing ? 'opacity 0.35s ease-out' : 'opacity 0.4s ease-out',
-  }
-
   return createPortal(
     <>
       <div
@@ -195,38 +113,25 @@ export function MovieDetailsDialog({
         style={backdropStyle}
         onClick={handleBackdropClick}
       />
-      {posterUrl && (
-        <img
-          src={posterUrl}
-          alt={movie.title}
-          style={getImageStyle()}
-          className="object-cover pointer-events-none"
-        />
-      )}
+      <AnimatedPoster
+        posterUrl={posterUrl}
+        movieTitle={movie.title}
+        triggerRect={triggerRect}
+        showImage={showImage}
+        mounted={mounted}
+        isClosing={isClosing}
+      />
       <div
         ref={containerRef}
         className="bg-dialog-background text-foreground border border-dialog-border shadow-2xl"
         style={getContainerStyle()}
       >
-        <div className="relative h-full overflow-y-auto">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4 z-10 rounded-full bg-black/50 text-white hover:bg-black/70"
-            onClick={handleClose}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-          {backdropUrl && (
-            <div className="relative h-64 w-full overflow-hidden">
-              <img
-                src={backdropUrl}
-                alt={movie.title}
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-dialog-background to-transparent" />
-            </div>
-          )}
+        <DialogHeader
+          backdropUrl={backdropUrl}
+          movieTitle={movie.title}
+          onClose={handleClose}
+        />
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="p-6">
             <div className="flex gap-6">
               {posterUrl && (
@@ -234,45 +139,38 @@ export function MovieDetailsDialog({
                   <div className="aspect-[2/3]" />
                 </div>
               )}
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h2 className="text-3xl font-bold">{movie.title}</h2>
-                  {movie.original_title !== movie.title && (
-                    <p className="text-sm text-muted-foreground">
-                      {movie.original_title}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-4 text-sm">
-                  {movie.release_date && (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(movie.release_date).getFullYear()}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span>{movie.vote_average.toFixed(1)}</span>
-                    <span className="text-muted-foreground">
-                      ({movie.vote_count.toLocaleString()} votes)
-                    </span>
-                  </div>
-                </div>
-                {movie.overview && (
-                  <div>
-                    <h3 className="mb-2 font-semibold">Overview</h3>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {movie.overview}
-                    </p>
-                  </div>
+              <div
+                className="flex-1 space-y-4"
+                style={{
+                  opacity: isTransitioning ? 0 : 1,
+                  transform: isTransitioning
+                    ? 'translateX(20px)'
+                    : 'translateX(0)',
+                  transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
+                }}
+              >
+                {currentView === 'overview' ? (
+                  <MovieOverviewView
+                    title={movie.title}
+                    originalTitle={movie.original_title}
+                    releaseDate={movie.release_date}
+                    voteAverage={movie.vote_average}
+                    voteCount={movie.vote_count}
+                    overview={movie.overview}
+                    movieDetails={movieDetails}
+                    onAddToShortlist={() => addToShortlist(movie.id)}
+                    onShowMoreInfo={() => handleViewTransition('details')}
+                    isPending={isPending}
+                  />
+                ) : (
+                  <MovieDetailsView
+                    title={movie.title}
+                    movieDetails={movieDetails}
+                    onBack={() => handleViewTransition('overview')}
+                    onAddToShortlist={() => addToShortlist(movie.id)}
+                    isPending={isPending}
+                  />
                 )}
-                <div className="flex gap-3 pt-4">
-                  <Button className="gap-2" variant={'primary'}>
-                    <Plus className="h-4 w-4" />
-                    Add to Shortlist
-                  </Button>
-                  <Button variant="outline">More Info</Button>
-                </div>
               </div>
             </div>
           </div>

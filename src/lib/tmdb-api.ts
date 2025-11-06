@@ -1,3 +1,5 @@
+import { TMDBMovieResponse } from '@/types/tmdb'
+
 // Types for The Movie Database API
 export interface Movie {
   id: number
@@ -27,29 +29,38 @@ export type TimeWindow = 'day' | 'week'
 
 const TMDB_CONFIG = {
   API_KEY: import.meta.env.VITE_TMDB_API_KEY,
-  BASE_URL: import.meta.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.org/3',
-  IMAGE_BASE_URL: import.meta.env.VITE_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p'
+  BASE_URL:
+    import.meta.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.org/3',
+  IMAGE_BASE_URL:
+    import.meta.env.VITE_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p',
 }
 
-export function getImageUrl(path: string | null, size: string = 'w500'): string | null {
+export function getImageUrl(
+  path: string | null,
+  size: string = 'w500',
+): string | null {
   if (!path) return null
   return `${TMDB_CONFIG.IMAGE_BASE_URL}/${size}${path}`
 }
 
-export async function fetchTrendingMovies(timeWindow: TimeWindow = 'week'): Promise<Movie[]> {
+export async function fetchTrendingMovies(
+  timeWindow: TimeWindow = 'week',
+): Promise<Movie[]> {
   if (!TMDB_CONFIG.API_KEY) {
     throw new Error('TMDB API key is not configured')
   }
 
   const url = `${TMDB_CONFIG.BASE_URL}/trending/movie/${timeWindow}?api_key=${TMDB_CONFIG.API_KEY}`
-  
+
   try {
     const response = await fetch(url)
-    
+
     if (!response.ok) {
-      throw new Error(`TMDB API error: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `TMDB API error: ${response.status} ${response.statusText}`,
+      )
     }
-    
+
     const data: TMDBResponse = await response.json()
     return data.results
   } catch (error) {
@@ -58,21 +69,22 @@ export async function fetchTrendingMovies(timeWindow: TimeWindow = 'week'): Prom
   }
 }
 
-export async function fetchBackgroundMovies(count: number = 12, timeWindow: TimeWindow = 'week'): Promise<Movie[]> {
+export async function fetchBackgroundMovies(
+  count: number = 12,
+  timeWindow: TimeWindow = 'week',
+): Promise<Movie[]> {
   const movies = await fetchTrendingMovies(timeWindow)
-  
-  return movies
-    .filter(movie => movie.poster_path !== null)
-    .slice(0, count)
+
+  return movies.filter((movie) => movie.poster_path !== null).slice(0, count)
 }
 
 export async function getFilters() {
   const res = await fetch(
     `https://api.themoviedb.org/3/genre/movie/list?language=en-US&api_key=${TMDB_CONFIG.API_KEY}`,
     {
-      method: "GET",
+      method: 'GET',
       headers: {
-        accept: "application/json",
+        accept: 'application/json',
         Authorization: `Bearer ${TMDB_CONFIG.API_KEY}`,
       },
     },
@@ -106,14 +118,16 @@ export async function fetchWatchProviders(): Promise<WatchProvider[]> {
   }
 
   const url = `${TMDB_CONFIG.BASE_URL}/watch/providers/movie?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&watch_region=FI`
-  
+
   try {
     const response = await fetch(url)
-    
+
     if (!response.ok) {
-      throw new Error(`TMDB API error: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `TMDB API error: ${response.status} ${response.statusText}`,
+      )
     }
-    
+
     const data: WatchProvidersResponse = await response.json()
     return data.results
   } catch (error) {
@@ -132,7 +146,9 @@ export interface DiscoverParams {
   sort_by?: string
 }
 
-export async function discoverMovies(params: DiscoverParams): Promise<TMDBResponse> {
+export async function discoverMovies(
+  params: DiscoverParams,
+): Promise<TMDBResponse> {
   if (!TMDB_CONFIG.API_KEY) {
     throw new Error('TMDB API key is not configured')
   }
@@ -156,26 +172,56 @@ export async function discoverMovies(params: DiscoverParams): Promise<TMDBRespon
   }
 
   if (params['vote_average.gte'] !== undefined) {
-    queryParams.append('vote_average.gte', params['vote_average.gte'].toString())
+    queryParams.append(
+      'vote_average.gte',
+      params['vote_average.gte'].toString(),
+    )
   }
 
   if (params['vote_average.lte'] !== undefined) {
-    queryParams.append('vote_average.lte', params['vote_average.lte'].toString())
+    queryParams.append(
+      'vote_average.lte',
+      params['vote_average.lte'].toString(),
+    )
   }
 
   const url = `${TMDB_CONFIG.BASE_URL}/discover/movie?${queryParams.toString()}`
-  
+
   try {
     const response = await fetch(url)
-    
+
     if (!response.ok) {
-      throw new Error(`TMDB API error: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `TMDB API error: ${response.status} ${response.statusText}`,
+      )
     }
-    
+
     const data: TMDBResponse = await response.json()
     return data
   } catch (error) {
     console.error('Error discovering movies:', error)
+    throw error
+  }
+}
+
+export async function fetchMovieDetails(
+  tmdbId: number,
+): Promise<TMDBMovieResponse> {
+  const url = `${TMDB_CONFIG.BASE_URL}/movie/${tmdbId}?api_key=${TMDB_CONFIG.API_KEY}&append_to_response=credits,external_ids,images,similar,videos,watch/providers`
+
+  try {
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(
+        `TMDB API error: ${response.status} ${response.statusText}`,
+      )
+    }
+
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error('Error fetching movie details:', error)
     throw error
   }
 }

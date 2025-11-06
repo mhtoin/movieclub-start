@@ -1,5 +1,8 @@
-import { Image, TMDBMovieResponse } from "@/types/tmdb";
-import { getBlurDataUrl } from "./utils";
+import { db } from '@/db/db'
+import { movie } from '@/db/schema'
+import { Image, TMDBMovieResponse } from '@/types/tmdb'
+import { eq } from 'drizzle-orm'
+import { getBlurDataUrl } from './utils'
 
 type RankObject = {
   [key: string]: {
@@ -12,7 +15,7 @@ function rankImages(images: Array<Image>, originalLanguage: string) {
   const rankObject: RankObject = images.reduce((acc, image) => {
     let points = 0
     if (
-      image.iso_639_1 === "en" ||
+      image.iso_639_1 === 'en' ||
       image.iso_639_1 === originalLanguage ||
       !image.iso_639_1
     ) {
@@ -45,61 +48,45 @@ function rankImages(images: Array<Image>, originalLanguage: string) {
     .map((image) => image.image)
 }
 
-export const createDbMovie = async (
-  movieData: TMDBMovieResponse,
-) => {
-    const finnishProvider = [
-    ...(movieData["watch/providers"]?.results?.FI?.flatrate ?? []),
-    ...(movieData["watch/providers"]?.results?.FI?.free ?? []),
+export const createDbMovie = async (movieData: TMDBMovieResponse) => {
+  const finnishProvider = [
+    ...(movieData['watch/providers']?.results?.FI?.flatrate ?? []),
+    ...(movieData['watch/providers']?.results?.FI?.free ?? []),
   ]
 
-  const providerLink = movieData["watch/providers"]?.results?.FI?.link
+  const providerLink = movieData['watch/providers']?.results?.FI?.link
   const cast = movieData.credits?.cast
   const crew = movieData.credits?.crew.filter(
     (crew) =>
-      crew.job === "Director" ||
-      crew.job === "Screenplay" ||
-      crew.job === "Original Music Composer",
+      crew.job === 'Director' ||
+      crew.job === 'Screenplay' ||
+      crew.job === 'Original Music Composer',
   )
 
   const trailers = movieData.videos?.results.filter(
-    (video) => video.type === "Trailer",
+    (video) => video.type === 'Trailer',
   )
 
   const backdrops = movieData.images?.backdrops
     ? rankImages(movieData.images.backdrops, movieData.original_language)
     : []
-  const backdropsWithBlurDataUrl: Array<Image> = []
 
-  for (const backdrop of backdrops.slice(0, 3)) {
-    const blurDataUrl = await getBlurDataUrl(
-      `https://image.tmdb.org/t/p/w300/${backdrop.file_path}`,
-    )
-    const backdropWithBlurDataUrl = {
-      ...backdrop,
-      blurDataUrl,
-    }
-    backdropsWithBlurDataUrl.push(backdropWithBlurDataUrl)
-  }
-
-  // include only english posters
   const posters = movieData.images?.posters
     ? rankImages(movieData.images.posters, movieData.original_language)
     : []
-  const postersWithBlurDataUrl: Array<Image> = []
 
-  for (const poster of posters.slice(0, 3)) {
-    const blurDataUrl = await getBlurDataUrl(
-      `https://image.tmdb.org/t/p/w92/${poster.file_path}`,
-    )
-    const posterWithBlurDataUrl = {
-      ...poster,
-      blurDataUrl,
-    }
-    postersWithBlurDataUrl.push(posterWithBlurDataUrl)
-  }
+  const backdropsWithBlurDataUrl = backdrops.slice(0, 3).map((backdrop) => ({
+    ...backdrop,
+    blurDataUrl: '',
+  }))
+
+  const postersWithBlurDataUrl = posters.slice(0, 3).map((poster) => ({
+    ...poster,
+    blurDataUrl: '',
+  }))
+
   const logos = movieData.images?.logos.filter(
-    (image) => image.iso_639_1 === "en" || image.vote_average > 0,
+    (image) => image.iso_639_1 === 'en' || image.vote_average > 0,
   )
 
   return {
@@ -119,7 +106,7 @@ export const createDbMovie = async (
     tagline: movieData.tagline,
     genres: movieData.genres.map((genre) => genre.name),
     watchProviders: {
-      link: providerLink ?? "",
+      link: providerLink ?? '',
       providers: finnishProvider ?? [],
     },
     images: {
@@ -131,5 +118,62 @@ export const createDbMovie = async (
     cast: cast,
     crew: crew,
   }
-    
+}
+
+/**
+ * Generates blur data URLs for movie images asynchronously and updates the database.
+ * This function runs in the background without blocking movie creation.
+ *
+ * @param movieId - The database ID of the movie to update
+ * @param images - The images object from the movie data (containing backdrops and posters)
+ */
+export async function generateAndUpdateBlurData(
+  movieId: string,
+  images: {
+    backdrops: Array<Image>
+    posters: Array<Image>
+    logos: any
+  },
+): Promise<void> {
+  try {
+    // Generate blur data for all images in parallel
+    const [backdropsWithBlur, postersWithBlur] = await Promise.all([
+      Promise.all(
+        images.backdrops.map(async (backdrop) => {
+          const blurDataUrl = await getBlurDataUrl(
+            `https://image.tmdb.org/t/p/w300/${backdrop.file_path}`,
+          )
+          return {
+            ...backdrop,
+            blurDataUrl,
+          }
+        }),
+      ),
+      Promise.all(
+        images.posters.map(async (poster) => {
+          const blurDataUrl = await getBlurDataUrl(
+            `https://image.tmdb.org/t/p/w92/${poster.file_path}`,
+          )
+          return {
+            ...poster,
+            blurDataUrl,
+          }
+        }),
+      ),
+    ])
+
+    // Update the movie in the database with blur data
+    await db
+      .update(movie)
+      .set({
+        images: {
+          backdrops: backdropsWithBlur,
+          posters: postersWithBlur,
+          logos: images.logos,
+        },
+      })
+      .where(eq(movie.id, movieId))
+  } catch (error) {
+    console.error(`Failed to generate blur data for movie ${movieId}:`, error)
+  }
 }

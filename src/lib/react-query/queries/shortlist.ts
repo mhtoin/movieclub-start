@@ -13,34 +13,26 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
         .select()
         .from(shortlist)
         .where(eq(shortlist.userId, userId))
-        .limit(1)
+        .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+        .innerJoin(movie, eq(movieToShortlist.a, movie.id))
 
-      if (!userShortlist || userShortlist.length === 0) {
-        return {
-          shortlist: null,
-          movies: [],
-        }
+      // Transform the result into a more useful structure
+      const shortlistWithMovies =
+        userShortlist.length > 0
+          ? {
+              ...userShortlist[0].shortlist,
+              movies: userShortlist.map((row) => row.movie),
+            }
+          : null
+
+      if (!shortlistWithMovies) {
+        return null
       }
 
-      const shortlistData = userShortlist[0]
-      const shortlistMovies = await db
-        .select({
-          movie: movie,
-        })
-        .from(movieToShortlist)
-        .innerJoin(movie, eq(movie.id, movieToShortlist.a))
-        .where(eq(movieToShortlist.b, shortlistData.id))
-
-      return {
-        shortlist: shortlistData,
-        movies: shortlistMovies.map(item => item.movie),
-      }
+      return shortlistWithMovies
     } catch (error) {
       console.error('Error fetching shortlist:', error)
-      return {
-        shortlist: null,
-        movies: [],
-      }
+      return null
     }
   })
 
