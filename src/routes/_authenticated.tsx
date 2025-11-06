@@ -1,6 +1,6 @@
 import { ErrorComponent } from '@/components/error-component'
 import Header from '@/components/header/header'
-import { ShortlistToolbar } from '@/components/shortlist-toolbar'
+import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolbar'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import {
   createFileRoute,
