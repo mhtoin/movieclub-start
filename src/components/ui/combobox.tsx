@@ -5,7 +5,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import * as React from 'react'
 
 const comboboxTriggerVariants = cva(
-  'inline-flex items-center justify-between gap-2 rounded-md border border-border bg-background text-foreground transition-colors hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 data-[popup-open]:bg-gray-50',
+  'inline-flex items-center justify-between gap-2 rounded-md border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 data-[popup-open]:bg-accent',
   {
     variants: {
       size: {
@@ -53,7 +53,7 @@ const comboboxPopupVariants = cva(
 )
 
 const comboboxItemVariants = cva(
-  'relative flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 outline-none transition-colors hover:bg-accent focus-visible:bg-accent data-[selected]:bg-primary/20 data-[highlighted]:bg-accent data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
+  'relative flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 my-2 outline-none transition-colors hover:bg-accent focus-visible:bg-accent data-[selected]:bg-primary/20 data-[highlighted]:bg-accent data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
   {
     variants: {
       size: {

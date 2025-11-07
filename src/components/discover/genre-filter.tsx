@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/combobox'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Check, ChevronDown, X } from 'lucide-react'
+import { ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 interface GenreFilterProps {
@@ -74,9 +74,6 @@ export function GenreFilter({
               >
                 <div className="flex flex-1 items-center justify-between">
                   <span>{genre.label}</span>
-                  {selectedGenres.includes(genre.value) && (
-                    <Check className="h-4 w-4" />
-                  )}
                 </div>
               </ComboboxItem>
             ))}

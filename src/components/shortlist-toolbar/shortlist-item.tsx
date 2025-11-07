@@ -17,7 +17,7 @@ export default function ShortlistItem({
   return (
     <div
       key={movie.id}
-      className="group relative rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
+      className="group relative rounded-2xl border-2 border-secondary overflow-hidden transition-all duration-300 cursor-pointer"
       style={{
         animationDelay: `${index * 50}ms`,
       }}

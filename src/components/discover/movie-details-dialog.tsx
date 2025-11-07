@@ -83,7 +83,6 @@ export function MovieDetailsDialog({
       width: '90vw',
       maxWidth: '48rem',
       height: '90vh',
-      maxHeight: '90vh',
       zIndex: 110,
       borderRadius: '0.5rem',
       overflow: 'hidden',
@@ -123,7 +122,7 @@ export function MovieDetailsDialog({
       />
       <div
         ref={containerRef}
-        className="bg-dialog-background text-foreground border border-dialog-border shadow-2xl"
+        className="bg-dialog-background text-foreground border border-dialog-border shadow-2xl max-h-[90vh] 2xl:max-h-[55vh]"
         style={getContainerStyle()}
       >
         <DialogHeader
