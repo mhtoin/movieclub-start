@@ -1,3 +1,7 @@
+import {
+  useToggleIsReadyMutation,
+  useToggleParticipatingMutation,
+} from '@/lib/react-query/mutations/shortlist'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, Film, Sparkles, X } from 'lucide-react'
@@ -11,8 +15,22 @@ interface ShortlistToolbarProps {
 export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const { data, isLoading } = useQuery(shortlistQueries.byUser(userId))
+  const toggleIsReadyMutation = useToggleIsReadyMutation()
+  const toggleParticipatingMutation = useToggleParticipatingMutation()
 
   const movieCount = data?.movies?.length || 0
+
+  const handleToggleReady = () => {
+    if (data) {
+      toggleIsReadyMutation.mutate(!data.isReady)
+    }
+  }
+
+  const handleToggleParticipating = () => {
+    if (data) {
+      toggleParticipatingMutation.mutate(!data.participating)
+    }
+  }
 
   return (
     <>
@@ -93,24 +111,52 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
             </div>
             {movieCount > 0 && (
               <div className="mt-6 pt-4 border-t border-border/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        data?.isReady
-                          ? 'bg-green-500 shadow-lg shadow-green-500/50'
-                          : 'bg-yellow-500 shadow-lg shadow-yellow-500/50'
-                      }`}
-                    />
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {data?.isReady ? 'Ready to Watch' : 'In Progress'}
+                <div className="space-y-3">
+                  <button
+                    onClick={handleToggleReady}
+                    disabled={toggleIsReadyMutation.isPending}
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-accent/50 hover:bg-accent transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          data?.isReady
+                            ? 'bg-green-500 shadow-lg shadow-green-500/50'
+                            : 'bg-yellow-500 shadow-lg shadow-yellow-500/50'
+                        }`}
+                      />
+                      <span className="text-sm font-medium text-foreground">
+                        {data?.isReady ? 'Ready to Watch' : 'In Progress'}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                      Click to toggle
                     </span>
-                  </div>
-                  {data?.participating && (
-                    <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
-                      Participating
+                  </button>
+
+                  <button
+                    onClick={handleToggleParticipating}
+                    disabled={toggleParticipatingMutation.isPending}
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-accent/50 hover:bg-accent transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          data?.participating
+                            ? 'bg-primary shadow-lg shadow-primary/50'
+                            : 'bg-muted-foreground/30'
+                        }`}
+                      />
+                      <span className="text-sm font-medium text-foreground">
+                        {data?.participating
+                          ? 'Participating'
+                          : 'Not Participating'}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                      Click to toggle
                     </span>
-                  )}
+                  </button>
                 </div>
               </div>
             )}
