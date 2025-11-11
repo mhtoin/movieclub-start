@@ -1,4 +1,5 @@
 import { db } from '@/db/db'
+import type { ShortlistWithUserMovies } from '@/db/schema'
 import { movieToShortlist, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
@@ -38,7 +39,7 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
   })
 
 export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
-  async () => {
+  async (): Promise<ShortlistWithUserMovies[]> => {
     try {
       const allShortlists = await db
         .select()
@@ -49,7 +50,7 @@ export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
 
       console.log('All Shortlists Raw:', allShortlists)
 
-      const shortlistsMap = new Map()
+      const shortlistsMap = new Map<string, ShortlistWithUserMovies>()
 
       for (const row of allShortlists) {
         const shortlistId = row.shortlist.id
@@ -61,7 +62,7 @@ export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
           })
         }
         if (row.movie) {
-          shortlistsMap.get(shortlistId).movies.push(row.movie)
+          shortlistsMap.get(shortlistId)!.movies.push(row.movie)
         }
       }
 
