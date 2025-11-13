@@ -1,7 +1,7 @@
 import { Link, useRouter } from '@tanstack/react-router'
 
 import { logoutFn } from '@/lib/auth/logout-action'
-import { Film, Home, List, LogOut, Menu, Search, X } from 'lucide-react'
+import { Dices, Film, Home, List, LogOut, Menu, Search, X } from 'lucide-react'
 import { useState } from 'react'
 import { ThemeToggle } from '../theme-toggle'
 import { Button } from '../ui/button'
@@ -75,6 +75,10 @@ export default function Header() {
           <HeaderLink destination="/shortlists" setIsOpen={setIsOpen}>
             <List size={20} />
             <span className="font-medium">Shortlists</span>
+          </HeaderLink>
+          <HeaderLink destination="/raffle" setIsOpen={setIsOpen}>
+            <Dices size={20} />
+            <span className="font-medium">Raffle</span>
           </HeaderLink>
         </nav>
       </aside>

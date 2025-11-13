@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant light (&:is(.light *));
+@plugin "tailwindcss-fade";
 
 .light {
   --background: oklch(0.97 0 0);
@@ -225,6 +226,27 @@
         backdrop-filter: blur(8px);
       }
     }
+  }
+  .slide {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .parallax {
+    border-radius: 1.8rem;
+    height: 100%;
+    overflow: hidden;
+  }
+  .parallax__layer {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .parallax__img {
+    max-width: none;
+    flex: 0 0 calc(115% + (5px) * 2);
+    object-fit: cover;
   }
 }
 
