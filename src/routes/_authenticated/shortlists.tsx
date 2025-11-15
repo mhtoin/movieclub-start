@@ -3,7 +3,10 @@ import RaffleCarousel from '@/components/shortlists/raffle-carousel'
 import { ShortlistCard } from '@/components/shortlists/shortlist-card'
 import { Button } from '@/components/ui/button'
 import { Movie } from '@/db/schema'
-import { useStartRaffleMutation } from '@/lib/react-query/mutations/raffle'
+import {
+  useFinalizeRaffleMutation,
+  useStartRaffleMutation,
+} from '@/lib/react-query/mutations/raffle'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -20,6 +23,7 @@ export const Route = createFileRoute('/_authenticated/shortlists')({
 function ShortlistsPage() {
   const { data: shortlists } = useSuspenseQuery(shortlistQueries.all())
   const startRaffleMutation = useStartRaffleMutation()
+  const finalizeMutation = useFinalizeRaffleMutation()
   const [selectedMovie, setSelectedMovie] = useState<any>(null)
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -56,11 +60,22 @@ function ShortlistsPage() {
     try {
       const winner = await startRaffleMutation.mutateAsync()
       setWinningMovie(winner)
-      // Optionally set state to 'winner' after the raffle animation completes
-      // This could be done in the RaffleCarousel component or with a timeout
+      console.log('Raffle started, winning movie:', winner)
     } catch (error) {
       console.error('Failed to start raffle:', error)
       setRaffleState('preview')
+    }
+  }
+
+  const handleRaffleComplete = async () => {
+    setRaffleState('winner')
+    if (winningMovie) {
+      try {
+        await finalizeMutation.mutateAsync(winningMovie.id)
+        console.log('Raffle finalized successfully')
+      } catch (error) {
+        console.error('Failed to finalize raffle:', error)
+      }
     }
   }
 
@@ -114,7 +129,12 @@ function ShortlistsPage() {
       <AnimatePresence>
         {raffleState !== 'not-started' && (
           <>
-            <RaffleCarousel movies={movies} raffleState={raffleState} />
+            <RaffleCarousel
+              movies={movies}
+              raffleState={raffleState}
+              winningMovie={winningMovie}
+              onRaffleComplete={handleRaffleComplete}
+            />
           </>
         )}
       </AnimatePresence>

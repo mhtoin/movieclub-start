@@ -92,8 +92,6 @@ export async function getFilters() {
 
   const responseBody = await res.json()
 
-  console.log('Fetched genres from TMDB:', responseBody)
-
   if (responseBody.genres) {
     return responseBody.genres.map((genre: { name: string; id: number }) => {
       return { label: genre.name, value: genre.id.toString() }

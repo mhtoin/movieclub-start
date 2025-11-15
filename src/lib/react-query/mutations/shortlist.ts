@@ -170,7 +170,6 @@ export const useRemoveFromShortlistMutation = () => {
       })
     },
     onSuccess: (shortlist) => {
-      console.log('Successfully removed movie from shortlist:', shortlist)
       queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
       toastManager.add({
         title: 'Success',
@@ -200,7 +199,6 @@ export const useAddToShortlistMutation = () => {
       })
     },
     onSuccess: (shortlist) => {
-      console.log('Successfully added movie to shortlist:', shortlist)
       queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
       toastManager.add({
         title: 'Success',

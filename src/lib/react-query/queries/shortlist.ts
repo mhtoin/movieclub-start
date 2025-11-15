@@ -48,8 +48,6 @@ export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
         .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
         .innerJoin(movie, eq(movieToShortlist.a, movie.id))
 
-      console.log('All Shortlists Raw:', allShortlists)
-
       const shortlistsMap = new Map<string, ShortlistWithUserMovies>()
 
       for (const row of allShortlists) {

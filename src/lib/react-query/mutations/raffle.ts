@@ -8,7 +8,6 @@ import { and, eq } from 'drizzle-orm'
 export const startRaffle = createServerFn({ method: 'POST' }).handler(
   async () => {
     try {
-      // Get all shortlists that are both ready and participating
       const eligibleShortlists = await db
         .select()
         .from(shortlist)
@@ -20,7 +19,6 @@ export const startRaffle = createServerFn({ method: 'POST' }).handler(
         throw new Error('No shortlists are ready and participating')
       }
 
-      // Get all movies from eligible shortlists
       const eligibleMovies = await db
         .select({
           movie: movie,
@@ -51,8 +49,32 @@ export const startRaffle = createServerFn({ method: 'POST' }).handler(
   },
 )
 
+export const finalizeRaffle = createServerFn({ method: 'POST' })
+  .inputValidator((data: { movieId: string }) => data)
+  .handler(async ({ data }) => {
+    const { movieId } = data
+
+    try {
+      await db
+        .update(movie)
+        .set({ watchDate: new Date().toISOString() })
+        .where(eq(movie.id, movieId))
+
+      await db.delete(movieToShortlist).where(eq(movieToShortlist.a, movieId))
+
+      await db
+        .update(shortlist)
+        .set({ isReady: false })
+        .where(eq(shortlist.participating, true))
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error finalizing raffle:', error)
+      throw error
+    }
+  })
+
 export const useStartRaffleMutation = () => {
-  const queryClient = useQueryClient()
   const toastManager = Toast.useToastManager()
 
   return useMutation({
@@ -73,14 +95,41 @@ export const useStartRaffleMutation = () => {
           error instanceof Error ? error.message : 'Failed to start raffle',
       })
     },
-    onSuccess: (movie) => {
-      console.log('Successfully selected winning movie:', movie)
+  })
+}
+
+export const useFinalizeRaffleMutation = () => {
+  const queryClient = useQueryClient()
+  const toastManager = Toast.useToastManager()
+
+  return useMutation({
+    mutationFn: async (movieId: string) => {
+      const response = await finalizeRaffle({ data: { movieId } })
+
+      if (!response.success) {
+        throw new Error('Failed to finalize raffle')
+      }
+
+      return response
+    },
+    onError: (error) => {
+      console.error('Error finalizing raffle:', error)
       toastManager.add({
-        title: 'Winner Selected!',
-        description: `${movie.title} has been selected!`,
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to finalize raffle. Please refresh the page.',
       })
-      // Optionally invalidate queries if needed
-      queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
+    },
+    onSuccess: () => {
+      console.log('Successfully finalized raffle')
+      queryClient.invalidateQueries({ queryKey: ['shortlists'] })
+      queryClient.invalidateQueries({ queryKey: ['movies'] })
+      toastManager.add({
+        title: 'Raffle Complete!',
+        description: 'The winning movie has been added to your watched list.',
+      })
     },
   })
 }

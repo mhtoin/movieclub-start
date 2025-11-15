@@ -9,9 +9,13 @@ const TWEEN_FACTOR_BASE = 0.2
 export default function RaffleCarousel({
   movies,
   raffleState,
+  winningMovie,
+  onRaffleComplete,
 }: {
   movies: any[]
   raffleState: string
+  winningMovie: any | null
+  onRaffleComplete: () => void
 }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -87,19 +91,110 @@ export default function RaffleCarousel({
       .on('slideFocus', tweenParallax)
   }, [emblaApi, tweenParallax])
 
-  // Auto-scroll functionality
   useEffect(() => {
-    if (!emblaApi) return
-    if (raffleState !== 'spinning') return
+    if (!emblaApi || raffleState !== 'spinning' || !winningMovie) return
 
-    const autoScroll = setInterval(() => {
-      if (emblaApi.canScrollNext()) {
-        emblaApi.scrollNext()
+    const winningIndex = movies.findIndex((m) => m.id === winningMovie.id)
+    if (winningIndex === -1) return
+
+    let currentSpeed = 1
+    const maxSpeed = 1
+    const minSpeed = 1200
+    const totalDuration = 12000
+    const startTime = Date.now()
+
+    let scrollCount = 0
+    let timeoutId: NodeJS.Timeout
+
+    const scheduleNextScroll = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / totalDuration, 1)
+
+      const easeOut = 1 - Math.pow(1 - progress, 1.5)
+      currentSpeed = maxSpeed + (minSpeed - maxSpeed) * easeOut
+
+      const currentIndex = emblaApi.selectedScrollSnap()
+      let distanceToWinner = winningIndex - currentIndex
+
+      console.log({
+        easeOut,
+        scrollCount,
+        elapsed,
+        progress,
+        currentSpeed,
+        distanceToWinner,
+      })
+
+      if (distanceToWinner < 0) {
+        distanceToWinner += movies.length
       }
-    }, 3500) // Auto-scroll every 0.5 seconds
 
-    return () => clearInterval(autoScroll)
-  }, [emblaApi])
+      const estimatedScrollsRemaining = Math.ceil(
+        (totalDuration - elapsed) / currentSpeed,
+      )
+
+      if (progress >= 1 || elapsed >= totalDuration) {
+        const finalDistance = distanceToWinner
+
+        if (finalDistance === 0) {
+          onRaffleComplete()
+          return
+        } else if (finalDistance <= 5) {
+          let finalScrolls = finalDistance
+          let baseDelay = currentSpeed
+
+          const doFinalScroll = () => {
+            if (finalScrolls > 0) {
+              console.log('Final scroll to winner, remaining:', finalScrolls)
+              emblaApi.scrollNext()
+              finalScrolls--
+
+              baseDelay += 200
+
+              const randomVariation = (Math.random() - 0.5) * 200
+              const delay = Math.max(200, baseDelay + randomVariation)
+              console.log('Next final scroll in ms:', delay)
+
+              setTimeout(doFinalScroll, delay)
+            } else {
+              onRaffleComplete()
+            }
+          }
+          doFinalScroll()
+          return
+        } else {
+          emblaApi.scrollNext()
+          scrollCount++
+          timeoutId = setTimeout(scheduleNextScroll, 10)
+          return
+        }
+      }
+
+      if (
+        progress > 0.85 &&
+        distanceToWinner > 0 &&
+        distanceToWinner <= estimatedScrollsRemaining
+      ) {
+        emblaApi.scrollNext()
+        scrollCount++
+        timeoutId = setTimeout(scheduleNextScroll, currentSpeed)
+      } else if (progress < 0.85) {
+        emblaApi.scrollNext()
+        scrollCount++
+        timeoutId = setTimeout(scheduleNextScroll, currentSpeed)
+      } else {
+        emblaApi.scrollNext()
+        scrollCount++
+        timeoutId = setTimeout(scheduleNextScroll, currentSpeed)
+      }
+    }
+
+    scheduleNextScroll()
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [emblaApi, raffleState, winningMovie, movies, onRaffleComplete])
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
