@@ -23,12 +23,11 @@ export function NextMovieCard({ movieData }: NextMovieCardProps) {
     ? `https://www.imdb.com/title/${movie.imdbId}`
     : null
 
-  // Get US watch providers
-  const watchProviders = movie.watchProviders?.US
+  const watchProviders = movie.watchProviders
+  console.log('watchProviders:', watchProviders)
 
   return (
     <div className="relative overflow-hidden rounded-lg border bg-card shadow-lg">
-      {/* Backdrop Image */}
       <div className="relative h-80 overflow-hidden">
         {backdropUrl ? (
           <>
@@ -47,11 +46,8 @@ export function NextMovieCard({ movieData }: NextMovieCardProps) {
             </div>
           </div>
         )}
-
-        {/* Overlay Content */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-start gap-4">
-            {/* Poster */}
             {posterPath && (
               <div className="hidden sm:block flex-shrink-0">
                 <div className="w-24 overflow-hidden rounded-md border-2 border-background shadow-xl">
@@ -63,8 +59,6 @@ export function NextMovieCard({ movieData }: NextMovieCardProps) {
                 </div>
               </div>
             )}
-
-            {/* Movie Info */}
             <div className="flex-1 min-w-0">
               <h2 className="text-3xl font-bold text-foreground mb-2 line-clamp-2">
                 {movie.title}
@@ -98,10 +92,7 @@ export function NextMovieCard({ movieData }: NextMovieCardProps) {
           </div>
         </div>
       </div>
-
-      {/* Content Section */}
       <div className="p-6 space-y-4">
-        {/* Overview */}
         {movie.overview && (
           <div>
             <h3 className="text-sm font-semibold mb-2">Overview</h3>
@@ -110,8 +101,6 @@ export function NextMovieCard({ movieData }: NextMovieCardProps) {
             </p>
           </div>
         )}
-
-        {/* Genres */}
         {movie.genres && movie.genres.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold mb-2">Genres</h3>
@@ -127,13 +116,11 @@ export function NextMovieCard({ movieData }: NextMovieCardProps) {
             </div>
           </div>
         )}
-
-        {/* Watch Providers */}
-        {watchProviders?.flatrate && watchProviders.flatrate.length > 0 && (
+        {watchProviders?.providers && watchProviders.providers.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold mb-2">Available On</h3>
             <div className="flex flex-wrap gap-2">
-              {watchProviders.flatrate.slice(0, 5).map((provider: any) => (
+              {watchProviders.providers.slice(0, 5).map((provider: any) => (
                 <div
                   key={provider.provider_id}
                   className="flex items-center gap-2 rounded-md border bg-background px-3 py-1.5"
