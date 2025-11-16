@@ -1,5 +1,6 @@
 import type { NextMovieToWatch } from '@/lib/react-query/queries/dashboard'
 import { getImageUrl } from '@/lib/tmdb-api'
+import { Link } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { Calendar, Clock, ExternalLink, Play, Star } from 'lucide-react'
 
@@ -128,24 +129,30 @@ export function MovieSpotlight({ movieData }: MovieSpotlightProps) {
                       {watchProviders.providers
                         .slice(0, 5)
                         .map((provider: any) => (
-                          <div
-                            key={provider.provider_id}
-                            className="flex items-center gap-2 rounded-lg border-2 bg-background px-4 py-2 shadow-sm hover:shadow-md transition-shadow"
-                            title={provider.provider_name}
+                          <Link
+                            to={watchProviders.link || tmdbUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
-                            {provider.logo_path && (
-                              <img
-                                src={
-                                  getImageUrl(provider.logo_path, 'w92') || ''
-                                }
-                                alt={provider.provider_name}
-                                className="h-6 w-6 rounded"
-                              />
-                            )}
-                            <span className="text-sm font-medium">
-                              {provider.provider_name}
-                            </span>
-                          </div>
+                            <div
+                              key={provider.provider_id}
+                              className="flex items-center gap-2 rounded-lg border-2 bg-background px-4 py-2 shadow-sm hover:shadow-md transition-shadow"
+                              title={provider.provider_name}
+                            >
+                              {provider.logo_path && (
+                                <img
+                                  src={
+                                    getImageUrl(provider.logo_path, 'w92') || ''
+                                  }
+                                  alt={provider.provider_name}
+                                  className="h-6 w-6 rounded"
+                                />
+                              )}
+                              <span className="text-sm font-medium">
+                                {provider.provider_name}
+                              </span>
+                            </div>
+                          </Link>
                         ))}
                     </div>
                   </div>
