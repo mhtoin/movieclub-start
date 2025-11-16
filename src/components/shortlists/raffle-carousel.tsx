@@ -207,14 +207,14 @@ export default function RaffleCarousel({
   return (
     <motion.div
       layout
-      className="relative max-w-[min(90vw,600px)] mx-auto"
+      className="relative max-w-[min(90vw,800px)] mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5 }}
     >
       <div
-        className="overflow-hidden fade-mask fade-16 dark:fade-44 fade-intensity-100"
+        className="overflow-hidden fade-mask fade-16 dark:fade-80 fade-intensity-100"
         ref={emblaRef}
       >
         <div className="flex gap-6 pb-4 pl-6">

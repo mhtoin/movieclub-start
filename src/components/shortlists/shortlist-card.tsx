@@ -1,5 +1,6 @@
 import { Movie } from '@/db/schema/movies'
 import { motion } from 'framer-motion'
+import { Clapperboard } from 'lucide-react'
 import { useState } from 'react'
 import MoviePoster from './movie-poster'
 
@@ -75,7 +76,6 @@ export function ShortlistCard({
       }`}
     >
       {isCollapsed ? (
-        // Collapsed Pill View
         <motion.div
           layout
           className="flex items-center gap-3"
@@ -91,18 +91,17 @@ export function ShortlistCard({
             />
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-card" />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold text-foreground whitespace-nowrap">
               {shortlist.user.name}
             </span>
-            <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full whitespace-nowrap">
-              {shortlist.movies.length}{' '}
-              {shortlist.movies.length === 1 ? 'movie' : 'movies'}
-            </span>
+            <div className="flex items-center text-xs px-2 py-0.5 rounded-full whitespace-nowrap">
+              <span className="text-xs">{shortlist.movies.length}</span>
+              <Clapperboard className="h-4 w-4 ml-1 text-muted-foreground" />
+            </div>
           </div>
         </motion.div>
       ) : (
-        // Full Card View
         <>
           <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-transparent to-secondary/5 pointer-events-none" />
 

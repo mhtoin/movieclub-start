@@ -2,6 +2,7 @@ import { MovieDetailsDialog } from '@/components/shortlists/movie-details-dialog
 import RaffleCarousel from '@/components/shortlists/raffle-carousel'
 import { ShortlistCard } from '@/components/shortlists/shortlist-card'
 import { Button } from '@/components/ui/button'
+import Toggle from '@/components/ui/toggle'
 import { Movie } from '@/db/schema'
 import {
   useFinalizeRaffleMutation,
@@ -11,6 +12,7 @@ import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
+import { Dices } from 'lucide-react'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/shortlists')({
@@ -96,35 +98,48 @@ function ShortlistsPage() {
     <div className="container mx-auto px-4 py-2 relative">
       <div className="mb-8 border-b border-border flex flex-col lg:flex-row justify-between items-center p-4  shadow-md">
         <h1 className="text-4xl font-bold text-foreground mb-2">Shortlists</h1>
-        <div className="flex items-center justify-center bg-card rounded-lg p-4 gap-4 shadow-md border border-border">
-          <span className="text-xs lg:text-base rounded-full bg-secondary/70 px-2 py-1 lg:px-4 lg:py-2">{`Ready: ${readyCount} / ${totalCount}`}</span>
-          <span className="text-xs lg:text-base rounded-full bg-secondary/70 px-2 py-1 lg:px-4 lg:py-2">{`Movies: ${movieCount}`}</span>
-          <Button variant={'primary'} onClick={handleStateToggle}>
-            {raffleState === 'not-started' ? 'Start Raffle' : 'Reset Raffle'}
-          </Button>
-          <AnimatePresence>
-            {raffleState !== 'not-started' && (
-              <Button variant={'secondary'} onClick={handleRaffleStart}>
-                Start
-              </Button>
-            )}
-          </AnimatePresence>
+        <div className="flex items-center justify-center  rounded-lg p-4 gap-4">
+          <span className="text-secondary-foreground text-xs lg:text-base rounded-full bg-secondary/70 px-2 py-1 lg:px-4 lg:py-2">{`Ready: ${readyCount} / ${totalCount}`}</span>
+          <span className="text-secondary-foreground text-xs lg:text-base rounded-full bg-secondary/70 px-2 py-1 lg:px-4 lg:py-2">{`Movies: ${movieCount}`}</span>
+          <Toggle
+            pressedIcon={<Dices className="h-5 w-5" />}
+            unpressedIcon={<Dices className="h-5 w-5" />}
+            onPressedChange={handleStateToggle}
+            variant="default"
+            size="default"
+            aria-label="Toggle Raffle Mode"
+          />
         </div>
       </div>
 
       <motion.div
         layout
-        className={`flex flex-wrap gap-6 w-fit mx-auto p-4 mb-4`}
+        className={`flex flex-wrap gap-6 p-4 mb-4 items-center justify-between`}
       >
-        {shortlists.map((shortlistItem, index) => (
-          <ShortlistCard
-            key={shortlistItem.id}
-            shortlist={shortlistItem}
-            index={index}
-            onMovieClick={handleMovieClick}
-            raffleState={raffleState}
-          />
-        ))}
+        <div className="flex gap-4 w-fit flex-wrap">
+          {shortlists.map((shortlistItem, index) => (
+            <ShortlistCard
+              key={shortlistItem.id}
+              shortlist={shortlistItem}
+              index={index}
+              onMovieClick={handleMovieClick}
+              raffleState={raffleState}
+            />
+          ))}
+        </div>
+        <AnimatePresence>
+          {raffleState !== 'not-started' && (
+            <Button
+              variant="secondary"
+              className="flex items-center gap-2"
+              onClick={handleRaffleStart}
+              disabled={raffleState !== 'preview' || movies.length === 0}
+            >
+              <Dices className="h-4 w-4" />
+              Start Raffle
+            </Button>
+          )}
+        </AnimatePresence>
       </motion.div>
       <AnimatePresence>
         {raffleState !== 'not-started' && (
@@ -138,7 +153,6 @@ function ShortlistsPage() {
           </>
         )}
       </AnimatePresence>
-
       <MovieDetailsDialog
         movie={selectedMovie}
         open={dialogOpen}
