@@ -1,7 +1,5 @@
 import { MovieDetailsDialog } from '@/components/shortlists/movie-details-dialog'
-import RaffleCarousel from '@/components/shortlists/raffle-carousel'
-import { ShortlistCard } from '@/components/shortlists/shortlist-card'
-import { Button } from '@/components/ui/button'
+import UserTabList from '@/components/shortlists/user-tab-list'
 import Toggle from '@/components/ui/toggle'
 import { Movie } from '@/db/schema'
 import {
@@ -11,7 +9,7 @@ import {
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Dices } from 'lucide-react'
 import { useState } from 'react'
 
@@ -112,47 +110,14 @@ function ShortlistsPage() {
         </div>
       </div>
 
-      <motion.div
-        layout
-        className={`flex flex-wrap gap-6 p-4 mb-4 items-center justify-between`}
-      >
-        <div className="flex gap-4 w-fit flex-wrap">
-          {shortlists.map((shortlistItem, index) => (
-            <ShortlistCard
-              key={shortlistItem.id}
-              shortlist={shortlistItem}
-              index={index}
-              onMovieClick={handleMovieClick}
-              raffleState={raffleState}
-            />
-          ))}
-        </div>
-        <AnimatePresence>
-          {raffleState !== 'not-started' && (
-            <Button
-              variant="secondary"
-              className="flex items-center gap-2"
-              onClick={handleRaffleStart}
-              disabled={raffleState !== 'preview' || movies.length === 0}
-            >
-              <Dices className="h-4 w-4" />
-              Start Raffle
-            </Button>
-          )}
-        </AnimatePresence>
+      <motion.div layout className={`flex h-full w-full `}>
+        <UserTabList
+          onMovieClick={handleMovieClick}
+          raffleState={raffleState}
+          onRaffleComplete={handleRaffleComplete}
+          winningMovie={winningMovie}
+        />
       </motion.div>
-      <AnimatePresence>
-        {raffleState !== 'not-started' && (
-          <>
-            <RaffleCarousel
-              movies={movies}
-              raffleState={raffleState}
-              winningMovie={winningMovie}
-              onRaffleComplete={handleRaffleComplete}
-            />
-          </>
-        )}
-      </AnimatePresence>
       <MovieDetailsDialog
         movie={selectedMovie}
         open={dialogOpen}

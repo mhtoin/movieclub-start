@@ -89,7 +89,6 @@ export function MovieDetailsDialog({
         className="bg-dialog-background text-foreground border border-dialog-border shadow-2xl"
         style={getContainerStyle()}
       >
-        {/* Header with backdrop */}
         <div className="relative h-64 flex-shrink-0">
           {backdropUrl ? (
             <img
@@ -109,8 +108,6 @@ export function MovieDetailsDialog({
             ✕
           </button>
         </div>
-
-        {/* Content */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="p-6">
             <div className="flex gap-6">
@@ -133,8 +130,6 @@ export function MovieDetailsDialog({
                     </p>
                   )}
                 </div>
-
-                {/* Metadata */}
                 <div className="flex flex-wrap gap-4 text-sm">
                   {movie.releaseDate && (
                     <div className="flex items-center gap-2">
@@ -171,8 +166,6 @@ export function MovieDetailsDialog({
                     </div>
                   )}
                 </div>
-
-                {/* Genres */}
                 {movie.genres && movie.genres.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {movie.genres.map((genre: string) => (
@@ -185,8 +178,6 @@ export function MovieDetailsDialog({
                     ))}
                   </div>
                 )}
-
-                {/* Overview */}
                 {movie.overview && (
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Overview</h3>

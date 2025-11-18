@@ -22,6 +22,7 @@ export default function RaffleCarousel({
     align: 'center',
     containScroll: 'trimSnaps',
     dragFree: false,
+    startIndex: 3,
   })
   const tweenFactor = useRef(0)
   const tweenNodes = useRef<HTMLElement[]>([])
@@ -207,7 +208,7 @@ export default function RaffleCarousel({
   return (
     <motion.div
       layout
-      className="relative max-w-[min(90vw,800px)] mx-auto"
+      className="relative w-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
@@ -221,7 +222,7 @@ export default function RaffleCarousel({
           {movies.map((movie, index) => (
             <motion.div
               key={movie.id}
-              className="flex-[0_0_min(50vw,280px)] min-w-0"
+              className="flex-[0_0_min(85vw,150px)] sm:flex-[0_0_min(70vw,200px)] md:flex-[0_0_min(60vw,280px)] lg:flex-[0_0_min(50vw,320px)] 2xl:flex-[0_0_min(40vw,500px)] min-w-0"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
@@ -243,7 +244,6 @@ export default function RaffleCarousel({
         </div>
       </div>
 
-      {/* Navigation buttons */}
       <button
         onClick={scrollPrev}
         className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
