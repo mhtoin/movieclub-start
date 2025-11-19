@@ -10,6 +10,8 @@ interface RaffleControlTabProps {
   onStartRaffle: () => void
   onDateSelect: (date: Date) => void
   selectedDate?: Date
+  dryRun: boolean
+  onDryRunChange: (value: boolean) => void
 }
 
 const spring: Transition = {
@@ -23,11 +25,17 @@ export function RaffleControlTab({
   onStartRaffle,
   onDateSelect,
   selectedDate,
+  dryRun,
+  onDryRunChange,
 }: RaffleControlTabProps) {
   const [showDatePicker, setShowDatePicker] = useState(false)
 
   return (
-    <Tabs.Tab value={value} className="group/tab">
+    <Tabs.Tab
+      value={value}
+      render={<div className="group/tab" />}
+      nativeButton={false}
+    >
       <motion.div
         layout
         transition={spring}
@@ -35,7 +43,7 @@ export function RaffleControlTab({
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-data-[selected]/tab:opacity-100 transition-opacity duration-300 rounded-2xl" />
         <div className="absolute top-2 right-2">
-          <RaffleSettings />
+          <RaffleSettings dryRun={dryRun} onDryRunChange={onDryRunChange} />
         </div>
         <div className="flex flex-col gap-3 relative z-10">
           <Button
@@ -43,8 +51,9 @@ export function RaffleControlTab({
               e.stopPropagation()
               onStartRaffle()
             }}
+            disabled={!selectedDate}
             variant={'primary'}
-            className="flex items-center gap-3 px-4 py-6 bg-primary rounded-xl transition-all duration-200 group/button"
+            className="flex items-center gap-3 px-4 py-6 bg-primary rounded-xl transition-all duration-200 group/button disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="relative flex-shrink-0">
               <Dices className="h-6 w-6 text-primary-foreground transition-transform group-hover/button:rotate-12" />

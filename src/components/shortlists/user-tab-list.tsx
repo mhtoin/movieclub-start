@@ -18,16 +18,25 @@ export default function UserTabList({
   winningMovie,
   onRaffleComplete,
   onStartRaffle,
+  dryRun,
+  onDryRunChange,
+  watchDate,
+  onDateSelect,
 }: {
   onMovieClick: (movie: any, rect: DOMRect) => void
   raffleState: any
   winningMovie: any
   onRaffleComplete: () => void
   onStartRaffle?: () => void
+  dryRun: boolean
+  onDryRunChange: (value: boolean) => void
+  watchDate?: Date
+  onDateSelect: (date: Date) => void
 }) {
   const { data: shortlists } = useSuspenseQuery(shortlistQueries.all())
   const [hoveredMovieId, setHoveredMovieId] = useState<string | null>(null)
-  const [watchDate, setWatchDate] = useState<Date | undefined>(undefined)
+
+  const movies = shortlists.flatMap((shortlist) => shortlist.movies)
 
   const handleMovieClick = (
     movie: any,
@@ -44,10 +53,10 @@ export default function UserTabList({
             {raffleState === 'not-started' ? (
               <motion.div
                 key="all"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -50, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 className="w-full"
               >
                 <UserTabButton
@@ -63,17 +72,19 @@ export default function UserTabList({
             ) : (
               <motion.div
                 key="raffle-control"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -50, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 className="w-full"
               >
                 <RaffleControlTab
                   value="all"
                   onStartRaffle={() => onStartRaffle?.()}
-                  onDateSelect={setWatchDate}
+                  onDateSelect={onDateSelect}
                   selectedDate={watchDate}
+                  dryRun={dryRun}
+                  onDryRunChange={onDryRunChange}
                 />
               </motion.div>
             )}

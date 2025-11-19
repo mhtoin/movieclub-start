@@ -26,7 +26,11 @@ export function UserTabButton({
   isAllUsers = false,
 }: UserTabButtonProps) {
   return (
-    <Tabs.Tab value={value} className="group/tab w-full text-left">
+    <Tabs.Tab
+      value={value}
+      className="group/tab w-full text-left"
+      nativeButton={false}
+    >
       <motion.div
         layout
         transition={spring}

@@ -1,28 +1,35 @@
 import { EllipsisVertical } from 'lucide-react'
 import {
+  PopoverArrow,
   PopoverPopup,
   PopoverPortal,
   PopoverPositioner,
   PopoverRoot,
   PopoverTrigger,
 } from '../ui/popover'
+import { Switch } from '../ui/switch'
 
-export default function RaffleSettings() {
+export default function RaffleSettings({
+  dryRun,
+  onDryRunChange,
+}: {
+  dryRun: boolean
+  onDryRunChange: (value: boolean) => void
+}) {
   return (
     <PopoverRoot>
       <PopoverTrigger>
         <EllipsisVertical className="w-4 h-4" />
       </PopoverTrigger>
       <PopoverPortal>
-        <PopoverPositioner side="bottom" align="end" sideOffset={8}>
-          <PopoverPopup className="w-48 p-4 bg-card border shadow-lg rounded-lg">
+        <PopoverPositioner side="bottom" align="center" sideOffset={8}>
+          <PopoverPopup size={'auto'}>
+            <PopoverArrow />
             <div className="flex flex-col gap-3">
-              <button className="text-sm text-foreground hover:text-primary transition-colors text-left w-full">
-                Edit Raffle
-              </button>
-              <button className="text-sm text-foreground hover:text-primary transition-colors text-left w-full">
-                Delete Raffle
-              </button>
+              <label className="flex items-center justify-between w-full gap-2">
+                <span className="text-sm text-foreground">Dry Run</span>
+                <Switch checked={dryRun} onCheckedChange={onDryRunChange} />
+              </label>
             </div>
           </PopoverPopup>
         </PopoverPositioner>

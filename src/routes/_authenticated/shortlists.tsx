@@ -12,8 +12,14 @@ import { createFileRoute } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Dices } from 'lucide-react'
 import { useState } from 'react'
+import { z } from 'zod'
+
+const searchSchema = z.object({
+  dryRun: z.boolean().optional().default(false),
+})
 
 export const Route = createFileRoute('/_authenticated/shortlists')({
+  validateSearch: (search) => searchSchema.parse(search),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(shortlistQueries.all())
   },
@@ -21,6 +27,8 @@ export const Route = createFileRoute('/_authenticated/shortlists')({
 })
 
 function ShortlistsPage() {
+  const { dryRun } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const { data: shortlists } = useSuspenseQuery(shortlistQueries.all())
   const startRaffleMutation = useStartRaffleMutation()
   const finalizeMutation = useFinalizeRaffleMutation()
@@ -31,6 +39,8 @@ function ShortlistsPage() {
     'not-started' | 'preview' | 'spinning' | 'winner'
   >('not-started')
   const [winningMovie, setWinningMovie] = useState<Movie | null>(null)
+  const [winningUserId, setWinningUserId] = useState<string | null>(null)
+  const [watchDate, setWatchDate] = useState<Date | undefined>(undefined)
 
   const handleMovieClick = (movie: any, rect: DOMRect) => {
     setSelectedMovie(movie)
@@ -52,15 +62,17 @@ function ShortlistsPage() {
     } else {
       setRaffleState('not-started')
       setWinningMovie(null)
+      setWinningUserId(null)
     }
   }
 
   const handleRaffleStart = async () => {
     setRaffleState('spinning')
     try {
-      const winner = await startRaffleMutation.mutateAsync()
-      setWinningMovie(winner)
-      console.log('Raffle started, winning movie:', winner)
+      const { movie, userId } = await startRaffleMutation.mutateAsync()
+      setWinningMovie(movie)
+      setWinningUserId(userId)
+      console.log('Raffle started, winning movie:', movie)
     } catch (error) {
       console.error('Failed to start raffle:', error)
       setRaffleState('preview')
@@ -69,9 +81,21 @@ function ShortlistsPage() {
 
   const handleRaffleComplete = async () => {
     setRaffleState('winner')
-    if (winningMovie) {
+    if (winningMovie && winningUserId) {
+      if (dryRun) {
+        console.log('Dry run: Raffle finalized (simulated)')
+        return
+      }
+      if (!watchDate) {
+        console.error('No watch date selected')
+        return
+      }
       try {
-        await finalizeMutation.mutateAsync(winningMovie.id)
+        await finalizeMutation.mutateAsync({
+          movieId: winningMovie.id,
+          watchDate,
+          userId: winningUserId,
+        })
         console.log('Raffle finalized successfully')
       } catch (error) {
         console.error('Failed to finalize raffle:', error)
@@ -116,6 +140,13 @@ function ShortlistsPage() {
           raffleState={raffleState}
           onRaffleComplete={handleRaffleComplete}
           winningMovie={winningMovie}
+          dryRun={dryRun}
+          onDryRunChange={(val) =>
+            navigate({ search: (prev) => ({ ...prev, dryRun: val }) })
+          }
+          onStartRaffle={handleRaffleStart}
+          watchDate={watchDate}
+          onDateSelect={setWatchDate}
         />
       </motion.div>
       <MovieDetailsDialog

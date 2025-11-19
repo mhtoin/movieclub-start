@@ -22,6 +22,7 @@ export const startRaffle = createServerFn({ method: 'POST' }).handler(
       const eligibleMovies = await db
         .select({
           movie: movie,
+          userId: shortlist.userId,
         })
         .from(movieToShortlist)
         .innerJoin(movie, eq(movieToShortlist.a, movie.id))
@@ -39,9 +40,13 @@ export const startRaffle = createServerFn({ method: 'POST' }).handler(
           eligibleMovies.length,
       )
 
-      const winningMovie = eligibleMovies[randomIndex].movie
+      const winningEntry = eligibleMovies[randomIndex]
 
-      return { success: true, movie: winningMovie }
+      return {
+        success: true,
+        movie: winningEntry.movie,
+        userId: winningEntry.userId,
+      }
     } catch (error) {
       console.error('Error starting raffle:', error)
       throw error
@@ -50,14 +55,16 @@ export const startRaffle = createServerFn({ method: 'POST' }).handler(
 )
 
 export const finalizeRaffle = createServerFn({ method: 'POST' })
-  .inputValidator((data: { movieId: string }) => data)
+  .inputValidator(
+    (data: { movieId: string; watchDate: string; userId: string }) => data,
+  )
   .handler(async ({ data }) => {
-    const { movieId } = data
+    const { movieId, watchDate, userId } = data
 
     try {
       await db
         .update(movie)
-        .set({ watchDate: new Date().toISOString() })
+        .set({ watchDate: watchDate, userId: userId })
         .where(eq(movie.id, movieId))
 
       await db.delete(movieToShortlist).where(eq(movieToShortlist.a, movieId))
@@ -85,7 +92,7 @@ export const useStartRaffleMutation = () => {
         throw new Error('Failed to start raffle')
       }
 
-      return response.movie
+      return { movie: response.movie, userId: response.userId }
     },
     onError: (error) => {
       console.error('Error starting raffle:', error)
@@ -103,8 +110,18 @@ export const useFinalizeRaffleMutation = () => {
   const toastManager = Toast.useToastManager()
 
   return useMutation({
-    mutationFn: async (movieId: string) => {
-      const response = await finalizeRaffle({ data: { movieId } })
+    mutationFn: async ({
+      movieId,
+      watchDate,
+      userId,
+    }: {
+      movieId: string
+      watchDate: Date
+      userId: string
+    }) => {
+      const response = await finalizeRaffle({
+        data: { movieId, watchDate: watchDate.toISOString(), userId },
+      })
 
       if (!response.success) {
         throw new Error('Failed to finalize raffle')
