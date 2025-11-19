@@ -1,5 +1,5 @@
 import { Tabs } from '@base-ui-components/react/tabs'
-import { motion } from 'framer-motion'
+import { motion, Transition } from 'framer-motion'
 import { Clapperboard, Users } from 'lucide-react'
 
 interface UserTabButtonProps {
@@ -11,6 +11,12 @@ interface UserTabButtonProps {
   isAllUsers?: boolean
 }
 
+const spring: Transition = {
+  type: 'spring',
+  damping: 20,
+  stiffness: 300,
+}
+
 export function UserTabButton({
   value,
   index = 0,
@@ -20,9 +26,10 @@ export function UserTabButton({
   isAllUsers = false,
 }: UserTabButtonProps) {
   return (
-    <Tabs.Tab value={value} className="group/tab">
+    <Tabs.Tab value={value} className="group/tab w-full text-left">
       <motion.div
         layout
+        transition={spring}
         className={`flex bg-card border shadow-md hover:shadow-xl max-w-sm transition-all duration-300 relative overflow-hidden rounded-2xl p-4 group-data-[selected]/tab:border-primary group-data-[selected]/tab:shadow-primary/20 group-data-[selected]/tab:shadow-xl group-data-[selected]/tab:scale-105 border-border`}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-data-[selected]/tab:opacity-100 transition-opacity duration-300 rounded-2xl" />

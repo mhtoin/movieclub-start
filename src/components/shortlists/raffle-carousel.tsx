@@ -70,7 +70,32 @@ export default function RaffleCarousel({
 
           const translate = diffToTarget * (-1 * tweenFactor.current) * 100
           const tweenNode = tweenNodes.current[slideIndex]
-          tweenNode.style.transform = `translateX(${translate}%)`
+
+          // Calculate distance from center (0 = center, increases with distance)
+          const distanceFromCenter = Math.abs(diffToTarget)
+
+          const scale = Math.max(0.85, 1.15 - distanceFromCenter * 0.6)
+
+          const opacity = Math.max(0.4, 1 - distanceFromCenter * 1.2)
+
+          const brightness = Math.max(0.6, 1.2 + distanceFromCenter * 0.5)
+
+          const saturation = Math.max(0.5, 1.2 - distanceFromCenter * 0.7)
+
+          const glowOpacity = Math.max(0, 1 - distanceFromCenter * 3)
+
+          tweenNode.style.transform = `translateX(${translate}%) scale(${scale})`
+          tweenNode.style.opacity = `${opacity}`
+          tweenNode.style.filter = `brightness(${brightness}) saturate(${saturation})`
+          tweenNode.style.transition =
+            'transform 0.3s ease-out, opacity 0.3s ease-out, filter 0.3s ease-out'
+
+          const glowElement = tweenNode.querySelector(
+            '.spotlight-glow',
+          ) as HTMLElement
+          if (glowElement) {
+            glowElement.style.opacity = `${glowOpacity}`
+          }
         })
       })
     },
@@ -229,7 +254,8 @@ export default function RaffleCarousel({
               transition={{ duration: 0.5, delay: index * 0.05 }}
             >
               <div className="parallax">
-                <div className="parallax__layer">
+                <div className="parallax__layer relative">
+                  <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-0 spotlight-glow pointer-events-none" />
                   <MoviePoster
                     movie={movie}
                     movieIndex={0}

@@ -289,4 +289,18 @@
   .animate-scale-in {
     animation: scaleIn 0.3s ease-out both;
   }
+
+  .parallax__layer {
+    transition: all 0.3s ease-out;
+    will-change: transform, opacity, filter;
+  }
+
+  .spotlight-glow {
+    transition: opacity 0.3s ease-out;
+    box-shadow:
+      0 0 60px rgba(var(--primary-rgb, 234, 179, 8), 0.6),
+      0 0 120px rgba(var(--primary-rgb, 234, 179, 8), 0.4),
+      0 0 180px rgba(var(--primary-rgb, 234, 179, 8), 0.2),
+      inset 0 0 80px rgba(var(--primary-rgb, 234, 179, 8), 0.3);
+  }
 }

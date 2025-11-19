@@ -1,7 +1,7 @@
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { Tabs } from '@base-ui-components/react/tabs'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 import { EmptyState } from './empty-state'
 import { MovieColorBorder } from './movie-color-border'
@@ -40,26 +40,42 @@ export default function UserTabList({
     <Tabs.Root className="rounded-md " defaultValue="all">
       <Tabs.List className="relative z-0  gap-5 px-5 flex ">
         <div className="flex flex-col gap-3 mb-4">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             {raffleState === 'not-started' ? (
-              <UserTabButton
+              <motion.div
                 key="all"
-                value="all"
-                name="All Users"
-                movieCount={shortlists.reduce(
-                  (acc, s) => acc + s.movies.length,
-                  0,
-                )}
-                isAllUsers
-              />
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
+                className="w-full"
+              >
+                <UserTabButton
+                  value="all"
+                  name="All Users"
+                  movieCount={shortlists.reduce(
+                    (acc, s) => acc + s.movies.length,
+                    0,
+                  )}
+                  isAllUsers
+                />
+              </motion.div>
             ) : (
-              <RaffleControlTab
+              <motion.div
                 key="raffle-control"
-                value="all"
-                onStartRaffle={() => onStartRaffle?.()}
-                onDateSelect={setWatchDate}
-                selectedDate={watchDate}
-              />
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
+                className="w-full"
+              >
+                <RaffleControlTab
+                  value="all"
+                  onStartRaffle={() => onStartRaffle?.()}
+                  onDateSelect={setWatchDate}
+                  selectedDate={watchDate}
+                />
+              </motion.div>
             )}
           </AnimatePresence>
           {shortlists.map((shortlist, index) => (
