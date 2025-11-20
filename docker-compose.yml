@@ -7,6 +7,7 @@ services:
       POSTGRES_USER: movieclub
       POSTGRES_PASSWORD: movieclub_dev_password
       POSTGRES_DB: movieclub_dev
+    command: ["postgres", "-c", "wal_level=logical"]
     ports:
       - '5432:5432'
     volumes:
@@ -16,6 +17,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  electric:
+    image: docker.io/electricsql/electric:latest
+    environment:
+      DATABASE_URL: postgresql://movieclub:movieclub_dev_password@postgres:5432/movieclub_dev?sslmode=disable
+      # Not suitable for production. Only use insecure mode in development or if you've otherwise secured the Electric API.
+      # See https://electric-sql.com/docs/guides/security
+      ELECTRIC_INSECURE: true
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:
