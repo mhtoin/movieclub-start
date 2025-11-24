@@ -26,7 +26,7 @@ export function MovieSpotlight({ movieData }: MovieSpotlightProps) {
   const watchProviders = movie.watchProviders
 
   return (
-    <div className="relative h-full overflow-hidden rounded-lg border bg-card shadow-2xl">
+    <div className="relative h-full overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
       <div className="absolute inset-0">
         {backdropUrl ? (
           <>

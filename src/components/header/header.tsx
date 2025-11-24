@@ -89,6 +89,10 @@ export default function Header() {
             <List size={20} />
             <span className="font-medium">Shortlists</span>
           </HeaderLink>
+          <HeaderLink destination="/tierlist" setIsOpen={setIsOpen}>
+            <List size={20} />
+            <span className="font-medium">Tierlists</span>
+          </HeaderLink>
         </nav>
       </aside>
     </>

@@ -1,6 +1,8 @@
 import { db } from '@/db/db'
 import { movie, type MovieWithUser } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { electricCollectionOptions } from '@tanstack/electric-db-collection'
+import { createCollection } from '@tanstack/react-db'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { format } from 'date-fns'
@@ -35,37 +37,40 @@ export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
   },
 )
 
-export const getDistinctWatchedMonths = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const rows = await db
-      .select({
-        month: movie.watchDate,
-      })
-      .from(movie)
-
-    if (!rows) return null
-
-    const uniqueMonths = new Set<string>()
-    rows.forEach((row) => {
-      if (row.month) {
-        const date = new Date(row.month)
-        const monthString = format(date, 'yyyy-MM')
-        uniqueMonths.add(monthString)
-      }
+export const getDistinctWatchedMonths = createServerFn({
+  method: 'GET',
+}).handler(async () => {
+  const rows = await db
+    .select({
+      month: movie.watchDate,
     })
+    .from(movie)
 
-    const sortedMonths = Array.from(uniqueMonths).sort((a, b) =>
-      b.localeCompare(a),
-    )
+  if (!rows) return null
 
-    const mappedRows = sortedMonths.map((month) => ({
-      value: month,
-      label: new Date(month + '-01').toLocaleString('default', { month: 'long', year: 'numeric' }),
-    }))
+  const uniqueMonths = new Set<string>()
+  rows.forEach((row) => {
+    if (row.month) {
+      const date = new Date(row.month)
+      const monthString = format(date, 'yyyy-MM')
+      uniqueMonths.add(monthString)
+    }
+  })
 
-    return mappedRows
-  },
-)
+  const sortedMonths = Array.from(uniqueMonths).sort((a, b) =>
+    b.localeCompare(a),
+  )
+
+  const mappedRows = sortedMonths.map((month) => ({
+    value: month,
+    label: new Date(month + '-01').toLocaleString('default', {
+      month: 'long',
+      year: 'numeric',
+    }),
+  }))
+
+  return mappedRows
+})
 
 const watchedByMonthSchema = z.object({
   search: z.string().optional(),
@@ -120,11 +125,13 @@ export const movieQueries = {
     queryOptions({
       queryKey: [...movieQueries.all(), 'watched', search, username, genre],
       queryFn: async () => {
-        const result = await getWatchedMoviesByMonth({ data: { search, username, genre } })
+        const result = await getWatchedMoviesByMonth({
+          data: { search, username, genre },
+        })
         return result
       },
     }),
-    months: () =>
+  months: () =>
     queryOptions({
       queryKey: [...movieQueries.all(), 'months'],
       queryFn: getDistinctWatchedMonths,
@@ -143,3 +150,16 @@ export const movieQueries = {
         },
     }),*/
 }
+
+export const electricMovieCollection = createCollection(
+  electricCollectionOptions({
+    id: `movies`,
+    getKey: (item: any) => item.id,
+    shapeOptions: {
+      url: `http://localhost:3000/v1/shape`,
+      params: {
+        table: 'movie',
+      },
+    },
+  }),
+)

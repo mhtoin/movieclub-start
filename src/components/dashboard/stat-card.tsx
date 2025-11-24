@@ -19,7 +19,7 @@ export function StatCard({
   trend,
 }: StatCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/50">
+    <div className="relative overflow-hidden rounded-lg border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/50">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
