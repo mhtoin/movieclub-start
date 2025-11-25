@@ -1,7 +1,5 @@
 import DragOverlayPortal from '@/components/tierlist/drag-overlay-portal'
-import DroppableTier from '@/components/tierlist/droppable-tier'
-import Sortable from '@/components/tierlist/sortable'
-import TierItem from '@/components/tierlist/tier-item'
+import TierContainer from '@/components/tierlist/tier-container'
 import {
   electricMoviesOnTiersCollection,
   electricTierCollection,
@@ -16,11 +14,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import {
-  horizontalListSortingStrategy,
-  SortableContext,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
@@ -56,13 +50,27 @@ function TierlistContent() {
 
   function handleDragStart(event: any) {
     const { active } = event
+    console.log({ event })
     setActiveMovieId(active.id)
+  }
+
+  const handleDragOver = (event: any) => {
+    const { active, over, draggingRect } = event
+    const { id } = active
+    const { id: overId } = over
+
+    console.log({ active, over, draggingRect, id, overId })
   }
 
   function handleDragEnd(event: any) {
     const { active, over } = event
     const { movie } = active.data.current ?? {}
     const { movie: overMovie } = over?.data?.current ?? {}
+
+    if (!movie || !overMovie) {
+      setActiveMovieId(null)
+      return
+    }
 
     const newTierPosition = overMovie.position
     const oldTierPosition = movie.position
@@ -93,32 +101,13 @@ function TierlistContent() {
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <div className="space-y-8">
-          <SortableContext
-            id="tiers"
-            items={tierlist.tiers.map((tier) => tier.id)}
-            strategy={horizontalListSortingStrategy}
-          >
-            {tierlist.tiers.map((tier) => (
-              <SortableContext
-                id={`${tier.id}`}
-                items={tier.movies.map((m) => m.id)}
-                strategy={horizontalListSortingStrategy}
-              >
-                <Sortable id={`${tier.id}`}>
-                  <DroppableTier key={tier.id} tier={tier}>
-                    {tier.movies.map((movie, index) => (
-                      <Sortable key={movie.id} id={movie.id} data={{ movie }}>
-                        <TierItem key={movie.id} movie={movie} />
-                      </Sortable>
-                    ))}
-                  </DroppableTier>
-                </Sortable>
-              </SortableContext>
-            ))}
-          </SortableContext>
+          {tierlist.tiers.map((tier) => (
+            <TierContainer key={tier.id} id={tier.id} tier={tier} />
+          ))}
           <DragOverlayPortal />
         </div>
       </DndContext>

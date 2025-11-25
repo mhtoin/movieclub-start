@@ -15,7 +15,7 @@ type Tier = InferSelectModel<typeof tier>
 type MovieOnTier = InferSelectModel<typeof moviesOnTiers>
 type Movie = InferSelectModel<typeof movie>
 
-interface TierWithMovies extends Tier {
+export interface TierWithMovies extends Tier {
   movies: (Movie & { position: number; movieOnTierId: string })[]
 }
 

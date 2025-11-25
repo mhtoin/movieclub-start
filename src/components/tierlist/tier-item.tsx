@@ -1,5 +1,7 @@
 import { movie } from '@/db/schema/movies'
 import { type Movie as TMDBMovie } from '@/lib/tmdb-api'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { InferSelectModel } from 'drizzle-orm'
 import { MovieCard } from '../discover/movie-card'
 
@@ -31,8 +33,26 @@ export default function TierItem({
   ref?: React.Ref<HTMLDivElement>
   [key: string]: any
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: props.id,
+      data: { movie },
+    })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
   return (
-    <div key={movie.id} className="w-32" ref={ref} {...props}>
+    <div
+      key={movie.id}
+      className="w-32"
+      ref={setNodeRef}
+      {...props}
+      {...attributes}
+      {...listeners}
+      style={style}
+    >
       <MovieCard movie={mapDbMovieToTmdbMovie(movie)} />
     </div>
   )
