@@ -33,27 +33,47 @@ export default function TierItem({
   ref?: React.Ref<HTMLDivElement>
   [key: string]: any
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id: props.id,
-      data: { movie },
-    })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: props.id,
+    data: { movie },
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   }
+
   return (
     <div
       key={movie.id}
-      className="w-32"
+      className={`w-32 transition-all duration-200 ${
+        isDragging
+          ? 'scale-105 rotate-3 cursor-grabbing z-50'
+          : 'hover:scale-105 hover:-translate-y-1 cursor-grab'
+      }`}
       ref={setNodeRef}
       {...props}
       {...attributes}
       {...listeners}
       style={style}
     >
-      <MovieCard movie={mapDbMovieToTmdbMovie(movie)} />
+      <div
+        className={`rounded-lg overflow-hidden ${
+          isDragging
+            ? 'shadow-2xl ring-2 ring-primary'
+            : 'shadow-md hover:shadow-xl'
+        }`}
+      >
+        <MovieCard movie={mapDbMovieToTmdbMovie(movie)} />
+      </div>
     </div>
   )
 }

@@ -25,17 +25,85 @@ interface TierlistWithTiers extends Tierlist {
 
 export const updateTierMoviePosition = createServerFn({ method: 'POST' })
   .inputValidator(
-    (data: { movieOnTierId: string; newPosition: number }) => data,
+    (data: { movieOnTierId: string; newPosition: number; tierId?: string }) =>
+      data,
   )
   .handler(async ({ data }) => {
-    const { movieOnTierId, newPosition } = data
-    const tierId = movieOnTierId as (typeof moviesOnTiers.$inferSelect)['id']
+    const { movieOnTierId, newPosition, tierId } = data
+    const id = movieOnTierId as (typeof moviesOnTiers.$inferSelect)['id']
 
     const txid = await db.transaction(async (tx) => {
+      const updateData: { position: number; tierId?: string } = {
+        position: newPosition,
+      }
+      if (tierId) {
+        updateData.tierId = tierId
+      }
+
       await tx
         .update(moviesOnTiers)
-        .set({ position: newPosition })
-        .where(dbEq(moviesOnTiers.id, tierId))
+        .set(updateData)
+        .where(dbEq(moviesOnTiers.id, id))
+
+      const [{ txid }] = await tx.execute(sql`select txid_current() as txid`)
+      return txid as string
+    })
+
+    return { txid }
+  })
+
+export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (
+      data: Array<{
+        movieOnTierId: string
+        newPosition: number
+        tierId: string
+      }>,
+    ) => data,
+  )
+  .handler(async ({ data }) => {
+    if (data.length === 0) return { txid: 0 }
+
+    const txid = await db.transaction(async (tx) => {
+      for (const update of data) {
+        const id =
+          update.movieOnTierId as (typeof moviesOnTiers.$inferSelect)['id']
+        await tx
+          .update(moviesOnTiers)
+          .set({ position: update.newPosition, tierId: update.tierId })
+          .where(dbEq(moviesOnTiers.id, id))
+      }
+
+      const [{ txid }] = await tx.execute(sql`select txid_current() as txid`)
+      return txid as string
+    })
+
+    return { txid }
+  })
+
+export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (
+      data: Array<{
+        movieId: string
+        tierId: string
+        position: number
+      }>,
+    ) => data,
+  )
+  .handler(async ({ data }) => {
+    if (data.length === 0) return { txid: 0 }
+
+    const txid = await db.transaction(async (tx) => {
+      for (const insert of data) {
+        await tx.insert(moviesOnTiers).values({
+          id: `movieOnTier-${crypto.randomUUID()}`,
+          movieId: insert.movieId,
+          tierId: insert.tierId,
+          position: insert.position,
+        })
+      }
 
       const [{ txid }] = await tx.execute(sql`select txid_current() as txid`)
       return txid as string
@@ -129,6 +197,9 @@ export const electricTierlistCollection = createCollection(
       params: {
         table: 'tierlist',
       },
+      onError: (error) => {
+        console.error('Electric tierlist collection sync error:', error)
+      },
     },
   }),
 )
@@ -141,6 +212,9 @@ export const electricTierCollection = createCollection(
       url: `http://localhost:3000/v1/shape`,
       params: {
         table: 'tier',
+      },
+      onError: (error) => {
+        console.error('Electric tier collection sync error:', error)
       },
     },
   }),
@@ -155,17 +229,29 @@ export const electricMoviesOnTiersCollection = createCollection(
       params: {
         table: 'movies_on_tiers',
       },
+      onError: (error) => {
+        console.error('Electric movies_on_tiers collection sync error:', error)
+      },
     },
     onUpdate: async ({ transaction }) => {
-      const { modified } = transaction.mutations[0]
+      // Process ALL mutations in a single batch, not just the first one
+      const updates = transaction.mutations.map((m) => ({
+        movieOnTierId: m.modified.id,
+        newPosition: m.modified.position,
+        tierId: m.modified.tierId,
+      }))
 
-      const result = await updateTierMoviePosition({
-        data: {
-          movieOnTierId: modified.id,
-          newPosition: modified.position,
-        },
-      })
+      const result = await batchUpdateTierMoviePositions({ data: updates })
+      return { txid: Number(result.txid) }
+    },
+    onInsert: async ({ transaction }) => {
+      const inserts = transaction.mutations.map((m) => ({
+        movieId: m.modified.movieId,
+        position: m.modified.position,
+        tierId: m.modified.tierId,
+      }))
 
+      const result = await batchInsertMoviesOnTiers({ data: inserts })
       return { txid: Number(result.txid) }
     },
   }),
@@ -195,12 +281,37 @@ export const useTierlistLiveQuery = (userId: string, tierlistId: string) => {
       )
   })
 
-  return useMemo((): TierlistWithTiers | null => {
+  const rankedMovieIds = useMemo(() => {
+    if (!results) return new Set<string>()
+
+    return new Set(
+      results
+        .map(
+          (result) => (result.movieOnTier as MovieOnTier | undefined)?.movieId,
+        )
+        .filter((id): id is string => Boolean(id)),
+    )
+  }, [results])
+
+  // Get all movies
+  const { data: allMovies } = useLiveQuery((q) => {
+    return q.from({ electricMovieCollection })
+  })
+
+  // Filter to get unranked movies (movies not in any tier of this tierlist)
+  const unrankedMovies = useMemo(() => {
+    if (!allMovies) return []
+
+    return allMovies
+      .filter((movie): movie is Movie => Boolean(movie))
+      .filter((movie) => !rankedMovieIds.has(movie.id))
+  }, [allMovies, rankedMovieIds])
+
+  const tierlist = useMemo((): TierlistWithTiers | null => {
     if (!results || results.length === 0) return null
 
     const tierlistData = results[0].electricTierlistCollection as Tierlist
     const tiersMap = new Map<string, TierWithMovies>()
-    const rankedMovieIds = new Set<string>()
 
     results.forEach((result) => {
       const tier = result.tier as Tier
@@ -218,18 +329,33 @@ export const useTierlistLiveQuery = (userId: string, tierlistId: string) => {
           position: movieOnTier.position,
           movieOnTierId: movieOnTier.id,
         })
-        rankedMovieIds.add(movie.id)
       }
     })
 
-    // Sort movies in tiers
-    tiersMap.forEach((tier) => {
-      tier.movies.sort((a, b) => a.position - b.position)
-    })
+    const sortedTiers = Array.from(tiersMap.values())
+      .map((tier) => ({
+        ...tier,
+        movies: [...tier.movies].sort((a, b) => a.position - b.position),
+      }))
+      .sort((a, b) => b.value - a.value)
+
+    const unrankedTier: TierWithMovies = {
+      id: 'unranked',
+      label: 'Unranked',
+      value: 0,
+      tierlistId: tierlistData.id,
+      movies: unrankedMovies.map((movie, index) => ({
+        ...movie,
+        position: index,
+        movieOnTierId: `unranked-${movie.id}`,
+      })),
+    }
 
     return {
       ...tierlistData,
-      tiers: Array.from(tiersMap.values()).sort((a, b) => a.value - b.value),
+      tiers: [unrankedTier, ...sortedTiers],
     }
-  }, [results])
+  }, [results, unrankedMovies])
+
+  return tierlist
 }

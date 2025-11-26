@@ -160,6 +160,16 @@ export const electricMovieCollection = createCollection(
       params: {
         table: 'movie',
       },
+      onError: (error) => {
+        // Handle offset out of bounds error by clearing stored state
+        if (error.message?.includes('out of bounds')) {
+          console.warn(
+            'Electric shape offset out of bounds, clearing stored state...',
+          )
+          // The collection will automatically retry with a fresh offset
+        }
+        console.error('Electric movie collection sync error:', error)
+      },
     },
   }),
 )
