@@ -11,6 +11,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
 import ToastList from '@/components/ui/toast-list'
+import { getSchemeServerFn } from '@/lib/color-scheme'
 import { getThemeServerFn } from '@/lib/theme'
 import type { QueryClient } from '@tanstack/react-query'
 import appCss from '../styles.css?url'
@@ -39,15 +40,26 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
-  loader: () => getThemeServerFn(),
+  loader: async () => {
+    const [theme, colorScheme] = await Promise.all([
+      getThemeServerFn(),
+      getSchemeServerFn(),
+    ])
+
+    return { theme, colorScheme }
+  },
   shellComponent: RootDocument,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const theme = Route.useLoaderData()
+  const { theme, colorScheme } = Route.useLoaderData()
 
   return (
-    <html className={theme} lang="en" suppressHydrationWarning>
+    <html
+      className={`${theme} scheme-${colorScheme}`}
+      lang="en"
+      suppressHydrationWarning
+    >
       <head>
         <HeadContent />
       </head>

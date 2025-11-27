@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react'
 import { useState } from 'react'
+import { ColorSchemeSelector } from '../color-scheme-selector'
 import { ThemeToggle } from '../theme-toggle'
 import { Button } from '../ui/button'
 import HeaderLink from './header-link'
@@ -41,6 +42,7 @@ export default function Header() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          <ColorSchemeSelector />
           <ThemeToggle />
           <Button
             onClick={handleLogout}
