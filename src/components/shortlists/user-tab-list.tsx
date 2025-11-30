@@ -100,7 +100,7 @@ export default function UserTabList({
             />
           ))}
         </div>
-        <div className="flex flex-col gap-3 p-5 border border-border rounded-2xl w-full flex-1 h-full">
+        <div className="flex flex-col gap-3 p-5 rounded-2xl w-full flex-1 h-full">
           <Tabs.Panel key={'all'} value={'all'} className="w-full">
             {raffleState === 'not-started' ? (
               <MovieGrid columns={6}>
