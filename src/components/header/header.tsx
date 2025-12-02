@@ -11,7 +11,6 @@ import HeaderLink from './header-link'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -71,7 +70,6 @@ export default function Header() {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -81,7 +79,6 @@ export default function Header() {
               className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
             />
 
-            {/* Aside Menu */}
             <motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
@@ -106,80 +103,32 @@ export default function Header() {
               </div>
 
               <nav className="flex-1 px-4 py-6 overflow-y-auto">
-                <motion.div
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    visible: {
-                      transition: {
-                        staggerChildren: 0.05,
-                      },
-                    },
-                  }}
-                  className="space-y-1 relative"
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <HeaderLink
-                    destination="/"
-                    setIsOpen={setIsOpen}
-                    index={0}
-                    hoveredItem={hoveredItem}
-                    setHoveredItem={setHoveredItem}
-                  >
+                <div className="space-y-1">
+                  <HeaderLink destination="/" setIsOpen={setIsOpen}>
                     <Home size={20} />
                     <span className="font-medium">Home</span>
                   </HeaderLink>
-                  <HeaderLink
-                    destination="/dashboard"
-                    setIsOpen={setIsOpen}
-                    index={1}
-                    hoveredItem={hoveredItem}
-                    setHoveredItem={setHoveredItem}
-                  >
+                  <HeaderLink destination="/dashboard" setIsOpen={setIsOpen}>
                     <LayoutDashboard size={20} />
                     <span className="font-medium">Dashboard</span>
                   </HeaderLink>
-                  <HeaderLink
-                    destination="/watched"
-                    setIsOpen={setIsOpen}
-                    index={2}
-                    hoveredItem={hoveredItem}
-                    setHoveredItem={setHoveredItem}
-                  >
+                  <HeaderLink destination="/watched" setIsOpen={setIsOpen}>
                     <Film size={20} />
                     <span className="font-medium">Watched</span>
                   </HeaderLink>
-                  <HeaderLink
-                    destination="/discover"
-                    setIsOpen={setIsOpen}
-                    index={3}
-                    hoveredItem={hoveredItem}
-                    setHoveredItem={setHoveredItem}
-                  >
+                  <HeaderLink destination="/discover" setIsOpen={setIsOpen}>
                     <Search size={20} />
                     <span className="font-medium">Discover</span>
                   </HeaderLink>
-                  <HeaderLink
-                    destination="/shortlists"
-                    setIsOpen={setIsOpen}
-                    index={4}
-                    hoveredItem={hoveredItem}
-                    setHoveredItem={setHoveredItem}
-                  >
+                  <HeaderLink destination="/shortlists" setIsOpen={setIsOpen}>
                     <List size={20} />
                     <span className="font-medium">Shortlists</span>
                   </HeaderLink>
-                  <HeaderLink
-                    destination="/tierlist"
-                    setIsOpen={setIsOpen}
-                    index={5}
-                    hoveredItem={hoveredItem}
-                    setHoveredItem={setHoveredItem}
-                  >
+                  <HeaderLink destination="/tierlist" setIsOpen={setIsOpen}>
                     <List size={20} />
                     <span className="font-medium">Tierlists</span>
                   </HeaderLink>
-                </motion.div>
+                </div>
               </nav>
 
               <div className="p-4 border-t border-sidebar-border/30 bg-sidebar-accent/10">
