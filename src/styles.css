@@ -561,6 +561,9 @@
   body {
     @apply m-0 bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
 
   code {
@@ -686,5 +689,95 @@
 
   ::view-transition-new(root) {
     z-index: 2;
+  }
+}
+
+@layer components {
+  .app-background-option {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.6s ease;
+    background: var(--background);
+  }
+
+  .backdrop-veil {
+    position: absolute;
+    inset: 0;
+    isolation: isolate;
+    background:
+      radial-gradient(
+        circle at 20% 25%,
+        rgba(255, 210, 170, 0.08),
+        transparent 55%
+      ),
+      radial-gradient(
+        circle at 75% 10%,
+        rgba(120, 190, 255, 0.08),
+        transparent 60%
+      ),
+      linear-gradient(140deg, rgba(5, 6, 14, 0.9), rgba(10, 12, 22, 0.75));
+  }
+
+  .backdrop-veil__image {
+    position: absolute;
+    inset: -15%;
+    width: 130%;
+    height: 130%;
+    object-fit: cover;
+    opacity: 0.65;
+    filter: saturate(1.15) contrast(1.05) brightness(0.78);
+    mix-blend-mode: screen;
+    animation: backdropVeilPan 48s ease-in-out infinite alternate;
+    mask-image: radial-gradient(
+      circle at 32% 35%,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.65) 35%,
+      transparent 62%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at 32% 35%,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.65) 35%,
+      transparent 62%
+    );
+  }
+
+  .backdrop-veil__wash {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        circle at 25% 30%,
+        rgba(255, 220, 180, 0.18),
+        transparent 48%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(90, 160, 255, 0.12),
+        transparent 60%
+      ),
+      linear-gradient(120deg, rgba(4, 5, 12, 0.95), rgba(7, 9, 18, 0.7)),
+      linear-gradient(
+        180deg,
+        rgba(2, 3, 8, 0.85),
+        rgba(2, 3, 8, 0.4),
+        rgba(2, 3, 8, 0.92)
+      );
+    mix-blend-mode: multiply;
+  }
+}
+
+@layer utilities {
+  @keyframes backdropVeilPan {
+    0% {
+      transform: scale(1.04) translate3d(-2%, -1%, 0);
+    }
+    100% {
+      transform: scale(1.12) translate3d(2%, 2%, 0);
+    }
   }
 }

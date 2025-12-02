@@ -1,3 +1,4 @@
+import { BackdropVeilBackground } from '@/components/background-options'
 import { ErrorComponent } from '@/components/error-component'
 import Header from '@/components/header/header'
 import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolbar'
@@ -47,7 +48,6 @@ export const Route = createFileRoute('/_authenticated')({
   },
   loader: async ({ context }) => {
     const user = context.user
-    // Preload shortlist data to ensure server function is registered for all child routes
     if (user?.userId) {
       await Promise.all([
         context.queryClient.ensureQueryData(
@@ -70,6 +70,7 @@ function AuthenticatedLayout() {
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
       <Header />
+      <BackdropVeilBackground />
       <div
         className={
           isHomePage ? 'flex-1 overflow-auto' : 'pt-20 flex-1 overflow-auto'
