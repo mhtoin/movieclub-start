@@ -1,42 +1,31 @@
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
-import { Tabs } from '@base-ui-components/react/tabs'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
+import { Dices, Users } from 'lucide-react'
 import { useState } from 'react'
+import { Tab, TabsList, TabsPanel, TabsRoot } from '../ui/tabs'
 import { EmptyState } from './empty-state'
 import { MovieColorBorder } from './movie-color-border'
 import { AnimatedMovieWrapper, MovieGrid } from './movie-grid'
 import MoviePoster from './movie-poster'
 import RaffleCarousel from './raffle-carousel'
-import { RaffleControlTab } from './raffle-control-tab'
 import { UserBadge } from './user-badge'
-import { UserTabButton } from './user-tab-button'
 
 export default function UserTabList({
   onMovieClick,
   raffleState,
   winningMovie,
   onRaffleComplete,
-  onStartRaffle,
-  dryRun,
-  onDryRunChange,
-  watchDate,
-  onDateSelect,
+  onRaffleModeToggle,
 }: {
   onMovieClick: (movie: any, rect: DOMRect) => void
-  raffleState: any
+  raffleState: 'not-started' | 'preview' | 'spinning' | 'winner'
   winningMovie: any
   onRaffleComplete: () => void
-  onStartRaffle?: () => void
-  dryRun: boolean
-  onDryRunChange: (value: boolean) => void
-  watchDate?: Date
-  onDateSelect: (date: Date) => void
+  onRaffleModeToggle: () => void
 }) {
   const { data: shortlists } = useSuspenseQuery(shortlistQueries.all())
   const [hoveredMovieId, setHoveredMovieId] = useState<string | null>(null)
-
-  const movies = shortlists.flatMap((shortlist) => shortlist.movies)
 
   const handleMovieClick = (
     movie: any,
@@ -45,64 +34,73 @@ export default function UserTabList({
     const rect = event.currentTarget.getBoundingClientRect()
     onMovieClick(movie, rect)
   }
+
   return (
-    <Tabs.Root className="rounded-md " defaultValue="all">
-      <Tabs.List className="relative z-0  gap-5 px-5 flex ">
-        <div className="flex flex-col gap-3 mb-4">
-          <AnimatePresence mode="wait" initial={false}>
-            {raffleState === 'not-started' ? (
-              <motion.div
-                key="all"
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -50, opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className="w-full"
-              >
-                <UserTabButton
-                  value="all"
-                  name="All Users"
-                  movieCount={shortlists.reduce(
-                    (acc, s) => acc + s.movies.length,
-                    0,
-                  )}
-                  isAllUsers
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="raffle-control"
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -50, opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className="w-full"
-              >
-                <RaffleControlTab
-                  value="all"
-                  onStartRaffle={() => onStartRaffle?.()}
-                  onDateSelect={onDateSelect}
-                  selectedDate={watchDate}
-                  dryRun={dryRun}
-                  onDryRunChange={onDryRunChange}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {shortlists.map((shortlist, index) => (
-            <UserTabButton
+    <TabsRoot variant="underlined" defaultValue="all" className="w-full">
+      <div className="flex items-center justify-between mb-6">
+        <TabsList
+          variant="underlined"
+          className="flex-1 border-b border-border"
+        >
+          <Tab
+            variant="underlined"
+            value="all"
+            className="flex items-center gap-2"
+          >
+            <Users className="h-4 w-4" />
+            <span>All</span>
+            <span className="text-xs text-muted-foreground ml-1">
+              ({shortlists.reduce((acc, s) => acc + s.movies.length, 0)})
+            </span>
+          </Tab>
+          {shortlists.map((shortlist) => (
+            <Tab
               key={shortlist.user.id}
+              variant="underlined"
               value={shortlist.user.id}
-              name={shortlist.user.name}
-              imageUrl={shortlist.user.image}
-              index={index + 1}
-              movieCount={shortlist.movies.length}
-            />
+              className="flex items-center gap-2"
+            >
+              {shortlist.user.image && (
+                <img
+                  src={shortlist.user.image}
+                  alt={shortlist.user.name}
+                  className="w-5 h-5 rounded-full"
+                />
+              )}
+              <span>{shortlist.user.name}</span>
+              <span className="text-xs text-muted-foreground">
+                ({shortlist.movies.length})
+              </span>
+            </Tab>
           ))}
-        </div>
-        <div className="flex flex-col gap-3 p-5 rounded-2xl w-full flex-1 h-full">
-          <Tabs.Panel key={'all'} value={'all'} className="w-full">
-            {raffleState === 'not-started' ? (
+        </TabsList>
+
+        {/* Raffle Mode Toggle Button */}
+        <button
+          onClick={onRaffleModeToggle}
+          className={`ml-6 flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+            raffleState !== 'not-started'
+              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
+              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+          }`}
+          aria-label="Toggle Raffle Mode"
+        >
+          <Dices className="h-4 w-4" />
+          <span className="text-sm font-medium">
+            {raffleState !== 'not-started' ? 'Exit Raffle' : 'Raffle'}
+          </span>
+        </button>
+      </div>
+
+      <TabsPanel variant="underlined" value="all">
+        <AnimatePresence mode="wait">
+          {raffleState === 'not-started' ? (
+            <motion.div
+              key="grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
               <MovieGrid columns={6}>
                 {shortlists.flatMap((shortlist, shortlistIndex) =>
                   shortlist.movies.map((movie, movieIndex) => {
@@ -134,45 +132,50 @@ export default function UserTabList({
                   }),
                 )}
               </MovieGrid>
-            ) : (
-              <div className="w-full">
-                <RaffleCarousel
-                  raffleState={raffleState}
-                  movies={shortlists.flatMap((shortlist) => shortlist.movies)}
-                  winningMovie={winningMovie}
-                  onRaffleComplete={onRaffleComplete}
-                />
-              </div>
-            )}
-          </Tabs.Panel>
-          {shortlists.map((shortlist) => (
-            <Tabs.Panel
-              key={shortlist.user.id}
-              className="relative flex items-center justify-center "
-              value={shortlist.user.id}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="raffle"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full"
             >
-              {shortlist.movies.length > 0 ? (
-                <MovieGrid columns={3}>
-                  {shortlist.movies.map((movie, movieIndex) => {
-                    return (
-                      <MoviePoster
-                        key={movie.id}
-                        movie={movie}
-                        movieIndex={movieIndex}
-                        handleMovieClick={handleMovieClick}
-                        hoveredMovieId={hoveredMovieId}
-                        setHoveredMovieId={setHoveredMovieId}
-                      />
-                    )
-                  })}
-                </MovieGrid>
-              ) : (
-                <EmptyState />
-              )}
-            </Tabs.Panel>
-          ))}
-        </div>
-      </Tabs.List>
-    </Tabs.Root>
+              <RaffleCarousel
+                raffleState={raffleState}
+                movies={shortlists.flatMap((shortlist) => shortlist.movies)}
+                winningMovie={winningMovie}
+                onRaffleComplete={onRaffleComplete}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </TabsPanel>
+
+      {shortlists.map((shortlist) => (
+        <TabsPanel
+          key={shortlist.user.id}
+          variant="underlined"
+          value={shortlist.user.id}
+        >
+          {shortlist.movies.length > 0 ? (
+            <MovieGrid columns={3}>
+              {shortlist.movies.map((movie, movieIndex) => (
+                <MoviePoster
+                  key={movie.id}
+                  movie={movie}
+                  movieIndex={movieIndex}
+                  handleMovieClick={handleMovieClick}
+                  hoveredMovieId={hoveredMovieId}
+                  setHoveredMovieId={setHoveredMovieId}
+                />
+              ))}
+            </MovieGrid>
+          ) : (
+            <EmptyState />
+          )}
+        </TabsPanel>
+      ))}
+    </TabsRoot>
   )
 }
