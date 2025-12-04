@@ -631,7 +631,15 @@
     scrollbar-width: none;
   }
 
-  /* Animation utilities */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -652,6 +660,10 @@
       opacity: 1;
       transform: scale(1);
     }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out both;
   }
 
   .animate-fade-in-up {
@@ -676,7 +688,6 @@
       inset 0 0 80px rgba(var(--primary-rgb, 234, 179, 8), 0.3);
   }
 
-  /* View Transition API animations for theme/color scheme changes */
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none;

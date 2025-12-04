@@ -1,6 +1,5 @@
 import { EmblaCarouselType, EmblaEventType } from 'embla-carousel'
 import useEmblaCarousel from 'embla-carousel-react'
-import { motion } from 'framer-motion'
 import { useCallback, useEffect, useRef } from 'react'
 import MoviePoster from './movie-poster'
 
@@ -26,10 +25,15 @@ export default function RaffleCarousel({
   })
   const tweenFactor = useRef(0)
   const tweenNodes = useRef<HTMLElement[]>([])
+  const glowNodes = useRef<HTMLElement[]>([])
 
   const setTweenNodes = useCallback((emblaApi: EmblaCarouselType): void => {
     tweenNodes.current = emblaApi.slideNodes().map((slideNode) => {
       return slideNode.querySelector('.parallax__layer') as HTMLElement
+    })
+
+    glowNodes.current = tweenNodes.current.map((node) => {
+      return node?.querySelector('.spotlight-glow') as HTMLElement
     })
   }, [])
 
@@ -75,24 +79,13 @@ export default function RaffleCarousel({
           const distanceFromCenter = Math.abs(diffToTarget)
 
           const scale = Math.max(0.85, 1.15 - distanceFromCenter * 0.6)
-
           const opacity = Math.max(0.4, 1 - distanceFromCenter * 1.2)
-
-          const brightness = Math.max(0.6, 1.2 + distanceFromCenter * 0.5)
-
-          const saturation = Math.max(0.5, 1.2 - distanceFromCenter * 0.7)
-
           const glowOpacity = Math.max(0, 1 - distanceFromCenter * 3)
 
-          tweenNode.style.transform = `translateX(${translate}%) scale(${scale})`
+          tweenNode.style.transform = `translate3d(${translate}%, 0, 0) scale(${scale})`
           tweenNode.style.opacity = `${opacity}`
-          tweenNode.style.filter = `brightness(${brightness}) saturate(${saturation})`
-          tweenNode.style.transition =
-            'transform 0.3s ease-out, opacity 0.3s ease-out, filter 0.3s ease-out'
 
-          const glowElement = tweenNode.querySelector(
-            '.spotlight-glow',
-          ) as HTMLElement
+          const glowElement = glowNodes.current[slideIndex]
           if (glowElement) {
             glowElement.style.opacity = `${glowOpacity}`
           }
@@ -142,15 +135,6 @@ export default function RaffleCarousel({
       const currentIndex = emblaApi.selectedScrollSnap()
       let distanceToWinner = winningIndex - currentIndex
 
-      console.log({
-        easeOut,
-        scrollCount,
-        elapsed,
-        progress,
-        currentSpeed,
-        distanceToWinner,
-      })
-
       if (distanceToWinner < 0) {
         distanceToWinner += movies.length
       }
@@ -171,16 +155,11 @@ export default function RaffleCarousel({
 
           const doFinalScroll = () => {
             if (finalScrolls > 0) {
-              console.log('Final scroll to winner, remaining:', finalScrolls)
               emblaApi.scrollNext()
               finalScrolls--
-
               baseDelay += 200
-
               const randomVariation = (Math.random() - 0.5) * 200
               const delay = Math.max(200, baseDelay + randomVariation)
-              console.log('Next final scroll in ms:', delay)
-
               setTimeout(doFinalScroll, delay)
             } else {
               onRaffleComplete()
@@ -230,42 +209,33 @@ export default function RaffleCarousel({
     if (emblaApi) emblaApi.scrollNext()
   }, [emblaApi])
 
+  const noopSetHovered = useCallback(() => {}, [])
+
   return (
-    <motion.div
-      layout
-      className="relative w-full"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="relative w-full animate-fade-in">
       <div
         className="overflow-hidden fade-mask fade-16 dark:fade-80 fade-intensity-100"
         ref={emblaRef}
       >
         <div className="flex gap-6 pb-4 pl-6">
-          {movies.map((movie, index) => (
-            <motion.div
+          {movies.map((movie) => (
+            <div
               key={movie.id}
               className="flex-[0_0_min(85vw,150px)] sm:flex-[0_0_min(70vw,200px)] md:flex-[0_0_min(60vw,280px)] lg:flex-[0_0_min(50vw,320px)] 2xl:flex-[0_0_min(40vw,500px)] min-w-0"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
             >
               <div className="parallax">
-                <div className="parallax__layer relative">
+                <div className="parallax__layer relative will-change-transform">
                   <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-0 spotlight-glow pointer-events-none" />
                   <MoviePoster
                     movie={movie}
                     movieIndex={0}
                     handleMovieClick={undefined}
                     hoveredMovieId={null}
-                    setHoveredMovieId={() => {}}
+                    setHoveredMovieId={noopSetHovered}
                   />
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -308,6 +278,6 @@ export default function RaffleCarousel({
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
-    </motion.div>
+    </div>
   )
 }
