@@ -183,9 +183,7 @@ function RouteComponent() {
       </div>
 
       <div className="relative flex-1 overflow-hidden isolate">
-        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-background to-transparent z-[1] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent z-[1] pointer-events-none" />
-        <div className="h-full overflow-y-auto -mx-4 px-10 pt-6">
+        <div className="h-full overflow-y-auto -mx-4 px-10 pt-6 fade-mask fade-y-16 dark:fade-y-84 fade-intensity-100">
           <Suspense fallback={<WatchedSkeleton />}>
             <WatchedMoviesList
               searchQuery={debouncedSearch}
