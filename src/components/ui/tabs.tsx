@@ -9,6 +9,7 @@ const tabsRootVariants = cva('rounded-md  ', {
       default: '',
       pills: 'border-0 bg-gray-100 p-1',
       underline: 'border-0 border-b border-gray-200',
+      underlined: 'border-0',
     },
   },
   defaultVariants: {
@@ -22,6 +23,7 @@ const tabsListVariants = cva('relative z-0 flex', {
       default: 'gap-1 px-1 shadow-[inset_0_-1px] shadow-gray-200',
       pills: 'gap-1',
       underline: 'gap-4 px-0 items-center justify-center',
+      underlined: 'gap-6',
     },
   },
   defaultVariants: {
@@ -40,6 +42,8 @@ const tabVariants = cva(
           'h-8 px-3 text-sm text-gray-600 rounded-md hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800 data-[selected]:bg-white data-[selected]:text-gray-900 data-[selected]:shadow-sm',
         underline:
           'h-10 px-0 p-2 text-sm text-gray-600 border-b-2 border-gray hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800 data-[selected]:border-blue-600 data-[selected]:text-blue-600',
+        underlined:
+          'relative py-2 text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:origin-left after:scale-x-0 hover:after:scale-x-50 after:transition-transform after:duration-300 after:ease-out data-[selected]:text-foreground data-[selected]:after:scale-x-100',
       },
       size: {
         sm: 'text-xs',
@@ -64,6 +68,7 @@ const tabsIndicatorVariants = cva(
         pills: 'hidden', // Pills don't need an indicator
         underline:
           'bottom-0 left-0 h-0.5 w-[var(--active-tab-width)] translate-x-[var(--active-tab-left)] bg-blue-600',
+        underlined: 'hidden', // Underlined uses pseudo-element on each tab
       },
     },
     defaultVariants: {
@@ -73,13 +78,14 @@ const tabsIndicatorVariants = cva(
 )
 
 const tabsPanelVariants = cva(
-  'relative flex items-center justify-center -outline-offset-1 outline-blue-800 focus-visible:rounded-md focus-visible:outline focus-visible:outline-2',
+  'relative -outline-offset-1 outline-blue-800 focus-visible:rounded-md focus-visible:outline focus-visible:outline-2',
   {
     variants: {
       variant: {
-        default: 'min-h-32 p-5',
-        pills: 'mt-4 min-h-32',
-        underline: 'mt-4 min-h-32',
+        default: 'flex items-center justify-center min-h-32 p-5',
+        pills: 'flex items-center justify-center mt-4 min-h-32',
+        underline: 'flex items-center justify-center mt-4 min-h-32',
+        underlined: 'mt-6',
       },
     },
     defaultVariants: {
