@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Dices, Users } from 'lucide-react'
 import { useState } from 'react'
+import { Button } from '../ui/button'
 import { Tab, TabsList, TabsPanel, TabsRoot } from '../ui/tabs'
 import { EmptyState } from './empty-state'
 import { MovieColorBorder } from './movie-color-border'
@@ -63,7 +64,7 @@ export default function UserTabList({
               {shortlist.user.image && (
                 <img
                   src={shortlist.user.image}
-                  alt={shortlist.user.name}
+                  alt={shortlist.user.name.charAt(0)}
                   className="w-5 h-5 rounded-full"
                 />
               )}
@@ -74,14 +75,11 @@ export default function UserTabList({
             </Tab>
           ))}
         </TabsList>
-
-        {/* Raffle Mode Toggle Button */}
-        <button
+        <Button
           onClick={onRaffleModeToggle}
-          className={`ml-6 flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-            raffleState !== 'not-started'
-              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+          variant={raffleState !== 'not-started' ? 'primary' : 'secondary'}
+          className={`ml-6 rounded-full ${
+            raffleState !== 'not-started' ? 'shadow-lg shadow-primary/30' : ''
           }`}
           aria-label="Toggle Raffle Mode"
         >
@@ -89,7 +87,7 @@ export default function UserTabList({
           <span className="text-sm font-medium">
             {raffleState !== 'not-started' ? 'Exit Raffle' : 'Raffle'}
           </span>
-        </button>
+        </Button>
       </div>
 
       <TabsPanel variant="underlined" value="all">
