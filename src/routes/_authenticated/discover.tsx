@@ -110,9 +110,7 @@ function RouteComponent() {
       <main className="flex-1 overflow-hidden">
         <div className="h-full flex flex-col">
           <div className="relative flex-1 overflow-hidden isolate">
-            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-background to-transparent z-[1] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent z-[1] pointer-events-none" />
-            <div className="h-full overflow-y-auto px-6 py-6">
+            <div className="h-full overflow-y-auto px-6 py-6 pt-6 fade-mask fade-left-40 fade-y-16 dark:fade-y-40 fade-intensity-100">
               <Suspense
                 fallback={
                   <div className="flex items-center justify-center py-12">
