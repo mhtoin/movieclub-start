@@ -13,6 +13,7 @@ const schemeValidator = z.enum([
   'forest',
   'rose',
   'mono',
+  'teal',
 ])
 export type ColorScheme = z.infer<typeof schemeValidator>
 
@@ -57,6 +58,13 @@ export const COLOR_SCHEMES = {
     colors: {
       light: 'oklch(0.45 0 0)',
       dark: 'oklch(0.70 0 0)',
+    },
+  },
+  teal: {
+    label: 'Teal',
+    colors: {
+      light: 'oklch(0.62 0.08 220)',
+      dark: 'oklch(0.65 0.08 220)',
     },
   },
 } as const satisfies Record<
