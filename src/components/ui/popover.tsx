@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Popover as BasePopover } from '@base-ui-components/react/popover'
+import { Popover as BasePopover } from '@base-ui/react/popover'
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 

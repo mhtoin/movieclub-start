@@ -1,4 +1,4 @@
-import { Toast } from '@base-ui-components/react/toast'
+import { Toast } from '@base-ui/react/toast'
 import { XIcon } from 'lucide-react'
 
 export default function ToastList() {

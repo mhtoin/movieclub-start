@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Field as BaseField } from '@base-ui-components/react/field'
+import { Field as BaseField } from '@base-ui/react/field'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 const fieldVariants = cva('flex flex-col items-start gap-1', {

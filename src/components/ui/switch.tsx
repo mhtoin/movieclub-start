@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Switch as BaseSwitch } from '@base-ui-components/react/switch'
+import { Switch as BaseSwitch } from '@base-ui/react/switch'
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 

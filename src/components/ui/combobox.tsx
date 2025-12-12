@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Combobox as BaseCombobox } from '@base-ui-components/react/combobox'
+import { Combobox as BaseCombobox } from '@base-ui/react/combobox'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Check, ChevronDown } from 'lucide-react'
 import * as React from 'react'
@@ -37,7 +37,7 @@ const comboboxInputVariants = cva(
 )
 
 const comboboxPopupVariants = cva(
-  'overflow-y-auto rounded-md border border-border bg-background shadow-lg outline-none transition-all duration-300 ease-out data-[ending-style]:scale-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-80 data-[starting-style]:opacity-0 z-50',
+  'overflow-y-auto rounded-md border border-border bg-background shadow-lg outline-none transition-all duration-300 ease-out data-[ending-style]:scale-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-80 data-[starting-style]:opacity-0 z-[9999]',
   {
     variants: {
       size: {
@@ -139,7 +139,7 @@ const ComboboxPopup = React.forwardRef<
   ComboboxPopupProps
 >(({ className, size, children, ...props }, ref) => (
   <BaseCombobox.Portal>
-    <BaseCombobox.Positioner sideOffset={4}>
+    <BaseCombobox.Positioner sideOffset={4} className="z-[9999]">
       <BaseCombobox.Popup
         ref={ref}
         className={cn(comboboxPopupVariants({ size, className }))}
