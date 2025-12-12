@@ -1,4 +1,4 @@
-import { Tabs } from '@base-ui-components/react/tabs'
+import { Tabs } from '@base-ui/react/tabs'
 import { motion, Transition } from 'framer-motion'
 import { Clapperboard, Users } from 'lucide-react'
 

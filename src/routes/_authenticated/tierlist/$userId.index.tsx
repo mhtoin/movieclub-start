@@ -13,7 +13,7 @@ import {
   deleteTierlist,
 } from '@/lib/react-query/mutations/tierlists'
 import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
-import { Toast } from '@base-ui-components/react/toast'
+import { Toast } from '@base-ui/react/toast'
 import {
   useMutation,
   useQueryClient,
