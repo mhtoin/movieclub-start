@@ -18,7 +18,7 @@ export default function MoviePoster({
   setHoveredMovieId: (id: string | null) => void
 }) {
   const posterPath = movie.images?.posters?.[0]?.file_path
-  const posterUrl = posterPath ? getImageUrl(posterPath, 'w500') : null
+  const posterUrl = posterPath ? getImageUrl(posterPath, 'original') : null
   return (
     <div
       key={movie.id}

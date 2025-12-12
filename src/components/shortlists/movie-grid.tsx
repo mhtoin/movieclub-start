@@ -7,7 +7,7 @@ interface MovieGridProps {
 }
 
 export function MovieGrid({ children, columns = 6 }: MovieGridProps) {
-  const gridClass = columns === 6 ? 'grid-cols-5' : 'grid-cols-3'
+  const gridClass = columns === 6 ? 'grid-cols-6' : 'grid-cols-3'
 
   return (
     <motion.div

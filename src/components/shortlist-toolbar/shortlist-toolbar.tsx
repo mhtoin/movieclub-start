@@ -5,7 +5,9 @@ import {
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, Film, Sparkles, X } from 'lucide-react'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
+import { SortByFilter } from '../discover/sort-by-filter'
+import { AddMovieDialog } from './add-movie-dialog'
 import ShortlistItem from './shortlist-item'
 
 interface ShortlistToolbarProps {
@@ -17,8 +19,10 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
   const { data, isLoading } = useQuery(shortlistQueries.byUser(userId))
   const toggleIsReadyMutation = useToggleIsReadyMutation()
   const toggleParticipatingMutation = useToggleParticipatingMutation()
+  const [sortBy, setSortBy] = useState('popularity.desc')
 
   const movieCount = data?.movies?.length || 0
+  const canAddMoreMovies = movieCount < 3
 
   const handleToggleReady = () => {
     if (data) {
@@ -89,23 +93,46 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                     <Sparkles className="w-12 h-12 text-primary/40" />
                   </div>
                   <h3 className="font-semibold text-foreground mb-2">
-                    Start Your Collection
+                    No movies yet
                   </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Add movies to your shortlist and plan your next movie night!
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Start building your shortlist
                   </p>
+                  <div className="w-full">
+                    <Suspense fallback={null}>
+                      <AddMovieDialog movieCount={movieCount} />
+                    </Suspense>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {data?.requiresSelection && data?.selectedIndex === null && (
+                    <div className="mb-4 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                      <p className="text-sm font-medium text-primary">
+                        Select one movie for the raffle
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        You won last time! Choose which movie to include.
+                      </p>
+                    </div>
+                  )}
                   {data?.movies?.map((movie, index) => {
                     return (
                       <ShortlistItem
                         key={movie.id}
                         movie={movie}
                         index={index}
+                        requiresSelection={data?.requiresSelection ?? undefined}
+                        selectedIndex={data?.selectedIndex ?? undefined}
                       />
                     )
                   })}
+                  <SortByFilter value={sortBy} onValueChange={setSortBy} />
+                  {canAddMoreMovies && (
+                    <Suspense fallback={null}>
+                      <AddMovieDialog movieCount={movieCount} />
+                    </Suspense>
+                  )}
                 </div>
               )}
             </div>
@@ -121,8 +148,8 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                       <div
                         className={`w-2 h-2 rounded-full transition-all ${
                           data?.isReady
-                            ? 'bg-green-500 shadow-lg shadow-green-500/50'
-                            : 'bg-yellow-500 shadow-lg shadow-yellow-500/50'
+                            ? 'bg-success shadow-lg shadow-success/50'
+                            : 'bg-muted-foreground/50 shadow-lg shadow-muted-foreground/20'
                         }`}
                       />
                       <span className="text-sm font-medium text-foreground">

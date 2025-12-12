@@ -3,6 +3,8 @@ export type Shortlist = {
   userId: string
   isReady: boolean
   participating: boolean
+  requiresSelection?: boolean | null
+  selectedIndex?: number | null
   user: {
     id: string
     name: string

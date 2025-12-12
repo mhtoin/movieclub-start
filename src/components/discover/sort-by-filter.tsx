@@ -14,7 +14,14 @@ export function SortByFilter({ value, onValueChange }: SortByFilterProps) {
   return (
     <div>
       <label className="mb-2 block text-sm font-medium">Sort By</label>
-      <SelectRoot onValueChange={onValueChange} value={value}>
+      <SelectRoot
+        onValueChange={(value) => {
+          if (value !== null) {
+            onValueChange(value)
+          }
+        }}
+        value={value}
+      >
         <SelectTrigger className="w-full" />
         <SelectPopup className="w-[var(--anchor-width)]">
           <SelectItem value="popularity.desc">

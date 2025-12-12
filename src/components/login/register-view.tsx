@@ -1,5 +1,5 @@
 import { useRegisterMutation } from '@/lib/react-query/mutations/auth'
-import { Form } from '@base-ui-components/react/form'
+import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
 import Field from '../ui/field'
 

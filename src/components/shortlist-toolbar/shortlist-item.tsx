@@ -1,23 +1,46 @@
 import { Movie } from '@/db/schema/movies'
-import { useRemoveFromShortlistMutation } from '@/lib/react-query/mutations/shortlist'
+import {
+  useRemoveFromShortlistMutation,
+  useUpdateSelectedIndexMutation,
+} from '@/lib/react-query/mutations/shortlist'
 import { Film } from 'lucide-react'
 import { Button } from '../ui/button'
 
 export default function ShortlistItem({
   movie,
   index,
+  requiresSelection,
+  selectedIndex,
 }: {
   movie: Movie
   index: number
+  requiresSelection?: boolean
+  selectedIndex?: number | null
 }) {
   const { mutate: removeFromShortlist, isPending } =
     useRemoveFromShortlistMutation()
+  const { mutate: updateSelectedIndex, isPending: isUpdatingSelection } =
+    useUpdateSelectedIndexMutation()
+
+  const isSelected = requiresSelection && selectedIndex === index
+
+  const handleToggleSelection = () => {
+    if (!requiresSelection) return
+    // Toggle selection: if already selected, clear it; otherwise select this one
+    updateSelectedIndex(isSelected ? null : index)
+  }
   const backdropPath = movie.images?.backdrops?.[0]?.file_path
   const hasBackdrop = Boolean(backdropPath)
   return (
     <div
       key={movie.id}
-      className="group relative rounded-2xl border-2 border-secondary overflow-hidden transition-all duration-300 cursor-pointer"
+      className={`group relative rounded-2xl border-2 overflow-hidden transition-all duration-300 ${
+        requiresSelection ? 'cursor-default' : 'cursor-pointer'
+      } ${
+        isSelected
+          ? 'border-primary ring-2 ring-primary/50'
+          : 'border-secondary'
+      }`}
       style={{
         animationDelay: `${index * 50}ms`,
       }}
@@ -84,15 +107,58 @@ export default function ShortlistItem({
               </span>
             )}
           </div>
-          <Button
-            variant="destructive"
-            className="mt-2"
-            size="xs"
-            loading={isPending}
-            onClick={() => removeFromShortlist(movie.id)}
-          >
-            Remove
-          </Button>
+          <div className="flex items-center gap-2 mt-2">
+            {requiresSelection && (
+              <button
+                onClick={handleToggleSelection}
+                disabled={isUpdatingSelection}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isSelected
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : hasBackdrop
+                      ? 'bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20'
+                      : 'bg-accent text-foreground hover:bg-accent/80'
+                }`}
+              >
+                <div
+                  className={`relative w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-300 ${
+                    isSelected
+                      ? 'border-primary-foreground bg-primary-foreground/20'
+                      : hasBackdrop
+                        ? 'border-white/40'
+                        : 'border-border'
+                  }`}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-3 h-3 transition-all duration-300"
+                    style={{
+                      opacity: isSelected ? 1 : 0,
+                      transform: isSelected
+                        ? 'scale(1) rotate(0deg)'
+                        : 'scale(0.5) rotate(-90deg)',
+                    }}
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <span>{isSelected ? 'Selected' : 'Select'}</span>
+              </button>
+            )}
+            <Button
+              variant="destructive"
+              size="xs"
+              loading={isPending}
+              onClick={() => removeFromShortlist(movie.id)}
+            >
+              Remove
+            </Button>
+          </div>
         </div>
       </div>
     </div>

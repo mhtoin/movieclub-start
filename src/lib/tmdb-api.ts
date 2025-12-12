@@ -115,7 +115,7 @@ export async function fetchWatchProviders(): Promise<WatchProvider[]> {
     throw new Error('TMDB API key is not configured')
   }
 
-  const url = `${TMDB_CONFIG.BASE_URL}/watch/providers/movie?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&watch_region=FI`
+  const url = `${TMDB_CONFIG.BASE_URL}/watch/providers/movie?api_key=${TMDB_CONFIG.API_KEY}&language=en-US`
 
   try {
     const response = await fetch(url)
@@ -127,6 +127,7 @@ export async function fetchWatchProviders(): Promise<WatchProvider[]> {
     }
 
     const data: WatchProvidersResponse = await response.json()
+    console.log('Fetched watch providers:', data)
     return data.results
   } catch (error) {
     console.error('Error fetching watch providers:', error)
@@ -198,6 +199,45 @@ export async function discoverMovies(
     return data
   } catch (error) {
     console.error('Error discovering movies:', error)
+    throw error
+  }
+}
+
+export interface SearchParams {
+  page: number
+  query: string
+}
+
+export async function searchMovies(
+  params: SearchParams,
+): Promise<TMDBResponse> {
+  if (!TMDB_CONFIG.API_KEY) {
+    throw new Error('TMDB API key is not configured')
+  }
+
+  const queryParams = new URLSearchParams({
+    api_key: TMDB_CONFIG.API_KEY,
+    query: params.query,
+    include_adult: 'false',
+    language: 'en-US',
+    page: params.page.toString(),
+  })
+
+  const url = `${TMDB_CONFIG.BASE_URL}/search/movie?${queryParams.toString()}`
+
+  try {
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(
+        `TMDB API error: ${response.status} ${response.statusText}`,
+      )
+    }
+
+    const data: TMDBResponse = await response.json()
+    return data
+  } catch (error) {
+    console.error('Error searching movies:', error)
     throw error
   }
 }

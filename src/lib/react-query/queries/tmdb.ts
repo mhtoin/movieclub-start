@@ -4,6 +4,7 @@ import {
   fetchMovieDetails,
   fetchWatchProviders,
   getFilters,
+  searchMovies,
 } from '@/lib/tmdb-api'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
@@ -27,6 +28,18 @@ export const tmdbQueries = {
       queryKey: ['tmdb', 'discover', filters],
       queryFn: ({ pageParam }) =>
         discoverMovies({ ...filters, page: pageParam }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => {
+        if (lastPage.page < lastPage.total_pages) {
+          return lastPage.page + 1
+        }
+        return undefined
+      },
+    }),
+  search: (query: string) =>
+    infiniteQueryOptions({
+      queryKey: ['tmdb', 'search', query],
+      queryFn: ({ pageParam }) => searchMovies({ query, page: pageParam }),
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
         if (lastPage.page < lastPage.total_pages) {
