@@ -1,9 +1,10 @@
 import { db } from '@/db/db'
 import { movie, movieToShortlist, shortlist } from '@/db/schema'
+import { user } from '@/db/schema/users'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
 import { fetchMovieDetails } from '@/lib/tmdb-api'
-import { Toast } from '@base-ui-components/react/toast'
+import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq } from 'drizzle-orm'
@@ -367,6 +368,192 @@ export const useToggleParticipatingMutation = () => {
         description: shortlist.participating
           ? 'Now participating in movie night'
           : 'No longer participating in movie night',
+      })
+    },
+  })
+}
+
+export const updateUserShortlistStatus = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (data: { userId: string; isReady?: boolean; participating?: boolean }) =>
+      data,
+  )
+  .handler(async ({ data }) => {
+    const { userId, isReady, participating } = data
+    const session = await useAppSession()
+    const sessionToken = session.data?.sessionToken
+    const sessionUser = await getSessionUser(sessionToken)
+
+    if (!sessionUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const targetShortlist = await db
+      .select()
+      .from(shortlist)
+      .where(eq(shortlist.userId, userId))
+      .limit(1)
+      .then((res) => res[0])
+
+    if (!targetShortlist) {
+      throw new Error('Shortlist not found')
+    }
+
+    const updates: Partial<typeof shortlist.$inferInsert> = {}
+    if (isReady !== undefined) updates.isReady = isReady
+    if (participating !== undefined) updates.participating = participating
+
+    await db
+      .update(shortlist)
+      .set(updates)
+      .where(eq(shortlist.id, targetShortlist.id))
+
+    // Get the updated shortlist with all its movies
+    const shortlistWithMovies = await db
+      .select()
+      .from(shortlist)
+      .where(eq(shortlist.userId, userId))
+      .innerJoin(user, eq(shortlist.userId, user.id))
+      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+
+    const shortlistsMap = new Map()
+    for (const row of shortlistWithMovies) {
+      const shortlistId = row.shortlist.id
+      if (!shortlistsMap.has(shortlistId)) {
+        shortlistsMap.set(shortlistId, {
+          ...row.shortlist,
+          user: row.user,
+          movies: [],
+        })
+      }
+      if (row.movie) {
+        shortlistsMap.get(shortlistId).movies.push(row.movie)
+      }
+    }
+
+    const updatedShortlist = Array.from(shortlistsMap.values())[0]
+
+    if (!updatedShortlist) {
+      throw new Error('Shortlist not found after update')
+    }
+
+    return { success: true, shortlist: updatedShortlist }
+  })
+
+export const useUpdateUserShortlistStatusMutation = () => {
+  const queryClient = useQueryClient()
+  const toastManager = Toast.useToastManager()
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      isReady,
+      participating,
+    }: {
+      userId: string
+      isReady?: boolean
+      participating?: boolean
+    }) => {
+      const response = await updateUserShortlistStatus({
+        data: { userId, isReady, participating },
+      })
+
+      if (!response.success) {
+        throw new Error('Failed to update user shortlist status')
+      }
+      return response.shortlist
+    },
+    onError: (error) => {
+      console.error('Error updating user shortlist status:', error)
+      toastManager.add({
+        title: 'Error',
+        description: 'Failed to update user status',
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shortlists'] })
+    },
+  })
+}
+
+export const updateSelectedIndex = createServerFn({ method: 'POST' })
+  .inputValidator((data: { selectedIndex: number | null }) => data)
+  .handler(async ({ data }) => {
+    const { selectedIndex } = data
+    const session = await useAppSession()
+    const sessionToken = session.data?.sessionToken
+    const user = await getSessionUser(sessionToken)
+
+    if (!user) {
+      throw new Error('Unauthorized')
+    }
+
+    const userShortlist = await db
+      .select()
+      .from(shortlist)
+      .where(eq(shortlist.userId, user.userId))
+      .limit(1)
+      .then((res) => res[0])
+
+    if (!userShortlist) {
+      throw new Error('Shortlist not found')
+    }
+
+    await db
+      .update(shortlist)
+      .set({ selectedIndex })
+      .where(eq(shortlist.id, userShortlist.id))
+
+    // Get the updated shortlist with all its movies
+    const shortlistWithMovies = await db
+      .select()
+      .from(shortlist)
+      .where(eq(shortlist.userId, user.userId))
+      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+
+    const updatedShortlist =
+      shortlistWithMovies.length > 0
+        ? {
+            ...shortlistWithMovies[0].shortlist,
+            movies: shortlistWithMovies.map((row) => row.movie),
+          }
+        : null
+
+    if (!updatedShortlist) {
+      throw new Error('Shortlist not found after update')
+    }
+
+    return { success: true, shortlist: updatedShortlist }
+  })
+
+export const useUpdateSelectedIndexMutation = () => {
+  const queryClient = useQueryClient()
+  const toastManager = Toast.useToastManager()
+  return useMutation({
+    mutationFn: async (selectedIndex: number | null) => {
+      const response = await updateSelectedIndex({ data: { selectedIndex } })
+
+      if (!response.success) {
+        throw new Error('Failed to update selected movie')
+      }
+      return response.shortlist
+    },
+    onError: (error) => {
+      console.error('Error updating selected movie:', error)
+      toastManager.add({
+        title: 'Error',
+        description: 'Failed to update selection',
+      })
+    },
+    onSuccess: (shortlist) => {
+      queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+      toastManager.add({
+        title: 'Success',
+        description:
+          shortlist.selectedIndex !== null
+            ? 'Movie selected for raffle'
+            : 'Selection cleared',
       })
     },
   })

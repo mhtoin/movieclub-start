@@ -1,4 +1,4 @@
-import { Tabs } from '@base-ui-components/react/tabs'
+import { Tabs } from '@base-ui/react/tabs'
 import { motion, Transition } from 'framer-motion'
 import { Calendar, Dices } from 'lucide-react'
 import { useState } from 'react'

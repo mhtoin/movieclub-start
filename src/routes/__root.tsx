@@ -1,4 +1,4 @@
-import { Toast } from '@base-ui-components/react/toast'
+import { Toast } from '@base-ui/react/toast'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {

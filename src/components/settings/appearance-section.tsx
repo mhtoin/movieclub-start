@@ -4,7 +4,7 @@ import {
   setSchemeServerFn,
   type ColorScheme,
 } from '@/lib/color-scheme'
-import { Toast } from '@base-ui-components/react/toast'
+import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { Check, Moon, Palette, Sun } from 'lucide-react'

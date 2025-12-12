@@ -1,6 +1,6 @@
 import { db } from '@/db/db'
 import { movie, movieToShortlist, shortlist } from '@/db/schema'
-import { Toast } from '@base-ui-components/react/toast'
+import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq } from 'drizzle-orm'
