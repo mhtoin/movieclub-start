@@ -156,7 +156,8 @@ export const electricMovieCollection = createCollection(
     id: `movies`,
     getKey: (item: any) => item.id,
     shapeOptions: {
-      url: `http://localhost:3000/v1/shape`,
+      url:
+        import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
       params: {
         table: 'movie',
       },

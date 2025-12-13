@@ -1,0 +1,68 @@
+# docker-compose.prod.yml
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: movieclub-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-movieclub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
+      POSTGRES_DB: ${POSTGRES_DB:-movieclub}
+    command: ["postgres", "-c", "wal_level=logical"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-movieclub} -d ${POSTGRES_DB:-movieclub}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - movieclub-network
+
+  electric:
+    image: docker.io/electricsql/electric:latest
+    container_name: movieclub-electric-prod
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-movieclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movieclub}?sslmode=disable
+      ELECTRIC_INSECURE: ${ELECTRIC_INSECURE:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - movieclub-network
+    # Expose Electric on port 3000 for Nginx Proxy Manager to proxy
+    ports:
+      - "3000:3000"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: movieclub-app-prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-movieclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movieclub}?sslmode=disable
+      AUTH_SECRET: ${AUTH_SECRET:?Auth secret required}
+      VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY:?TMDB API key required}
+      VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
+      VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
+      VITE_ELECTRIC_URL: ${VITE_ELECTRIC_URL:-http://electric:3000/v1/shape}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      electric:
+        condition: service_started
+    networks:
+      - movieclub-network
+    # Expose app on port 3001 for Nginx Proxy Manager to proxy
+    ports:
+      - "3001:3001"
+
+networks:
+  movieclub-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

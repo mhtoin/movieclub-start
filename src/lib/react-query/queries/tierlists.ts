@@ -193,7 +193,8 @@ export const electricTierlistCollection = createCollection(
     id: `tierlists`,
     getKey: (item: any) => item.id,
     shapeOptions: {
-      url: `http://localhost:3000/v1/shape`,
+      url:
+        import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
       params: {
         table: 'tierlist',
       },
@@ -209,7 +210,8 @@ export const electricTierCollection = createCollection(
     id: `tiers`,
     getKey: (item: any) => item.id,
     shapeOptions: {
-      url: `http://localhost:3000/v1/shape`,
+      url:
+        import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
       params: {
         table: 'tier',
       },
@@ -225,7 +227,8 @@ export const electricMoviesOnTiersCollection = createCollection(
     id: `movies_on_tiers`,
     getKey: (item: any) => item.id,
     shapeOptions: {
-      url: `http://localhost:3000/v1/shape`,
+      url:
+        import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
       params: {
         table: 'movies_on_tiers',
       },
