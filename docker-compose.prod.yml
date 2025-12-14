@@ -25,7 +25,8 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-movieclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movieclub}?sslmode=disable
-      ELECTRIC_INSECURE: ${ELECTRIC_INSECURE:-false}
+      ELECTRIC_INSECURE: ${ELECTRIC_INSECURE:-true}
+      ELECTRIC_SECRET: ${ELECTRIC_SECRET:-}
     depends_on:
       postgres:
         condition: service_healthy

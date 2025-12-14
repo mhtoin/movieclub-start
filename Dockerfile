@@ -17,11 +17,15 @@ RUN pnpm build
 # Production runner stage
 FROM base AS runner
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3001
 
-# Copy necessary files
+# Install production dependencies only
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+
+# Copy built application
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
 
 # Expose port for the app
 EXPOSE 3001
