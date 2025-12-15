@@ -37,13 +37,13 @@ const tabVariants = cva(
     variants: {
       variant: {
         default:
-          'h-8 px-2 text-sm text-gray-600 before:inset-x-0 before:inset-y-1 before:rounded-sm before:-outline-offset-1 before:outline-blue-800 hover:text-gray-900 focus-visible:relative focus-visible:before:absolute focus-visible:before:outline focus-visible:before:outline-2 data-[selected]:text-gray-900',
+          'h-8 px-2 text-sm text-gray-600 before:inset-x-0 before:inset-y-1 before:rounded-sm before:-outline-offset-1 before:outline-blue-800 hover:text-gray-900 focus-visible:relative focus-visible:before:absolute focus-visible:before:outline focus-visible:before:outline-2 data-[active]:text-gray-900',
         pills:
-          'h-8 px-3 text-sm text-gray-600 rounded-md hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800 data-[selected]:bg-white data-[selected]:text-gray-900 data-[selected]:shadow-sm',
+          'h-8 px-3 text-sm text-gray-600 rounded-md hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800 data-[active]:bg-white data-[active]:text-gray-900 data-[active]:shadow-sm',
         underline:
-          'h-10 px-0 p-2 text-sm text-gray-600 border-b-2 border-gray hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800 data-[selected]:border-blue-600 data-[selected]:text-blue-600',
+          'h-10 px-0 p-2 text-sm text-gray-600 border-b-2 border-gray hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800 data-[active]:border-blue-600 data-[active]:text-blue-600',
         underlined:
-          'relative py-2 text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:origin-left after:scale-x-0 hover:after:scale-x-50 after:transition-transform after:duration-300 after:ease-out data-[selected]:text-foreground data-[selected]:after:scale-x-100',
+          'relative py-2 text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:origin-left after:scale-x-0 hover:after:scale-x-50 after:transition-transform after:duration-300 after:ease-out data-[active]:text-foreground data-[active]:after:scale-x-100',
       },
       size: {
         sm: 'text-xs',
