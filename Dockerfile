@@ -20,9 +20,9 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3001
 
-# Install production dependencies only
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile
+# Copy package files
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built application
 COPY --from=builder /app/dist ./dist
@@ -30,4 +30,4 @@ COPY --from=builder /app/dist ./dist
 # Expose port for the app
 EXPOSE 3001
 
-CMD ["node", "dist/server/server.js"]
+CMD ["node", "--enable-source-maps", "dist/server/server.js"]
