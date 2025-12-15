@@ -10,11 +10,11 @@ import {
   Search,
   Settings,
   Star,
+  User,
 } from 'lucide-react'
 import { useState } from 'react'
 import { ColorSchemeSelector } from '../color-scheme-selector'
 import { ThemeToggle } from '../theme-toggle'
-import { Button } from '../ui/button'
 import HeaderLink from './header-link'
 
 export default function Header() {
@@ -71,7 +71,27 @@ export default function Header() {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-sidebar-border/30 mt-16 bg-sidebar-accent/20">
+        <Link
+          to="/settings"
+          onClick={() => setIsOpen(false)}
+          className="group mx-4 mt-20 mb-4 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
+          viewTransition
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all">
+              <User size={20} className="text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                Your Profile
+              </p>
+              <p className="text-xs text-sidebar-foreground/60">
+                View and edit
+              </p>
+            </div>
+          </div>
+        </Link>
+        <div className="flex items-center justify-between px-6 py-3 border-b border-sidebar-border/30 bg-sidebar-accent/20">
           <div>
             <h2 className="text-xl font-bold tracking-tight">Navigation</h2>
             <p className="text-xs text-sidebar-foreground/60 mt-0.5">
@@ -112,25 +132,25 @@ export default function Header() {
           </div>
         </nav>
 
-        <div className="px-4 pb-4 border-t border-sidebar-border/30 bg-sidebar-accent/20 backdrop-blur-sm">
-          <div className="pt-4 space-y-3">
-            <div className="flex items-center justify-between gap-2 p-3 rounded-lg bg-sidebar-accent/30 border border-sidebar-border/20 hover:bg-sidebar-accent/40 transition-colors">
-              <span className="text-sm font-medium text-sidebar-foreground/90">
-                Theme
+        <div className="px-4 pb-4 border-t border-sidebar-border/30">
+          <div className="pt-4 space-y-2">
+            <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+              <span className="text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider">
+                Appearance
               </span>
               <div className="flex items-center gap-2">
                 <ColorSchemeSelector />
                 <ThemeToggle />
               </div>
             </div>
-            <Button
+            <button
               onClick={handleLogout}
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2 bg-sidebar-accent/30 border-sidebar-border/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all"
+              className="group relative flex items-center gap-3 px-4 py-3 w-full transition-all duration-200 text-sidebar-foreground/80 hover:text-destructive"
             >
-              <LogOut size={18} />
+              <LogOut size={20} />
               <span className="font-medium">Logout</span>
-            </Button>
+              <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-destructive to-transparent origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out" />
+            </button>
           </div>
           <p className="text-xs text-sidebar-foreground/50 text-center mt-4 pt-3 border-t border-sidebar-border/20">
             leffaseura © 2025
