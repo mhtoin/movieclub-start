@@ -24,10 +24,12 @@ ENV PORT=3001
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy built application
+# Copy built application (TanStack Start outputs to .output for production)
+COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/dist ./dist
 
 # Expose port for the app
 EXPOSE 3001
 
-CMD ["node", "--enable-source-maps", "dist/server/server.js"]
+# Use node to run the Vinxi/Nitro server
+CMD ["node", ".output/server/index.mjs"]
