@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite dev --port 3001",
     "build": "vite build",
+    "start": "node .output/server/index.mjs",
     "serve": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
@@ -69,6 +70,7 @@
     "csv-stringify": "^6.6.0",
     "drizzle-kit": "^0.31.5",
     "jsdom": "^27.0.0",
+    "nitro": "3.0.1-alpha.1",
     "prettier": "^3.5.3",
     "tsx": "^4.20.6",
     "typescript": "^5.7.2",
