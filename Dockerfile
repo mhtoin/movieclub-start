@@ -20,11 +20,17 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3001
 
-# Copy package files
+# Copy package files and install all dependencies (including drizzle-kit for migrations)
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Copy built application (Nitro output)
 COPY --from=builder /app/.output ./.output
+
+# Copy drizzle config and migrations for db operations
+COPY --from=builder /app/drizzle.config.ts ./
+COPY --from=builder /app/drizzle ./drizzle
 
 # Expose port for the app
 EXPOSE 3001
