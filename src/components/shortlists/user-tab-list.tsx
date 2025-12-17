@@ -42,79 +42,84 @@ export default function UserTabList({
 
   return (
     <TabsRoot variant="underlined" defaultValue="all" className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <TabsList
-          variant="underlined"
-          className="flex-1 border-b border-border"
-        >
-          <Tab
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+        <div className="relative -mx-4 sm:mx-0 sm:flex-1">
+          <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none sm:hidden" />
+          <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none sm:hidden" />
+
+          <TabsList
             variant="underlined"
-            value="all"
-            className="flex items-center gap-2"
+            className="flex-1 border-b border-border overflow-x-auto no-scrollbar px-4 sm:px-0 snap-x snap-mandatory touch-pan-x"
           >
-            <Users className="h-4 w-4" />
-            <span>All</span>
-            <span className="text-xs text-muted-foreground ml-1">
-              ({shortlists.reduce((acc, s) => acc + s.movies.length, 0)})
-            </span>
-          </Tab>
-          {shortlists.map((shortlist) => (
             <Tab
-              key={shortlist.user.id}
               variant="underlined"
-              value={shortlist.user.id}
-              className="flex items-center gap-2 relative"
+              value="all"
+              className="flex items-center gap-2 min-w-fit px-3 py-3 sm:py-2 snap-start touch-manipulation"
             >
-              {shortlist.user.image && (
-                <div className="relative w-6 h-6">
-                  <img
-                    src={shortlist.user.image}
-                    alt={shortlist.user.name.charAt(0)}
-                    className={`absolute inset-0.5 w-5 h-5 border border-border rounded-full transition-opacity duration-300 ${
-                      !shortlist.participating ? 'opacity-40 grayscale' : ''
-                    }`}
-                  />
-                  {!shortlist.participating && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <XCircle className="w-4 h-4 text-destructive drop-shadow-md" />
-                    </div>
-                  )}
-                  {shortlist.isReady && shortlist.participating && (
-                    <div className="absolute -top-1 -right-1 bg-background rounded-full">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-success drop-shadow-sm" />
-                    </div>
-                  )}
-                </div>
-              )}
-              <span
-                className={`text-sm font-medium transition-colors ${
-                  !shortlist.participating
-                    ? 'text-muted-foreground/50 line-through'
-                    : shortlist.isReady
-                      ? 'text-success'
-                      : ''
-                }`}
-              >
-                {shortlist.user.name}
-              </span>
-              <span
-                className={`text-xs ml-1 transition-colors ${
-                  !shortlist.participating
-                    ? 'text-muted-foreground/40'
-                    : shortlist.isReady
-                      ? 'text-success-foreground/70'
-                      : 'text-muted-foreground'
-                }`}
-              >
-                ({shortlist.movies.length})
+              <Users className="h-5 w-5 sm:h-4 sm:w-4" />
+              <span className="text-base sm:text-sm">All</span>
+              <span className="text-sm sm:text-xs text-muted-foreground ml-1 bg-muted/50 px-1.5 py-0.5 rounded-full">
+                {shortlists.reduce((acc, s) => acc + s.movies.length, 0)}
               </span>
             </Tab>
-          ))}
-        </TabsList>
+            {shortlists.map((shortlist) => (
+              <Tab
+                key={shortlist.user.id}
+                variant="underlined"
+                value={shortlist.user.id}
+                className="flex items-center gap-2 relative min-w-fit px-3 py-3 sm:py-2 snap-start touch-manipulation"
+              >
+                {shortlist.user.image && (
+                  <div className="relative w-8 h-8 sm:w-6 sm:h-6 flex-shrink-0">
+                    <img
+                      src={shortlist.user.image}
+                      alt={shortlist.user.name.charAt(0)}
+                      className={`absolute inset-0.5 w-7 h-7 sm:w-5 sm:h-5 border border-border rounded-full transition-opacity duration-300 ${
+                        !shortlist.participating ? 'opacity-40 grayscale' : ''
+                      }`}
+                    />
+                    {!shortlist.participating && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <XCircle className="w-5 h-5 sm:w-4 sm:h-4 text-destructive drop-shadow-md" />
+                      </div>
+                    )}
+                    {shortlist.isReady && shortlist.participating && (
+                      <div className="absolute -top-1 -right-1 bg-background rounded-full">
+                        <CheckCircle2 className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-success drop-shadow-sm" />
+                      </div>
+                    )}
+                  </div>
+                )}
+                <span
+                  className={`text-base sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                    !shortlist.participating
+                      ? 'text-muted-foreground/50 line-through'
+                      : shortlist.isReady
+                        ? 'text-success'
+                        : ''
+                  }`}
+                >
+                  {shortlist.user.name}
+                </span>
+                <span
+                  className={`text-sm sm:text-xs ml-1 transition-colors bg-muted/50 px-1.5 py-0.5 rounded-full ${
+                    !shortlist.participating
+                      ? 'text-muted-foreground/40'
+                      : shortlist.isReady
+                        ? 'text-success'
+                        : 'text-muted-foreground'
+                  }`}
+                >
+                  {shortlist.movies.length}
+                </span>
+              </Tab>
+            ))}
+          </TabsList>
+        </div>
         <Button
           onClick={onRaffleModeToggle}
           variant={raffleState !== 'not-started' ? 'primary' : 'secondary'}
-          className={`ml-6 rounded-full ${
+          className={`hidden sm:flex ml-6 rounded-full ${
             raffleState !== 'not-started' ? 'shadow-lg shadow-primary/30' : ''
           }`}
           aria-label="Toggle Raffle Mode"
@@ -125,9 +130,22 @@ export default function UserTabList({
           </span>
         </Button>
       </div>
+      <Button
+        onClick={onRaffleModeToggle}
+        variant={raffleState !== 'not-started' ? 'primary' : 'secondary'}
+        size="lg"
+        className={`sm:hidden fixed bottom-20 right-4 z-40 rounded-full w-14 h-14 p-0 shadow-xl ${
+          raffleState !== 'not-started'
+            ? 'shadow-primary/40 animate-pulse'
+            : 'shadow-black/20'
+        }`}
+        aria-label="Toggle Raffle Mode"
+      >
+        <Dices className="h-6 w-6" />
+      </Button>
 
       <TabsPanel variant="underlined" value="all">
-        <div className="overflow-y-auto max-h-[calc(100vh-14rem)] no-scrollbar p-5 fade-mask fade-y-5 dark:fade-y-5 fade-intensity-100">
+        <div className="max-h-[calc(100vh-12rem)] sm:max-h-[100dvh] no-scrollbar px-1 sm:p-5 pb-24 sm:pb-5 fade-mask fade-y-5 dark:fade-y-5 fade-intensity-100">
           <AnimatePresence mode="wait">
             {raffleState === 'not-started' ? (
               <motion.div
@@ -195,7 +213,7 @@ export default function UserTabList({
           variant="underlined"
           value={shortlist.user.id}
         >
-          <div className="overflow-y-auto max-h-[calc(100vh-16rem)] pr-2">
+          <div className="overflow-y-auto max-h-[calc(100vh-12rem)] sm:max-h-[calc(100vh-16rem)] px-1 sm:pr-2 pb-24 sm:pb-5">
             {shortlist.movies.length > 0 ? (
               <MovieGrid columns={3}>
                 {shortlist.movies.map((movie, movieIndex) => (

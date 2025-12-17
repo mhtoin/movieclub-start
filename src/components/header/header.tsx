@@ -28,7 +28,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="px-10 py-4 justify-between flex items-center bg-transparent text-foreground fixed top-0 left-0 w-full z-50">
+      <header className="px-4 md:px-10 py-4 justify-between flex items-center bg-transparent text-foreground fixed top-0 left-0 w-full z-50">
         <div className="flex items-center">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -67,7 +67,7 @@ export default function Header() {
       />
       <aside
         onMouseLeave={() => setIsOpen(false)}
-        className={`fixed top-0 left-0 h-full w-80 bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95 text-sidebar-foreground shadow-2xl border-r border-sidebar-border/50 z-40 flex flex-col transform transition-transform duration-300 ease-out will-change-transform ${
+        className={`fixed top-0 left-0 h-full w-[85vw] max-w-80 bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95 text-sidebar-foreground shadow-2xl border-r border-sidebar-border/50 z-40 flex flex-col transform transition-transform duration-300 ease-out will-change-transform ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

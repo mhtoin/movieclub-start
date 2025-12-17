@@ -4,14 +4,7 @@ import { ProviderFilter } from '@/components/discover/provider-filter'
 import { RatingFilter } from '@/components/discover/rating-filter'
 import { SortByFilter } from '@/components/discover/sort-by-filter'
 import { Button } from '@/components/ui/button'
-import {
-  DialogBackdrop,
-  DialogClose,
-  DialogPopup,
-  DialogPortal,
-  DialogRoot,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog'
 import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl, Movie } from '@/lib/tmdb-api'
@@ -90,8 +83,8 @@ export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
   }
 
   return (
-    <DialogRoot open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger>
+    <ResponsiveDialog open={isOpen} onOpenChange={setIsOpen}>
+      <ResponsiveDialog.Trigger>
         <Button
           variant="ghost"
           className="w-full p-4 h-auto rounded-2xl border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 transition-all"
@@ -108,135 +101,134 @@ export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
             </div>
           </div>
         </Button>
-      </DialogTrigger>
-      <DialogPortal>
-        <DialogBackdrop opacity="medium" />
-        <DialogPopup size="xl" className="h-[85vh] flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
-                <Plus className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">
-                  Add Movie
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Search and add movies to your shortlist
-                </p>
-              </div>
+      </ResponsiveDialog.Trigger>
+      <ResponsiveDialog.Content
+        size="xl"
+        opacity="medium"
+        className="h-[85vh] flex flex-col"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+              <Plus className="w-5 h-5 text-primary-foreground" />
             </div>
-            <DialogClose>
-              <button className="w-8 h-8 rounded-full hover:bg-accent flex items-center justify-center transition-colors group">
-                <X className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-              </button>
-            </DialogClose>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Add Movie</h2>
+              <p className="text-sm text-muted-foreground">
+                Search and add movies to your shortlist
+              </p>
+            </div>
+          </div>
+          <ResponsiveDialog.Close>
+            <button className="w-8 h-8 rounded-full hover:bg-accent flex items-center justify-center transition-colors group">
+              <X className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            </button>
+          </ResponsiveDialog.Close>
+        </div>
+
+        <div className="space-y-4 mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search for movies..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-12 pl-10 pr-4 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            />
           </div>
 
-          <div className="space-y-4 mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search for movies..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-12 pl-10 pr-4 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              />
-            </div>
+          {!debouncedQuery && (
+            <div>
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setShowFilters(!showFilters)
+                }}
+                type="button"
+                className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                Filters
+                {showFilters ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
 
-            {!debouncedQuery && (
-              <div>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    setShowFilters(!showFilters)
-                  }}
-                  type="button"
-                  className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-                >
-                  <SlidersHorizontal className="w-4 h-4" />
-                  Filters
-                  {showFilters ? (
-                    <ChevronUp className="w-4 h-4" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4" />
-                  )}
-                </button>
-
-                <div
-                  className={cn(
-                    'rounded-xl bg-muted/30 border transition-all duration-300 origin-top',
-                    showFilters
-                      ? 'mt-4 p-4 border-border opacity-100'
-                      : 'mt-0 p-0 border-transparent opacity-0',
-                  )}
-                  style={{
-                    display: 'grid',
-                    gridTemplateRows: showFilters ? '1fr' : '0fr',
-                  }}
-                >
-                  <div style={{ overflow: 'hidden' }}>
-                    <div className="space-y-4 px-4">
-                      <SortByFilter value={sortBy} onValueChange={setSortBy} />
-                      <GenreFilter
-                        selectedGenres={selectedGenres}
-                        onGenresChange={setSelectedGenres}
-                      />
-                      <ProviderFilter
-                        selectedProviders={selectedProviders}
-                        onProvidersChange={setSelectedProviders}
-                      />
-                      <RatingFilter
-                        voteRange={voteRange}
-                        onVoteRangeChange={setVoteRange}
-                      />
-                    </div>
+              <div
+                className={cn(
+                  'rounded-xl bg-muted/30 border transition-all duration-300 origin-top',
+                  showFilters
+                    ? 'mt-4 p-4 border-border opacity-100'
+                    : 'mt-0 p-0 border-transparent opacity-0',
+                )}
+                style={{
+                  display: 'grid',
+                  gridTemplateRows: showFilters ? '1fr' : '0fr',
+                }}
+              >
+                <div style={{ overflow: 'hidden' }}>
+                  <div className="space-y-4 px-4">
+                    <SortByFilter value={sortBy} onValueChange={setSortBy} />
+                    <GenreFilter
+                      selectedGenres={selectedGenres}
+                      onGenresChange={setSelectedGenres}
+                    />
+                    <ProviderFilter
+                      selectedProviders={selectedProviders}
+                      onProvidersChange={setSelectedProviders}
+                    />
+                    <RatingFilter
+                      voteRange={voteRange}
+                      onVoteRangeChange={setVoteRange}
+                    />
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto -mx-2 px-2 min-h-0">
+          <Suspense
+            fallback={
+              <div className="flex justify-center items-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }
+          >
+            {debouncedQuery ? (
+              <SearchResults
+                query={debouncedQuery}
+                onAddMovie={handleAddMovie}
+                onMovieInfo={handleMovieInfo}
+                isPending={isPending}
+              />
+            ) : (
+              <PopularMovies
+                onAddMovie={handleAddMovie}
+                onMovieInfo={handleMovieInfo}
+                isPending={isPending}
+                selectedGenres={selectedGenres}
+                selectedProviders={selectedProviders}
+                voteRange={voteRange}
+                sortBy={sortBy}
+              />
             )}
-          </div>
+          </Suspense>
+        </div>
 
-          <div className="flex-1 overflow-y-auto -mx-2 px-2 min-h-0">
-            <Suspense
-              fallback={
-                <div className="flex justify-center items-center min-h-[400px]">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              }
-            >
-              {debouncedQuery ? (
-                <SearchResults
-                  query={debouncedQuery}
-                  onAddMovie={handleAddMovie}
-                  onMovieInfo={handleMovieInfo}
-                  isPending={isPending}
-                />
-              ) : (
-                <PopularMovies
-                  onAddMovie={handleAddMovie}
-                  onMovieInfo={handleMovieInfo}
-                  isPending={isPending}
-                  selectedGenres={selectedGenres}
-                  selectedProviders={selectedProviders}
-                  voteRange={voteRange}
-                  sortBy={sortBy}
-                />
-              )}
-            </Suspense>
-          </div>
-
-          <MovieDetailsDialog
-            movie={selectedMovie}
-            open={detailsDialogOpen}
-            onOpenChange={handleDetailsDialogClose}
-            triggerRect={triggerRect}
-          />
-        </DialogPopup>
-      </DialogPortal>
-    </DialogRoot>
+        <MovieDetailsDialog
+          movie={selectedMovie}
+          open={detailsDialogOpen}
+          onOpenChange={handleDetailsDialogClose}
+          triggerRect={triggerRect}
+        />
+      </ResponsiveDialog.Content>
+    </ResponsiveDialog>
   )
 }
 

@@ -101,8 +101,11 @@ function ShortlistsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-2 relative">
-      <motion.div layout className={`flex flex-col h-full w-full `}>
+    <div className="container mx-auto px-2 sm:px-4 py-2 relative overflow-hidden">
+      <motion.div
+        layout
+        className={`flex flex-col h-full w-full overflow-hidden`}
+      >
         <UserTabList
           onMovieClick={handleMovieClick}
           raffleState={raffleState}
@@ -124,7 +127,7 @@ function ShortlistsPage() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+            className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[95vw] sm:max-w-none"
           >
             <RaffleControlPanel
               onStartRaffle={handleRaffleStart}

@@ -1,8 +1,19 @@
+import { Button } from '@/components/ui/button'
+import {
+  DrawerClose,
+  DrawerContent,
+  DrawerHandle,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerRoot,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
 import Input from '@/components/ui/input'
 import Filters from '@/components/watched/filters'
 import { WatchedItem } from '@/components/watched/watched-item'
 import WatchedSkeleton from '@/components/watched/watched-skeleton'
-import { useDebouncedValue } from '@/lib/hooks'
+import { useDebouncedValue, useMediaQuery } from '@/lib/hooks'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
@@ -12,7 +23,7 @@ import {
 } from '@tanstack/react-router'
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
 import { format } from 'date-fns'
-import { Calendar, Search } from 'lucide-react'
+import { Calendar, Filter, Search, X } from 'lucide-react'
 import { Suspense, useEffect, useState } from 'react'
 import { z } from 'zod'
 
@@ -56,8 +67,68 @@ function WatchedMoviesList({
   const { data } = useSuspenseQuery(
     movieQueries.watched(searchQuery, user, genre),
   )
+  const isMobile = !useMediaQuery('(min-width: 768px)')
 
   const entries = Object.entries(data || {})
+
+  if (isMobile) {
+    return (
+      <div className="relative space-y-8 pl-8">
+        <div className="absolute left-3 top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/20 to-transparent" />
+        {entries.map(([yearMonth, movies]) => {
+          return (
+            <div id={`${yearMonth}`} key={yearMonth} className="space-y-3">
+              <div className="sticky top-0 z-10 -ml-8 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-shrink-0 w-6 flex justify-center">
+                    <div className="w-3 h-3 rounded-full bg-gradient-to-br from-primary to-primary/60 ring-2 ring-background shadow-sm" />
+                  </div>
+                  <div className="flex-1 bg-gradient-to-r from-background via-background to-background/80 backdrop-blur-md rounded-lg px-4 py-2.5 shadow-sm border border-border/50">
+                    <h2 className="text-base font-bold text-foreground">
+                      {new Date(
+                        parseInt(yearMonth.split('-')[0], 10),
+                        parseInt(yearMonth.split('-')[1], 10) - 1,
+                      ).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                      })}
+                    </h2>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {movies?.map((movieData) => {
+                  const watchDate = movieData.movie?.watchDate
+                    ? new Date(movieData?.movie?.watchDate)
+                    : null
+                  return (
+                    <div key={movieData?.movie?.id} className="relative">
+                      <div className="absolute -left-[1.9rem] top-6">
+                        <div className="flex flex-col items-center gap-0.5">
+                          <div className="w-2 h-2 rounded-full bg-primary/40 ring-1 ring-background" />
+                          {watchDate && (
+                            <span className="text-[9px] font-semibold text-primary/70 whitespace-nowrap">
+                              {format(watchDate, 'd')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <WatchedItem
+                        movie={movieData.movie}
+                        user={movieData.user}
+                        compact
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
 
   return (
     <div className="relative">
@@ -131,6 +202,8 @@ function RouteComponent() {
   const [debouncedSearch] = useDebouncedValue(search, 300)
   const navigate = Route.useNavigate()
   const { user, genre } = Route.useSearch()
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const isMobile = !useMediaQuery('(min-width: 768px)')
 
   useEffect(() => {
     navigate({
@@ -152,30 +225,134 @@ function RouteComponent() {
     setSearch(e.target.value)
   }
 
+  const activeFiltersCount = [user, genre].filter(Boolean).length
+
   return (
-    <div className="h-full container mx-auto px-4 py-8 flex flex-col overflow-hidden">
-      <div className="flex-shrink-0 relative mb-6">
-        <h1 className="text-3xl font-bold mb-2">Watch History</h1>
-        <p className="text-muted-foreground mb-6">
-          A timeline of all the movies watched
+    <div className="h-full container mx-auto px-4 md:px-4 py-4 md:py-8 flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 relative mb-4 md:mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+          Watch History
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">
+          {isMobile ? 'Movies watched' : 'A timeline of all the movies watched'}
         </p>
-        <div className="flex items-center gap-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search movies..."
-              value={search}
-              onChange={handleSearchChange}
-              className="pl-10"
-            />
+        {isMobile ? (
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search movies..."
+                value={search}
+                onChange={handleSearchChange}
+                className="pl-10 h-11"
+              />
+            </div>
+            <DrawerRoot
+              direction="bottom"
+              open={filtersOpen}
+              onOpenChange={setFiltersOpen}
+              modal
+            >
+              <DrawerTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full h-11 justify-between group"
+                >
+                  <span className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 group-hover:text-primary transition-colors" />
+                    <span>Filters</span>
+                    {activeFiltersCount > 0 && (
+                      <span className="ml-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold animate-in fade-in-0 zoom-in-95">
+                        {activeFiltersCount}
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {activeFiltersCount > 0 ? 'Active' : 'Tap to filter'}
+                  </span>
+                </Button>
+              </DrawerTrigger>
+              <DrawerPortal>
+                <DrawerOverlay opacity="heavy" />
+                <DrawerContent
+                  direction="bottom"
+                  size="xl"
+                  className="rounded-t-2xl"
+                >
+                  <div className="flex justify-center pt-4 pb-2">
+                    <DrawerHandle
+                      direction="bottom"
+                      className="bg-muted-foreground/30"
+                    />
+                  </div>
+                  <div className="px-6 pb-6 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <DrawerTitle className="text-xl font-bold">
+                          Filters
+                        </DrawerTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Refine your watch history
+                        </p>
+                      </div>
+                      <DrawerClose asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </DrawerClose>
+                    </div>
+
+                    <Filters
+                      variant="mobile"
+                      onFilterApply={() => setFiltersOpen(false)}
+                    />
+
+                    {activeFiltersCount > 0 && (
+                      <div className="mt-6 pt-4 border-t border-border">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            navigate({
+                              search: { search: search || undefined },
+                            })
+                            setFiltersOpen(false)
+                          }}
+                        >
+                          Clear all filters
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </DrawerContent>
+              </DrawerPortal>
+            </DrawerRoot>
           </div>
-          <Filters />
-        </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search movies..."
+                value={search}
+                onChange={handleSearchChange}
+                className="pl-10"
+              />
+            </div>
+            <Filters />
+          </div>
+        )}
 
         {debouncedSearch.trim() && (
-          <div className="border-l-4 border-primary pl-4 my-6 ml-4">
-            <h2 className="text-lg font-semibold">Search Results</h2>
-            <p className="text-sm text-muted-foreground">
+          <div className="border-l-4 border-primary pl-4 my-4 md:my-6 ml-0 md:ml-4">
+            <h2 className="text-base md:text-lg font-semibold">
+              Search Results
+            </h2>
+            <p className="text-xs md:text-sm text-muted-foreground">
               Showing results for &ldquo;{debouncedSearch}&rdquo;
             </p>
           </div>
@@ -183,7 +360,7 @@ function RouteComponent() {
       </div>
 
       <div className="relative flex-1 overflow-hidden isolate">
-        <div className="h-full overflow-y-auto -mx-4 px-10 pt-6 fade-mask fade-y-16 dark:fade-y-84 fade-intensity-100">
+        <div className="h-full overflow-y-auto -mx-4 px-4 md:px-10 pt-2 md:pt-6 fade-mask fade-y-16 dark:fade-y-84 fade-intensity-100">
           <Suspense fallback={<WatchedSkeleton />}>
             <WatchedMoviesList
               searchQuery={debouncedSearch}

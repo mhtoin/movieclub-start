@@ -1,7 +1,17 @@
+import {
+  DrawerClose,
+  DrawerContent,
+  DrawerHandle,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerRoot,
+} from '@/components/ui/drawer'
+import { useMediaQuery } from '@/lib/hooks'
 import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl, Movie } from '@/lib/tmdb-api'
 import { useQuery } from '@tanstack/react-query'
+import { X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatedPoster } from './animated-poster'
@@ -23,6 +33,7 @@ export function MovieDetailsDialog({
   onOpenChange,
   triggerRect,
 }: MovieDetailsDialogProps) {
+  const isDesktop = useMediaQuery('(min-width: 768px)')
   const { mutate: addToShortlist, isPending } = useAddToShortlistMutation()
   const [currentView, setCurrentView] = useState<'overview' | 'details'>(
     'overview',
@@ -38,7 +49,6 @@ export function MovieDetailsDialog({
     enabled: open && !!movie,
   })
 
-  // Handle dialog animations and state
   const {
     mounted,
     isClosing,
@@ -72,7 +82,98 @@ export function MovieDetailsDialog({
     }, 200)
   }
 
-  if (!movie || !open) return null
+  const handleDrawerClose = () => {
+    onOpenChange(false)
+    setCurrentView('overview')
+    setIsTransitioning(false)
+  }
+
+  if (!movie) return null
+
+  if (!isDesktop) {
+    return (
+      <DrawerRoot open={open} onOpenChange={onOpenChange} direction="bottom">
+        <DrawerPortal>
+          <DrawerOverlay opacity="heavy" />
+          <DrawerContent
+            direction="bottom"
+            className="max-h-[90vh] flex flex-col"
+          >
+            <DrawerHandle direction="bottom" />
+
+            <DrawerClose asChild>
+              <button
+                className="absolute right-3 top-3 z-10 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 transition-colors"
+                onClick={handleDrawerClose}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </DrawerClose>
+            <div className="flex gap-4 p-4 pb-2">
+              {posterUrl && (
+                <div className="flex-shrink-0 w-24">
+                  <img
+                    src={posterUrl}
+                    alt={movie.title}
+                    className="w-full rounded-md shadow-lg aspect-[2/3] object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1 min-w-0 pt-1">
+                <h2 className="text-xl font-bold leading-tight line-clamp-2">
+                  {movie.title}
+                </h2>
+                {movie.original_title !== movie.title && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                    {movie.original_title}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
+              <div
+                className="space-y-4"
+                style={{
+                  opacity: isTransitioning ? 0 : 1,
+                  transform: isTransitioning
+                    ? 'translateX(20px)'
+                    : 'translateX(0)',
+                  transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
+                }}
+              >
+                {currentView === 'overview' ? (
+                  <MovieOverviewView
+                    title={movie.title}
+                    originalTitle={movie.original_title}
+                    releaseDate={movie.release_date}
+                    voteAverage={movie.vote_average}
+                    voteCount={movie.vote_count}
+                    overview={movie.overview}
+                    movieDetails={movieDetails}
+                    onAddToShortlist={() => addToShortlist(movie.id)}
+                    onShowMoreInfo={() => handleViewTransition('details')}
+                    isPending={isPending}
+                    compact
+                  />
+                ) : (
+                  <MovieDetailsView
+                    title={movie.title}
+                    movieDetails={movieDetails}
+                    onBack={() => handleViewTransition('overview')}
+                    onAddToShortlist={() => addToShortlist(movie.id)}
+                    isPending={isPending}
+                    compact
+                  />
+                )}
+              </div>
+            </div>
+          </DrawerContent>
+        </DrawerPortal>
+      </DrawerRoot>
+    )
+  }
+
+  if (!open) return null
 
   const getContainerStyle = (): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {

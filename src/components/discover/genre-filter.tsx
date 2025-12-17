@@ -9,15 +9,18 @@ import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import MobileFilter from './mobile-filter'
 
 interface GenreFilterProps {
   selectedGenres: string[]
   onGenresChange: (genres: string[]) => void
+  variant?: 'default' | 'mobile'
 }
 
 export function GenreFilter({
   selectedGenres,
   onGenresChange,
+  variant = 'default',
 }: GenreFilterProps) {
   const { data: genres = [] } = useSuspenseQuery(tmdbQueries.genres())
   const [searchValue, setSearchValue] = useState('')
@@ -41,6 +44,36 @@ export function GenreFilter({
     .filter((g) => selectedGenres.includes(g.value))
     .map((g) => g.label)
     .join(', ')
+
+  if (variant === 'mobile') {
+    return (
+      <MobileFilter
+        label="Genres"
+        value={selectedGenres}
+        options={genres.map((genre) => ({
+          value: genre.value,
+          label: genre.label,
+        }))}
+        icon={
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 10h16M4 14h16M4 18h16"
+            />
+          </svg>
+        }
+        onChange={(value) => handleToggle(value)}
+      />
+    )
+  }
 
   return (
     <div>

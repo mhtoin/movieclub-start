@@ -48,7 +48,7 @@ export function RaffleControlPanel({
   }
 
   return (
-    <div className="flex items-center gap-3 bg-card/95 backdrop-blur-md border border-border rounded-full px-4 py-3 shadow-2xl">
+    <div className="flex items-center gap-2 sm:gap-3 bg-card/95 backdrop-blur-md border border-border rounded-full px-3 sm:px-4 py-2.5 sm:py-3 shadow-2xl overflow-x-auto">
       <div className="relative">
         <Button
           onClick={() => setShowDatePicker(!showDatePicker)}

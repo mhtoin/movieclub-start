@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react'
 
 export function useDebouncedValue<T>(value: T, delay: number): [T] {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
@@ -46,4 +46,32 @@ export function useElementInView(
   }, [elementRef, options])
 
   return { isInView, intersectionRatio }
+}
+
+export function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(() => {
+    // SSR-safe: default to desktop (false for mobile queries)
+    if (typeof window === 'undefined') {
+      return query.includes('min-width')
+    }
+    return window.matchMedia(query).matches
+  })
+
+  useEffect(() => {
+    const media = window.matchMedia(query)
+
+    // Update if value changed since initial render
+    if (media.matches !== matches) {
+      setMatches(media.matches)
+    }
+
+    const listener = (e: MediaQueryListEvent) => {
+      setMatches(e.matches)
+    }
+
+    media.addEventListener('change', listener)
+    return () => media.removeEventListener('change', listener)
+  }, [query, matches])
+
+  return matches
 }

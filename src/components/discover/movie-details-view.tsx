@@ -9,6 +9,7 @@ interface MovieDetailsViewProps {
   onBack: () => void
   onAddToShortlist: () => void
   isPending: boolean
+  compact?: boolean
 }
 
 export function MovieDetailsView({
@@ -17,6 +18,7 @@ export function MovieDetailsView({
   onBack,
   onAddToShortlist,
   isPending,
+  compact = false,
 }: MovieDetailsViewProps) {
   return (
     <div className="flex flex-col h-full">
@@ -27,10 +29,12 @@ export function MovieDetailsView({
           onClick={onBack}
           className="rounded-full"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className={compact ? 'h-4 w-4' : 'h-5 w-5'} />
         </Button>
         <div>
-          <h2 className="text-2xl font-bold">{title}</h2>
+          <h2 className={compact ? 'text-lg font-bold' : 'text-2xl font-bold'}>
+            {title}
+          </h2>
           <p className="text-sm text-muted-foreground">Cast & Crew</p>
         </div>
       </div>
@@ -39,36 +43,54 @@ export function MovieDetailsView({
         {movieDetails?.credits?.cast &&
           movieDetails.credits.cast.length > 0 && (
             <div>
-              <h3 className="mb-3 font-semibold text-lg">Cast</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {movieDetails.credits.cast.slice(0, 10).map((person) => (
-                  <div
-                    key={person.credit_id}
-                    className="flex gap-3 rounded-lg bg-secondary/30 p-3"
-                  >
-                    {person.profile_path ? (
-                      <img
-                        src={getImageUrl(person.profile_path, 'w185') || ''}
-                        alt={person.name}
-                        className="h-16 w-16 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="h-16 w-16 rounded-lg bg-secondary/50 flex items-center justify-center">
-                        <span className="text-2xl text-muted-foreground">
-                          {person.name.charAt(0)}
-                        </span>
+              <h3
+                className={`mb-3 font-semibold ${compact ? 'text-base' : 'text-lg'}`}
+              >
+                Cast
+              </h3>
+              <div
+                className={`grid gap-3 ${compact ? 'grid-cols-1 gap-2' : 'grid-cols-1 sm:grid-cols-2'}`}
+              >
+                {movieDetails.credits.cast
+                  .slice(0, compact ? 6 : 10)
+                  .map((person) => (
+                    <div
+                      key={person.credit_id}
+                      className={`flex gap-3 rounded-lg bg-secondary/30 ${compact ? 'p-2' : 'p-3'}`}
+                    >
+                      {person.profile_path ? (
+                        <img
+                          src={getImageUrl(person.profile_path, 'w185') || ''}
+                          alt={person.name}
+                          className={
+                            compact
+                              ? 'h-12 w-12 rounded-md object-cover'
+                              : 'h-16 w-16 rounded-lg object-cover'
+                          }
+                        />
+                      ) : (
+                        <div
+                          className={`rounded-lg bg-secondary/50 flex items-center justify-center ${compact ? 'h-12 w-12 rounded-md' : 'h-16 w-16'}`}
+                        >
+                          <span
+                            className={`text-muted-foreground ${compact ? 'text-lg' : 'text-2xl'}`}
+                          >
+                            {person.name.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`font-medium truncate ${compact ? 'text-xs' : 'text-sm'}`}
+                        >
+                          {person.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {person.character}
+                        </p>
                       </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {person.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {person.character}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           )}
@@ -76,8 +98,14 @@ export function MovieDetailsView({
         {movieDetails?.credits?.crew &&
           movieDetails.credits.crew.length > 0 && (
             <div>
-              <h3 className="mb-3 font-semibold text-lg">Key Crew</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <h3
+                className={`mb-3 font-semibold ${compact ? 'text-base' : 'text-lg'}`}
+              >
+                Key Crew
+              </h3>
+              <div
+                className={`grid gap-3 ${compact ? 'grid-cols-1 gap-2' : 'grid-cols-1 sm:grid-cols-2'}`}
+              >
                 {movieDetails.credits.crew
                   .filter((person) =>
                     [
@@ -88,27 +116,37 @@ export function MovieDetailsView({
                       'Executive Producer',
                     ].includes(person.job),
                   )
-                  .slice(0, 8)
+                  .slice(0, compact ? 4 : 8)
                   .map((person) => (
                     <div
                       key={person.credit_id}
-                      className="flex gap-3 rounded-lg bg-secondary/30 p-3"
+                      className={`flex gap-3 rounded-lg bg-secondary/30 ${compact ? 'p-2' : 'p-3'}`}
                     >
                       {person.profile_path ? (
                         <img
                           src={getImageUrl(person.profile_path, 'w185') || ''}
                           alt={person.name}
-                          className="h-16 w-16 rounded-lg object-cover"
+                          className={
+                            compact
+                              ? 'h-12 w-12 rounded-md object-cover'
+                              : 'h-16 w-16 rounded-lg object-cover'
+                          }
                         />
                       ) : (
-                        <div className="h-16 w-16 rounded-lg bg-secondary/50 flex items-center justify-center">
-                          <span className="text-2xl text-muted-foreground">
+                        <div
+                          className={`rounded-lg bg-secondary/50 flex items-center justify-center ${compact ? 'h-12 w-12 rounded-md' : 'h-16 w-16'}`}
+                        >
+                          <span
+                            className={`text-muted-foreground ${compact ? 'text-lg' : 'text-2xl'}`}
+                          >
                             {person.name.charAt(0)}
                           </span>
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">
+                        <p
+                          className={`font-medium truncate ${compact ? 'text-xs' : 'text-sm'}`}
+                        >
                           {person.name}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">

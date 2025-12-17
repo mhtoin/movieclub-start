@@ -1,10 +1,21 @@
 import DiscoverMoviesList from '@/components/discover/discover-movie-list'
 import { DiscoverFilters } from '@/components/discover/filters'
+import { Button } from '@/components/ui/button'
+import {
+  DrawerClose,
+  DrawerContent,
+  DrawerHandle,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerRoot,
+  DrawerTitle,
+} from '@/components/ui/drawer'
+import { useMediaQuery } from '@/lib/hooks'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { createFileRoute } from '@tanstack/react-router'
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
-import { Loader2 } from 'lucide-react'
-import { Suspense } from 'react'
+import { Loader2, SlidersHorizontal, X } from 'lucide-react'
+import { Suspense, useState } from 'react'
 import { z } from 'zod'
 
 const discoverSearchSchema = z.object({
@@ -39,6 +50,8 @@ export const Route = createFileRoute('/_authenticated/discover')({
 function RouteComponent() {
   const navigate = Route.useNavigate()
   const search = Route.useSearch()
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const isDesktop = useMediaQuery('(min-width: 768px)')
 
   const selectedGenres = search.genres ? search.genres.split(',') : []
   const selectedProviders = search.providers ? search.providers.split('|') : []
@@ -82,35 +95,75 @@ function RouteComponent() {
     })
   }
 
+  const filtersContent = (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <DiscoverFilters
+        selectedGenres={selectedGenres}
+        onGenresChange={handleGenresChange}
+        selectedProviders={selectedProviders}
+        onProvidersChange={handleProvidersChange}
+        voteRange={voteRange}
+        onVoteRangeChange={handleVoteRangeChange}
+        sortBy={sortBy}
+        onSortByChange={handleSortByChange}
+      />
+    </Suspense>
+  )
+
   return (
     <div className="h-full flex overflow-hidden">
-      <aside className="w-80 flex-shrink-0 border-r border-border bg-sidebar p-6 overflow-y-auto">
-        <div className="sticky top-0">
-          <h2 className="mb-6 text-2xl font-bold">Filters</h2>
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      {isDesktop && (
+        <aside className="w-80 flex-shrink-0 border-r border-border bg-sidebar p-6 overflow-y-auto">
+          <div className="sticky top-0">
+            <h2 className="mb-6 text-2xl font-bold">Filters</h2>
+            {filtersContent}
+          </div>
+        </aside>
+      )}
+      {!isDesktop && (
+        <DrawerRoot open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <DrawerPortal>
+            <DrawerOverlay opacity="medium" />
+            <DrawerContent className="p-6">
+              <DrawerHandle />
+              <div className="flex items-center justify-between mb-6">
+                <DrawerTitle className="text-2xl font-bold">
+                  Filters
+                </DrawerTitle>
+                <DrawerClose asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </DrawerClose>
               </div>
-            }
-          >
-            <DiscoverFilters
-              selectedGenres={selectedGenres}
-              onGenresChange={handleGenresChange}
-              selectedProviders={selectedProviders}
-              onProvidersChange={handleProvidersChange}
-              voteRange={voteRange}
-              onVoteRangeChange={handleVoteRangeChange}
-              sortBy={sortBy}
-              onSortByChange={handleSortByChange}
-            />
-          </Suspense>
-        </div>
-      </aside>
+              <div className="overflow-y-auto flex-1">{filtersContent}</div>
+            </DrawerContent>
+          </DrawerPortal>
+        </DrawerRoot>
+      )}
       <main className="flex-1 overflow-hidden">
         <div className="h-full flex flex-col">
+          {!isDesktop && (
+            <div className="px-4 py-3 border-b border-border  backdrop-blur-sm">
+              <Button
+                variant="outline"
+                size="default"
+                onClick={() => setFiltersOpen(true)}
+                className="w-full"
+              >
+                <SlidersHorizontal className="mr-2 h-4 w-4" />
+                Filters
+              </Button>
+            </div>
+          )}
           <div className="relative flex-1 overflow-hidden isolate">
-            <div className="h-full overflow-y-auto px-6 py-6 pt-6 fade-mask fade-left-40 fade-y-16 dark:fade-y-40 fade-intensity-100">
+            <div className="h-full overflow-y-auto px-4 md:px-6 py-6 pt-6 fade-mask md:fade-left-40 fade-y-16 dark:md:fade-y-40 fade-intensity-100">
               <Suspense
                 fallback={
                   <div className="flex items-center justify-center py-12">

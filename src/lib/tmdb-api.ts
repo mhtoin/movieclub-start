@@ -104,6 +104,7 @@ export interface WatchProvider {
   provider_name: string
   logo_path: string
   display_priority: number
+  display_priorities: { [key: string]: number }
 }
 
 export interface WatchProvidersResponse {
@@ -127,8 +128,22 @@ export async function fetchWatchProviders(): Promise<WatchProvider[]> {
     }
 
     const data: WatchProvidersResponse = await response.json()
-    console.log('Fetched watch providers:', data)
-    return data.results
+
+    /**
+     * For some reason, the API no longer returns any results if the watch_region parameter is
+     * set to FI. Therefore, we fetch all providers and filter out those that are used by the club.
+     * This could potentially be set to be user configurable in the future.
+     */
+
+    const finnishIds = [8, 76, 323, 338, 496, 1773, 1899, 2029]
+
+    const finnishProviders = data.results
+      .filter((provider) => {
+        return finnishIds.includes(provider.provider_id)
+      })
+      .sort((a, b) => a.display_priorities['FI'] - b.display_priorities['FI'])
+
+    return finnishProviders
   } catch (error) {
     console.error('Error fetching watch providers:', error)
     throw error

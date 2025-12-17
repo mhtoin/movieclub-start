@@ -16,6 +16,7 @@ interface MovieOverviewViewProps {
   onAddToShortlist: () => void
   onShowMoreInfo: () => void
   isPending: boolean
+  compact?: boolean
 }
 
 export function MovieOverviewView({
@@ -29,17 +30,20 @@ export function MovieOverviewView({
   onAddToShortlist,
   onShowMoreInfo,
   isPending,
+  compact = false,
 }: MovieOverviewViewProps) {
   const [showFullOverview, setShowFullOverview] = useState(false)
 
   return (
     <>
-      <div>
-        <h2 className="text-3xl font-bold">{title}</h2>
-        {originalTitle !== title && (
-          <p className="text-sm text-muted-foreground">{originalTitle}</p>
-        )}
-      </div>
+      {!compact && (
+        <div>
+          <h2 className="text-3xl font-bold">{title}</h2>
+          {originalTitle !== title && (
+            <p className="text-sm text-muted-foreground">{originalTitle}</p>
+          )}
+        </div>
+      )}
 
       <MovieMetadata
         releaseDate={releaseDate}
@@ -76,9 +80,9 @@ export function MovieOverviewView({
         <WatchProvidersList watchProviders={movieDetails['watch/providers']} />
       )}
 
-      <div className="flex gap-3 pt-4">
+      <div className={`flex gap-3 pt-4 ${compact ? 'flex-col' : ''}`}>
         <Button
-          className="gap-2"
+          className={`gap-2 ${compact ? 'w-full' : ''}`}
           variant={'primary'}
           loading={isPending}
           onClick={onAddToShortlist}
@@ -86,7 +90,11 @@ export function MovieOverviewView({
           <Plus className="h-4 w-4" />
           Add to Shortlist
         </Button>
-        <Button variant="secondary" onClick={onShowMoreInfo}>
+        <Button
+          variant="secondary"
+          onClick={onShowMoreInfo}
+          className={compact ? 'w-full' : ''}
+        >
           More Info
         </Button>
       </div>

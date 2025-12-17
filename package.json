@@ -55,6 +55,7 @@
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.6",
     "tailwindcss-fade": "^0.1.2",
+    "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^5.1.4",
     "zod": "^4.1.12"
   },

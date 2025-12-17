@@ -44,12 +44,12 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
           onClick={() => setIsExpanded(false)}
         />
       )}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50">
         <div
           className={`absolute bottom-0 right-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl transition-all duration-500 ease-out overflow-hidden ${
             isExpanded
-              ? 'w-[420px] h-[650px] opacity-100 scale-100 mb-20'
-              : 'w-0 h-0 opacity-0 scale-75 pointer-events-none'
+              ? 'w-[95vw] max-w-[420px] h-[85vh] max-h-[650px] opacity-100 scale-100 mb-16 sm:mb-20'
+              : 'w-0 h-0 max-w-[420px] opacity-0 scale-75 pointer-events-none'
           }`}
         >
           <div className="h-full flex flex-col p-6">

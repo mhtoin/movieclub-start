@@ -10,15 +10,18 @@ import { WatchProvider } from '@/lib/tmdb-api'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Check, ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import MobileFilter from './mobile-filter'
 
 interface ProviderFilterProps {
   selectedProviders: string[]
   onProvidersChange: (providers: string[]) => void
+  variant?: 'default' | 'mobile'
 }
 
 export function ProviderFilter({
   selectedProviders,
   onProvidersChange,
+  variant = 'default',
 }: ProviderFilterProps) {
   const { data: providers = [] } = useSuspenseQuery(
     tmdbQueries.watchProviders(),
@@ -46,6 +49,36 @@ export function ProviderFilter({
     )
     .map((p: WatchProvider) => p.provider_name)
     .join(', ')
+
+  if (variant === 'mobile') {
+    return (
+      <MobileFilter
+        label="Streaming Providers"
+        value={selectedProviders}
+        options={providers.map((provider: WatchProvider) => ({
+          value: provider.provider_id.toString(),
+          label: provider.provider_name,
+        }))}
+        icon={
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zM3 16a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z"
+            />
+          </svg>
+        }
+        onChange={(value) => handleToggle(value)}
+      />
+    )
+  }
 
   return (
     <div>

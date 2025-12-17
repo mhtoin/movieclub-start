@@ -1,5 +1,6 @@
 import { getImageUrl, Movie } from '@/lib/tmdb-api'
 import { Star } from 'lucide-react'
+import { memo } from 'react'
 
 interface MovieCardProps {
   movie: Movie
@@ -61,3 +62,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
     </div>
   )
 }
+
+export const MemoizedMovieCard = memo(MovieCard, (prevProps, nextProps) => {
+  return prevProps.movie.id === nextProps.movie.id
+})
