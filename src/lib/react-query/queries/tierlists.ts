@@ -316,7 +316,15 @@ export const useTierlistLiveQuery = (userId: string, tierlistId: string) => {
     return allMovies
       .filter((movie): movie is Movie => Boolean(movie))
       .filter(
-        (movie) => !rankedMovieIds.has(movie.id) && movie.watchDate !== null,
+        (movie) =>
+          !rankedMovieIds.has(movie.id) &&
+          movie.watchDate !== null &&
+          (tierlistFromDate
+            ? new Date(movie.watchDate!) >= new Date(tierlistFromDate)
+            : true) &&
+          (tierlistToDate
+            ? new Date(movie.watchDate!) <= new Date(tierlistToDate)
+            : true),
       )
   }, [allMovies, rankedMovieIds])
 
