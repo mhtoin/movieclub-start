@@ -1,7 +1,7 @@
 import { BackdropVeilBackground } from '@/components/background-options'
 import { ErrorComponent } from '@/components/error-component'
-import Header from '@/components/header/header'
 import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolbar'
+import Sidebar from '@/components/sidebar/sidebar'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
@@ -69,11 +69,13 @@ function AuthenticatedLayout() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
-      <Header />
+      <Sidebar />
       <BackdropVeilBackground />
       <div
         className={
-          isHomePage ? 'flex-1 overflow-auto' : 'pt-20 flex-1 overflow-auto'
+          isHomePage
+            ? 'flex-1 overflow-auto'
+            : 'pt-4 pb-24 md:pb-4 md:pl-16 px-4 flex-1 overflow-auto'
         }
       >
         <Outlet />
