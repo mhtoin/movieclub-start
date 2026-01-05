@@ -5,14 +5,14 @@ import {
   SortableContext,
 } from '@dnd-kit/sortable'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import TierItem from './tier-item'
 
 interface StickyUnrankedTierProps {
   tier: TierWithMovies
 }
 
-export default function StickyUnrankedTier({ tier }: StickyUnrankedTierProps) {
+function StickyUnrankedTier({ tier }: StickyUnrankedTierProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const { setNodeRef, isOver } = useDroppable({
     id: tier.id,
@@ -75,3 +75,7 @@ export default function StickyUnrankedTier({ tier }: StickyUnrankedTierProps) {
     </div>
   )
 }
+
+export default memo(StickyUnrankedTier, (prevProps, nextProps) => {
+  return prevProps.tier.movies === nextProps.tier.movies
+})

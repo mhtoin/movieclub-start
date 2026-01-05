@@ -3,28 +3,40 @@ import { type Movie as TMDBMovie } from '@/lib/tmdb-api'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { InferSelectModel } from 'drizzle-orm'
-import { MovieCard } from '../discover/movie-card'
+import { memo } from 'react'
+import { MemoizedMovieCard } from '../discover/movie-card'
 
 type Movie = InferSelectModel<typeof movie>
 
-const mapDbMovieToTmdbMovie = (dbMovie: Movie): TMDBMovie => ({
-  id: dbMovie.tmdbId,
-  title: dbMovie.title,
-  overview: dbMovie.overview,
-  poster_path: (dbMovie.images as any)?.posters?.[0]?.file_path ?? null,
-  backdrop_path: (dbMovie.images as any)?.backdrops?.[0]?.file_path ?? null,
-  release_date: dbMovie.releaseDate,
-  vote_average: dbMovie.voteAverage ?? 0,
-  vote_count: dbMovie.voteCount,
-  genre_ids: [],
-  adult: dbMovie.adult,
-  original_language: dbMovie.originalLanguage,
-  original_title: dbMovie.originalTitle,
-  popularity: dbMovie.popularity,
-  video: dbMovie.video,
-})
+const mapDbMovieToTmdbMovie = (dbMovie: Movie): TMDBMovie => {
+  let images = dbMovie.images
+  if (typeof images === 'string') {
+    try {
+      images = JSON.parse(images)
+    } catch (e) {
+      images = null
+    }
+  }
 
-export default function TierItem({
+  return {
+    id: dbMovie.tmdbId,
+    title: dbMovie.title,
+    overview: dbMovie.overview,
+    poster_path: (images as any)?.posters?.[0]?.file_path ?? null,
+    backdrop_path: (images as any)?.backdrops?.[0]?.file_path ?? null,
+    release_date: dbMovie.releaseDate,
+    vote_average: dbMovie.voteAverage ?? 0,
+    vote_count: dbMovie.voteCount,
+    genre_ids: [],
+    adult: dbMovie.adult,
+    original_language: dbMovie.originalLanguage,
+    original_title: dbMovie.originalTitle,
+    popularity: dbMovie.popularity,
+    video: dbMovie.video,
+  }
+}
+
+function TierItem({
   movie,
   ref,
   ...props
@@ -72,8 +84,12 @@ export default function TierItem({
             : 'shadow-md hover:shadow-xl'
         }`}
       >
-        <MovieCard movie={mapDbMovieToTmdbMovie(movie)} />
+        <MemoizedMovieCard movie={mapDbMovieToTmdbMovie(movie)} />
       </div>
     </div>
   )
 }
+
+export default memo(TierItem, (prevProps, nextProps) => {
+  return prevProps.movie.id === nextProps.movie.id
+})

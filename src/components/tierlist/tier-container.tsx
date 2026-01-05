@@ -4,6 +4,7 @@ import {
   horizontalListSortingStrategy,
   SortableContext,
 } from '@dnd-kit/sortable'
+import { memo } from 'react'
 import TierItem from './tier-item'
 
 interface TierContainerProps {
@@ -73,7 +74,7 @@ const getTierColors = (value: number) => {
   )
 }
 
-export default function TierContainer({ id, tier }: TierContainerProps) {
+function TierContainer({ id, tier }: TierContainerProps) {
   const { setNodeRef, isOver } = useDroppable({
     id,
   })
@@ -126,3 +127,10 @@ export default function TierContainer({ id, tier }: TierContainerProps) {
     </SortableContext>
   )
 }
+
+export default memo(TierContainer, (prevProps, nextProps) => {
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.tier.movies === nextProps.tier.movies
+  )
+})

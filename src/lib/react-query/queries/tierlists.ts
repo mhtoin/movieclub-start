@@ -284,6 +284,8 @@ export const useTierlistLiveQuery = (userId: string, tierlistId: string) => {
       )
   })
 
+  console.log('Tierlist live query results:', results)
+
   const rankedMovieIds = useMemo(() => {
     if (!results) return new Set<string>()
 
@@ -305,9 +307,17 @@ export const useTierlistLiveQuery = (userId: string, tierlistId: string) => {
   const unrankedMovies = useMemo(() => {
     if (!allMovies) return []
 
+    const tierlist = results?.[0]?.electricTierlistCollection as Tierlist
+    if (!tierlist) return []
+
+    const tierlistFromDate = tierlist.watchDateFrom
+    const tierlistToDate = tierlist.watchDateTo
+
     return allMovies
       .filter((movie): movie is Movie => Boolean(movie))
-      .filter((movie) => !rankedMovieIds.has(movie.id))
+      .filter(
+        (movie) => !rankedMovieIds.has(movie.id) && movie.watchDate !== null,
+      )
   }, [allMovies, rankedMovieIds])
 
   const tierlist = useMemo((): TierlistWithTiers | null => {
