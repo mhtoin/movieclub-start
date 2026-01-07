@@ -1,16 +1,18 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useState } from 'react'
+import { z } from 'zod'
+
+import { PageTitleBar } from '@/components/page-titlebar'
 import { MovieDetailsDialog } from '@/components/shortlists/movie-details-dialog'
 import { RaffleControlPanel } from '@/components/shortlists/raffle-control-panel'
 import UserTabList from '@/components/shortlists/user-tab-list'
-import { Movie } from '@/db/schema'
+import type { Movie } from '@/db/schema'
 import {
   useFinalizeRaffleMutation,
   useStartRaffleMutation,
 } from '@/lib/react-query/mutations/raffle'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
-import { createFileRoute } from '@tanstack/react-router'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
-import { z } from 'zod'
 
 const searchSchema = z.object({
   dryRun: z.boolean().optional().default(false),
@@ -102,6 +104,10 @@ function ShortlistsPage() {
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-2 relative overflow-hidden">
+      <PageTitleBar
+        title="Shortlists"
+        description="Browse member shortlists and run a raffle"
+      />
       <motion.div
         layout
         className={`flex flex-col h-full w-full overflow-hidden`}

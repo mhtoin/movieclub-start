@@ -1,5 +1,12 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { fallback, zodValidator } from '@tanstack/zod-adapter'
+import { Loader2, SlidersHorizontal, X } from 'lucide-react'
+import { Suspense, useState } from 'react'
+import { z } from 'zod'
+
 import DiscoverMoviesList from '@/components/discover/discover-movie-list'
 import { DiscoverFilters } from '@/components/discover/filters'
+import { PageTitleBar } from '@/components/page-titlebar'
 import { Button } from '@/components/ui/button'
 import {
   DrawerClose,
@@ -12,11 +19,6 @@ import {
 } from '@/components/ui/drawer'
 import { useMediaQuery } from '@/lib/hooks'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { createFileRoute } from '@tanstack/react-router'
-import { fallback, zodValidator } from '@tanstack/zod-adapter'
-import { Loader2, SlidersHorizontal, X } from 'lucide-react'
-import { Suspense, useState } from 'react'
-import { z } from 'zod'
 
 const discoverSearchSchema = z.object({
   genres: fallback(z.string(), '').default(''),
@@ -58,7 +60,7 @@ function RouteComponent() {
   const voteRange: [number, number] = [search.minRating, search.maxRating]
   const sortBy = search.sortBy
 
-  const handleGenresChange = (genres: string[]) => {
+  const handleGenresChange = (genres: Array<string>) => {
     navigate({
       search: (prev) => ({
         ...prev,
@@ -67,7 +69,7 @@ function RouteComponent() {
     })
   }
 
-  const handleProvidersChange = (providers: string[]) => {
+  const handleProvidersChange = (providers: Array<string>) => {
     navigate({
       search: (prev) => ({
         ...prev,
@@ -118,14 +120,6 @@ function RouteComponent() {
 
   return (
     <div className="h-full flex overflow-hidden">
-      {isDesktop && (
-        <aside className="w-80 flex-shrink-0 border-r border-border bg-sidebar p-6 overflow-y-auto">
-          <div className="sticky top-0">
-            <h2 className="mb-6 text-2xl font-bold">Filters</h2>
-            {filtersContent}
-          </div>
-        </aside>
-      )}
       {!isDesktop && (
         <DrawerRoot open={filtersOpen} onOpenChange={setFiltersOpen}>
           <DrawerPortal>
@@ -162,8 +156,15 @@ function RouteComponent() {
               </Button>
             </div>
           )}
-          <div className="relative flex-1 overflow-hidden isolate">
-            <div className="h-full overflow-y-auto px-4 md:px-6 py-6 pt-6 fade-mask md:fade-left-40 fade-y-16 dark:md:fade-y-40 fade-intensity-100">
+          <div className="relative flex-1 flex flex-col overflow-hidden isolate">
+            <PageTitleBar
+              title="Discover"
+              description="Browse movies and refine results with filters"
+            />
+            <div className="flex-shrink-0 px-4">
+              {isDesktop && filtersContent}
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-24 pt-5 fade-mask md:fade-left-40 fade-y-16 dark:md:fade-y-40 fade-intensity-100">
               <Suspense
                 fallback={
                   <div className="flex items-center justify-center py-12">
