@@ -10,7 +10,8 @@ import MobileFilter from './mobile-filter'
 interface SortByFilterProps {
   value: string
   onValueChange: (value: string) => void
-  variant?: 'default' | 'mobile'
+  variant?: 'default' | 'mobile' | 'chip'
+  chipContent?: React.ReactNode
 }
 
 const sortOptions = [
@@ -28,7 +29,32 @@ export function SortByFilter({
   value,
   onValueChange,
   variant = 'default',
+  chipContent,
 }: SortByFilterProps) {
+  if (variant === 'chip') {
+    return (
+      <SelectRoot
+        onValueChange={(value) => {
+          if (value !== null) {
+            onValueChange(value)
+          }
+        }}
+        value={value}
+      >
+        <SelectTrigger className="border-none bg-transparent p-0 h-auto hover:bg-transparent focus:outline-none data-[popup-open]:outline-none">
+          {chipContent}
+        </SelectTrigger>
+        <SelectPopup className="w-56">
+          {sortOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectPopup>
+      </SelectRoot>
+    )
+  }
+
   if (variant === 'mobile') {
     return (
       <MobileFilter

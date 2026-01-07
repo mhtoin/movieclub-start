@@ -14,13 +14,15 @@ import MobileFilter from './mobile-filter'
 interface GenreFilterProps {
   selectedGenres: string[]
   onGenresChange: (genres: string[]) => void
-  variant?: 'default' | 'mobile'
+  variant?: 'default' | 'mobile' | 'chip'
+  chipContent?: React.ReactNode
 }
 
 export function GenreFilter({
   selectedGenres,
   onGenresChange,
   variant = 'default',
+  chipContent,
 }: GenreFilterProps) {
   const { data: genres = [] } = useSuspenseQuery(tmdbQueries.genres())
   const [searchValue, setSearchValue] = useState('')
@@ -72,6 +74,48 @@ export function GenreFilter({
         }
         onChange={(value) => handleToggle(value)}
       />
+    )
+  }
+
+  if (variant === 'chip') {
+    return (
+      <ComboboxRoot
+        value={selectedGenres}
+        onValueChange={(value) => onGenresChange(value)}
+        multiple
+      >
+        <ComboboxTrigger className="outline-none">
+          {chipContent}
+        </ComboboxTrigger>
+        <ComboboxPopup className="w-64">
+          <div className="p-2">
+            <ComboboxInput
+              placeholder="Search genres..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto">
+            {filteredGenres.map((genre) => (
+              <ComboboxItem
+                key={genre.value}
+                value={genre.value}
+                onClick={() => handleToggle(genre.value)}
+              >
+                <div className="flex flex-1 items-center justify-between">
+                  <span>{genre.label}</span>
+                </div>
+              </ComboboxItem>
+            ))}
+            {filteredGenres.length === 0 && (
+              <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                No genres found
+              </div>
+            )}
+          </div>
+        </ComboboxPopup>
+      </ComboboxRoot>
     )
   }
 

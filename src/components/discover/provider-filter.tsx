@@ -15,13 +15,15 @@ import MobileFilter from './mobile-filter'
 interface ProviderFilterProps {
   selectedProviders: string[]
   onProvidersChange: (providers: string[]) => void
-  variant?: 'default' | 'mobile'
+  variant?: 'default' | 'mobile' | 'chip'
+  chipContent?: React.ReactNode
 }
 
 export function ProviderFilter({
   selectedProviders,
   onProvidersChange,
   variant = 'default',
+  chipContent,
 }: ProviderFilterProps) {
   const { data: providers = [] } = useSuspenseQuery(
     tmdbQueries.watchProviders(),
@@ -77,6 +79,51 @@ export function ProviderFilter({
         }
         onChange={(value) => handleToggle(value)}
       />
+    )
+  }
+
+  if (variant === 'chip') {
+    return (
+      <ComboboxRoot
+        value={selectedProviders}
+        onValueChange={(value) => onProvidersChange(value)}
+        multiple
+      >
+        <ComboboxTrigger className="outline-none">
+          {chipContent}
+        </ComboboxTrigger>
+        <ComboboxPopup className="w-72">
+          <div className="p-2">
+            <ComboboxInput
+              placeholder="Search providers..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto">
+            {filteredProviders.map((provider: WatchProvider) => (
+              <ComboboxItem
+                key={provider.provider_id}
+                value={provider.provider_id.toString()}
+                onClick={() => handleToggle(provider.provider_id.toString())}
+              >
+                <div className="flex flex-1 items-center justify-between">
+                  <span>{provider.provider_name}</span>
+                  {selectedProviders.includes(
+                    provider.provider_id.toString(),
+                  ) && <Check className="h-4 w-4" />}
+                </div>
+              </ComboboxItem>
+            ))}
+            {filteredProviders.length === 0 && (
+              <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                No providers found
+              </div>
+            )}
+          </div>
+        </ComboboxPopup>
+      </ComboboxRoot>
     )
   }
 
