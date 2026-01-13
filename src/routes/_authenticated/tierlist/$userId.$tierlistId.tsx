@@ -333,7 +333,7 @@ function TierlistContent() {
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex-1 overflow-y-auto pb-64">
+      <div className="flex-1 overflow-y-auto pr-20">
         <div className="p-6">
           <div className="mb-8">
             <h1 className="text-4xl font-black tracking-tight mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">

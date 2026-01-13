@@ -39,10 +39,12 @@ const mapDbMovieToTmdbMovie = (dbMovie: Movie): TMDBMovie => {
 function TierItem({
   movie,
   ref,
+  compact = false,
   ...props
 }: {
   movie: Movie & { position: number }
   ref?: React.Ref<HTMLDivElement>
+  compact?: boolean
   [key: string]: any
 }) {
   const {
@@ -66,7 +68,9 @@ function TierItem({
   return (
     <div
       key={movie.id}
-      className={`w-32 transition-all duration-200 ${
+      className={`transition-all duration-200 ${
+        compact ? 'w-full h-full' : 'w-32'
+      } ${
         isDragging
           ? 'scale-105 rotate-3 cursor-grabbing z-50'
           : 'hover:scale-105 hover:-translate-y-1 cursor-grab'
@@ -78,18 +82,24 @@ function TierItem({
       style={style}
     >
       <div
-        className={`rounded-lg overflow-hidden ${
+        className={`rounded-lg overflow-hidden h-full ${
           isDragging
             ? 'shadow-2xl ring-2 ring-primary'
             : 'shadow-md hover:shadow-xl'
         }`}
       >
-        <MemoizedMovieCard movie={mapDbMovieToTmdbMovie(movie)} />
+        <MemoizedMovieCard
+          movie={mapDbMovieToTmdbMovie(movie)}
+          compact={compact}
+        />
       </div>
     </div>
   )
 }
 
 export default memo(TierItem, (prevProps, nextProps) => {
-  return prevProps.movie.id === nextProps.movie.id
+  return (
+    prevProps.movie.id === nextProps.movie.id &&
+    prevProps.compact === nextProps.compact
+  )
 })

@@ -2,19 +2,52 @@ import { getImageUrl, Movie } from '@/lib/tmdb-api'
 import { Star } from 'lucide-react'
 import { memo } from 'react'
 
-interface MovieCardProps {
+export interface MovieCardProps {
   movie: Movie
   onClick?: (movie: Movie, rect: DOMRect) => void
+  compact?: boolean
 }
 
-export function MovieCard({ movie, onClick }: MovieCardProps) {
-  const posterUrl = getImageUrl(movie.poster_path, 'w500')
+export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
+  const posterUrl = getImageUrl(movie.poster_path, compact ? 'w342' : 'w500')
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (onClick) {
       const rect = e.currentTarget.getBoundingClientRect()
       onClick(movie, rect)
     }
+  }
+
+  if (compact) {
+    return (
+      <div
+        className="group relative overflow-hidden rounded-md bg-card transition-all hover:shadow-lg cursor-pointer h-full"
+        onClick={handleClick}
+      >
+        <div className="h-full overflow-hidden">
+          {posterUrl ? (
+            <img
+              src={posterUrl}
+              alt={movie.title}
+              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <span className="text-xs text-muted-foreground text-center px-1">
+                {movie.title}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute bottom-0 left-0 right-0 p-1.5">
+            <h3 className="text-xs font-semibold text-white line-clamp-2 leading-tight">
+              {movie.title}
+            </h3>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -64,5 +97,8 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
 }
 
 export const MemoizedMovieCard = memo(MovieCard, (prevProps, nextProps) => {
-  return prevProps.movie.id === nextProps.movie.id
+  return (
+    prevProps.movie.id === nextProps.movie.id &&
+    prevProps.compact === nextProps.compact
+  )
 })
