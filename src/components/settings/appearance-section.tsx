@@ -36,12 +36,10 @@ export function AppearanceSection({
   const { theme, setTheme } = useTheme()
   const router = useRouter()
   const toastManager = Toast.useToastManager()
-  const [currentBackground, setCurrentBackground] = useState<BackgroundOptionKey>(
-    initialBackground,
-  )
-  const [currentColorScheme, setCurrentColorScheme] = useState<ColorScheme>(
-    initialColorScheme,
-  )
+  const [currentBackground, setCurrentBackground] =
+    useState<BackgroundOptionKey>(initialBackground)
+  const [currentColorScheme, setCurrentColorScheme] =
+    useState<ColorScheme>(initialColorScheme)
 
   const schemeMutation = useMutation({
     mutationFn: async (scheme: ColorScheme) => {

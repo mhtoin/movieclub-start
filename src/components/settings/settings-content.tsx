@@ -5,8 +5,8 @@ import {
   TabsPanel,
   TabsRoot,
 } from '@/components/ui/tabs'
-import { Route } from '@/routes/_authenticated/settings'
 import { Route as RootRoute } from '@/routes/__root'
+import { Route } from '@/routes/_authenticated/settings'
 import { Palette, Settings, User } from 'lucide-react'
 import { AppearanceSection } from './appearance-section'
 import { ProfileSection } from './profile-section'
