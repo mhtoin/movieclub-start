@@ -6,6 +6,7 @@ import {
   TabsRoot,
 } from '@/components/ui/tabs'
 import { Route } from '@/routes/_authenticated/settings'
+import { Route as RootRoute } from '@/routes/__root'
 import { Palette, Settings, User } from 'lucide-react'
 import { AppearanceSection } from './appearance-section'
 import { ProfileSection } from './profile-section'
@@ -16,7 +17,8 @@ const tabs = [
 ]
 
 export function SettingsContent() {
-  const { user } = Route.useRouteContext()
+  const { user, backgroundPreference } = Route.useRouteContext()
+  const { colorScheme } = RootRoute.useLoaderData()
 
   return (
     <div className="h-full flex flex-col">
@@ -54,7 +56,10 @@ export function SettingsContent() {
               <ProfileSection user={user} />
             </TabsPanel>
             <TabsPanel value="appearance" variant="underlined">
-              <AppearanceSection />
+              <AppearanceSection
+                initialBackground={backgroundPreference}
+                initialColorScheme={colorScheme}
+              />
             </TabsPanel>
           </TabsRoot>
         </div>

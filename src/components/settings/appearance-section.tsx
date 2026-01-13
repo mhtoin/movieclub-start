@@ -1,4 +1,10 @@
+import type { BackgroundOptionKey } from '@/components/background-options'
 import { useTheme } from '@/components/theme-provider'
+import {
+  BackgroundPreview,
+  getBackgroundOptions,
+  useBackgroundMutation,
+} from '@/lib/background-utils'
 import {
   COLOR_SCHEMES,
   setSchemeServerFn,
@@ -7,7 +13,8 @@ import {
 import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import { Check, Moon, Palette, Sun } from 'lucide-react'
+import { Check, ImageIcon, Moon, Palette, Sun } from 'lucide-react'
+import { useState } from 'react'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   value: value as ColorScheme,
@@ -15,16 +22,34 @@ const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   colors: config.colors,
 }))
 
-export function AppearanceSection() {
+const backgrounds = getBackgroundOptions()
+
+interface AppearanceSectionProps {
+  initialBackground?: BackgroundOptionKey
+  initialColorScheme?: ColorScheme
+}
+
+export function AppearanceSection({
+  initialBackground = 'none',
+  initialColorScheme = 'default',
+}: AppearanceSectionProps) {
   const { theme, setTheme } = useTheme()
   const router = useRouter()
   const toastManager = Toast.useToastManager()
+  const [currentBackground, setCurrentBackground] = useState<BackgroundOptionKey>(
+    initialBackground,
+  )
+  const [currentColorScheme, setCurrentColorScheme] = useState<ColorScheme>(
+    initialColorScheme,
+  )
 
   const schemeMutation = useMutation({
     mutationFn: async (scheme: ColorScheme) => {
       await setSchemeServerFn({ data: scheme })
+      return scheme
     },
-    onSuccess: () => {
+    onSuccess: (scheme) => {
+      setCurrentColorScheme(scheme)
       if (document.startViewTransition) {
         const x = window.innerWidth / 2
         const y = window.innerHeight / 2
@@ -63,6 +88,10 @@ export function AppearanceSection() {
         description: `Failed to update color scheme: ${error.message}`,
       })
     },
+  })
+
+  const backgroundMutation = useBackgroundMutation((background) => {
+    setCurrentBackground(background)
   })
 
   function handleThemeChange(newTheme: 'light' | 'dark') {
@@ -166,9 +195,7 @@ export function AppearanceSection() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {schemes.map((scheme) => {
-            const isActive = document.documentElement.classList.contains(
-              `scheme-${scheme.value}`,
-            )
+            const isActive = currentColorScheme === scheme.value
             return (
               <button
                 key={scheme.value}
@@ -193,6 +220,48 @@ export function AppearanceSection() {
                 <span className="font-medium text-sm flex-1 text-left">
                   {scheme.label}
                 </span>
+                {isActive && (
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <ImageIcon className="h-5 w-5 text-primary" />
+          <div>
+            <h3 className="font-semibold">Background Style</h3>
+            <p className="text-sm text-muted-foreground">
+              Choose your preferred background effect
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {backgrounds.map((bg) => {
+            const isActive = currentBackground === bg.value
+            return (
+              <button
+                key={bg.value}
+                onClick={() => backgroundMutation.mutate(bg.value)}
+                disabled={backgroundMutation.isPending}
+                className={`relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                  isActive
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                }`}
+              >
+                <BackgroundPreview type={bg.value} />
+                <div className="text-left flex-1 min-w-0">
+                  <span className="font-medium text-sm block truncate">
+                    {bg.label}
+                  </span>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {bg.description}
+                  </p>
+                </div>
                 {isActive && (
                   <Check className="h-4 w-4 text-primary shrink-0" />
                 )}

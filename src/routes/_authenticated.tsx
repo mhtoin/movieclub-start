@@ -1,8 +1,12 @@
-import { BackdropVeilBackground } from '@/components/background-options'
+import {
+  BACKGROUND_OPTIONS,
+  type BackgroundOptionKey,
+} from '@/components/background-options'
 import { ErrorComponent } from '@/components/error-component'
 import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolbar'
 import Sidebar from '@/components/sidebar/sidebar'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
+import { getBackgroundServerFn } from '@/lib/background-preference'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import {
@@ -44,7 +48,8 @@ export const Route = createFileRoute('/_authenticated')({
     if (!user) {
       throw redirect({ to: '/' })
     }
-    return { user }
+    const backgroundPreference = await getBackgroundServerFn()
+    return { user, backgroundPreference }
   },
   loader: async ({ context }) => {
     const user = context.user
@@ -61,16 +66,20 @@ export const Route = createFileRoute('/_authenticated')({
 })
 
 function AuthenticatedLayout() {
-  const { user } = Route.useRouteContext()
+  const { user, backgroundPreference } = Route.useRouteContext()
   const matches = useMatches()
   const isHomePage = matches.some(
     (match) => match.routeId === '/_authenticated/home',
   )
 
+  const BackgroundComponent =
+    BACKGROUND_OPTIONS[backgroundPreference as BackgroundOptionKey]
+      ?.component ?? BACKGROUND_OPTIONS.backdropVeil.component
+
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
       <Sidebar />
-      <BackdropVeilBackground />
+      <BackgroundComponent />
       <div
         className={
           isHomePage
