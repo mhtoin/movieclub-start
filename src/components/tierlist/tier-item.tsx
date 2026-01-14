@@ -40,11 +40,13 @@ function TierItem({
   movie,
   ref,
   compact = false,
+  isOwner = true,
   ...props
 }: {
   movie: Movie & { position: number }
   ref?: React.Ref<HTMLDivElement>
   compact?: boolean
+  isOwner?: boolean
   [key: string]: any
 }) {
   const {
@@ -57,6 +59,7 @@ function TierItem({
   } = useSortable({
     id: props.id,
     data: { movie },
+    disabled: !isOwner,
   })
 
   const style = {
@@ -73,12 +76,14 @@ function TierItem({
       } ${
         isDragging
           ? 'scale-105 rotate-3 cursor-grabbing z-50'
-          : 'hover:scale-105 hover:-translate-y-1 cursor-grab'
+          : isOwner
+            ? 'hover:scale-105 hover:-translate-y-1 cursor-grab'
+            : 'cursor-default'
       }`}
       ref={setNodeRef}
       {...props}
       {...attributes}
-      {...listeners}
+      {...(isOwner ? listeners : {})}
       style={style}
     >
       <div

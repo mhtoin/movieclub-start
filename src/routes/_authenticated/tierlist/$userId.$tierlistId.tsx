@@ -1,6 +1,18 @@
+import { PageTitleBar } from '@/components/page-titlebar'
 import DragOverlayPortal from '@/components/tierlist/drag-overlay-portal'
 import StickyUnrankedTier from '@/components/tierlist/sticky-unranked-tier'
 import TierContainer from '@/components/tierlist/tier-container'
+import { Button } from '@/components/ui/button'
+import {
+  DialogBackdrop,
+  DialogClose,
+  DialogPopup,
+  DialogPortal,
+  DialogRoot,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import Input from '@/components/ui/input'
+import { updateTierlist } from '@/lib/react-query/mutations/tierlists'
 import {
   electricMoviesOnTiersCollection,
   electricTierCollection,
@@ -10,16 +22,22 @@ import {
 } from '@/lib/react-query/queries/tierlists'
 import {
   closestCorners,
+  CollisionDetection,
   DndContext,
   DragEndEvent,
   DragOverEvent,
+  getFirstCollision,
   KeyboardSensor,
   PointerSensor,
+  pointerWithin,
+  rectIntersection,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { useMutation } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { Calendar, Pencil, Tag } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 export const Route = createFileRoute(
@@ -42,6 +60,9 @@ function RouteComponent() {
 
 function TierlistContent() {
   const { userId, tierlistId } = Route.useParams()
+  const { user } = Route.useRouteContext()
+  const isOwner = user?.userId === userId
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, {
@@ -89,6 +110,28 @@ function TierlistContent() {
     (id: string): string | null => containerMap.get(id) ?? null,
     [containerMap],
   )
+
+  const collisionDetectionStrategy: CollisionDetection = useCallback((args) => {
+    // see if there are any droppable containers intersecting
+    const pointerCollisions = pointerWithin(args)
+    const intersectingCollisions = rectIntersection(args)
+
+    // Prioritize pointer collisions for better UX with empty containers
+    let overId = getFirstCollision(pointerCollisions, 'id')
+
+    // If no pointer collision, fall back to rect intersection
+    if (!overId) {
+      overId = getFirstCollision(intersectingCollisions, 'id')
+    }
+
+    // If still no collision, use closest corners as last resort
+    if (!overId) {
+      const closestCornerCollisions = closestCorners(args)
+      overId = getFirstCollision(closestCornerCollisions, 'id')
+    }
+
+    return overId ? [{ id: overId }] : []
+  }, [])
 
   // Use local state when dragging, otherwise use the live query data
   const tierlist = useMemo(() => {
@@ -331,35 +374,180 @@ function TierlistContent() {
   const unrankedTier = tierlist.tiers.find((t) => t.id === 'unranked')
   const rankedTiers = tierlist.tiers.filter((t) => t.id !== 'unranked')
 
+  const totalRanked = rankedTiers.reduce((acc, t) => acc + t.movies.length, 0)
+  const totalUnranked = unrankedTier?.movies.length || 0
+
+  // Format date range for display
+  const dateRangeText = (() => {
+    if (!tierlist.watchDateFrom && !tierlist.watchDateTo) return null
+    const formatDate = (dateStr: string) =>
+      new Date(dateStr).toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      })
+    if (tierlist.watchDateFrom && tierlist.watchDateTo) {
+      return `${formatDate(tierlist.watchDateFrom)} — ${formatDate(tierlist.watchDateTo)}`
+    }
+    if (tierlist.watchDateFrom) {
+      return `From ${formatDate(tierlist.watchDateFrom)}`
+    }
+    return `Until ${formatDate(tierlist.watchDateTo!)}`
+  })()
+
+  const renameMutation = useMutation({
+    mutationFn: updateTierlist,
+  })
+
+  const handleRename = (newTitle: string) => {
+    if (!newTitle.trim()) return
+    renameMutation.mutate({
+      data: {
+        id: tierlistId,
+        title: newTitle.trim(),
+      },
+    })
+  }
+
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="container mx-auto px-2 sm:px-4 py-2 relative overflow-hidden">
+      <PageTitleBar
+        title={tierlist.title || 'Untitled Tierlist'}
+        kicker={`${rankedTiers.length} ${
+          rankedTiers.length === 1 ? 'tier' : 'tiers'
+        }, ${totalRanked} ${
+          totalRanked === 1 ? 'ranked movie' : 'ranked movies'
+        }${
+          totalUnranked > 0
+            ? `, ${totalUnranked} ${
+                totalUnranked === 1 ? 'unranked movie' : 'unranked movies'
+              }`
+            : ''
+        }`}
+        actions={
+          isOwner && (
+            <RenameTierlistDialog
+              currentTitle={tierlist.title || 'Untitled Tierlist'}
+              onRename={handleRename}
+            />
+          )
+        }
+      />
+      {(dateRangeText || (tierlist.genres && tierlist.genres.length > 0)) && (
+        <div className="flex flex-wrap items-center gap-3 mb-4 px-6">
+          {dateRangeText && (
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 rounded-full px-3 py-1.5">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>{dateRangeText}</span>
+            </div>
+          )}
+          {tierlist.genres && tierlist.genres.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Tag className="w-3.5 h-3.5 text-muted-foreground" />
+              <div className="flex flex-wrap gap-1.5">
+                {tierlist.genres.slice(0, 5).map((genre) => (
+                  <span
+                    key={genre}
+                    className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                  >
+                    {genre}
+                  </span>
+                ))}
+                {tierlist.genres.length > 5 && (
+                  <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                    +{tierlist.genres.length - 5}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto pr-20">
         <div className="p-6">
-          <div className="mb-8">
-            <h1 className="text-4xl font-black tracking-tight mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              {tierlist.title}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Drag and drop movies to organize them into tiers
-            </p>
-          </div>
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCorners}
+            collisionDetection={collisionDetectionStrategy}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div className="space-y-6">
+            <div className="space-y-4">
               {rankedTiers.map((tier) => (
-                <TierContainer key={tier.id} id={tier.id} tier={tier} />
+                <TierContainer
+                  key={tier.id}
+                  id={tier.id}
+                  tier={tier}
+                  isOwner={isOwner}
+                />
               ))}
             </div>
-            {unrankedTier && <StickyUnrankedTier tier={unrankedTier} />}
+            {unrankedTier && (
+              <StickyUnrankedTier tier={unrankedTier} isOwner={isOwner} />
+            )}
             <DragOverlayPortal />
           </DndContext>
         </div>
       </div>
     </div>
+  )
+}
+
+function RenameTierlistDialog({
+  currentTitle,
+  onRename,
+}: {
+  currentTitle: string
+  onRename: (newTitle: string) => void
+}) {
+  const [title, setTitle] = useState(currentTitle)
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setTitle(currentTitle)
+    }
+  }, [open, currentTitle])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onRename(title)
+    setOpen(false)
+  }
+
+  return (
+    <DialogRoot open={open} onOpenChange={setOpen}>
+      <DialogTrigger>
+        <Button variant="outline" size="sm" className="gap-2">
+          <Pencil className="w-3.5 h-3.5" />
+          Rename
+        </Button>
+      </DialogTrigger>
+      <DialogPortal>
+        <DialogBackdrop />
+        <DialogPopup>
+          <form onSubmit={handleSubmit}>
+            <h2 className="text-lg font-semibold mb-4">Rename Tierlist</h2>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Tierlist name"
+              className="mb-4"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <DialogClose>
+                <Button type="button" variant="outline">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={!title.trim()}>
+                Save
+              </Button>
+            </div>
+          </form>
+        </DialogPopup>
+      </DialogPortal>
+    </DialogRoot>
   )
 }

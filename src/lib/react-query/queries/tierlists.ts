@@ -145,7 +145,11 @@ export const getUserTierlists = createServerFn({ method: 'GET' })
         with: {
           tiers: {
             with: {
-              moviesOnTiers: true,
+              moviesOnTiers: {
+                with: {
+                  movie: true,
+                },
+              },
             },
             orderBy: (tiers, { asc }) => [asc(tiers.value)],
           },
@@ -284,8 +288,6 @@ export const useTierlistLiveQuery = (userId: string, tierlistId: string) => {
       )
   })
 
-  console.log('Tierlist live query results:', results)
-
   const rankedMovieIds = useMemo(() => {
     if (!results) return new Set<string>()
 
@@ -324,6 +326,11 @@ export const useTierlistLiveQuery = (userId: string, tierlistId: string) => {
             : true) &&
           (tierlistToDate
             ? new Date(movie.watchDate!) <= new Date(tierlistToDate)
+            : true) &&
+          (tierlist.genres && tierlist.genres.length > 0
+            ? movie.genres
+              ? tierlist.genres.some((genre) => movie.genres!.includes(genre))
+              : false
             : true),
       )
   }, [allMovies, rankedMovieIds])
@@ -358,7 +365,7 @@ export const useTierlistLiveQuery = (userId: string, tierlistId: string) => {
         ...tier,
         movies: [...tier.movies].sort((a, b) => a.position - b.position),
       }))
-      .sort((a, b) => b.value - a.value)
+      .sort((a, b) => a.value - b.value)
 
     const unrankedTier: TierWithMovies = {
       id: 'unranked',

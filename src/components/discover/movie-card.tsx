@@ -39,7 +39,7 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
             </div>
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity hover:opacity-100">
           <div className="absolute bottom-0 left-0 right-0 p-1.5">
             <h3 className="text-xs font-semibold text-white line-clamp-2 leading-tight">
               {movie.title}

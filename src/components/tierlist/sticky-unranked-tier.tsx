@@ -7,12 +7,14 @@ import TierItem from './tier-item'
 
 interface StickyUnrankedTierProps {
   tier: TierWithMovies
+  isOwner?: boolean
 }
 
-function StickyUnrankedTier({ tier }: StickyUnrankedTierProps) {
+function StickyUnrankedTier({ tier, isOwner = true }: StickyUnrankedTierProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const { setNodeRef, isOver } = useDroppable({
     id: tier.id,
+    disabled: !isOwner,
   })
 
   const movieCount = tier.movies.length
@@ -21,16 +23,15 @@ function StickyUnrankedTier({ tier }: StickyUnrankedTierProps) {
     <>
       <div
         className={`fixed right-0 top-1/2 -translate-y-1/2 z-50 flex items-stretch transition-all duration-300 ease-in-out ${
-          isExpanded ? 'translate-x-0' : 'translate-x-[calc(100%-3rem)]'
+          isExpanded ? 'translate-x-0' : 'translate-x-[calc(100%-2.5rem)]'
         }`}
       >
-        {/* Toggle button - always visible */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className={`flex flex-col items-center justify-center gap-2 px-2 py-4 rounded-l-xl border-y-2 border-l-2 transition-all duration-200 ${
             isOver
-              ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20'
-              : 'bg-background/95 border-border/50 hover:bg-muted/80 hover:border-primary/30'
+              ? 'bg-primary/10 border-primary shadow-lg shadow-primary/20'
+              : 'bg-background/95 border-border/70 hover:bg-background/50 hover:border-primary/30'
           } backdrop-blur-md`}
         >
           {isExpanded ? (
@@ -51,7 +52,7 @@ function StickyUnrankedTier({ tier }: StickyUnrankedTierProps) {
           </span>
         </button>
         <div
-          className={`w-72 max-h-[70vh] flex flex-col rounded-l-xl border-y-2 border-l-2 transition-all duration-200 ${
+          className={`w-72 max-h-[70vh] flex flex-col  border-y-2 border-l-2 transition-all duration-200 ${
             isOver
               ? 'bg-primary/10 border-primary shadow-xl shadow-primary/20'
               : 'bg-background/95 border-border/50 shadow-2xl'
@@ -95,7 +96,12 @@ function StickyUnrankedTier({ tier }: StickyUnrankedTierProps) {
                 <div className="grid grid-cols-2 gap-2">
                   {tier.movies.map((movie) => (
                     <div key={movie.id} className="aspect-[2/3]">
-                      <TierItem movie={movie} id={movie.id} compact />
+                      <TierItem
+                        movie={movie}
+                        id={movie.id}
+                        compact
+                        isOwner={isOwner}
+                      />
                     </div>
                   ))}
                 </div>

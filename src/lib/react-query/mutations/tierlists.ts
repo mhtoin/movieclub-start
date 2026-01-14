@@ -50,3 +50,21 @@ export const deleteTierlist = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     await db.delete(tierlist).where(eq(tierlist.id, data.id))
   })
+
+export const updateTierlist = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({
+      id: z.string(),
+      title: z.string().min(1).optional(),
+      watchDateFrom: z.string().optional(),
+      watchDateTo: z.string().optional(),
+      genres: z.array(z.string()).optional(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const { id, ...updates } = data
+    await db
+      .update(tierlist)
+      .set(updates)
+      .where(eq(tierlist.id, id))
+  })
