@@ -53,145 +53,226 @@ export function BackdropVeilBackground() {
   )
 }
 
+function FilmReel({
+  x,
+  y,
+  size = 100,
+  className,
+}: {
+  x: number
+  y: number
+  size?: number
+  className: string
+}) {
+  const centerX = x + size / 2
+  const centerY = y + size / 2
+  const holeRadius = size * 0.09
+  const holeDistance = size * 0.22
+  const holeCount = 6
+
+  return (
+    <g className={className}>
+      <circle
+        cx={centerX}
+        cy={centerY}
+        r={size * 0.46}
+        fill="none"
+        strokeWidth={size * 0.08}
+      />
+      <circle
+        cx={centerX}
+        cy={centerY}
+        r={size * 0.3}
+        fill="none"
+        strokeWidth={size * 0.04}
+      />
+      {Array.from({ length: holeCount }, (_, i) => {
+        const angle = (i * 360) / holeCount
+        const holeX = centerX + holeDistance * Math.cos((angle * Math.PI) / 180)
+        const holeY = centerY + holeDistance * Math.sin((angle * Math.PI) / 180)
+        return (
+          <circle
+            key={i}
+            cx={holeX}
+            cy={holeY}
+            r={holeRadius}
+            className="bg-cinema__hole"
+          />
+        )
+      })}
+      <circle
+        cx={centerX}
+        cy={centerY}
+        r={size * 0.12}
+        fill="none"
+        strokeWidth={size * 0.03}
+      />
+    </g>
+  )
+}
+
+function ClapperBoard({
+  x,
+  y,
+  size = 100,
+  rotation = 0,
+  className,
+  clapOpen = false,
+}: {
+  x: number
+  y: number
+  size?: number
+  rotation?: number
+  className: string
+  clapOpen?: boolean
+}) {
+  const width = size
+  const height = size * 0.7
+  const clapHeight = height * 0.25
+  const stripeWidth = width / 7
+
+  return (
+    <g className={className}>
+      <g
+        transform={`translate(${x}, ${y}) rotate(${rotation} ${width / 2} ${height / 2})`}
+      >
+        <rect
+          x={0}
+          y={clapHeight * 0.8}
+          width={width}
+          height={height - clapHeight * 0.5}
+          rx={size * 0.03}
+          fill="none"
+          strokeWidth={size * 0.025}
+        />
+        <g transform={`rotate(${clapOpen ? -25 : 0} 0 ${clapHeight})`}>
+          <rect
+            x={0}
+            y={0}
+            width={width}
+            height={clapHeight}
+            rx={size * 0.02}
+            fill="none"
+            strokeWidth={size * 0.025}
+          />
+          {Array.from({ length: 4 }, (_, i) => (
+            <line
+              key={i}
+              x1={stripeWidth * (i * 2 + 1)}
+              y1={0}
+              x2={stripeWidth * (i * 2 + 1.5)}
+              y2={clapHeight}
+              strokeWidth={stripeWidth * 0.8}
+              strokeLinecap="butt"
+            />
+          ))}
+        </g>
+        <line
+          x1={width * 0.1}
+          y1={height * 0.5}
+          x2={width * 0.7}
+          y2={height * 0.5}
+          strokeWidth={size * 0.02}
+          strokeLinecap="round"
+        />
+        <line
+          x1={width * 0.1}
+          y1={height * 0.65}
+          x2={width * 0.5}
+          y2={height * 0.65}
+          strokeWidth={size * 0.02}
+          strokeLinecap="round"
+        />
+        <line
+          x1={width * 0.1}
+          y1={height * 0.8}
+          x2={width * 0.6}
+          y2={height * 0.8}
+          strokeWidth={size * 0.02}
+          strokeLinecap="round"
+        />
+      </g>
+    </g>
+  )
+}
+
 export function ShapesBackground() {
   return (
     <div className="app-background-option" aria-hidden>
-      <div className="bg-geometric">
+      <div className="bg-cinema">
         <svg
-          className="bg-geometric__svg"
+          className="bg-cinema__svg"
           viewBox="0 0 1920 1080"
           preserveAspectRatio="xMidYMid slice"
         >
-          <defs>
-            <pattern
-              id="perfPattern"
-              x="0"
-              y="0"
-              width="40"
-              height="60"
-              patternUnits="userSpaceOnUse"
-            >
-              <rect
-                x="12"
-                y="5"
-                width="16"
-                height="12"
-                rx="2"
-                className="bg-geometric__perf"
-              />
-            </pattern>
-          </defs>
-
-          <rect
-            x="0"
-            y="0"
-            width="40"
-            height="100%"
-            fill="url(#perfPattern)"
-            className="bg-geometric__strip"
+          <FilmReel
+            x={96}
+            y={108}
+            size={140}
+            className="bg-cinema__item bg-cinema__item--1"
           />
-          <rect
-            x="1880"
-            y="0"
-            width="40"
-            height="100%"
-            fill="url(#perfPattern)"
-            className="bg-geometric__strip"
+          <FilmReel
+            x={1632}
+            y={702}
+            size={180}
+            className="bg-cinema__item bg-cinema__item--2"
+          />
+          <FilmReel
+            x={1440}
+            y={54}
+            size={100}
+            className="bg-cinema__item bg-cinema__item--3"
+          />
+          <FilmReel
+            x={38}
+            y={756}
+            size={120}
+            className="bg-cinema__item bg-cinema__item--4"
+          />
+          <FilmReel
+            x={864}
+            y={810}
+            size={90}
+            className="bg-cinema__item bg-cinema__item--5"
           />
 
-          <circle
-            cx="15%"
-            cy="20%"
-            r="80"
-            className="bg-geometric__shape bg-geometric__shape--1"
+          <ClapperBoard
+            x={480}
+            y={54}
+            size={120}
+            rotation={-12}
+            className="bg-cinema__item bg-cinema__item--6"
           />
-          <circle
-            cx="85%"
-            cy="75%"
-            r="120"
-            className="bg-geometric__shape bg-geometric__shape--2"
+          <ClapperBoard
+            x={1152}
+            y={594}
+            size={100}
+            rotation={8}
+            className="bg-cinema__item bg-cinema__item--7"
+            clapOpen
           />
-          <rect
-            x="70%"
-            y="15%"
-            width="100"
-            height="100"
-            rx="8"
-            className="bg-geometric__shape bg-geometric__shape--3"
-            transform="rotate(15, 1344, 162)"
+          <ClapperBoard
+            x={288}
+            y={486}
+            size={80}
+            rotation={-5}
+            className="bg-cinema__item bg-cinema__item--8"
           />
-          <rect
-            x="20%"
-            y="70%"
-            width="80"
-            height="80"
-            rx="6"
-            className="bg-geometric__shape bg-geometric__shape--4"
-            transform="rotate(-10, 384, 756)"
+          <ClapperBoard
+            x={1536}
+            y={324}
+            size={90}
+            rotation={15}
+            className="bg-cinema__item bg-cinema__item--9"
+            clapOpen
           />
-
-          <circle
-            cx="8%"
-            cy="55%"
-            r="50"
-            className="bg-geometric__shape bg-geometric__shape--5"
+          <ClapperBoard
+            x={768}
+            y={270}
+            size={70}
+            rotation={-8}
+            className="bg-cinema__item bg-cinema__item--10"
           />
-          <circle
-            cx="92%"
-            cy="30%"
-            r="65"
-            className="bg-geometric__shape bg-geometric__shape--6"
-          />
-          <rect
-            x="45%"
-            y="85%"
-            width="70"
-            height="70"
-            rx="4"
-            className="bg-geometric__shape bg-geometric__shape--7"
-            transform="rotate(25, 864, 918)"
-          />
-          <rect
-            x="55%"
-            y="8%"
-            width="60"
-            height="60"
-            rx="30"
-            className="bg-geometric__shape bg-geometric__shape--8"
-          />
-
-          <polygon
-            points="150,650 200,750 100,750"
-            className="bg-geometric__shape bg-geometric__shape--9"
-          />
-          <polygon
-            points="1750,350 1800,450 1700,450"
-            className="bg-geometric__shape bg-geometric__shape--10"
-          />
-
-          <line
-            x1="5%"
-            y1="40%"
-            x2="25%"
-            y2="35%"
-            className="bg-geometric__line bg-geometric__line--1"
-          />
-          <line
-            x1="75%"
-            y1="55%"
-            x2="95%"
-            y2="60%"
-            className="bg-geometric__line bg-geometric__line--2"
-          />
-
-          <circle
-            cx="50%"
-            cy="50%"
-            r="200"
-            className="bg-geometric__reel"
-            strokeDasharray="20 10"
-          />
-          <circle cx="50%" cy="50%" r="60" className="bg-geometric__reel-hub" />
         </svg>
       </div>
     </div>
