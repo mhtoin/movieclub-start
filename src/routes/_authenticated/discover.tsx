@@ -164,7 +164,7 @@ function RouteComponent() {
             <div className="flex-shrink-0 px-4">
               {isDesktop && filtersContent}
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-24 pt-4 fade-mask md:fade-left-16 fade-y-16 fade-intensity-100">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-24 pt-4 fade-mask fade-y-10 fade-intensity-75  dark:fade-y-16 dark:fade-intensity-100">
               <Suspense
                 fallback={
                   <div className="flex items-center justify-center py-12">
