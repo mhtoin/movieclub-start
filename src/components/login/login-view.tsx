@@ -6,6 +6,7 @@ import Field from '../ui/field'
 
 export default function LoginView() {
   const [errors, setErrors] = useState({})
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
   const loginMutation = useLoginMutation()
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -15,12 +16,15 @@ export default function LoginView() {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
+    setIsLoggingIn(true)
+
     loginMutation.mutate(
       { email, password },
       {
         onError: (error) => {
           console.error('Login failed:', error)
           setErrors({ form: error.message })
+          setIsLoggingIn(false)
         },
       },
     )
@@ -30,23 +34,24 @@ export default function LoginView() {
     <Form
       className="flex w-full max-w-64 flex-col gap-4 "
       errors={errors}
-      onClearErrors={setErrors}
       onSubmit={handleSubmit}
     >
-      <Field
-        name="email"
-        label="Email"
-        type="email"
-        required
-        placeholder="user@example.com"
-      />
-      <Field
-        name="password"
-        label="Password"
-        type="password"
-        required
-        placeholder="password"
-      />
+      <fieldset disabled={isLoggingIn} className="contents">
+        <Field
+          name="email"
+          label="Email"
+          type="email"
+          required
+          placeholder="user@example.com"
+        />
+        <Field
+          name="password"
+          label="Password"
+          type="password"
+          required
+          placeholder="password"
+        />
+      </fieldset>
 
       {loginMutation.error && (
         <div className="text-sm text-red-600">
@@ -54,12 +59,8 @@ export default function LoginView() {
         </div>
       )}
 
-      <Button
-        disabled={loginMutation.isPending}
-        type="submit"
-        variant={'primary'}
-      >
-        {loginMutation.isPending ? 'Logging in...' : 'Submit'}
+      <Button disabled={isLoggingIn} type="submit" variant={'primary'}>
+        {isLoggingIn ? 'Logging in...' : 'Submit'}
       </Button>
     </Form>
   )

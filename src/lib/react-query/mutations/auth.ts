@@ -29,7 +29,19 @@ export function useLoginMutation(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (variables: LoginInput) => {
-      return await loginFn({ data: variables })
+      try {
+        return await loginFn({ data: variables })
+      } catch (error) {
+        // For now, a bit of a hack to avoid treating redirects as errors
+        if (
+          error instanceof Response &&
+          error.status >= 300 &&
+          error.status < 400
+        ) {
+          return
+        }
+        throw error
+      }
     },
     onSuccess: () => {
       // Invalidate router cache after successful login
@@ -47,7 +59,19 @@ export function useRegisterMutation(): UseMutationResult<
 
   return useMutation({
     mutationFn: async (variables: RegisterInput) => {
-      return await registerFn({ data: variables })
+      try {
+        return await registerFn({ data: variables })
+      } catch (error) {
+        // For now, a bit of a hack to avoid treating redirects as errors
+        if (
+          error instanceof Response &&
+          error.status >= 300 &&
+          error.status < 400
+        ) {
+          return
+        }
+        throw error
+      }
     },
     onSuccess: () => {
       // Invalidate router cache after successful registration
