@@ -11,7 +11,7 @@ export const registerFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const existingUser = await getUserByEmail(data.email)
     if (existingUser) {
-      return { error: 'User already exists' }
+      throw new Error('User already exists')
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 12)
@@ -39,12 +39,17 @@ export const loginFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const user = await getUserByEmail(data.email)
     if (!user || !user.password) {
-      return { error: 'Invalid email or password' }
+      console.error(
+        'Login failed: User not found or missing password for',
+        data.email,
+      )
+      throw new Error('Invalid email or password')
     }
 
     const passwordMatch = await bcrypt.compare(data.password, user.password)
     if (!passwordMatch) {
-      return { error: 'Invalid email or password' }
+      console.error('Login failed: Incorrect password for', data.email)
+      throw new Error('Invalid email or password')
     }
 
     const session = await createSession(user.id)

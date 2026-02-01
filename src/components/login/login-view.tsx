@@ -18,6 +18,8 @@ export default function LoginView() {
 
     setIsLoggingIn(true)
 
+    console.log('Attempting login with:', { email, password })
+
     loginMutation.mutate(
       { email, password },
       {
