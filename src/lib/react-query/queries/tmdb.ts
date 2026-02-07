@@ -9,19 +9,24 @@ import {
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 export const tmdbQueries = {
-  genres: () => ({
-    queryKey: ['tmdb', 'genres'],
-    queryFn: getFilters,
-  }),
-  watchProviders: () => ({
-    queryKey: ['tmdb', 'watchProviders'],
-    queryFn: fetchWatchProviders,
-  }),
+  genres: () =>
+    queryOptions({
+      queryKey: ['tmdb', 'genres'],
+      queryFn: getFilters,
+      staleTime: 1000 * 60 * 60 * 24,
+    }),
+  watchProviders: () =>
+    queryOptions({
+      queryKey: ['tmdb', 'watchProviders'],
+      queryFn: fetchWatchProviders,
+      staleTime: 1000 * 60 * 60 * 24,
+    }),
   movieDetails: (movieId: number) =>
     queryOptions({
       queryKey: ['tmdb', 'movie', movieId],
       queryFn: () => fetchMovieDetails(movieId),
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 30,
+      gcTime: 1000 * 60 * 60,
     }),
   discover: (filters: Omit<DiscoverParams, 'page'>) =>
     infiniteQueryOptions({
@@ -35,6 +40,8 @@ export const tmdbQueries = {
         }
         return undefined
       },
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
     }),
   search: (query: string) =>
     infiniteQueryOptions({
@@ -47,5 +54,7 @@ export const tmdbQueries = {
         }
         return undefined
       },
+      staleTime: 1000 * 60 * 15,
+      gcTime: 1000 * 60 * 30,
     }),
 }

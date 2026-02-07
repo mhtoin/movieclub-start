@@ -57,7 +57,7 @@ export function SlideTabs({
         ))}
       </div>
 
-      <div className="relative min-h-[140px] overflow-hidden rounded-2xl border border-border/40 bg-background/70 p-4 backdrop-blur-md sm:min-h-[130px]">
+      <div className="relative min-h-[140px] overflow-hidden rounded-2xl border border-border/40 bg-background/70 px-4 py-6 backdrop-blur-md sm:min-h-[130px]">
         <AnimatePresence mode="wait" custom={slideDirection}>
           <motion.div
             key={activeSlide}

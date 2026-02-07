@@ -1,9 +1,12 @@
 import { EmptyState } from '@/components/home/empty-state'
 import { HeroSection } from '@/components/home/hero-section'
-import { homeQueries } from '@/lib/react-query/queries/home'
+import { MovieReel } from '@/components/home/movie-reel'
+import { homeQueries, type TMDBMovie } from '@/lib/react-query/queries/home'
 import { movieQueries } from '@/lib/react-query/queries/movies'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { Flame, ThumbsUp } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
@@ -11,6 +14,7 @@ export const Route = createFileRoute('/_authenticated/home')({
     await Promise.all([
       context.queryClient.ensureQueryData(movieQueries.latest()),
       context.queryClient.ensureQueryData(homeQueries.trending()),
+      context.queryClient.ensureQueryData(tmdbQueries.genres()),
       userId
         ? context.queryClient.ensureQueryData(
             homeQueries.recommendations(userId),
@@ -37,7 +41,26 @@ function Home() {
     <div className="min-h-screen w-full bg-background text-foreground">
       <HeroSection movie={latestMovie.movie} movieUser={latestMovie.user} />
 
-      <div className="relative space-y-0"></div>
+      <div className="relative space-y-0">
+        {trendingMovies && trendingMovies.length > 0 && (
+          <MovieReel
+            title="Trending Now"
+            subtitle="Popular on your streaming services"
+            icon={<Flame className="h-5 w-5" />}
+            movies={trendingMovies as TMDBMovie[]}
+            accentColor="orange"
+          />
+        )}
+        {recommendations && recommendations.length > 0 && (
+          <MovieReel
+            title="Recommended"
+            subtitle="Based on your highly ranked films"
+            icon={<ThumbsUp className="h-5 w-5" />}
+            movies={recommendations as TMDBMovie[]}
+            accentColor="blue"
+          />
+        )}
+      </div>
     </div>
   )
 }
