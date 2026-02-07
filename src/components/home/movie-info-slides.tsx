@@ -188,8 +188,6 @@ function DetailsSlide({
       {details.map((item, i) => (
         <motion.div
           key={item.label}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
           className="group rounded-xl border border-border/40 bg-background/60 p-3 backdrop-blur-sm transition-all hover:bg-background/80 hover:border-border/60"
         >

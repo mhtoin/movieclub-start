@@ -1,10 +1,8 @@
 import type { TMDBMovie } from '@/lib/react-query/queries/home'
 import { cn } from '@/lib/utils'
-import useEmblaCarousel from 'embla-carousel-react'
-import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures'
-import { motion } from 'framer-motion'
+import { LayoutGroup, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useId, useRef, useState, type ReactNode } from 'react'
 import { MovieCard } from './movie-card'
 
 interface MovieReelProps {
@@ -29,46 +27,55 @@ export function MovieReel({
   movies,
   accentColor = 'orange',
 }: MovieReelProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      loop: false,
-      align: 'start',
-      containScroll: 'trimSnaps',
-      dragFree: true,
-      skipSnaps: false,
-    },
-    [WheelGesturesPlugin()],
-  )
-
+  const layoutGroupId = useId()
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(true)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartX = useRef(0)
+  const scrollStartX = useRef(0)
+
+  const updateScrollButtons = useCallback(() => {
+    if (!scrollRef.current) return
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+    setCanScrollPrev(scrollLeft > 0)
+    setCanScrollNext(scrollLeft < scrollWidth - clientWidth - 1)
+  }, [])
 
   const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev()
-  }, [emblaApi])
+    if (!scrollRef.current) return
+    scrollRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+  }, [])
 
   const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext()
-  }, [emblaApi])
+    if (!scrollRef.current) return
+    scrollRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+  }, [])
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return
-    setCanScrollPrev(emblaApi.canScrollPrev())
-    setCanScrollNext(emblaApi.canScrollNext())
-  }, [emblaApi])
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!scrollRef.current) return
+    setIsDragging(true)
+    dragStartX.current = e.pageX
+    scrollStartX.current = scrollRef.current.scrollLeft
+  }, [])
 
-  useEffect(() => {
-    if (!emblaApi) return
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDragging || !scrollRef.current) return
+      e.preventDefault()
+      const dx = e.pageX - dragStartX.current
+      scrollRef.current.scrollLeft = scrollStartX.current - dx
+    },
+    [isDragging],
+  )
 
-    onSelect()
-    emblaApi.on('select', onSelect)
-    emblaApi.on('reInit', onSelect)
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+  }, [])
 
-    return () => {
-      emblaApi.off('select', onSelect)
-      emblaApi.off('reInit', onSelect)
-    }
-  }, [emblaApi, onSelect])
+  const handleMouseLeave = useCallback(() => {
+    setIsDragging(false)
+  }, [])
 
   return (
     <motion.section
@@ -134,13 +141,29 @@ export function MovieReel({
             </motion.button>
           </div>
         </div>
-        <div className="overflow-hidden " ref={emblaRef}>
-          <div className="flex touch-pan-y gap-3 sm:gap-4 ">
-            {movies.map((movie, index) => (
-              <div className="min-w-0 flex-shrink-0" key={movie.id}>
-                <MovieCard movie={movie} index={index} />
-              </div>
-            ))}
+        <div className="overflow-hidden">
+          <div
+            ref={scrollRef}
+            onScroll={updateScrollButtons}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            className={cn(
+              'flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar fade-mask fade-x-16 dark:fade-x-16 fade-intensity-100',
+              isDragging ? 'cursor-grabbing' : 'cursor-grab',
+            )}
+          >
+            <LayoutGroup id={layoutGroupId}>
+              {movies.map((movie, index) => (
+                <div
+                  className="min-w-0 flex-shrink-0 snap-start"
+                  key={movie.id}
+                >
+                  <MovieCard movie={movie} index={index} />
+                </div>
+              ))}
+            </LayoutGroup>
           </div>
         </div>
       </div>

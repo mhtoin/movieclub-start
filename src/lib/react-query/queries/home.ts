@@ -20,6 +20,10 @@ export interface TMDBMovie {
   vote_average: number
   vote_count: number
   genre_ids: number[]
+  becauseYouLiked?: {
+    title: string
+    posterPath: string | null
+  }
 }
 
 interface TMDBResponse {
@@ -110,6 +114,7 @@ export const getRecommendations = createServerFn({ method: 'GET' })
       const highlyRatedMovies: Array<{
         tmdbId: number
         genres: string[] | null
+        title: string
       }> = []
 
       for (const tl of userTierlists) {
@@ -121,6 +126,7 @@ export const getRecommendations = createServerFn({ method: 'GET' })
                 highlyRatedMovies.push({
                   tmdbId: mot.movie.tmdbId,
                   genres: mot.movie.genres,
+                  title: mot.movie.title,
                 })
               }
             }
@@ -136,16 +142,41 @@ export const getRecommendations = createServerFn({ method: 'GET' })
       const shuffled = highlyRatedMovies.sort(() => Math.random() - 0.5)
       const seedMovies = shuffled.slice(0, 3)
 
-      // Fetch recommendations from TMDB for each seed movie
-      const recommendationPromises = seedMovies.map(async (seedMovie) => {
-        const url = `${TMDB_CONFIG.BASE_URL}/movie/${seedMovie.tmdbId}/recommendations?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&page=1`
+      // Fetch TMDB details for each seed movie to get poster_path
+      const seedDetailsPromises = seedMovies.map(async (seed) => {
+        const url = `${TMDB_CONFIG.BASE_URL}/movie/${seed.tmdbId}?api_key=${TMDB_CONFIG.API_KEY}&language=en-US`
+        try {
+          const response = await fetch(url)
+          if (!response.ok)
+            return { ...seed, posterPath: null as string | null }
+          const data = await response.json()
+          return {
+            ...seed,
+            posterPath: data.poster_path as string | null,
+          }
+        } catch {
+          return { ...seed, posterPath: null as string | null }
+        }
+      })
+
+      const seedDetails = await Promise.all(seedDetailsPromises)
+
+      // Fetch recommendations from TMDB for each seed movie, tagging each with its source
+      const recommendationPromises = seedDetails.map(async (seed) => {
+        const url = `${TMDB_CONFIG.BASE_URL}/movie/${seed.tmdbId}/recommendations?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&page=1`
 
         try {
           const response = await fetch(url)
           if (!response.ok) return []
 
           const data: TMDBResponse = await response.json()
-          return data.results.slice(0, 10)
+          return data.results.slice(0, 10).map((movie) => ({
+            ...movie,
+            becauseYouLiked: {
+              title: seed.title,
+              posterPath: seed.posterPath,
+            },
+          }))
         } catch {
           return []
         }
