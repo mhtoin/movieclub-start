@@ -6,7 +6,6 @@ import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, Film, Sparkles, X } from 'lucide-react'
 import { Suspense, useState } from 'react'
-import { SortByFilter } from '../discover/sort-by-filter'
 import { AddMovieDialog } from './add-movie-dialog'
 import ShortlistItem from './shortlist-item'
 
@@ -127,7 +126,6 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                       />
                     )
                   })}
-                  <SortByFilter value={sortBy} onValueChange={setSortBy} />
                   {canAddMoreMovies && (
                     <Suspense fallback={null}>
                       <AddMovieDialog movieCount={movieCount} />
