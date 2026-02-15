@@ -79,7 +79,6 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
 
   return (
     <>
-      {/* Backdrop overlay */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -92,7 +91,6 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
           />
         )}
       </AnimatePresence>
-
       <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50">
         <AnimatePresence mode="wait">
           {isExpanded && (
