@@ -96,8 +96,8 @@ DialogClose.displayName = 'DialogClose'
 
 const DialogTrigger = React.forwardRef<
   React.ComponentRef<typeof BaseDialog.Trigger>,
-  React.ComponentProps<typeof BaseDialog.Trigger>
->(({ children, ...props }, ref) => {
+  React.ComponentProps<typeof BaseDialog.Trigger> & { asChild?: boolean }
+>(({ children, asChild, ...props }, ref) => {
   if (typeof children === 'function') {
     // Render prop pattern
     return (
@@ -107,7 +107,55 @@ const DialogTrigger = React.forwardRef<
     )
   }
 
-  // Regular children - clone and add trigger props
+  // asChild: Use render prop to forward trigger props to single child
+  if (asChild && React.isValidElement(children)) {
+    return (
+      <BaseDialog.Trigger
+        render={(triggerProps) => {
+          const childProps = children.props as any
+          return React.cloneElement(children, {
+            ...childProps,
+            ...triggerProps,
+            onClick: (e: React.MouseEvent) => {
+              childProps?.onClick?.(e)
+              triggerProps.onClick?.(e)
+            },
+            className: childProps?.className
+              ? `${childProps.className} ${triggerProps.className || ''}`.trim()
+              : triggerProps.className,
+            ref: (node: any) => {
+              // Merge refs: triggerProps ref, forwarded ref, and child ref
+              if (triggerProps.ref) {
+                if (typeof triggerProps.ref === 'function') {
+                  triggerProps.ref(node)
+                } else {
+                  triggerProps.ref.current = node
+                }
+              }
+              if (ref) {
+                if (typeof ref === 'function') {
+                  ref(node)
+                } else {
+                  ref.current = node
+                }
+              }
+              const childRef = (children as any).ref
+              if (childRef) {
+                if (typeof childRef === 'function') {
+                  childRef(node)
+                } else {
+                  childRef.current = node
+                }
+              }
+            },
+          })
+        }}
+        {...props}
+      />
+    )
+  }
+
+  // Regular children - wrap in trigger
   if (React.isValidElement(children)) {
     return (
       <BaseDialog.Trigger
