@@ -84,19 +84,19 @@ export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
 
   return (
     <ResponsiveDialog open={isOpen} onOpenChange={setIsOpen}>
-      <ResponsiveDialog.Trigger>
+      <ResponsiveDialog.Trigger asChild>
         <Button
           variant="ghost"
-          className="w-full p-4 h-auto rounded-2xl border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 transition-all"
+          className="w-full h-auto py-2.5 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all"
         >
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center transition-colors">
-              <Plus className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Plus className="w-4 h-4 text-primary" />
             </div>
-            <div className="text-center">
-              <p className="text-sm font-medium text-foreground">Add Movie</p>
-              <p className="text-xs text-muted-foreground">
-                {3 - movieCount} slot{3 - movieCount === 1 ? '' : 's'} remaining
+            <div className="text-left">
+              <p className="text-xs font-medium text-foreground">Add Movie</p>
+              <p className="text-[10px] text-muted-foreground leading-tight">
+                {3 - movieCount} slot{3 - movieCount === 1 ? '' : 's'} left
               </p>
             </div>
           </div>
