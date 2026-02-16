@@ -63,6 +63,7 @@ export function ResponsiveDialog({
 interface ResponsiveDialogTriggerProps {
   children: React.ReactNode
   asChild?: boolean
+  [key: string]: any
 }
 
 function ResponsiveDialogTrigger({

@@ -65,24 +65,9 @@ const DialogClose = React.forwardRef<
     )
   }
 
-  // Regular children - clone and add close props
+  // Regular children - use element-based render for stable ref handling
   if (React.isValidElement(children)) {
-    return (
-      <BaseDialog.Close
-        ref={ref}
-        render={(closeProps) => {
-          const childProps = children.props as any
-          return React.cloneElement(children, {
-            ...closeProps,
-            ...childProps,
-            className: closeProps.className
-              ? `${closeProps.className} ${childProps?.className || ''}`.trim()
-              : childProps?.className,
-          })
-        }}
-        {...props}
-      />
-    )
+    return <BaseDialog.Close ref={ref} render={children} {...props} />
   }
 
   // Fallback for text content
@@ -109,70 +94,12 @@ const DialogTrigger = React.forwardRef<
 
   // asChild: Use render prop to forward trigger props to single child
   if (asChild && React.isValidElement(children)) {
-    return (
-      <BaseDialog.Trigger
-        render={(triggerProps) => {
-          const childProps = children.props as any
-          return React.cloneElement(children, {
-            ...childProps,
-            ...triggerProps,
-            onClick: (e: React.MouseEvent) => {
-              childProps?.onClick?.(e)
-              triggerProps.onClick?.(e)
-            },
-            className: childProps?.className
-              ? `${childProps.className} ${triggerProps.className || ''}`.trim()
-              : triggerProps.className,
-            ref: (node: any) => {
-              // Merge refs: triggerProps ref, forwarded ref, and child ref
-              if (triggerProps.ref) {
-                if (typeof triggerProps.ref === 'function') {
-                  triggerProps.ref(node)
-                } else {
-                  triggerProps.ref.current = node
-                }
-              }
-              if (ref) {
-                if (typeof ref === 'function') {
-                  ref(node)
-                } else {
-                  ref.current = node
-                }
-              }
-              const childRef = (children as any).ref
-              if (childRef) {
-                if (typeof childRef === 'function') {
-                  childRef(node)
-                } else {
-                  childRef.current = node
-                }
-              }
-            },
-          })
-        }}
-        {...props}
-      />
-    )
+    return <BaseDialog.Trigger render={children} {...props} />
   }
 
-  // Regular children - wrap in trigger
+  // Regular children - use element-based render for stable ref handling
   if (React.isValidElement(children)) {
-    return (
-      <BaseDialog.Trigger
-        ref={ref}
-        render={(triggerProps) => {
-          const childProps = children.props as any
-          return React.cloneElement(children, {
-            ...triggerProps,
-            ...childProps,
-            className: triggerProps.className
-              ? `${triggerProps.className} ${childProps?.className || ''}`.trim()
-              : childProps?.className,
-          })
-        }}
-        {...props}
-      />
-    )
+    return <BaseDialog.Trigger ref={ref} render={children} {...props} />
   }
 
   // Fallback for text content

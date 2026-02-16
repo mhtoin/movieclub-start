@@ -109,22 +109,7 @@ const PopoverClose = React.forwardRef<
   }
 
   if (React.isValidElement(children)) {
-    return (
-      <BasePopover.Close
-        ref={ref}
-        render={(closeProps) => {
-          const childProps = children.props as any
-          return React.cloneElement(children, {
-            ...closeProps,
-            ...childProps,
-            className: closeProps.className
-              ? `${closeProps.className} ${childProps?.className || ''}`.trim()
-              : childProps?.className,
-          })
-        }}
-        {...props}
-      />
-    )
+    return <BasePopover.Close ref={ref} render={children} {...props} />
   }
 
   return (
@@ -148,22 +133,7 @@ const PopoverTrigger = React.forwardRef<
   }
 
   if (React.isValidElement(children)) {
-    return (
-      <BasePopover.Trigger
-        ref={ref}
-        render={(triggerProps) => {
-          const childProps = children.props as any
-          return React.cloneElement(children, {
-            ...triggerProps,
-            ...childProps,
-            className: triggerProps.className
-              ? `${triggerProps.className} ${childProps?.className || ''}`.trim()
-              : childProps?.className,
-          })
-        }}
-        {...props}
-      />
-    )
+    return <BasePopover.Trigger ref={ref} render={children} {...props} />
   }
 
   return (

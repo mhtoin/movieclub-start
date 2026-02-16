@@ -9,7 +9,7 @@ import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl, Movie } from '@/lib/tmdb-api'
 import { cn } from '@/lib/utils'
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import {
   ChevronDown,
   ChevronUp,
@@ -21,7 +21,7 @@ import {
   Star,
   X,
 } from 'lucide-react'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface AddMovieDialogProps {
   movieCount: number
@@ -84,23 +84,18 @@ export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
 
   return (
     <ResponsiveDialog open={isOpen} onOpenChange={setIsOpen}>
-      <ResponsiveDialog.Trigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full h-auto py-2.5 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Plus className="w-4 h-4 text-primary" />
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-medium text-foreground">Add Movie</p>
-              <p className="text-[10px] text-muted-foreground leading-tight">
-                {3 - movieCount} slot{3 - movieCount === 1 ? '' : 's'} left
-              </p>
-            </div>
+      <ResponsiveDialog.Trigger className="w-full h-auto py-2.5 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer bg-transparent text-left">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Plus className="w-4 h-4 text-primary" />
           </div>
-        </Button>
+          <div className="text-left">
+            <p className="text-xs font-medium text-foreground">Add Movie</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">
+              {3 - movieCount} slot{3 - movieCount === 1 ? '' : 's'} left
+            </p>
+          </div>
+        </div>
       </ResponsiveDialog.Trigger>
       <ResponsiveDialog.Content
         size="xl"
@@ -193,32 +188,24 @@ export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto -mx-2 px-2 min-h-0">
-          <Suspense
-            fallback={
-              <div className="flex justify-center items-center min-h-[400px]">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            }
-          >
-            {debouncedQuery ? (
-              <SearchResults
-                query={debouncedQuery}
-                onAddMovie={handleAddMovie}
-                onMovieInfo={handleMovieInfo}
-                isPending={isPending}
-              />
-            ) : (
-              <PopularMovies
-                onAddMovie={handleAddMovie}
-                onMovieInfo={handleMovieInfo}
-                isPending={isPending}
-                selectedGenres={selectedGenres}
-                selectedProviders={selectedProviders}
-                voteRange={voteRange}
-                sortBy={sortBy}
-              />
-            )}
-          </Suspense>
+          {debouncedQuery ? (
+            <SearchResults
+              query={debouncedQuery}
+              onAddMovie={handleAddMovie}
+              onMovieInfo={handleMovieInfo}
+              isPending={isPending}
+            />
+          ) : (
+            <PopularMovies
+              onAddMovie={handleAddMovie}
+              onMovieInfo={handleMovieInfo}
+              isPending={isPending}
+              selectedGenres={selectedGenres}
+              selectedProviders={selectedProviders}
+              voteRange={voteRange}
+              sortBy={sortBy}
+            />
+          )}
         </div>
 
         <MovieDetailsDialog
@@ -252,8 +239,8 @@ function PopularMovies({
   voteRange: [number, number]
   sortBy: string
 }) {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useSuspenseInfiniteQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery(
       tmdbQueries.discover({
         with_genres:
           selectedGenres.length > 0 ? selectedGenres.join(',') : undefined,
@@ -291,7 +278,15 @@ function PopularMovies({
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
-  const movies = data.pages.flatMap((page) => page.results)
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  const movies = data?.pages.flatMap((page) => page.results) ?? []
 
   return (
     <>
@@ -324,8 +319,8 @@ function SearchResults({
   onMovieInfo,
   isPending,
 }: MovieListProps & { query: string }) {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useSuspenseInfiniteQuery(tmdbQueries.search(query))
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery(tmdbQueries.search(query))
 
   const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -351,7 +346,15 @@ function SearchResults({
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
-  const movies = data.pages.flatMap((page) => page.results)
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  const movies = data?.pages.flatMap((page) => page.results) ?? []
 
   if (movies.length === 0) {
     return (

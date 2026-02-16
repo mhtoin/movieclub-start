@@ -41,24 +41,20 @@ export const removeFromShortlist = createServerFn({ method: 'POST' })
       )
 
     // Get the shortlist with all its movies
-    const shortlistWithMovies = await db
+    const rows = await db
       .select()
       .from(shortlist)
       .where(eq(shortlist.userId, user.userId))
-      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+      .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+      .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
-    // Transform the result into a more useful structure
-    const updatedShortlist =
-      shortlistWithMovies.length > 0
-        ? {
-            ...shortlistWithMovies[0].shortlist,
-            movies: shortlistWithMovies.map((row) => row.movie),
-          }
-        : null
-
-    if (!updatedShortlist) {
+    if (rows.length === 0) {
       throw new Error('Shortlist not found after deletion')
+    }
+
+    const updatedShortlist = {
+      ...rows[0].shortlist,
+      movies: rows.flatMap((row) => (row.movie ? [row.movie] : [])),
     }
 
     return { success: true, shortlist: updatedShortlist }
@@ -136,16 +132,16 @@ export const addToShortlist = createServerFn({ method: 'POST' })
     })
 
     // Get the updated shortlist with all its movies
-    const shortlistWithMovies = await db
+    const rows = await db
       .select()
       .from(shortlist)
       .where(eq(shortlist.userId, user.userId))
-      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+      .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+      .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
     const updatedShortlist = {
-      ...shortlistWithMovies[0].shortlist,
-      movies: shortlistWithMovies.map((row) => row.movie),
+      ...rows[0].shortlist,
+      movies: rows.flatMap((row) => (row.movie ? [row.movie] : [])),
     }
 
     return { success: true, shortlist: updatedShortlist }
@@ -172,6 +168,9 @@ export const useRemoveFromShortlistMutation = () => {
     },
     onSuccess: (shortlist) => {
       queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+      queryClient.invalidateQueries({
+        queryKey: ['shortlist', shortlist.userId],
+      })
       toastManager.add({
         title: 'Success',
         description: 'Movie removed from shortlist',
@@ -201,6 +200,9 @@ export const useAddToShortlistMutation = () => {
     },
     onSuccess: (shortlist) => {
       queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+      queryClient.invalidateQueries({
+        queryKey: ['shortlist', shortlist.userId],
+      })
       toastManager.add({
         title: 'Success',
         description: 'Movie added to shortlist',
@@ -238,23 +240,20 @@ export const toggleIsReady = createServerFn({ method: 'POST' })
       .where(eq(shortlist.id, userShortlist.id))
 
     // Get the updated shortlist with all its movies
-    const shortlistWithMovies = await db
+    const rows = await db
       .select()
       .from(shortlist)
       .where(eq(shortlist.userId, user.userId))
-      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+      .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+      .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
-    const updatedShortlist =
-      shortlistWithMovies.length > 0
-        ? {
-            ...shortlistWithMovies[0].shortlist,
-            movies: shortlistWithMovies.map((row) => row.movie),
-          }
-        : null
-
-    if (!updatedShortlist) {
+    if (rows.length === 0) {
       throw new Error('Shortlist not found after update')
+    }
+
+    const updatedShortlist = {
+      ...rows[0].shortlist,
+      movies: rows.flatMap((row) => (row.movie ? [row.movie] : [])),
     }
 
     return { success: true, shortlist: updatedShortlist }
@@ -289,23 +288,20 @@ export const toggleParticipating = createServerFn({ method: 'POST' })
       .where(eq(shortlist.id, userShortlist.id))
 
     // Get the updated shortlist with all its movies
-    const shortlistWithMovies = await db
+    const rows = await db
       .select()
       .from(shortlist)
       .where(eq(shortlist.userId, user.userId))
-      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+      .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+      .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
-    const updatedShortlist =
-      shortlistWithMovies.length > 0
-        ? {
-            ...shortlistWithMovies[0].shortlist,
-            movies: shortlistWithMovies.map((row) => row.movie),
-          }
-        : null
-
-    if (!updatedShortlist) {
+    if (rows.length === 0) {
       throw new Error('Shortlist not found after update')
+    }
+
+    const updatedShortlist = {
+      ...rows[0].shortlist,
+      movies: rows.flatMap((row) => (row.movie ? [row.movie] : [])),
     }
 
     return { success: true, shortlist: updatedShortlist }
@@ -409,33 +405,22 @@ export const updateUserShortlistStatus = createServerFn({ method: 'POST' })
       .where(eq(shortlist.id, targetShortlist.id))
 
     // Get the updated shortlist with all its movies
-    const shortlistWithMovies = await db
+    const rows = await db
       .select()
       .from(shortlist)
       .where(eq(shortlist.userId, userId))
-      .innerJoin(user, eq(shortlist.userId, user.id))
-      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+      .leftJoin(user, eq(shortlist.userId, user.id))
+      .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+      .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
-    const shortlistsMap = new Map()
-    for (const row of shortlistWithMovies) {
-      const shortlistId = row.shortlist.id
-      if (!shortlistsMap.has(shortlistId)) {
-        shortlistsMap.set(shortlistId, {
-          ...row.shortlist,
-          user: row.user,
-          movies: [],
-        })
-      }
-      if (row.movie) {
-        shortlistsMap.get(shortlistId).movies.push(row.movie)
-      }
+    if (rows.length === 0) {
+      throw new Error('Shortlist not found after update')
     }
 
-    const updatedShortlist = Array.from(shortlistsMap.values())[0]
-
-    if (!updatedShortlist) {
-      throw new Error('Shortlist not found after update')
+    const updatedShortlist = {
+      ...rows[0].shortlist,
+      user: rows[0].user!,
+      movies: rows.flatMap((row) => (row.movie ? [row.movie] : [])),
     }
 
     return { success: true, shortlist: updatedShortlist }
@@ -505,23 +490,20 @@ export const updateSelectedIndex = createServerFn({ method: 'POST' })
       .where(eq(shortlist.id, userShortlist.id))
 
     // Get the updated shortlist with all its movies
-    const shortlistWithMovies = await db
+    const rows = await db
       .select()
       .from(shortlist)
       .where(eq(shortlist.userId, user.userId))
-      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+      .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+      .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
-    const updatedShortlist =
-      shortlistWithMovies.length > 0
-        ? {
-            ...shortlistWithMovies[0].shortlist,
-            movies: shortlistWithMovies.map((row) => row.movie),
-          }
-        : null
-
-    if (!updatedShortlist) {
+    if (rows.length === 0) {
       throw new Error('Shortlist not found after update')
+    }
+
+    const updatedShortlist = {
+      ...rows[0].shortlist,
+      movies: rows.flatMap((row) => (row.movie ? [row.movie] : [])),
     }
 
     return { success: true, shortlist: updatedShortlist }

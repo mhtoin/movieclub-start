@@ -6,7 +6,7 @@ import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { Film, Sparkles, X } from 'lucide-react'
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { AddMovieDialog } from './add-movie-dialog'
 import ShortlistItem from './shortlist-item'
 
@@ -154,9 +154,7 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                       Add up to 3 movies to your shortlist
                     </p>
                     <div className="w-full">
-                      <Suspense fallback={null}>
-                        <AddMovieDialog movieCount={movieCount} />
-                      </Suspense>
+                      <AddMovieDialog movieCount={movieCount} />
                     </div>
                   </motion.div>
                 ) : (
@@ -175,63 +173,67 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                           </p>
                         </motion.div>
                       )}
-                    {data?.movies?.map((movie, index) => (
-                      <motion.div key={movie.id} variants={itemVariants}>
-                        <ShortlistItem
-                          movie={movie}
-                          index={index}
-                          requiresSelection={
-                            data?.requiresSelection ?? undefined
-                          }
-                          selectedIndex={data?.selectedIndex ?? undefined}
-                        />
-                      </motion.div>
-                    ))}
+                    <AnimatePresence initial={false}>
+                      {data?.movies?.map((movie, index) => (
+                        <motion.div key={movie.id} variants={itemVariants}>
+                          <ShortlistItem
+                            movie={movie}
+                            index={index}
+                            requiresSelection={
+                              data?.requiresSelection ?? undefined
+                            }
+                            selectedIndex={data?.selectedIndex ?? undefined}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                     {canAddMoreMovies && (
-                      <motion.div variants={itemVariants}>
-                        <Suspense fallback={null}>
-                          <AddMovieDialog movieCount={movieCount} />
-                        </Suspense>
+                      <motion.div
+                        key="add-movie"
+                        variants={itemVariants}
+                        initial="hidden"
+                        animate="visible"
+                      >
+                        <AddMovieDialog movieCount={movieCount} />
                       </motion.div>
                     )}
                   </div>
                 )}
-                {movieCount > 0 && (
-                  <motion.div
-                    variants={itemVariants}
-                    className="flex items-center gap-2 mt-4 pt-3 border-t border-border/40"
-                  >
-                    <button
-                      onClick={handleToggleParticipating}
-                      disabled={toggleParticipatingMutation.isPending}
-                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        data?.participating
-                          ? 'bg-primary/15 text-primary border border-primary/30'
-                          : 'bg-accent/50 text-muted-foreground border border-transparent hover:bg-accent hover:text-foreground'
-                      }`}
-                    >
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full transition-colors ${data?.participating ? 'bg-primary' : 'bg-muted-foreground/40'}`}
-                      />
-                      {data?.participating ? 'Participating' : 'Sitting out'}
-                    </button>
 
-                    <button
-                      onClick={handleToggleReady}
-                      disabled={toggleIsReadyMutation.isPending}
-                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        data?.isReady
-                          ? 'bg-success/15 text-success border border-success/30'
-                          : 'bg-accent/50 text-muted-foreground border border-transparent hover:bg-accent hover:text-foreground'
-                      }`}
-                    >
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full transition-colors ${data?.isReady ? 'bg-success' : 'bg-muted-foreground/40'}`}
-                      />
-                      {data?.isReady ? 'Ready' : 'Not ready'}
-                    </button>
-                  </motion.div>
-                )}
+                <motion.div
+                  variants={itemVariants}
+                  className="flex items-center gap-2 mt-4 pt-3 border-t border-border/40"
+                >
+                  <button
+                    onClick={handleToggleParticipating}
+                    disabled={toggleParticipatingMutation.isPending}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      data?.participating
+                        ? 'bg-primary/15 text-primary border border-primary/30'
+                        : 'bg-accent/50 text-muted-foreground border border-transparent hover:bg-accent hover:text-foreground'
+                    }`}
+                  >
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${data?.participating ? 'bg-primary' : 'bg-muted-foreground/40'}`}
+                    />
+                    {data?.participating ? 'Participating' : 'Sitting out'}
+                  </button>
+
+                  <button
+                    onClick={handleToggleReady}
+                    disabled={toggleIsReadyMutation.isPending}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      data?.isReady
+                        ? 'bg-success/15 text-success border border-success/30'
+                        : 'bg-accent/50 text-muted-foreground border border-transparent hover:bg-accent hover:text-foreground'
+                    }`}
+                  >
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${data?.isReady ? 'bg-success' : 'bg-muted-foreground/40'}`}
+                    />
+                    {data?.isReady ? 'Ready' : 'Not ready'}
+                  </button>
+                </motion.div>
               </div>
             </motion.div>
           )}

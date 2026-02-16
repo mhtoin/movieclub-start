@@ -11,27 +11,21 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
   .inputValidator((userId: string) => userId)
   .handler(async ({ data: userId }) => {
     try {
-      const userShortlist = await db
+      const rows = await db
         .select()
         .from(shortlist)
         .where(eq(shortlist.userId, userId))
-        .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-        .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+        .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+        .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
-      // Transform the result into a more useful structure
-      const shortlistWithMovies =
-        userShortlist.length > 0
-          ? {
-              ...userShortlist[0].shortlist,
-              movies: userShortlist.map((row) => row.movie),
-            }
-          : null
-
-      if (!shortlistWithMovies) {
+      if (rows.length === 0) {
         return null
       }
 
-      return shortlistWithMovies
+      return {
+        ...rows[0].shortlist,
+        movies: rows.flatMap((row) => (row.movie ? [row.movie] : [])),
+      }
     } catch (error) {
       console.error('Error fetching shortlist:', error)
       return null
