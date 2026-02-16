@@ -9,7 +9,7 @@ import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl, Movie } from '@/lib/tmdb-api'
 import { cn } from '@/lib/utils'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import {
   ChevronDown,
   ChevronUp,
@@ -21,7 +21,7 @@ import {
   Star,
   X,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 
 interface AddMovieDialogProps {
   movieCount: number
@@ -167,19 +167,27 @@ export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
               >
                 <div style={{ overflow: 'hidden' }}>
                   <div className="space-y-4 px-4">
-                    <SortByFilter value={sortBy} onValueChange={setSortBy} />
-                    <GenreFilter
-                      selectedGenres={selectedGenres}
-                      onGenresChange={setSelectedGenres}
-                    />
-                    <ProviderFilter
-                      selectedProviders={selectedProviders}
-                      onProvidersChange={setSelectedProviders}
-                    />
-                    <RatingFilter
-                      voteRange={voteRange}
-                      onVoteRangeChange={setVoteRange}
-                    />
+                    <Suspense
+                      fallback={
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                      }
+                    >
+                      <SortByFilter value={sortBy} onValueChange={setSortBy} />
+                      <GenreFilter
+                        selectedGenres={selectedGenres}
+                        onGenresChange={setSelectedGenres}
+                      />
+                      <ProviderFilter
+                        selectedProviders={selectedProviders}
+                        onProvidersChange={setSelectedProviders}
+                      />
+                      <RatingFilter
+                        voteRange={voteRange}
+                        onVoteRangeChange={setVoteRange}
+                      />
+                    </Suspense>
                   </div>
                 </div>
               </div>
@@ -188,24 +196,32 @@ export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto -mx-2 px-2 min-h-0">
-          {debouncedQuery ? (
-            <SearchResults
-              query={debouncedQuery}
-              onAddMovie={handleAddMovie}
-              onMovieInfo={handleMovieInfo}
-              isPending={isPending}
-            />
-          ) : (
-            <PopularMovies
-              onAddMovie={handleAddMovie}
-              onMovieInfo={handleMovieInfo}
-              isPending={isPending}
-              selectedGenres={selectedGenres}
-              selectedProviders={selectedProviders}
-              voteRange={voteRange}
-              sortBy={sortBy}
-            />
-          )}
+          <Suspense
+            fallback={
+              <div className="flex justify-center items-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }
+          >
+            {debouncedQuery ? (
+              <SearchResults
+                query={debouncedQuery}
+                onAddMovie={handleAddMovie}
+                onMovieInfo={handleMovieInfo}
+                isPending={isPending}
+              />
+            ) : (
+              <PopularMovies
+                onAddMovie={handleAddMovie}
+                onMovieInfo={handleMovieInfo}
+                isPending={isPending}
+                selectedGenres={selectedGenres}
+                selectedProviders={selectedProviders}
+                voteRange={voteRange}
+                sortBy={sortBy}
+              />
+            )}
+          </Suspense>
         </div>
 
         <MovieDetailsDialog
@@ -239,8 +255,8 @@ function PopularMovies({
   voteRange: [number, number]
   sortBy: string
 }) {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSuspenseInfiniteQuery(
       tmdbQueries.discover({
         with_genres:
           selectedGenres.length > 0 ? selectedGenres.join(',') : undefined,
@@ -278,15 +294,7 @@ function PopularMovies({
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  const movies = data?.pages.flatMap((page) => page.results) ?? []
+  const movies = data.pages.flatMap((page) => page.results)
 
   return (
     <>
@@ -319,8 +327,8 @@ function SearchResults({
   onMovieInfo,
   isPending,
 }: MovieListProps & { query: string }) {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery(tmdbQueries.search(query))
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSuspenseInfiniteQuery(tmdbQueries.search(query))
 
   const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -346,15 +354,7 @@ function SearchResults({
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  const movies = data?.pages.flatMap((page) => page.results) ?? []
+  const movies = data.pages.flatMap((page) => page.results)
 
   if (movies.length === 0) {
     return (

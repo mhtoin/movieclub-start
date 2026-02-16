@@ -7,8 +7,8 @@ import {
 } from '@/components/ui/combobox'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { WatchProvider } from '@/lib/tmdb-api'
-import { useQuery } from '@tanstack/react-query'
-import { Check, ChevronDown, Loader2, X } from 'lucide-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Check, ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import MobileFilter from './mobile-filter'
 
@@ -25,7 +25,7 @@ export function ProviderFilter({
   variant = 'default',
   chipContent,
 }: ProviderFilterProps) {
-  const { data: providers = [], isLoading } = useQuery(
+  const { data: providers = [] } = useSuspenseQuery(
     tmdbQueries.watchProviders(),
   )
   const [searchValue, setSearchValue] = useState('')
@@ -136,24 +136,12 @@ export function ProviderFilter({
         value={selectedProviders}
         onValueChange={(value) => onProvidersChange(value)}
         multiple
-        disabled={isLoading}
       >
         <ComboboxTrigger className="w-full">
-          {isLoading ? (
-            <>
-              <Loader2 className="h-3 w-3 animate-spin flex-shrink-0" />
-              <span className="flex-1 text-left text-muted-foreground">
-                Loading providers...
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="flex-1 truncate text-left">
-                {selectedLabels || 'Select providers...'}
-              </span>
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </>
-          )}
+          <span className="flex-1 truncate text-left">
+            {selectedLabels || 'Select providers...'}
+          </span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
         </ComboboxTrigger>
         <ComboboxPopup className="w-[var(--anchor-width)]">
           <div className="p-2">

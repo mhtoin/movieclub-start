@@ -5,8 +5,8 @@ import {
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
-import { Film, Sparkles, X } from 'lucide-react'
-import { useState } from 'react'
+import { Film, Plus, Sparkles, X } from 'lucide-react'
+import { Suspense, useState } from 'react'
 import { AddMovieDialog } from './add-movie-dialog'
 import ShortlistItem from './shortlist-item'
 
@@ -54,6 +54,24 @@ const itemVariants: Variants = {
     transition: { type: 'spring', damping: 25, stiffness: 350 },
   },
   exit: { opacity: 0, y: -4, transition: { duration: 0.12 } },
+}
+
+function AddMovieButton({ movieCount }: { movieCount: number }) {
+  return (
+    <div className="w-full h-auto py-2.5 px-3 rounded-lg border border-dashed border-border bg-transparent">
+      <div className="flex items-center gap-2.5">
+        <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <Plus className="w-4 h-4 text-primary" />
+        </div>
+        <div className="text-left">
+          <p className="text-xs font-medium text-foreground">Add Movie</p>
+          <p className="text-[10px] text-muted-foreground leading-tight">
+            {3 - movieCount} slot{3 - movieCount === 1 ? '' : 's'} left
+          </p>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
@@ -154,7 +172,11 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                       Add up to 3 movies to your shortlist
                     </p>
                     <div className="w-full">
-                      <AddMovieDialog movieCount={movieCount} />
+                      <Suspense
+                        fallback={<AddMovieButton movieCount={movieCount} />}
+                      >
+                        <AddMovieDialog movieCount={movieCount} />
+                      </Suspense>
                     </div>
                   </motion.div>
                 ) : (
@@ -194,7 +216,11 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                         initial="hidden"
                         animate="visible"
                       >
-                        <AddMovieDialog movieCount={movieCount} />
+                        <Suspense
+                          fallback={<AddMovieButton movieCount={movieCount} />}
+                        >
+                          <AddMovieDialog movieCount={movieCount} />
+                        </Suspense>
                       </motion.div>
                     )}
                   </div>
