@@ -147,84 +147,111 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </motion.div>
-                {isLoading ? (
-                  <div className="space-y-2">
-                    {[1, 2, 3].map((i) => (
-                      <motion.div
-                        key={i}
-                        variants={itemVariants}
-                        className="animate-pulse bg-accent/30 rounded-lg h-[88px]"
-                      />
-                    ))}
-                  </div>
-                ) : movieCount === 0 ? (
-                  <motion.div
-                    variants={itemVariants}
-                    className="flex flex-col items-center py-8 text-center"
-                  >
-                    <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mb-3">
-                      <Sparkles className="w-8 h-8 text-primary/30" />
-                    </div>
-                    <p className="text-sm font-medium text-foreground mb-1">
-                      No movies yet
-                    </p>
-                    <p className="text-xs text-muted-foreground mb-5">
-                      Add up to 3 movies to your shortlist
-                    </p>
-                    <div className="w-full">
-                      <Suspense
-                        fallback={<AddMovieButton movieCount={movieCount} />}
-                      >
-                        <AddMovieDialog movieCount={movieCount} />
-                      </Suspense>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <div className="space-y-2">
-                    {data?.requiresSelection &&
-                      data?.selectedIndex === null && (
-                        <motion.div
-                          variants={itemVariants}
-                          className="p-2.5 rounded-lg bg-primary/10 border border-primary/20"
-                        >
-                          <p className="text-xs font-medium text-primary">
-                            Select one movie for the raffle
-                          </p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">
-                            You won last time — choose which to include.
-                          </p>
-                        </motion.div>
-                      )}
-                    <AnimatePresence initial={false}>
-                      {data?.movies?.map((movie, index) => (
-                        <motion.div key={movie.id} variants={itemVariants}>
-                          <ShortlistItem
-                            movie={movie}
-                            index={index}
-                            requiresSelection={
-                              data?.requiresSelection ?? undefined
-                            }
-                            selectedIndex={data?.selectedIndex ?? undefined}
-                          />
-                        </motion.div>
+                <AnimatePresence mode="wait">
+                  {isLoading ? (
+                    <motion.div
+                      key="loading"
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="space-y-2"
+                    >
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="animate-pulse bg-accent/30 rounded-lg h-[88px]"
+                        />
                       ))}
-                    </AnimatePresence>
-                    {canAddMoreMovies && (
-                      <motion.div
-                        key="add-movie"
-                        variants={itemVariants}
-                        initial="hidden"
-                        animate="visible"
-                      >
+                    </motion.div>
+                  ) : movieCount === 0 ? (
+                    <motion.div
+                      key="empty"
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="flex flex-col items-center py-8 text-center"
+                    >
+                      <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mb-3">
+                        <Sparkles className="w-8 h-8 text-primary/30" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        No movies yet
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-5">
+                        Add up to 3 movies to your shortlist
+                      </p>
+                      <div className="w-full">
                         <Suspense
                           fallback={<AddMovieButton movieCount={movieCount} />}
                         >
                           <AddMovieDialog movieCount={movieCount} />
                         </Suspense>
-                      </motion.div>
-                    )}
-                  </div>
-                )}
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="list"
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="space-y-2"
+                    >
+                      {data?.requiresSelection &&
+                        data?.selectedIndex === null && (
+                          <motion.div
+                            variants={itemVariants}
+                            className="p-2.5 rounded-lg bg-primary/10 border border-primary/20"
+                          >
+                            <p className="text-xs font-medium text-primary">
+                              Select one movie for the raffle
+                            </p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                              You won last time — choose which to include.
+                            </p>
+                          </motion.div>
+                        )}
+                      <AnimatePresence initial={false}>
+                        {data?.movies?.map((movie, index) => (
+                          <motion.div
+                            key={movie.id}
+                            variants={itemVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                          >
+                            <ShortlistItem
+                              movie={movie}
+                              index={index}
+                              requiresSelection={
+                                data?.requiresSelection ?? undefined
+                              }
+                              selectedIndex={data?.selectedIndex ?? undefined}
+                            />
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                      {canAddMoreMovies && (
+                        <motion.div
+                          key="add-movie"
+                          variants={itemVariants}
+                          initial="hidden"
+                          animate="visible"
+                        >
+                          <Suspense
+                            fallback={
+                              <AddMovieButton movieCount={movieCount} />
+                            }
+                          >
+                            <AddMovieDialog movieCount={movieCount} />
+                          </Suspense>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <motion.div
                   variants={itemVariants}

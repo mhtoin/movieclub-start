@@ -8,7 +8,9 @@ import {
   Calendar,
   Check,
   Clock,
+  ExternalLink,
   Film,
+  Play,
   Star,
   Trash2,
   Users,
@@ -89,6 +91,26 @@ export function ShortlistItemDialog({
         profile_path: string | null
       }> | null
     )?.slice(0, 6) ?? []
+
+  const trailers = (
+    (
+      movie.videos as {
+        results?: Array<{
+          key: string
+          site: string
+          type: string
+          name: string
+          official: boolean
+        }>
+      } | null
+    )?.results ?? []
+  )
+    .filter(
+      (video) =>
+        video.site === 'YouTube' &&
+        (video.type === 'Trailer' || video.type === 'Teaser'),
+    )
+    .slice(0, 2)
 
   const handleToggleSelection = () => {
     if (!requiresSelection) return
@@ -227,6 +249,49 @@ export function ShortlistItemDialog({
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         {movie.overview}
                       </p>
+                    </div>
+                  )}
+                  {(movie.imdbId || movie.tmdbId || trailers.length > 0) && (
+                    <div className="mt-5">
+                      <h3 className="text-sm font-semibold text-foreground/70 uppercase tracking-wider mb-3">
+                        Links
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {movie.imdbId && (
+                          <a
+                            href={`https://www.imdb.com/title/${movie.imdbId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#F5C518]/10 hover:bg-[#F5C518]/20 border border-[#F5C518]/30 text-foreground text-sm font-medium transition-colors group"
+                          >
+                            <ExternalLink className="w-4 h-4 text-[#F5C518]" />
+                            <span>IMDb</span>
+                          </a>
+                        )}
+                        {movie.tmdbId && (
+                          <a
+                            href={`https://www.themoviedb.org/movie/${movie.tmdbId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#01D277]/10 hover:bg-[#01D277]/20 border border-[#01D277]/30 text-foreground text-sm font-medium transition-colors group"
+                          >
+                            <ExternalLink className="w-4 h-4 text-[#01D277]" />
+                            <span>TMDb</span>
+                          </a>
+                        )}
+                        {trailers.map((trailer) => (
+                          <a
+                            key={trailer.key}
+                            href={`https://www.youtube.com/watch?v=${trailer.key}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF0000]/10 hover:bg-[#FF0000]/20 border border-[#FF0000]/30 text-foreground text-sm font-medium transition-colors group"
+                          >
+                            <Play className="w-4 h-4 text-[#FF0000]" />
+                            <span>{trailer.name}</span>
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {cast.length > 0 && (
