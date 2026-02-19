@@ -1,3 +1,4 @@
+import { groupBy } from '@/lib/utils'
 import { db } from '@/db/db'
 import { movie, type MovieWithUser } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
@@ -106,7 +107,7 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
       .where(and(...conditions))
       .orderBy(desc(movie.watchDate))
 
-    return Object.groupBy(movies, (item) => {
+    return groupBy(movies, (item) => {
       const watchDate = item.movie.watchDate
       if (!watchDate) return 'Unknown'
       const date = new Date(watchDate)

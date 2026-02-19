@@ -18,3 +18,17 @@ export async function getBlurDataUrl(imageUrl: string): Promise<string> {
 function generateId(prefix: string): string {
   return crypto.randomUUID()
 }
+
+export function groupBy<T>(
+  items: T[],
+  keyFn: (item: T) => string | undefined,
+): Record<string, T[]> {
+  return items.reduce(
+    (acc, item) => {
+      const key = keyFn(item) ?? 'undefined'
+      ;(acc[key] ??= []).push(item)
+      return acc
+    },
+    {} as Record<string, T[]>,
+  )
+}
