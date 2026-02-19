@@ -1,7 +1,7 @@
-import { groupBy } from '@/lib/utils'
 import { db } from '@/db/db'
 import { movie, type MovieWithUser } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { groupBy } from '@/lib/utils'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
 import { createCollection } from '@tanstack/react-db'
 import { queryOptions } from '@tanstack/react-query'
