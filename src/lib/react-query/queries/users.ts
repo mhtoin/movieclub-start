@@ -5,7 +5,7 @@ import { createServerFn } from '@tanstack/react-start'
 
 export const getUsers = createServerFn({ method: 'GET' }).handler(async () => {
   try {
-    const users = db
+    const users = await db
       .select({
         id: user.id,
         name: user.name,

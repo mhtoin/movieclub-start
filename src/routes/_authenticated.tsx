@@ -44,11 +44,13 @@ const getCurrentUserServerFn = createServerFn({ method: 'GET' }).handler(
 export const Route = createFileRoute('/_authenticated')({
   errorComponent: ErrorComponent,
   beforeLoad: async () => {
-    const user = await getCurrentUserServerFn()
+    const [user, backgroundPreference] = await Promise.all([
+      getCurrentUserServerFn(),
+      getBackgroundServerFn(),
+    ])
     if (!user) {
       throw redirect({ to: '/' })
     }
-    const backgroundPreference = await getBackgroundServerFn()
     return { user, backgroundPreference }
   },
   loader: async ({ context }) => {

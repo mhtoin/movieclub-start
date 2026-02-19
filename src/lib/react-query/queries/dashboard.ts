@@ -100,91 +100,96 @@ export const getDashboardStats = createServerFn({ method: 'GET' })
   .inputValidator((data: { userId: string }) => data)
   .handler(async ({ data }): Promise<DashboardStats> => {
     try {
-      const totalWatchedResult = await db
-        .select({ count: count() })
-        .from(movie)
-        .where(isNotNull(movie.watchDate))
+      const [
+        totalWatchedResult,
+        userWatchedResult,
+        watchTimeResult,
+        genresResult,
+        ratingResult,
+        userWatchTimeResult,
+        userGenresResult,
+        userRatingResult,
+      ] = await Promise.all([
+        db
+          .select({ count: count() })
+          .from(movie)
+          .where(isNotNull(movie.watchDate)),
+
+        db
+          .select({ count: count() })
+          .from(movie)
+          .where(
+            and(isNotNull(movie.watchDate), eq(movie.userId, data.userId)),
+          ),
+
+        db
+          .select({
+            totalMinutes: sql<number>`COALESCE(SUM(${movie.runtime}), 0)`,
+          })
+          .from(movie)
+          .where(and(isNotNull(movie.watchDate), isNotNull(movie.runtime))),
+
+        db
+          .select({ genres: movie.genres })
+          .from(movie)
+          .where(and(isNotNull(movie.watchDate), isNotNull(movie.genres))),
+
+        db
+          .select({
+            avgRating: sql<number>`COALESCE(AVG(${movie.voteAverage}), 0)`,
+          })
+          .from(movie)
+          .where(isNotNull(movie.watchDate)),
+
+        db
+          .select({
+            totalMinutes: sql<number>`COALESCE(SUM(${movie.runtime}), 0)`,
+          })
+          .from(movie)
+          .where(
+            and(
+              isNotNull(movie.watchDate),
+              isNotNull(movie.runtime),
+              eq(movie.userId, data.userId),
+            ),
+          ),
+
+        db
+          .select({ genres: movie.genres })
+          .from(movie)
+          .where(
+            and(
+              isNotNull(movie.watchDate),
+              isNotNull(movie.genres),
+              eq(movie.userId, data.userId),
+            ),
+          ),
+
+        db
+          .select({
+            avgRating: sql<number>`COALESCE(AVG(${movie.voteAverage}), 0)`,
+          })
+          .from(movie)
+          .where(
+            and(isNotNull(movie.watchDate), eq(movie.userId, data.userId)),
+          ),
+      ])
 
       const totalWatched = totalWatchedResult[0]?.count ?? 0
-
-      const userWatchedResult = await db
-        .select({ count: count() })
-        .from(movie)
-        .where(and(isNotNull(movie.watchDate), eq(movie.userId, data.userId)))
-
       const userWatched = userWatchedResult[0]?.count ?? 0
-
-      const watchTimeResult = await db
-        .select({
-          totalMinutes: sql<number>`COALESCE(SUM(${movie.runtime}), 0)`,
-        })
-        .from(movie)
-        .where(and(isNotNull(movie.watchDate), isNotNull(movie.runtime)))
-
       const totalWatchTime = Math.round(watchTimeResult[0]?.totalMinutes ?? 0)
-
-      const genresResult = await db
-        .select({ genres: movie.genres })
-        .from(movie)
-        .where(and(isNotNull(movie.watchDate), isNotNull(movie.genres)))
-
       const allGenres = new Set<string>()
       genresResult.forEach((row) => {
-        if (row.genres) {
-          row.genres.forEach((genre) => allGenres.add(genre))
-        }
+        if (row.genres) row.genres.forEach((genre) => allGenres.add(genre))
       })
-
-      const ratingResult = await db
-        .select({
-          avgRating: sql<number>`COALESCE(AVG(${movie.voteAverage}), 0)`,
-        })
-        .from(movie)
-        .where(isNotNull(movie.watchDate))
-
       const averageRating = Number((ratingResult[0]?.avgRating ?? 0).toFixed(1))
-
-      // ── User-specific stats ──────────────────────────────────
-      const userWatchTimeResult = await db
-        .select({
-          totalMinutes: sql<number>`COALESCE(SUM(${movie.runtime}), 0)`,
-        })
-        .from(movie)
-        .where(
-          and(
-            isNotNull(movie.watchDate),
-            isNotNull(movie.runtime),
-            eq(movie.userId, data.userId),
-          ),
-        )
       const userWatchTime = Math.round(
         userWatchTimeResult[0]?.totalMinutes ?? 0,
       )
-
-      const userGenresResult = await db
-        .select({ genres: movie.genres })
-        .from(movie)
-        .where(
-          and(
-            isNotNull(movie.watchDate),
-            isNotNull(movie.genres),
-            eq(movie.userId, data.userId),
-          ),
-        )
       const userGenres = new Set<string>()
       userGenresResult.forEach((row) => {
-        if (row.genres) {
-          row.genres.forEach((genre) => userGenres.add(genre))
-        }
+        if (row.genres) row.genres.forEach((genre) => userGenres.add(genre))
       })
-
-      const userRatingResult = await db
-        .select({
-          avgRating: sql<number>`COALESCE(AVG(${movie.voteAverage}), 0)`,
-        })
-        .from(movie)
-        .where(and(isNotNull(movie.watchDate), eq(movie.userId, data.userId)))
-
       const userAverageRating = Number(
         (userRatingResult[0]?.avgRating ?? 0).toFixed(1),
       )

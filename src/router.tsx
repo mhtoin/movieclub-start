@@ -10,7 +10,7 @@ export const getRouter = () => {
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 5,
-        gcTime: 1000 * 60 * 10,
+        gcTime: 1000 * 60 * 60, // 1 hour — keeps cache alive well past staleTime
         refetchOnWindowFocus: false,
         retry: 1,
       },
@@ -21,7 +21,7 @@ export const getRouter = () => {
     scrollRestoration: true,
     context: { queryClient },
     defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
+    defaultPreloadStaleTime: 1000 * 60 * 5, // match staleTime — don't re-run loaders on hover if cache is fresh
     defaultViewTransition: true,
   })
 

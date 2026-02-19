@@ -74,15 +74,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               </Toast.Viewport>
             </Toast.Portal>
           </Toast.Provider>
-          <TanStackDevtools
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
-          <ReactQueryDevtools buttonPosition="bottom-left" />
+          {import.meta.env.DEV && (
+            <>
+              <TanStackDevtools
+                plugins={[
+                  {
+                    name: 'Tanstack Router',
+                    render: <TanStackRouterDevtoolsPanel />,
+                  },
+                ]}
+              />
+              <ReactQueryDevtools buttonPosition="bottom-left" />
+            </>
+          )}
         </ThemeProvider>
         <Scripts />
       </body>
