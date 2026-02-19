@@ -1,0 +1,26 @@
+# docker-compose.app-only.yml
+# Use this when postgres and electric are running as external services.
+# Requires DATABASE_URL and VITE_ELECTRIC_URL to be set in .env.production
+# pointing to the external services.
+#
+# Usage: docker compose -f docker-compose.app-only.yml up
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: movieclub-app-prod
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL required}
+      AUTH_SECRET: ${AUTH_SECRET:?Auth secret required}
+      VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY:?TMDB API key required}
+      VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
+      VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
+      VITE_ELECTRIC_URL: ${VITE_ELECTRIC_URL:?VITE_ELECTRIC_URL required}
+    ports:
+      - "3001:3001"
