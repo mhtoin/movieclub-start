@@ -1,0 +1,58 @@
+# docker-compose.with-db.yml
+# Runs the app and postgres together. Electric is external — set VITE_ELECTRIC_URL
+# in .env.production to point to it.
+#
+# Usage: docker compose -f docker-compose.with-db.yml up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: movieclub-postgres-prod
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-movieclub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
+      POSTGRES_DB: ${POSTGRES_DB:-movieclub}
+    command: ["postgres", "-c", "wal_level=logical"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-movieclub} -d ${POSTGRES_DB:-movieclub}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - movieclub-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: movieclub-app-prod
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-movieclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movieclub}?sslmode=disable
+      AUTH_SECRET: ${AUTH_SECRET:?Auth secret required}
+      VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY:?TMDB API key required}
+      VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
+      VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
+      VITE_ELECTRIC_URL: ${VITE_ELECTRIC_URL:?VITE_ELECTRIC_URL required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    networks:
+      - movieclub-network
+
+networks:
+  movieclub-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
