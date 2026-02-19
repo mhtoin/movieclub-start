@@ -7,7 +7,16 @@ import { createCollection } from '@tanstack/react-db'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { format } from 'date-fns'
-import { and, arrayContains, desc, eq, isNotNull, like, SQL } from 'drizzle-orm'
+import {
+  and,
+  arrayContains,
+  desc,
+  eq,
+  isNotNull,
+  like,
+  sql,
+  SQL,
+} from 'drizzle-orm'
 import { z } from 'zod'
 
 export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
@@ -42,35 +51,24 @@ export const getDistinctWatchedMonths = createServerFn({
   method: 'GET',
 }).handler(async () => {
   const rows = await db
-    .select({
-      month: movie.watchDate,
+    .selectDistinct({
+      month: sql<string>`substring(${movie.watchDate}, 1, 7)`,
     })
     .from(movie)
+    .where(isNotNull(movie.watchDate))
+    .orderBy(sql`substring(${movie.watchDate}, 1, 7) desc`)
 
   if (!rows) return null
 
-  const uniqueMonths = new Set<string>()
-  rows.forEach((row) => {
-    if (row.month) {
-      const date = new Date(row.month)
-      const monthString = format(date, 'yyyy-MM')
-      uniqueMonths.add(monthString)
-    }
-  })
-
-  const sortedMonths = Array.from(uniqueMonths).sort((a, b) =>
-    b.localeCompare(a),
-  )
-
-  const mappedRows = sortedMonths.map((month) => ({
-    value: month,
-    label: new Date(month + '-01').toLocaleString('default', {
-      month: 'long',
-      year: 'numeric',
-    }),
-  }))
-
-  return mappedRows
+  return rows
+    .filter((row) => row.month)
+    .map((row) => ({
+      value: row.month,
+      label: new Date(row.month + '-01').toLocaleString('default', {
+        month: 'long',
+        year: 'numeric',
+      }),
+    }))
 })
 
 const watchedByMonthSchema = z.object({

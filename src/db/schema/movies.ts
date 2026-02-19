@@ -1,127 +1,195 @@
-import { boolean, doublePrecision, foreignKey, index, integer, jsonb, pgEnum, pgTable, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core";
-import { raffle } from "./raffles";
-import { shortlist } from "./shortlists";
-import { user } from "./users";
+import {
+  boolean,
+  doublePrecision,
+  foreignKey,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core'
+import { raffle } from './raffles'
+import { shortlist } from './shortlists'
+import { user } from './users'
 
-export const trailer = pgEnum("Trailer", ['name', 'id', 'key'])
+export const trailer = pgEnum('Trailer', ['name', 'id', 'key'])
 
-export const movie = pgTable("movie", {
+export const movie = pgTable(
+  'movie',
+  {
     id: text().primaryKey().notNull(),
     adult: boolean().notNull(),
     tmdbId: integer().notNull(),
     imdbId: text(),
-    originalLanguage: text("original_language").notNull(),
-    originalTitle: text("original_title").notNull(),
+    originalLanguage: text('original_language').notNull(),
+    originalTitle: text('original_title').notNull(),
     overview: text().notNull(),
     popularity: doublePrecision().notNull(),
-    releaseDate: text("release_date").notNull(),
+    releaseDate: text('release_date').notNull(),
     title: text().notNull(),
     video: boolean().notNull(),
-    voteAverage: doublePrecision("vote_average").notNull(),
-    voteCount: integer("vote_count").notNull(),
+    voteAverage: doublePrecision('vote_average').notNull(),
+    voteCount: integer('vote_count').notNull(),
     watchDate: text(),
     userId: text().references(() => user.id),
     runtime: integer(),
     genres: text().array(),
     tagline: text(),
-    watchProviders: jsonb('watchProviders').$type<Record<string, any> | null>().default(null),
+    watchProviders: jsonb('watchProviders')
+      .$type<Record<string, any> | null>()
+      .default(null),
     images: jsonb('images').$type<Record<string, any> | null>().default(null),
     videos: jsonb('videos').$type<Record<string, any> | null>().default(null),
     cast: jsonb('cast').$type<any[] | null>().default(null),
     crew: jsonb('crew').$type<any[] | null>().default(null),
     tierIds: text().array(),
-}, (table) => [
-    uniqueIndex("Movie_tmdbId_key").using("btree", table.tmdbId.asc().nullsLast().op("int4_ops")),
+  },
+  (table) => [
+    uniqueIndex('Movie_tmdbId_key').using(
+      'btree',
+      table.tmdbId.asc().nullsLast().op('int4_ops'),
+    ),
     foreignKey({
-            columns: [table.userId],
-            foreignColumns: [user.id],
-            name: "Movie_userId_fkey"
-        }).onUpdate("cascade").onDelete("set null"),
-]);
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: 'Movie_userId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('set null'),
+    // Indexes for common query patterns
+    index('movie_watchDate_idx').on(table.watchDate),
+    index('movie_userId_idx').on(table.userId),
+  ],
+)
 
-export const review = pgTable("review", {
+export const review = pgTable(
+  'review',
+  {
     id: text().primaryKey().notNull(),
     content: text().notNull(),
     userId: text().notNull(),
     movieId: text().notNull(),
     timestamp: text().notNull(),
     rating: doublePrecision().notNull(),
-}, (table) => [
+  },
+  (table) => [
     foreignKey({
-            columns: [table.userId],
-            foreignColumns: [user.id],
-            name: "Review_userId_fkey"
-        }).onUpdate("cascade").onDelete("restrict"),
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: 'Review_userId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('restrict'),
     foreignKey({
-            columns: [table.movieId],
-            foreignColumns: [movie.id],
-            name: "Review_movieId_fkey"
-        }).onUpdate("cascade").onDelete("restrict"),
-]);
+      columns: [table.movieId],
+      foreignColumns: [movie.id],
+      name: 'Review_movieId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('restrict'),
+  ],
+)
 
-export const recommendedMovie = pgTable("recommended_movie", {
+export const recommendedMovie = pgTable(
+  'recommended_movie',
+  {
     id: text().primaryKey().notNull(),
     movieId: text().notNull(),
     userId: text().notNull(),
     sourceMovieId: text().notNull(),
-}, (table) => [
-    uniqueIndex("RecommendedMovie_movieId_userId_sourceMovieId_key").using("btree", table.movieId.asc().nullsLast().op("text_ops"), table.userId.asc().nullsLast().op("text_ops"), table.sourceMovieId.asc().nullsLast().op("text_ops")),
+  },
+  (table) => [
+    uniqueIndex('RecommendedMovie_movieId_userId_sourceMovieId_key').using(
+      'btree',
+      table.movieId.asc().nullsLast().op('text_ops'),
+      table.userId.asc().nullsLast().op('text_ops'),
+      table.sourceMovieId.asc().nullsLast().op('text_ops'),
+    ),
     foreignKey({
-            columns: [table.movieId],
-            foreignColumns: [movie.id],
-            name: "RecommendedMovie_movieId_fkey"
-        }).onUpdate("cascade").onDelete("set default"),
+      columns: [table.movieId],
+      foreignColumns: [movie.id],
+      name: 'RecommendedMovie_movieId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('set default'),
     foreignKey({
-            columns: [table.userId],
-            foreignColumns: [user.id],
-            name: "RecommendedMovie_userId_fkey"
-        }).onUpdate("cascade").onDelete("cascade"),
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: 'RecommendedMovie_userId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
     foreignKey({
-            columns: [table.sourceMovieId],
-            foreignColumns: [movie.id],
-            name: "RecommendedMovie_sourceMovieId_fkey"
-        }).onUpdate("cascade").onDelete("restrict"),
-]);
+      columns: [table.sourceMovieId],
+      foreignColumns: [movie.id],
+      name: 'RecommendedMovie_sourceMovieId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('restrict'),
+  ],
+)
 
-export const movieToShortlist = pgTable("_movie_to_shortlist", {
-    a: text("A").notNull(),
-    b: text("B").notNull(),
-}, (table) => [
-    index().using("btree", table.b.asc().nullsLast().op("text_ops")),
+export const movieToShortlist = pgTable(
+  '_movie_to_shortlist',
+  {
+    a: text('A').notNull(),
+    b: text('B').notNull(),
+  },
+  (table) => [
+    index().using('btree', table.b.asc().nullsLast().op('text_ops')),
     foreignKey({
-            columns: [table.a],
-            foreignColumns: [movie.id],
-            name: "_MovieToShortlist_A_fkey"
-        }).onUpdate("cascade").onDelete("cascade"),
+      columns: [table.a],
+      foreignColumns: [movie.id],
+      name: '_MovieToShortlist_A_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
     foreignKey({
-            columns: [table.b],
-            foreignColumns: [shortlist.id],
-            name: "_MovieToShortlist_B_fkey"
-        }).onUpdate("cascade").onDelete("cascade"),
-    primaryKey({ columns: [table.a, table.b], name: "_MovieToShortlist_AB_pkey"}),
-]);
+      columns: [table.b],
+      foreignColumns: [shortlist.id],
+      name: '_MovieToShortlist_B_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
+    primaryKey({
+      columns: [table.a, table.b],
+      name: '_MovieToShortlist_AB_pkey',
+    }),
+  ],
+)
 
-export const movieToRaffle = pgTable("_movie_to_raffle", {
-    a: text("A").notNull(),
-    b: text("B").notNull(),
-}, (table) => [
-    index().using("btree", table.b.asc().nullsLast().op("text_ops")),
+export const movieToRaffle = pgTable(
+  '_movie_to_raffle',
+  {
+    a: text('A').notNull(),
+    b: text('B').notNull(),
+  },
+  (table) => [
+    index().using('btree', table.b.asc().nullsLast().op('text_ops')),
     foreignKey({
-            columns: [table.a],
-            foreignColumns: [movie.id],
-            name: "_MovieToRaffle_A_fkey"
-        }).onUpdate("cascade").onDelete("cascade"),
+      columns: [table.a],
+      foreignColumns: [movie.id],
+      name: '_MovieToRaffle_A_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
     foreignKey({
-            columns: [table.b],
-            foreignColumns: [raffle.id],
-            name: "_MovieToRaffle_B_fkey"
-        }).onUpdate("cascade").onDelete("cascade"),
-    primaryKey({ columns: [table.a, table.b], name: "_MovieToRaffle_AB_pkey"}),
-]);
+      columns: [table.b],
+      foreignColumns: [raffle.id],
+      name: '_MovieToRaffle_B_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
+    primaryKey({ columns: [table.a, table.b], name: '_MovieToRaffle_AB_pkey' }),
+  ],
+)
 
-export type Movie = typeof movie.$inferSelect;
-export type Review = typeof review.$inferSelect;
+export type Movie = typeof movie.$inferSelect
+export type Review = typeof review.$inferSelect
 export type MovieWithUser = {
-    movie: Movie;
-    user: typeof user.$inferSelect;
+  movie: Movie
+  user: typeof user.$inferSelect
 }
