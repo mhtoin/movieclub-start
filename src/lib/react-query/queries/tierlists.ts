@@ -1,5 +1,5 @@
 import { db } from '@/db/db'
-import { movie, moviesOnTiers, tier, tierlist } from '@/db/schema'
+import { movie, moviesOnTiers, tier, tierlist, user } from '@/db/schema'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
 import { queryCollectionOptions } from '@tanstack/query-db-collection'
 import { createCollection, eq, useLiveQuery } from '@tanstack/react-db'
@@ -14,6 +14,15 @@ type Tierlist = InferSelectModel<typeof tierlist>
 type Tier = InferSelectModel<typeof tier>
 type MovieOnTier = InferSelectModel<typeof moviesOnTiers>
 type Movie = InferSelectModel<typeof movie>
+type User = InferSelectModel<typeof user>
+
+export type UserWithTierlists = User & {
+  tierlists: Array<
+    Tierlist & {
+      tiers: Array<Tier & { moviesOnTiers: MovieOnTier[] }>
+    }
+  >
+}
 
 export interface TierWithMovies extends Tier {
   movies: (Movie & { position: number; movieOnTierId: string })[]
@@ -45,7 +54,9 @@ export const updateTierMoviePosition = createServerFn({ method: 'POST' })
         .set(updateData)
         .where(dbEq(moviesOnTiers.id, id))
 
-      const [{ txid }] = await tx.execute(sql`select txid_current() as txid`)
+      const [{ txid }] = (await tx.execute(
+        sql`select txid_current() as txid`,
+      )) as Array<{ txid: unknown }>
       return txid as string
     })
 
@@ -75,7 +86,9 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
           .where(dbEq(moviesOnTiers.id, id))
       }
 
-      const [{ txid }] = await tx.execute(sql`select txid_current() as txid`)
+      const [{ txid }] = (await tx.execute(
+        sql`select txid_current() as txid`,
+      )) as Array<{ txid: unknown }>
       return txid as string
     })
 
@@ -105,7 +118,9 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
         })
       }
 
-      const [{ txid }] = await tx.execute(sql`select txid_current() as txid`)
+      const [{ txid }] = (await tx.execute(
+        sql`select txid_current() as txid`,
+      )) as Array<{ txid: unknown }>
       return txid as string
     })
 
@@ -115,7 +130,7 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
 export const getTierlists = createServerFn({ method: 'GET' }).handler(
   async () => {
     try {
-      const users = await db.query.user.findMany({
+      const users = await (db as any).query.user.findMany({
         with: {
           tierlists: {
             with: {
@@ -128,7 +143,7 @@ export const getTierlists = createServerFn({ method: 'GET' }).handler(
           },
         },
       })
-      return users.filter((u) => u.tierlists.length > 0)
+      return users.filter((u: UserWithTierlists) => u.tierlists.length > 0)
     } catch (error) {
       console.error('Error fetching tierlists:', error)
       throw error
@@ -140,8 +155,8 @@ export const getUserTierlists = createServerFn({ method: 'GET' })
   .inputValidator((userId: string) => userId)
   .handler(async ({ data: userId }) => {
     try {
-      const userTierlists = await db.query.tierlist.findMany({
-        where: (tierlist, { eq }) => eq(tierlist.userId, userId),
+      const userTierlists = await (db as any).query.tierlist.findMany({
+        where: (tierlist: any, { eq }: any) => eq(tierlist.userId, userId),
         with: {
           tiers: {
             with: {
@@ -151,7 +166,7 @@ export const getUserTierlists = createServerFn({ method: 'GET' })
                 },
               },
             },
-            orderBy: (tiers, { asc }) => [asc(tiers.value)],
+            orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
           },
         },
       })
@@ -188,7 +203,7 @@ export const tierlistQueryCollection = createCollection(
       return getUserTierlists({ data: userId })
     },
     queryClient,
-    getKey: (tierlist) => tierlist.id,
+    getKey: (tierlist: { id: string }) => tierlist.id,
   }),
 )
 

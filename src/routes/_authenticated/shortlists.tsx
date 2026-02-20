@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { z } from 'zod'
 
 import { PageTitleBar } from '@/components/page-titlebar'
 import { MovieDetailsDialog } from '@/components/shortlists/movie-details-dialog'
 import { RaffleControlPanel } from '@/components/shortlists/raffle-control-panel'
+import { ShortlistsSkeleton } from '@/components/shortlists/shortlists-skeleton'
 import UserTabList from '@/components/shortlists/user-tab-list'
 import type { Movie } from '@/db/schema'
 import {
@@ -112,13 +113,15 @@ function ShortlistsPage() {
         layout
         className={`flex flex-col h-full w-full overflow-hidden`}
       >
-        <UserTabList
-          onMovieClick={handleMovieClick}
-          raffleState={raffleState}
-          onRaffleComplete={handleRaffleComplete}
-          winningMovie={winningMovie}
-          onRaffleModeToggle={handleStateToggle}
-        />
+        <Suspense fallback={<ShortlistsSkeleton />}>
+          <UserTabList
+            onMovieClick={handleMovieClick}
+            raffleState={raffleState}
+            onRaffleComplete={handleRaffleComplete}
+            winningMovie={winningMovie}
+            onRaffleModeToggle={handleStateToggle}
+          />
+        </Suspense>
       </motion.div>
       <MovieDetailsDialog
         movie={selectedMovie}

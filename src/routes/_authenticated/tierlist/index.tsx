@@ -1,9 +1,14 @@
 import { PageTitleBar } from '@/components/page-titlebar'
+import { TierlistIndexSkeleton } from '@/components/tierlist/tierlist-index-skeleton'
 import Avatar from '@/components/ui/avatar'
-import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
+import {
+  tierlistQueries,
+  type UserWithTierlists,
+} from '@/lib/react-query/queries/tierlists'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowRight, Film, Layers, Sparkles } from 'lucide-react'
+import { Suspense } from 'react'
 
 export const Route = createFileRoute('/_authenticated/tierlist/')({
   component: RouteComponent,
@@ -13,27 +18,6 @@ export const Route = createFileRoute('/_authenticated/tierlist/')({
 })
 
 function RouteComponent() {
-  const { data: usersWithTierlists } = useSuspenseQuery(tierlistQueries.all())
-
-  const totalTierlists = usersWithTierlists.reduce(
-    (acc, user) => acc + user.tierlists.length,
-    0,
-  )
-  const totalMovies = usersWithTierlists.reduce(
-    (acc, user) =>
-      acc +
-      user.tierlists.reduce(
-        (tierAcc, tierlist) =>
-          tierAcc +
-          tierlist.tiers.reduce(
-            (movAcc, tier) => movAcc + (tier.moviesOnTiers?.length || 0),
-            0,
-          ),
-        0,
-      ),
-    0,
-  )
-
   return (
     <div className="min-h-screen">
       <div className="relative overflow-hidden">
@@ -44,9 +28,21 @@ function RouteComponent() {
           />
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {usersWithTierlists.map((user, index) => (
+      <Suspense fallback={<TierlistIndexSkeleton />}>
+        <TierlistContent />
+      </Suspense>
+    </div>
+  )
+}
+
+function TierlistContent() {
+  const { data: usersWithTierlists } = useSuspenseQuery(tierlistQueries.all())
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {(usersWithTierlists as UserWithTierlists[]).map(
+          (user, index: number) => (
             <div
               key={user.id}
               className="group relative animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
@@ -89,9 +85,10 @@ function RouteComponent() {
                   </div>
                 </Link>
                 <div className="p-4 space-y-2">
-                  {user.tierlists.slice(0, 3).map((tierlist, tierIndex) => {
+                  {user.tierlists.slice(0, 3).map((tierlist) => {
                     const movieCount = tierlist.tiers.reduce(
-                      (acc, tier) => acc + (tier.moviesOnTiers?.length || 0),
+                      (acc: number, tier) =>
+                        acc + (tier.moviesOnTiers?.length || 0),
                       0,
                     )
                     const tierCount = tierlist.tiers.length
@@ -147,24 +144,24 @@ function RouteComponent() {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-        {usersWithTierlists.length === 0 && (
-          <div className="text-center py-24">
-            <div className="relative inline-block mb-6">
-              <div className="absolute inset-0 bg-primary/10 rounded-full blur-2xl" />
-              <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-muted to-muted/50 border border-border">
-                <Layers className="w-10 h-10 text-muted-foreground" />
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">No tierlists found</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Be the first to create a tierlist and share your movie rankings
-              with the community!
-            </p>
-          </div>
+          ),
         )}
       </div>
+      {usersWithTierlists.length === 0 && (
+        <div className="text-center py-24">
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-primary/10 rounded-full blur-2xl" />
+            <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-muted to-muted/50 border border-border">
+              <Layers className="w-10 h-10 text-muted-foreground" />
+            </div>
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No tierlists found</h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Be the first to create a tierlist and share your movie rankings with
+            the community!
+          </p>
+        </div>
+      )}
     </div>
   )
 }

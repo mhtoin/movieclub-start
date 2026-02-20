@@ -15,9 +15,6 @@ export async function getBlurDataUrl(imageUrl: string): Promise<string> {
     return '' // Return empty string as fallback
   }
 }
-function generateId(prefix: string): string {
-  return crypto.randomUUID()
-}
 
 export function groupBy<T>(
   items: T[],
