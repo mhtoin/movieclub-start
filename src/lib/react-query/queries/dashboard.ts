@@ -3,7 +3,7 @@ import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { and, count, desc, eq, isNotNull, sql } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 
 export interface DashboardStats {
   totalWatchedMovies: number
@@ -229,6 +229,7 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
 
       const watchedMovies = await db
         .select({
+          id: movie.id,
           genres: movie.genres,
           voteAverage: movie.voteAverage,
           releaseDate: movie.releaseDate,
@@ -237,7 +238,6 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
           originalLanguage: movie.originalLanguage,
           title: movie.title,
           runtime: movie.runtime,
-          images: movie.images,
           userId: movie.userId,
         })
         .from(movie)
@@ -368,26 +368,51 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
         .sort((a, b) => b.count - a.count)
 
       // Highest rated movies
-      const highestRated = [...watchedMovies]
+      const topRatedIds = [...watchedMovies]
         .sort((a, b) => b.voteAverage - a.voteAverage)
         .slice(0, 5)
-        .map((m) => ({
-          title: m.title,
-          rating: m.voteAverage,
-          posterPath: (m.images as any)?.posters?.[0]?.file_path || null,
-          year: m.releaseDate?.substring(0, 4) || '',
-        }))
+        .map((m) => m.id)
 
       // Longest movies
-      const longestMovies = [...watchedMovies]
+      const longestIds = [...watchedMovies]
         .filter((m) => m.runtime && m.runtime > 0)
         .sort((a, b) => (b.runtime || 0) - (a.runtime || 0))
         .slice(0, 5)
-        .map((m) => ({
+        .map((m) => m.id)
+      const posterIds = [...new Set([...topRatedIds, ...longestIds])]
+      const posterRows =
+        posterIds.length > 0
+          ? await db
+              .select({ id: movie.id, images: movie.images })
+              .from(movie)
+              .where(inArray(movie.id, posterIds))
+          : []
+      const posterMap = new Map(
+        posterRows.map((r) => [
+          r.id,
+          (r.images as any)?.posters?.[0]?.file_path || null,
+        ]),
+      )
+
+      const highestRated = topRatedIds.map((id) => {
+        const m = watchedMovies.find((w) => w.id === id)!
+        return {
+          title: m.title,
+          rating: m.voteAverage,
+          posterPath: posterMap.get(id) || null,
+          year: m.releaseDate?.substring(0, 4) || '',
+        }
+      })
+
+      // Longest movies
+      const longestMovies = longestIds.map((id) => {
+        const m = watchedMovies.find((w) => w.id === id)!
+        return {
           title: m.title,
           runtime: m.runtime || 0,
-          posterPath: (m.images as any)?.posters?.[0]?.file_path || null,
-        }))
+          posterPath: posterMap.get(id) || null,
+        }
+      })
 
       return {
         genreDistribution,

@@ -15,6 +15,8 @@ import { WatchedItem } from '@/components/watched/watched-item'
 import WatchedSkeleton from '@/components/watched/watched-skeleton'
 import { useDebouncedValue, useMediaQuery } from '@/lib/hooks'
 import { movieQueries } from '@/lib/react-query/queries/movies'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import { userQueries } from '@/lib/react-query/queries/users'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   createFileRoute,
@@ -49,8 +51,20 @@ export const Route = createFileRoute('/_authenticated/watched')({
       retainSearchParams(['user', 'genre', 'month', 'search']),
     ],
   },
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(movieQueries.watched())
+  loaderDeps: ({ search: { search, user, genre } }) => ({
+    search,
+    user,
+    genre,
+  }),
+  loader: async ({ context, deps: { search, user, genre } }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(
+        movieQueries.watched(search, user, genre),
+      ),
+      context.queryClient.prefetchQuery(userQueries.all()),
+      context.queryClient.prefetchQuery(tmdbQueries.genres()),
+      context.queryClient.prefetchQuery(movieQueries.months()),
+    ])
   },
   component: RouteComponent,
 })
