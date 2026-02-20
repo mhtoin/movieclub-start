@@ -5,15 +5,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Suspense } from 'react'
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     const userId = context.user?.userId
     if (userId) {
-      await Promise.all([
-        context.queryClient.ensureQueryData(dashboardQueries.stats(userId)),
-        context.queryClient.ensureQueryData(dashboardQueries.insights()),
-        context.queryClient.ensureQueryData(dashboardQueries.insights(userId)),
-        context.queryClient.ensureQueryData(dashboardQueries.nextMovie()),
-      ])
+      context.queryClient.prefetchQuery(dashboardQueries.stats(userId))
+      context.queryClient.prefetchQuery(dashboardQueries.insights())
+      context.queryClient.prefetchQuery(dashboardQueries.insights(userId))
+      context.queryClient.prefetchQuery(dashboardQueries.nextMovie())
     }
   },
   component: Dashboard,
