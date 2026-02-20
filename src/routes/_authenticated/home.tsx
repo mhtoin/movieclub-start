@@ -1,37 +1,33 @@
 import { EmptyState } from '@/components/home/empty-state'
 import { HeroSection } from '@/components/home/hero-section'
-import { MovieReel } from '@/components/home/movie-reel'
-import { homeQueries, type TMDBMovie } from '@/lib/react-query/queries/home'
+import { MovieReelSkeleton } from '@/components/home/movie-reel-skeleton'
+import { RecommendationsSection } from '@/components/home/recommendations-section'
+import { TrendingSection } from '@/components/home/trending-section'
+import { homeQueries } from '@/lib/react-query/queries/home'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Flame, ThumbsUp } from 'lucide-react'
+import { Suspense } from 'react'
 
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
     const userId = context.user?.userId
-    await Promise.all([
-      context.queryClient.ensureQueryData(movieQueries.latest()),
-      context.queryClient.ensureQueryData(homeQueries.trending()),
-      context.queryClient.ensureQueryData(tmdbQueries.genres()),
-      userId
-        ? context.queryClient.ensureQueryData(
-            homeQueries.recommendations(userId),
-          )
-        : Promise.resolve(),
-    ])
+    // Hero content — await so it's ready before navigation completes
+    await context.queryClient.ensureQueryData(movieQueries.latest())
+    // Secondary sections — fire-and-forget, stream in while hero is visible
+    context.queryClient.prefetchQuery(homeQueries.trending())
+    context.queryClient.prefetchQuery(tmdbQueries.genres())
+    if (userId) {
+      context.queryClient.prefetchQuery(homeQueries.recommendations(userId))
+    }
   },
   component: Home,
 })
 
 function Home() {
   const { user } = Route.useRouteContext()
-  const { data: latestMovie } = useSuspenseQuery(movieQueries.latest())
-  const { data: trendingMovies } = useQuery(homeQueries.trending())
-  const { data: recommendations } = useQuery(
-    homeQueries.recommendations(user?.userId || ''),
-  )
+  const { data: latestMovie } = useQuery(movieQueries.latest())
 
   if (!latestMovie) {
     return <EmptyState />
@@ -42,24 +38,12 @@ function Home() {
       <HeroSection movie={latestMovie.movie} movieUser={latestMovie.user} />
 
       <div className="relative space-y-0">
-        {trendingMovies && trendingMovies.length > 0 && (
-          <MovieReel
-            title="Trending Now"
-            subtitle="Popular on your streaming services"
-            icon={<Flame className="h-5 w-5" />}
-            movies={trendingMovies as TMDBMovie[]}
-            accentColor="orange"
-          />
-        )}
-        {recommendations && recommendations.length > 0 && (
-          <MovieReel
-            title="Recommended"
-            subtitle="Based on your highly ranked films"
-            icon={<ThumbsUp className="h-5 w-5" />}
-            movies={recommendations as TMDBMovie[]}
-            accentColor="blue"
-          />
-        )}
+        <Suspense fallback={<MovieReelSkeleton />}>
+          <TrendingSection />
+        </Suspense>
+        <Suspense fallback={<MovieReelSkeleton />}>
+          <RecommendationsSection userId={user?.userId || ''} />
+        </Suspense>
       </div>
     </div>
   )
