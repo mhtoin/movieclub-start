@@ -32,8 +32,8 @@ services:
       - .env.production
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-movieclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movieclub}?sslmode=disable
-      ELECTRIC_INSECURE: ${ELECTRIC_INSECURE:-true}
-      #ELECTRIC_SECRET: ${ELECTRIC_SECRET:-}
+      ELECTRIC_INSECURE: ${ELECTRIC_INSECURE:-false}
+      ELECTRIC_SECRET: ${ELECTRIC_SECRET:?Electric secret required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,6 +47,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_ELECTRIC_URL: ${VITE_ELECTRIC_URL}
+        VITE_ELECTRIC_SECRET: ${VITE_ELECTRIC_SECRET}
+        VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY}
+        VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
+        VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
     container_name: movieclub-app-prod
     restart: unless-stopped
     env_file:

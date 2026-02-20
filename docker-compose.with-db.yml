@@ -30,6 +30,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_ELECTRIC_URL: ${VITE_ELECTRIC_URL}
+        VITE_ELECTRIC_SECRET: ${VITE_ELECTRIC_SECRET}
+        VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY}
+        VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
+        VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
     container_name: movieclub-app-prod
     restart: unless-stopped
     env_file:

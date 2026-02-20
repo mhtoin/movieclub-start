@@ -214,6 +214,9 @@ export const electricTierlistCollection = createCollection(
     shapeOptions: {
       url:
         import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
+      headers: import.meta.env.VITE_ELECTRIC_SECRET
+        ? { Authorization: `Bearer ${import.meta.env.VITE_ELECTRIC_SECRET}` }
+        : undefined,
       params: {
         table: 'tierlist',
       },
@@ -231,6 +234,9 @@ export const electricTierCollection = createCollection(
     shapeOptions: {
       url:
         import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
+      headers: import.meta.env.VITE_ELECTRIC_SECRET
+        ? { Authorization: `Bearer ${import.meta.env.VITE_ELECTRIC_SECRET}` }
+        : undefined,
       params: {
         table: 'tier',
       },
@@ -248,6 +254,9 @@ export const electricMoviesOnTiersCollection = createCollection(
     shapeOptions: {
       url:
         import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
+      headers: import.meta.env.VITE_ELECTRIC_SECRET
+        ? { Authorization: `Bearer ${import.meta.env.VITE_ELECTRIC_SECRET}` }
+        : undefined,
       params: {
         table: 'movies_on_tiers',
       },
