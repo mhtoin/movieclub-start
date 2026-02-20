@@ -157,9 +157,6 @@ export const electricMovieCollection = createCollection(
     shapeOptions: {
       url:
         import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
-      headers: import.meta.env.VITE_ELECTRIC_SECRET
-        ? { Authorization: `Bearer ${import.meta.env.VITE_ELECTRIC_SECRET}` }
-        : undefined,
       params: {
         table: 'movie',
       },
