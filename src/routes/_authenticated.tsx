@@ -14,6 +14,7 @@ import {
   Outlet,
   redirect,
   useMatches,
+  useRouterState,
 } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
@@ -53,15 +54,11 @@ export const Route = createFileRoute('/_authenticated')({
     }
     return { user, backgroundPreference }
   },
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     const user = context.user
     if (user?.userId) {
-      await Promise.all([
-        context.queryClient.ensureQueryData(
-          shortlistQueries.byUser(user.userId),
-        ),
-        context.queryClient.ensureQueryData(movieQueries.latest()),
-      ])
+      context.queryClient.prefetchQuery(shortlistQueries.byUser(user.userId))
+      context.queryClient.prefetchQuery(movieQueries.latest())
     }
   },
   component: AuthenticatedLayout,
@@ -73,6 +70,7 @@ function AuthenticatedLayout() {
   const isHomePage = matches.some(
     (match) => match.routeId === '/_authenticated/home',
   )
+  const isPending = useRouterState({ select: (s) => s.status === 'pending' })
 
   const BackgroundComponent =
     BACKGROUND_OPTIONS[backgroundPreference as BackgroundOptionKey]
@@ -80,6 +78,14 @@ function AuthenticatedLayout() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
+      {/* Thin top bar that appears when a blocking loader is running.
+          With most loaders now using prefetchQuery this rarely shows, but
+          gives clear feedback for the remaining await-based routes. */}
+      {isPending && (
+        <div className="fixed inset-x-0 top-0 z-[9999] h-[2px]">
+          <div className="h-full bg-primary animate-[progress_1.2s_ease-in-out_infinite] origin-left" />
+        </div>
+      )}
       <Sidebar />
       <BackgroundComponent />
       <div

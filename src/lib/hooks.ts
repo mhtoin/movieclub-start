@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function useDebouncedValue<T>(value: T, delay: number): [T] {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
@@ -14,6 +14,26 @@ export function useDebouncedValue<T>(value: T, delay: number): [T] {
   }, [value, delay])
 
   return [debouncedValue]
+}
+
+export function useDebouncedCallback<T extends (...args: any[]) => void>(
+  callback: T,
+  delay: number,
+): T {
+  const callbackRef = useRef(callback)
+  callbackRef.current = callback
+
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  return useCallback(
+    ((...args: Parameters<T>) => {
+      clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => {
+        callbackRef.current(...args)
+      }, delay)
+    }) as T,
+    [delay],
+  )
 }
 
 export function useElementInView(

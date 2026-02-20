@@ -23,6 +23,10 @@ export const getRouter = () => {
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 1000 * 60 * 5, // match staleTime — don't re-run loaders on hover if cache is fresh
     defaultViewTransition: true,
+    // Show a pending state after 500 ms (halved from the 1 s default) so that
+    // cold navigations with blocking loaders get feedback faster.
+    defaultPendingMs: 500,
+    defaultPendingMinMs: 200, // keep visible long enough to avoid a flash
   })
 
   setupRouterSsrQueryIntegration({

@@ -35,16 +35,16 @@ export const Route = createFileRoute('/_authenticated/discover')({
     await Promise.all([
       context.queryClient.ensureQueryData(tmdbQueries.genres()),
       context.queryClient.ensureQueryData(tmdbQueries.watchProviders()),
-      context.queryClient.ensureInfiniteQueryData(
-        tmdbQueries.discover({
-          with_genres: deps.genres || undefined,
-          with_watch_providers: deps.providers || undefined,
-          'vote_average.gte': deps.minRating,
-          'vote_average.lte': deps.maxRating,
-          sort_by: deps.sortBy,
-        }),
-      ),
     ])
+    context.queryClient.prefetchInfiniteQuery(
+      tmdbQueries.discover({
+        with_genres: deps.genres || undefined,
+        with_watch_providers: deps.providers || undefined,
+        'vote_average.gte': deps.minRating,
+        'vote_average.lte': deps.maxRating,
+        sort_by: deps.sortBy,
+      }),
+    )
   },
   component: RouteComponent,
 })

@@ -12,8 +12,8 @@ import { Suspense } from 'react'
 
 export const Route = createFileRoute('/_authenticated/tierlist/')({
   component: RouteComponent,
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(tierlistQueries.all())
+  loader: ({ context }) => {
+    context.queryClient.prefetchQuery(tierlistQueries.all())
   },
 })
 

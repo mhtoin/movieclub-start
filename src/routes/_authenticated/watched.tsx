@@ -13,7 +13,7 @@ import Input from '@/components/ui/input'
 import Filters from '@/components/watched/filters'
 import { WatchedItem } from '@/components/watched/watched-item'
 import WatchedSkeleton from '@/components/watched/watched-skeleton'
-import { useDebouncedValue, useMediaQuery } from '@/lib/hooks'
+import { useDebouncedCallback, useMediaQuery } from '@/lib/hooks'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { userQueries } from '@/lib/react-query/queries/users'
@@ -26,7 +26,7 @@ import {
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
 import { format } from 'date-fns'
 import { Calendar, Filter, Search, X } from 'lucide-react'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { z } from 'zod'
 
 const defaultValues = {
@@ -56,15 +56,11 @@ export const Route = createFileRoute('/_authenticated/watched')({
     user,
     genre,
   }),
-  loader: async ({ context, deps: { search, user, genre } }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(
-        movieQueries.watched(search, user, genre),
-      ),
-      context.queryClient.prefetchQuery(userQueries.all()),
-      context.queryClient.prefetchQuery(tmdbQueries.genres()),
-      context.queryClient.prefetchQuery(movieQueries.months()),
-    ])
+  loader: ({ context, deps: { search, user, genre } }) => {
+    context.queryClient.prefetchQuery(movieQueries.watched(search, user, genre))
+    context.queryClient.prefetchQuery(userQueries.all())
+    context.queryClient.prefetchQuery(tmdbQueries.genres())
+    context.queryClient.prefetchQuery(movieQueries.months())
   },
   component: RouteComponent,
 })
@@ -211,32 +207,34 @@ function WatchedMoviesList({
 }
 
 function RouteComponent() {
-  const { search: initialSearch } = Route.useSearch()
-  const [search, setSearch] = useState(initialSearch)
-  const [debouncedSearch] = useDebouncedValue(search, 300)
+  const { search: urlSearch, user, genre } = Route.useSearch()
+  // Local state for the input — stays snappy on every keystroke.
+  // The URL param (urlSearch) is the debounced, committed value used for
+  // data-fetching; it only updates after the user pauses typing.
+  const [localSearch, setLocalSearch] = useState(urlSearch)
   const navigate = Route.useNavigate()
-  const { user, genre } = Route.useSearch()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const isMobile = !useMediaQuery('(min-width: 768px)')
 
-  useEffect(() => {
+  // Debounce URL updates so the loader only re-runs after the user pauses
+  // typing.  No useEffect needed — the callback fires on user action.
+  const debouncedNavigate = useDebouncedCallback((value: string) => {
     navigate({
       search: (prev) => {
-        const searchValue =
-          debouncedSearch.trim().length >= 2 ? debouncedSearch.trim() : ''
-
-        if (searchValue) {
-          return { ...prev, search: searchValue }
-        } else {
-          const { search: _, ...rest } = prev
-          return rest
+        const trimmed = value.trim()
+        if (trimmed.length >= 2) {
+          return { ...prev, search: trimmed }
         }
+        const { search: _, ...rest } = prev
+        return rest
       },
     })
-  }, [debouncedSearch, navigate])
+  }, 300)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value)
+    const value = e.target.value
+    setLocalSearch(value)
+    debouncedNavigate(value)
   }
 
   const activeFiltersCount = [user, genre].filter(Boolean).length
@@ -256,7 +254,7 @@ function RouteComponent() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search movies..."
-                value={search}
+                value={localSearch}
                 onChange={handleSearchChange}
                 className="pl-10 h-11"
               />
@@ -332,7 +330,7 @@ function RouteComponent() {
                           className="w-full"
                           onClick={() => {
                             navigate({
-                              search: { search: search || undefined },
+                              search: { search: localSearch || undefined },
                             })
                             setFiltersOpen(false)
                           }}
@@ -352,7 +350,7 @@ function RouteComponent() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search movies..."
-                value={search}
+                value={localSearch}
                 onChange={handleSearchChange}
                 className="pl-10"
               />
@@ -361,13 +359,13 @@ function RouteComponent() {
           </div>
         )}
 
-        {debouncedSearch.trim() && (
+        {localSearch.trim() && (
           <div className="border-l-4 border-primary pl-4 my-4 md:my-6 ml-0 md:ml-4">
             <h2 className="text-base md:text-lg font-semibold">
               Search Results
             </h2>
             <p className="text-xs md:text-sm text-muted-foreground">
-              Showing results for &ldquo;{debouncedSearch}&rdquo;
+              Showing results for &ldquo;{localSearch}&rdquo;
             </p>
           </div>
         )}
@@ -377,7 +375,7 @@ function RouteComponent() {
         <div className="h-full overflow-y-auto -mx-4 px-4 md:px-10 pt-2 md:pt-6 fade-mask fade-y-16 dark:fade-y-84 fade-intensity-100">
           <Suspense fallback={<WatchedSkeleton />}>
             <WatchedMoviesList
-              searchQuery={debouncedSearch}
+              searchQuery={urlSearch}
               user={user}
               genre={genre}
             />

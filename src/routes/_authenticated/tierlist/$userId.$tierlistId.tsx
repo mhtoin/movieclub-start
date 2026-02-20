@@ -500,20 +500,7 @@ function RenameTierlistDialog({
   currentTitle: string
   onRename: (newTitle: string) => void
 }) {
-  const [title, setTitle] = useState(currentTitle)
   const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    if (open) {
-      setTitle(currentTitle)
-    }
-  }, [open, currentTitle])
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onRename(title)
-    setOpen(false)
-  }
 
   return (
     <DialogRoot open={open} onOpenChange={setOpen}>
@@ -526,28 +513,54 @@ function RenameTierlistDialog({
       <DialogPortal>
         <DialogBackdrop />
         <DialogPopup>
-          <form onSubmit={handleSubmit}>
-            <h2 className="text-lg font-semibold mb-4">Rename Tierlist</h2>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Tierlist name"
-              className="mb-4"
-              autoFocus
-            />
-            <div className="flex justify-end gap-2">
-              <DialogClose>
-                <Button type="button" variant="outline">
-                  Cancel
-                </Button>
-              </DialogClose>
-              <Button type="submit" disabled={!title.trim()}>
-                Save
-              </Button>
-            </div>
-          </form>
+          <RenameTierlistForm
+            key={open ? currentTitle : undefined}
+            currentTitle={currentTitle}
+            onRename={(title) => {
+              onRename(title)
+              setOpen(false)
+            }}
+          />
         </DialogPopup>
       </DialogPortal>
     </DialogRoot>
+  )
+}
+
+function RenameTierlistForm({
+  currentTitle,
+  onRename,
+}: {
+  currentTitle: string
+  onRename: (title: string) => void
+}) {
+  const [title, setTitle] = useState(currentTitle)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onRename(title)
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <h2 className="text-lg font-semibold mb-4">Rename Tierlist</h2>
+      <Input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Tierlist name"
+        className="mb-4"
+        autoFocus
+      />
+      <div className="flex justify-end gap-2">
+        <DialogClose>
+          <Button type="button" variant="outline">
+            Cancel
+          </Button>
+        </DialogClose>
+        <Button type="submit" disabled={!title.trim()}>
+          Save
+        </Button>
+      </div>
+    </form>
   )
 }

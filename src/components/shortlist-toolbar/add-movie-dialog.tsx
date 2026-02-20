@@ -5,6 +5,7 @@ import { RatingFilter } from '@/components/discover/rating-filter'
 import { SortByFilter } from '@/components/discover/sort-by-filter'
 import { Button } from '@/components/ui/button'
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog'
+import { useDebouncedValue } from '@/lib/hooks'
 import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl, Movie } from '@/lib/tmdb-api'
@@ -29,7 +30,7 @@ interface AddMovieDialogProps {
 
 export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [debouncedQuery] = useDebouncedValue(searchQuery, 300)
   const [isOpen, setIsOpen] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const [selectedGenres, setSelectedGenres] = useState<string[]>([])
@@ -45,13 +46,6 @@ export function AddMovieDialog({ movieCount }: AddMovieDialogProps) {
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const { mutate: addToShortlist, isPending } = useAddToShortlistMutation()
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery)
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchQuery])
 
   const handleAddMovie = (movie: Movie) => {
     addToShortlist(movie.id, {

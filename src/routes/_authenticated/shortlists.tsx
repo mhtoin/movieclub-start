@@ -21,8 +21,8 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute('/_authenticated/shortlists')({
   validateSearch: (search) => searchSchema.parse(search),
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(shortlistQueries.all())
+  loader: ({ context }) => {
+    context.queryClient.prefetchQuery(shortlistQueries.all())
   },
   component: ShortlistsPage,
 })
