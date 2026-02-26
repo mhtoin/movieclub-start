@@ -5,7 +5,11 @@ import { Button } from '../ui/button'
 import Field from '../ui/field'
 import OAuthProviders from './oauth-providers'
 
-export default function LoginView() {
+interface LoginViewProps {
+  onSwitch: () => void
+}
+
+export default function LoginView({ onSwitch }: LoginViewProps) {
   const [errors, setErrors] = useState({})
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const loginMutation = useLoginMutation()
@@ -35,6 +39,13 @@ export default function LoginView() {
 
   return (
     <div className="flex w-full flex-col gap-6">
+      <div className="flex flex-col space-y-2 text-center sm:text-left mb-2">
+        <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+        <p className="text-sm text-muted-foreground">
+          Enter your email and password to sign in to your account.
+        </p>
+      </div>
+
       <Form
         className="flex w-full flex-col gap-4"
         errors={errors}
@@ -67,13 +78,24 @@ export default function LoginView() {
           disabled={isLoggingIn}
           type="submit"
           variant={'primary'}
-          className="w-full"
+          className="w-full mt-2"
         >
-          {isLoggingIn ? 'Logging in...' : 'Login'}
+          {isLoggingIn ? 'Logging in...' : 'Sign In'}
         </Button>
       </Form>
 
       <OAuthProviders />
+
+      <p className="px-8 text-center text-sm text-muted-foreground mt-4">
+        Don't have an account?{' '}
+        <button
+          type="button"
+          onClick={onSwitch}
+          className="underline underline-offset-4 hover:text-primary font-medium"
+        >
+          Sign up
+        </button>
+      </p>
     </div>
   )
 }

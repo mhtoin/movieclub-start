@@ -3,6 +3,19 @@
 @custom-variant light (&:is(.light *));
 @plugin "tailwindcss-fade";
 
+@theme {
+  --animate-poster-scroll: poster-scroll 60s linear infinite;
+
+  @keyframes poster-scroll {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+}
+
 :root {
   --font-sans: Geist Mono, ui-monospace, monospace;
   --font-serif: serif;

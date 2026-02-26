@@ -1,6 +1,7 @@
 import {
   discoverMovies,
   DiscoverParams,
+  fetchBackgroundMovies,
   fetchMovieDetails,
   fetchWatchProviders,
   getFilters,
@@ -9,6 +10,12 @@ import {
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 export const tmdbQueries = {
+  backgroundMovies: (count: number = 12) =>
+    queryOptions({
+      queryKey: ['tmdb', 'backgroundMovies', count],
+      queryFn: () => fetchBackgroundMovies(count),
+      staleTime: 1000 * 60 * 60 * 24,
+    }),
   genres: () =>
     queryOptions({
       queryKey: ['tmdb', 'genres'],
