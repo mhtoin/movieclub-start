@@ -3,6 +3,7 @@ import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
 import { Button } from '../ui/button'
 import Field from '../ui/field'
+import OAuthProviders from './oauth-providers'
 
 export default function LoginView() {
   const [errors, setErrors] = useState({})
@@ -33,37 +34,46 @@ export default function LoginView() {
   }
 
   return (
-    <Form
-      className="flex w-full max-w-64 flex-col gap-4 "
-      errors={errors}
-      onSubmit={handleSubmit}
-    >
-      <fieldset disabled={isLoggingIn} className="contents">
-        <Field
-          name="email"
-          label="Email"
-          type="email"
-          required
-          placeholder="user@example.com"
-        />
-        <Field
-          name="password"
-          label="Password"
-          type="password"
-          required
-          placeholder="password"
-        />
-      </fieldset>
+    <div className="flex w-full flex-col gap-6">
+      <Form
+        className="flex w-full flex-col gap-4"
+        errors={errors}
+        onSubmit={handleSubmit}
+      >
+        <fieldset disabled={isLoggingIn} className="contents">
+          <Field
+            name="email"
+            label="Email"
+            type="email"
+            required
+            placeholder="user@example.com"
+          />
+          <Field
+            name="password"
+            label="Password"
+            type="password"
+            required
+            placeholder="password"
+          />
+        </fieldset>
 
-      {loginMutation.error && (
-        <div className="text-sm text-red-600">
-          {loginMutation.error.message || 'Login failed'}
-        </div>
-      )}
+        {loginMutation.error && (
+          <div className="text-sm text-red-600">
+            {loginMutation.error.message || 'Login failed'}
+          </div>
+        )}
 
-      <Button disabled={isLoggingIn} type="submit" variant={'primary'}>
-        {isLoggingIn ? 'Logging in...' : 'Submit'}
-      </Button>
-    </Form>
+        <Button
+          disabled={isLoggingIn}
+          type="submit"
+          variant={'primary'}
+          className="w-full"
+        >
+          {isLoggingIn ? 'Logging in...' : 'Login'}
+        </Button>
+      </Form>
+
+      <OAuthProviders />
+    </div>
   )
 }
