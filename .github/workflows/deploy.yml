@@ -23,8 +23,9 @@ jobs:
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v4
-        with:
-          clean: false   # preserve .env.production on the server
+
+      - name: Copy .env.production from server
+        run: cp ~/movieclub-env/.env.production .env.production
 
       - name: Pull latest base images
         run: docker compose -f docker-compose.prod.yml pull --ignore-buildable
