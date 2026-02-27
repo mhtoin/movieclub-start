@@ -11,6 +11,15 @@ jobs:
     runs-on: self-hosted
     environment: production
 
+    # Expose secrets as env vars so docker compose can interpolate the compose
+    # file correctly (variables marked with :? will error without these).
+    env:
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
+      VITE_ELECTRIC_URL: ${{ secrets.VITE_ELECTRIC_URL }}
+      VITE_ELECTRIC_SECRET: ${{ secrets.VITE_ELECTRIC_SECRET }}
+
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v4
