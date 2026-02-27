@@ -39,10 +39,11 @@ RUN pnpm install --frozen-lockfile
 # Copy built application (Nitro output)
 COPY --from=builder /app/.output ./.output
 
-# Copy drizzle config, schema, and migrations for db operations
+# Copy drizzle config, schema, migrations, and scripts for db operations
 COPY --from=builder /app/drizzle.config.ts ./
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/src/db ./src/db
+COPY --from=builder /app/scripts ./scripts
 
 # Expose port for the app
 EXPOSE 3001
