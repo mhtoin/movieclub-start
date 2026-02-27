@@ -1,4 +1,9 @@
-import { loginFn, registerFn } from '@/lib/auth/auth-actions'
+import {
+  loginFn,
+  registerFn,
+  requestPasswordResetFn,
+  resetPasswordFn,
+} from '@/lib/auth/auth-actions'
 import { useMutation, type UseMutationResult } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 
@@ -14,12 +19,53 @@ export type RegisterInput = {
   name: string
 }
 
+export type RequestPasswordResetInput = {
+  email: string
+}
+
+export type ResetPasswordInput = {
+  token: string
+  password: string
+}
+
 // Error response type from server functions
 type AuthErrorResponse = {
   error: string
 }
 
 // Custom hooks for mutations
+export function useRequestPasswordResetMutation(): UseMutationResult<
+  { success: boolean } | AuthErrorResponse,
+  Error,
+  RequestPasswordResetInput
+> {
+  return useMutation({
+    mutationFn: async (variables: RequestPasswordResetInput) => {
+      try {
+        return await requestPasswordResetFn({ data: variables })
+      } catch (error) {
+        throw error
+      }
+    },
+  })
+}
+
+export function useResetPasswordMutation(): UseMutationResult<
+  { success: boolean } | AuthErrorResponse,
+  Error,
+  ResetPasswordInput
+> {
+  return useMutation({
+    mutationFn: async (variables: ResetPasswordInput) => {
+      try {
+        return await resetPasswordFn({ data: variables })
+      } catch (error) {
+        throw error
+      }
+    },
+  })
+}
+
 export function useLoginMutation(): UseMutationResult<
   void | AuthErrorResponse,
   Error,

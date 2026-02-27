@@ -43,6 +43,13 @@
       "when": 1771545600000,
       "tag": "0005_add_indexes_and_tierlist_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772136115617,
+      "tag": "0006_rainy_green_goblin",
+      "breakpoints": true
     }
   ]
 }

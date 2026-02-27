@@ -7,9 +7,13 @@ import OAuthProviders from './oauth-providers'
 
 interface LoginViewProps {
   onSwitch: () => void
+  onForgotPassword: () => void
 }
 
-export default function LoginView({ onSwitch }: LoginViewProps) {
+export default function LoginView({
+  onSwitch,
+  onForgotPassword,
+}: LoginViewProps) {
   const [errors, setErrors] = useState({})
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const loginMutation = useLoginMutation()
@@ -66,6 +70,15 @@ export default function LoginView({ onSwitch }: LoginViewProps) {
             required
             placeholder="password"
           />
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4"
+            >
+              Forgot password?
+            </button>
+          </div>
         </fieldset>
 
         {loginMutation.error && (

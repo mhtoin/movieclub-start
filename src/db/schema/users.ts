@@ -72,8 +72,20 @@ export const account = pgTable(
   ],
 )
 
+export const passwordResetToken = pgTable('password_reset_token', {
+  id: text().primaryKey().notNull(),
+  userId: text()
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  token: text().notNull().unique(),
+  expiresAt: timestamp({ precision: 3, mode: 'date' }).notNull(),
+})
+
 export type User = typeof user.$inferSelect
 export type InsertUser = typeof user.$inferInsert
 
 export type SelectAccount = typeof account.$inferSelect
 export type InsertAccount = typeof account.$inferInsert
+
+export type PasswordResetToken = typeof passwordResetToken.$inferSelect
+export type InsertPasswordResetToken = typeof passwordResetToken.$inferInsert

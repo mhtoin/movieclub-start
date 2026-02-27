@@ -1,8 +1,68 @@
-import { createUser, getUserByEmail } from '@/db/queries/user'
+import {
+  createPasswordResetToken,
+  createUser,
+  deletePasswordResetToken,
+  getPasswordResetToken,
+  getUserByEmail,
+  getUserById,
+  updateUserPassword,
+} from '@/db/queries/user'
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import bcrypt from 'bcryptjs'
+import { sendPasswordResetEmail } from '../email'
 import { createSession, useAppSession } from './auth'
+
+export const requestPasswordResetFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: { email: string }) => data)
+  .handler(async ({ data }) => {
+    const user = await getUserByEmail(data.email)
+    if (!user) {
+      // We don't want to reveal if a user exists or not, so we just return success
+      return { success: true }
+    }
+
+    // Generate a secure token
+    const token = crypto.randomUUID()
+    // Token expires in 1 hour
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60)
+
+    await createPasswordResetToken(user.id, token, expiresAt)
+
+    // In a real app, you'd get the base URL from an environment variable or request headers
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3001'
+    const resetLink = `${baseUrl}/reset-password?token=${token}`
+
+    await sendPasswordResetEmail(user.email, resetLink)
+
+    return { success: true }
+  })
+
+export const resetPasswordFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: { token: string; password: string }) => data)
+  .handler(async ({ data }) => {
+    const resetToken = await getPasswordResetToken(data.token)
+
+    if (!resetToken) {
+      throw new Error('Invalid or expired password reset token')
+    }
+
+    if (new Date() > resetToken.expiresAt) {
+      await deletePasswordResetToken(resetToken.id)
+      throw new Error('Password reset token has expired')
+    }
+
+    const user = await getUserById(resetToken.userId)
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 12)
+    await updateUserPassword(user.email, hashedPassword)
+    await deletePasswordResetToken(resetToken.id)
+
+    return { success: true }
+  })
 
 export const registerFn = createServerFn({ method: 'POST' })
   .inputValidator(
