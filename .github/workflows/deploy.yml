@@ -1,0 +1,41 @@
+name: Deploy to Home Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Pull & Rebuild
+    runs-on: self-hosted
+    environment: production
+
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+        with:
+          clean: false   # preserve .env.production on the server
+
+      - name: Pull latest base images
+        run: docker compose -f docker-compose.prod.yml pull --ignore-buildable
+
+      - name: Rebuild app image
+        run: |
+          docker compose -f docker-compose.prod.yml build \
+            --build-arg VITE_ELECTRIC_URL="${{ secrets.VITE_ELECTRIC_URL }}" \
+            --build-arg VITE_ELECTRIC_SECRET="${{ secrets.VITE_ELECTRIC_SECRET }}" \
+            --build-arg VITE_TMDB_API_KEY="${{ secrets.VITE_TMDB_API_KEY }}" \
+            --build-arg VITE_TMDB_BASE_URL="${{ vars.VITE_TMDB_BASE_URL }}" \
+            --build-arg VITE_TMDB_IMAGE_BASE_URL="${{ vars.VITE_TMDB_IMAGE_BASE_URL }}" \
+            --no-cache app
+
+      - name: Start / restart containers
+        run: docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+      - name: Run database migrations
+        run: docker compose -f docker-compose.prod.yml exec -T app pnpm db:migrate
+
+      - name: Remove dangling images
+        if: always()
+        run: docker image prune -f
