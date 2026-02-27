@@ -30,7 +30,7 @@ export const requestPasswordResetFn = createServerFn({ method: 'POST' })
     await createPasswordResetToken(user.id, token, expiresAt)
 
     // In a real app, you'd get the base URL from an environment variable or request headers
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3001'
+    const baseUrl = process.env.BASE_URL
     const resetLink = `${baseUrl}/reset-password?token=${token}`
 
     await sendPasswordResetEmail(user.email, resetLink)
