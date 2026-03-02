@@ -19,6 +19,8 @@ jobs:
       VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
       VITE_ELECTRIC_URL: ${{ secrets.VITE_ELECTRIC_URL }}
       VITE_ELECTRIC_SECRET: ${{ secrets.VITE_ELECTRIC_SECRET }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
 
     steps:
       - name: Checkout latest code
