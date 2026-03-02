@@ -92,6 +92,21 @@ export const addToShortlist = createServerFn({ method: 'POST' })
       throw new Error('Shortlist not found')
     }
 
+    const currentShortlistMovies = await db
+      .select()
+      .from(movieToShortlist)
+      .where(eq(movieToShortlist.b, userShortlist.id))
+
+    if (currentShortlistMovies.length >= 3) {
+      throw new Error('Your shortlist is full (maximum 3 movies)')
+    }
+
+    if (existingEntry?.watchDate != null) {
+      throw new Error(
+        'This movie has already been watched and cannot be added to a shortlist',
+      )
+    }
+
     let movieEntry = existingEntry
 
     if (!movieEntry) {
@@ -164,6 +179,7 @@ export const useRemoveFromShortlistMutation = () => {
       toastManager.add({
         title: 'Error',
         description: 'Failed to remove movie from shortlist',
+        type: 'error',
       })
     },
     onSuccess: (shortlist) => {
@@ -174,6 +190,7 @@ export const useRemoveFromShortlistMutation = () => {
       toastManager.add({
         title: 'Success',
         description: 'Movie removed from shortlist',
+        type: 'success',
       })
     },
   })
@@ -195,7 +212,8 @@ export const useAddToShortlistMutation = () => {
       console.error('Error adding movie to shortlist:', error)
       toastManager.add({
         title: 'Error',
-        description: 'Failed to add movie to shortlist',
+        description: error.message ?? 'Failed to add movie to shortlist',
+        type: 'error',
       })
     },
     onSuccess: (shortlist) => {
@@ -206,6 +224,7 @@ export const useAddToShortlistMutation = () => {
       toastManager.add({
         title: 'Success',
         description: 'Movie added to shortlist',
+        type: 'success',
       })
     },
   })
@@ -324,6 +343,7 @@ export const useToggleIsReadyMutation = () => {
       toastManager.add({
         title: 'Error',
         description: 'Failed to update ready status',
+        type: 'error',
       })
     },
     onSuccess: (shortlist) => {
@@ -333,6 +353,7 @@ export const useToggleIsReadyMutation = () => {
         description: shortlist.isReady
           ? 'Marked as ready to watch'
           : 'Marked as in progress',
+        type: 'success',
       })
     },
   })
@@ -355,6 +376,7 @@ export const useToggleParticipatingMutation = () => {
       toastManager.add({
         title: 'Error',
         description: 'Failed to update participation status',
+        type: 'error',
       })
     },
     onSuccess: (shortlist) => {
@@ -364,6 +386,7 @@ export const useToggleParticipatingMutation = () => {
         description: shortlist.participating
           ? 'Now participating in movie night'
           : 'No longer participating in movie night',
+        type: 'success',
       })
     },
   })
@@ -453,6 +476,7 @@ export const useUpdateUserShortlistStatusMutation = () => {
       toastManager.add({
         title: 'Error',
         description: 'Failed to update user status',
+        type: 'error',
       })
     },
     onSuccess: () => {
@@ -526,6 +550,7 @@ export const useUpdateSelectedIndexMutation = () => {
       toastManager.add({
         title: 'Error',
         description: 'Failed to update selection',
+        type: 'error',
       })
     },
     onSuccess: (shortlist) => {
@@ -536,6 +561,7 @@ export const useUpdateSelectedIndexMutation = () => {
           shortlist.selectedIndex !== null
             ? 'Movie selected for raffle'
             : 'Selection cleared',
+        type: 'success',
       })
     },
   })
