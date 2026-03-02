@@ -61,6 +61,8 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-movieclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movieclub}?sslmode=disable
       AUTH_SECRET: ${AUTH_SECRET:?Auth secret required}
+      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY required}
+      EMAIL_FROM: ${EMAIL_FROM:?EMAIL_FROM required}
       VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY:?TMDB API key required}
       VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
       VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}

@@ -295,3 +295,53 @@ Files prefixed with `demo` can be safely deleted. They are there to provide a st
 # Learn More
 
 You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+
+
+# Deployment (Home Server)
+
+Every push to `main` automatically deploys via GitHub Actions using a **self-hosted runner** installed on the server.
+
+## One-time: install the self-hosted runner
+
+1. Go to **GitHub → repo → Settings → Actions → Runners → New self-hosted runner**.
+2. Select **Linux** and follow the download/configure steps shown there (they include a unique token for your repo).
+3. Start the runner as a background service so it survives reboots:
+
+```bash
+sudo ./svc.sh install
+sudo ./svc.sh start
+```
+
+The runner will connect to GitHub and pick up workflow jobs when code is pushed.
+
+## One-time: set GitHub Actions secrets & variables
+
+In **GitHub → repo → Settings → Environments → production**, add:
+
+| Type | Name | Value |
+|------|------|-------|
+| Secret | `VITE_ELECTRIC_URL` | your Electric endpoint |
+| Secret | `VITE_ELECTRIC_SECRET` | your Electric secret |
+| Secret | `VITE_TMDB_API_KEY` | your TMDB API key |
+| Variable | `VITE_TMDB_BASE_URL` | e.g. `https://api.themoviedb.org/3` |
+| Variable | `VITE_TMDB_IMAGE_BASE_URL` | e.g. `https://image.tmdb.org/t/p` |
+
+Runtime secrets (database password, auth secret, etc.) are read from `.env.production` on the server — that file is **not** committed to the repo and will never be touched by the workflow.
+
+## Repo must be checked out on the server
+
+The workflow uses `actions/checkout` with `clean: false` (to preserve `.env.production`), so the repo needs to exist at least once before the first run:
+
+```bash
+git clone https://github.com/mhtoin/movieclub-start.git
+cd movieclub-start
+# fill in .env.production with your values
+```
+
+## Manual deploy
+
+You can also trigger a deploy by hand from the repo root:
+
+```bash
+bash scripts/deploy.sh
+```
