@@ -179,20 +179,17 @@ export default function Sidebar() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`relative flex items-center gap-3 px-3 py-2.5 mx-1 rounded-xl transition-all duration-200 ${
+                  className={`flex items-center gap-3 px-3 py-2 mx-1 rounded-lg transition-all duration-150 ${
                     active
-                      ? 'text-primary bg-primary/15'
-                      : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                      ? 'text-primary bg-primary/20 font-medium border-l-2 border-primary'
+                      : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/90 hover:bg-sidebar-accent/40'
                   }`}
                   viewTransition
                 >
-                  <Icon size={18} className="flex-shrink-0" />
+                  <Icon size={17} className="flex-shrink-0" />
                   <span className="text-xs font-medium whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
                     {item.label}
                   </span>
-                  {active && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-primary rounded-r-full" />
-                  )}
                 </Link>
               )
             })}
@@ -308,18 +305,15 @@ export default function Sidebar() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 ${
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-150 ${
                   active
-                    ? 'text-primary'
-                    : 'text-sidebar-foreground/60 active:text-sidebar-foreground'
+                    ? 'text-primary bg-primary/15'
+                    : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/80 active:bg-sidebar-accent/40'
                 }`}
                 viewTransition
               >
                 <Icon size={20} />
                 <span className="text-[10px] font-medium">{item.label}</span>
-                {active && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-                )}
               </Link>
             )
           })}

@@ -106,7 +106,6 @@ function WatchedMoviesList({
                   </div>
                 </div>
               </div>
-
               <div className="space-y-3">
                 {movies?.map((movieData) => {
                   const watchDate = movieData.movie?.watchDate
@@ -155,10 +154,6 @@ function WatchedMoviesList({
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 ring-4 ring-background relative">
                   <Calendar className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <div
-                  className="absolute inset-0 w-12 h-12 rounded-full bg-primary/20 animate-ping"
-                  style={{ animationDuration: '3s' }}
-                />
               </div>
               <div className="flex-1">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
@@ -372,7 +367,7 @@ function RouteComponent() {
       </div>
 
       <div className="relative flex-1 overflow-hidden isolate">
-        <div className="h-full overflow-y-auto -mx-4 px-4 md:px-10 pt-2 md:pt-6 fade-mask fade-y-16 dark:fade-y-84 fade-intensity-100">
+        <div className="h-full overflow-y-auto -mx-4 px-4 md:px-10 pt-2 md:pt-6 fade-mask fade-y-16 dark:fade-y-10 fade-intensity-100">
           <Suspense fallback={<WatchedSkeleton />}>
             <WatchedMoviesList
               searchQuery={urlSearch}
