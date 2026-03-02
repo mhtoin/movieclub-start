@@ -40,10 +40,22 @@ jobs:
             --build-arg VITE_TMDB_API_KEY="${{ secrets.VITE_TMDB_API_KEY }}" \
             --build-arg VITE_TMDB_BASE_URL="${{ vars.VITE_TMDB_BASE_URL }}" \
             --build-arg VITE_TMDB_IMAGE_BASE_URL="${{ vars.VITE_TMDB_IMAGE_BASE_URL }}" \
-            --no-cache app
+            app
 
       - name: Start / restart containers
         run: docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+      - name: Wait for app container to be ready
+        run: |
+          echo "Waiting for app container to be healthy..."
+          for i in $(seq 1 30); do
+            if docker compose -f docker-compose.prod.yml exec -T app echo "ready" 2>/dev/null; then
+              echo "App container is ready."
+              break
+            fi
+            echo "Attempt $i/30 — retrying in 3s..."
+            sleep 3
+          done
 
       - name: Run database migrations
         run: docker compose -f docker-compose.prod.yml exec -T app pnpm db:migrate

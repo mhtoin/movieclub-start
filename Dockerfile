@@ -6,7 +6,8 @@ WORKDIR /app
 # Dependencies stage
 FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
 
 # Builder stage
 FROM base AS builder
@@ -31,10 +32,10 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3001
 
-# Copy package files and install all dependencies (including drizzle-kit for migrations)
+# Reuse node_modules from deps stage — no need to reinstall
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
 
 # Copy built application (Nitro output)
 COPY --from=builder /app/.output ./.output
