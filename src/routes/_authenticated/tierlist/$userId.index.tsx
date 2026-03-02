@@ -54,7 +54,11 @@ function RouteComponent() {
   const deleteMutation = useMutation({
     mutationFn: deleteTierlist,
     onSuccess: () => {
-      toastManager.add({ title: 'Success', description: 'Tierlist deleted' })
+      toastManager.add({
+        title: 'Success',
+        description: 'Tierlist deleted',
+        type: 'success',
+      })
       queryClient.invalidateQueries({
         queryKey: tierlistQueries.user(userId).queryKey,
       })
@@ -63,6 +67,7 @@ function RouteComponent() {
       toastManager.add({
         title: 'Error',
         description: 'Failed to delete tierlist',
+        type: 'error',
       })
     },
   })
@@ -412,7 +417,11 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
   const createMutation = useMutation({
     mutationFn: createTierlist,
     onSuccess: () => {
-      toastManager.add({ title: 'Success', description: 'Tierlist created' })
+      toastManager.add({
+        title: 'Success',
+        description: 'Tierlist created',
+        type: 'success',
+      })
       setOpen(false)
       setTitle('')
       setWatchDateFrom('')
@@ -433,6 +442,7 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
       toastManager.add({
         title: 'Error',
         description: 'Failed to create tierlist',
+        type: 'error',
       })
     },
   })

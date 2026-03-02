@@ -115,6 +115,7 @@ export default function Sidebar() {
       toastManager.add({
         title: 'Error',
         description: `Failed to update color scheme: ${error.message}`,
+        type: 'error',
       })
     },
   })
@@ -131,6 +132,7 @@ export default function Sidebar() {
       toastManager.add({
         title: 'Error',
         description: `Failed to update background: ${error.message}`,
+        type: 'error',
       })
     },
   })

@@ -84,6 +84,7 @@ export function AppearanceSection({
       toastManager.add({
         title: 'Error',
         description: `Failed to update color scheme: ${error.message}`,
+        type: 'error',
       })
     },
   })

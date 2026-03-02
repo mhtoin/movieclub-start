@@ -100,6 +100,7 @@ export const useStartRaffleMutation = () => {
         title: 'Error',
         description:
           error instanceof Error ? error.message : 'Failed to start raffle',
+        type: 'error',
       })
     },
   })
@@ -137,6 +138,7 @@ export const useFinalizeRaffleMutation = () => {
           error instanceof Error
             ? error.message
             : 'Failed to finalize raffle. Please refresh the page.',
+        type: 'error',
       })
     },
     onSuccess: () => {
@@ -146,6 +148,7 @@ export const useFinalizeRaffleMutation = () => {
       toastManager.add({
         title: 'Raffle Complete!',
         description: 'The winning movie has been added to your watched list.',
+        type: 'success',
       })
     },
   })

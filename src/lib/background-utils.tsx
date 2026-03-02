@@ -54,6 +54,7 @@ export function useBackgroundMutation(
       toastManager.add({
         title: 'Error',
         description: `Failed to update background: ${error.message}`,
+        type: 'error',
       })
     },
   })
