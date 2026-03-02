@@ -24,6 +24,10 @@ export type UserWithTierlists = User & {
   >
 }
 
+export type TierlistWithDetails = Tierlist & {
+  tiers: Array<Tier & { moviesOnTiers: Array<MovieOnTier & { movie: Movie }> }>
+}
+
 export interface TierWithMovies extends Tier {
   movies: (Movie & { position: number; movieOnTierId: string })[]
 }

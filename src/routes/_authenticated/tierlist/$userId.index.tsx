@@ -13,7 +13,10 @@ import {
   createTierlist,
   deleteTierlist,
 } from '@/lib/react-query/mutations/tierlists'
-import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
+import {
+  tierlistQueries,
+  type TierlistWithDetails,
+} from '@/lib/react-query/queries/tierlists'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl } from '@/lib/tmdb-api'
 import { Toast } from '@base-ui/react/toast'
@@ -46,7 +49,8 @@ export const Route = createFileRoute('/_authenticated/tierlist/$userId/')({
 function RouteComponent() {
   const { userId } = Route.useParams()
   const { user } = Route.useRouteContext()
-  const { data: tierlists } = useSuspenseQuery(tierlistQueries.user(userId))
+  const { data } = useSuspenseQuery(tierlistQueries.user(userId))
+  const tierlists = data as TierlistWithDetails[]
   const isOwner = user?.userId === userId
   const queryClient = useQueryClient()
   const toastManager = Toast.useToastManager()
