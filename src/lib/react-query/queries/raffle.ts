@@ -1,10 +1,10 @@
 import { db } from '@/db/db'
-import { movieToShortlist, shortlist } from '@/db/schema'
+import { movieToShortlist, raffle, raffleToUser, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
 export const getParticipatingShortlists = createServerFn({
   method: 'GET',
@@ -54,4 +54,42 @@ export const raffleQueries = {
         return result
       },
     }),
+  history: () =>
+    queryOptions({
+      queryKey: ['raffle', 'history'],
+      queryFn: async () => {
+        const result = await getRaffleHistory()
+        return result
+      },
+    }),
 }
+
+export const getRaffleHistory = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    try {
+      const rows = await db
+        .select()
+        .from(raffle)
+        .leftJoin(movie, eq(raffle.winningMovieID, movie.id))
+        .leftJoin(raffleToUser, eq(raffleToUser.a, raffle.id))
+        .leftJoin(user, eq(raffleToUser.b, user.id))
+        .orderBy(desc(raffle.date))
+      const seen = new Set<string>()
+      return rows
+        .filter((r) => {
+          if (seen.has(r.raffle.id)) return false
+          seen.add(r.raffle.id)
+          return true
+        })
+        .map((r) => ({
+          id: r.raffle.id,
+          date: r.raffle.date,
+          movie: r.movie ?? null,
+          winner: r.user ?? null,
+        }))
+    } catch (error) {
+      console.error('Error fetching raffle history:', error)
+      return []
+    }
+  },
+)

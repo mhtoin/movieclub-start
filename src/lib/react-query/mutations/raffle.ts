@@ -1,5 +1,11 @@
 import { db } from '@/db/db'
-import { movie, movieToShortlist, shortlist } from '@/db/schema'
+import {
+  movie,
+  movieToShortlist,
+  raffle as raffleTable,
+  raffleToUser,
+  shortlist,
+} from '@/db/schema'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
@@ -62,6 +68,14 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
     const { movieId, watchDate, userId } = data
 
     try {
+      const raffleId = crypto.randomUUID()
+      await db.insert(raffleTable).values({
+        id: raffleId,
+        winningMovieID: movieId,
+        date: watchDate,
+      })
+      await db.insert(raffleToUser).values({ a: raffleId, b: userId })
+
       await db
         .update(movie)
         .set({ watchDate: watchDate, userId: userId })
@@ -145,6 +159,7 @@ export const useFinalizeRaffleMutation = () => {
       console.log('Successfully finalized raffle')
       queryClient.invalidateQueries({ queryKey: ['shortlists'] })
       queryClient.invalidateQueries({ queryKey: ['movies'] })
+      queryClient.invalidateQueries({ queryKey: ['raffle', 'history'] })
       toastManager.add({
         title: 'Raffle Complete!',
         description: 'The winning movie has been added to your watched list.',

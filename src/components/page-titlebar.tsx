@@ -11,7 +11,7 @@ export function PageTitleBar({
 }: {
   title: string
   description?: string
-  kicker?: string
+  kicker?: ReactNode
   actions?: ReactNode
   className?: string
 }) {

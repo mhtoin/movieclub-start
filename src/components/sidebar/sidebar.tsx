@@ -15,6 +15,7 @@ import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import {
+  Dices,
   Film,
   Home,
   ImageIcon,
@@ -59,6 +60,7 @@ const navItems = [
   { icon: Film, label: 'Watched', path: '/watched' },
   { icon: Search, label: 'Discover', path: '/discover' },
   { icon: List, label: 'Shortlists', path: '/shortlists' },
+  { icon: Dices, label: 'Raffle', path: '/raffle' },
   { icon: Star, label: 'Tierlists', path: '/tierlist' },
 ]
 
