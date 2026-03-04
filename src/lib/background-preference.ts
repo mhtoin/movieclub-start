@@ -5,9 +5,9 @@ import * as z from 'zod'
 export const backgroundValidator = z.enum([
   'none',
   'minimal',
-  'shapes',
-  'aurora',
   'backdropVeil',
+  'projector',
+  'dust',
 ])
 
 export type BackgroundPreference = z.infer<typeof backgroundValidator>

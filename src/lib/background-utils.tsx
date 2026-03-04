@@ -74,21 +74,20 @@ export const BACKGROUND_PREVIEW_STYLES: Record<
     background:
       'linear-gradient(180deg, var(--muted) 0%, var(--background) 100%)',
   },
-  shapes: {
-    background: 'var(--background)',
-    border: '1px dashed var(--border)',
-  },
-  aurora: {
-    background: `
-      linear-gradient(180deg, var(--primary) 0%, var(--secondary) 50%, var(--background) 100%)
-    `,
-    opacity: 0.5,
-  },
   backdropVeil: {
     background: `
       linear-gradient(135deg, var(--primary) 0%, var(--muted) 50%, var(--secondary) 100%)
     `,
     opacity: 0.7,
+  },
+  projector: {
+    background:
+      'radial-gradient(ellipse at 50% 0%, var(--primary) 0%, var(--background) 70%)',
+    opacity: 0.6,
+  },
+  dust: {
+    background: 'var(--background)',
+    border: '1px dotted var(--border)',
   },
 }
 
