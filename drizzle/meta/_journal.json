@@ -50,6 +50,13 @@
       "when": 1772136115617,
       "tag": "0006_rainy_green_goblin",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1772582400000,
+      "tag": "0007_add_notify_triggers",
+      "breakpoints": true
     }
   ]
 }
