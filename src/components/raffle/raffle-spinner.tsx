@@ -16,16 +16,14 @@ interface Props {
 const ITEM_HEIGHT = 200
 const VISIBLE_COUNT = 5
 const WINDOW_HEIGHT = ITEM_HEIGHT * VISIBLE_COUNT
-const SPIN_DURATION = 8000 // ms
-const LAPS = 6
 const REEL_WIDTH = 400
 const SPROCKET_WIDTH = 36
 const CENTER_ITEM = Math.floor(VISIBLE_COUNT / 2) // index 2
 const IMAGE_H = ITEM_HEIGHT - 20
 const IMAGE_W = REEL_WIDTH - SPROCKET_WIDTH * 2 - 8
 
-function easeOutQuint(t: number) {
-  return 1 - Math.pow(1 - t, 5)
+function easeOutPow(t: number, power: number) {
+  return 1 - Math.pow(1 - t, power)
 }
 
 const SprocketStrip = memo(function SprocketStrip() {
@@ -148,6 +146,21 @@ export function RaffleSpinner({
   debug = false,
   arrowColor = 'var(--primary)',
 }: Props) {
+  // Randomise all spin parameters once per mount so each spin feels more unique.
+  const spinParams = useMemo(
+    () => ({
+      /** 5–9 full revolutions */
+      laps: Math.floor(Math.random() * 5) + 5,
+      /** 6.5 s – 10.5 s */
+      duration: 6500 + Math.random() * 4000,
+      /** How far (px) the winning frame can be off-centre (±ITEM_HEIGHT*0.4) */
+      landingJitter: (Math.random() - 0.5) * ITEM_HEIGHT * 0.8,
+      /** Easing exponent: 4–8 (lower = slower decay, higher = sharp snap) */
+      easingPower: 4 + Math.random() * 4,
+    }),
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  )
+
   const animFrameRef = useRef<number>(0)
   const stripRef = useRef<HTMLDivElement | null>(null)
   const completedRef = useRef(false)
@@ -163,25 +176,21 @@ export function RaffleSpinner({
 
   const barWidth = useTransform(speedProgress, [0, 1], ['100%', '0%'])
 
-  // Extend strip to (LAPS + 2) copies so the animation can travel in one
-  // continuous direction without ever wrapping — the wrap-around jump was
-  // the source of the odd flashing during spinning.
   const repeated = useMemo(
-    () => Array.from({ length: LAPS + 2 }, () => movies).flat(),
-    [movies],
+    () => Array.from({ length: spinParams.laps + 2 }, () => movies).flat(),
+    [movies, spinParams.laps],
   )
   const winningIndex = movies.findIndex((m) => m.id === winningMovie.id)
-  // Place the winning frame in copy `LAPS` (0-indexed) so there are always
-  // exactly LAPS full revolutions between any random start in copy 0 and
-  // the target.
   const targetOffset =
-    (LAPS * movies.length + winningIndex) * ITEM_HEIGHT -
+    (spinParams.laps * movies.length + winningIndex) * ITEM_HEIGHT -
     WINDOW_HEIGHT / 2 +
-    ITEM_HEIGHT / 2
+    ITEM_HEIGHT / 2 +
+    spinParams.landingJitter
 
   useEffect(() => {
+    const { duration, easingPower } = spinParams
     const start = performance.now()
-    const startOffset = Math.floor(Math.random() * movies.length) * ITEM_HEIGHT
+    const startOffset = Math.random() * movies.length * ITEM_HEIGHT
 
     if (debug) {
       const SPEED = 600 // px/s
@@ -201,14 +210,12 @@ export function RaffleSpinner({
       return () => cancelAnimationFrame(animFrameRef.current)
     }
 
-    // totalDistance is always positive: target is LAPS copies ahead of start.
-    // No modulo wrapping — the strip is long enough to cover the full distance.
     const totalDistance = targetOffset - startOffset
 
     const tick = (now: number) => {
       const elapsed = now - start
-      const t = Math.min(elapsed / SPIN_DURATION, 1)
-      const eased = easeOutQuint(t)
+      const t = Math.min(elapsed / duration, 1)
+      const eased = easeOutPow(t, easingPower)
       const offset = startOffset + totalDistance * eased
 
       speedProgress.set(eased)
