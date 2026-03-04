@@ -2,8 +2,6 @@ import { db } from '@/db/db'
 import { movie, type MovieWithUser } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { groupBy } from '@/lib/utils'
-import { electricCollectionOptions } from '@tanstack/electric-db-collection'
-import { createCollection } from '@tanstack/react-db'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { format } from 'date-fns'
@@ -113,6 +111,16 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
     })
   })
 
+export const getAllWatchedMovies = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return db
+      .select()
+      .from(movie)
+      .where(isNotNull(movie.watchDate))
+      .orderBy(desc(movie.watchDate))
+  },
+)
+
 export const movieQueries = {
   all: () => ['movies'],
   latest: () =>
@@ -135,6 +143,11 @@ export const movieQueries = {
       queryKey: [...movieQueries.all(), 'months'],
       queryFn: getDistinctWatchedMonths,
     }),
+  allWatched: () =>
+    queryOptions({
+      queryKey: [...movieQueries.all(), 'allWatched'],
+      queryFn: getAllWatchedMovies,
+    }),
 
   /* For now, we use simple query instead of infinite query
     watched: (search?: string) => infiniteQueryOptions({
@@ -149,27 +162,3 @@ export const movieQueries = {
         },
     }),*/
 }
-
-export const electricMovieCollection = createCollection(
-  electricCollectionOptions({
-    id: `movies`,
-    getKey: (item: any) => item.id,
-    shapeOptions: {
-      url:
-        import.meta.env.VITE_ELECTRIC_URL || `http://localhost:3000/v1/shape`,
-      params: {
-        table: 'movie',
-      },
-      onError: (error) => {
-        // Handle offset out of bounds error by clearing stored state
-        if (error.message?.includes('out of bounds')) {
-          console.warn(
-            'Electric shape offset out of bounds, clearing stored state...',
-          )
-          // The collection will automatically retry with a fresh offset
-        }
-        console.error('Electric movie collection sync error:', error)
-      },
-    },
-  }),
-)

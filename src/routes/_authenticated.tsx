@@ -7,6 +7,7 @@ import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolb
 import Sidebar from '@/components/sidebar/sidebar'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import { getBackgroundServerFn } from '@/lib/background-preference'
+import { useSSEInvalidation } from '@/lib/hooks/use-sse-invalidation'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import {
@@ -66,6 +67,7 @@ export const Route = createFileRoute('/_authenticated')({
 
 function AuthenticatedLayout() {
   const { user, backgroundPreference } = Route.useRouteContext()
+  useSSEInvalidation()
   const matches = useMatches()
   const isHomePage = matches.some(
     (match) => match.routeId === '/_authenticated/home',
@@ -78,9 +80,6 @@ function AuthenticatedLayout() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
-      {/* Thin top bar that appears when a blocking loader is running.
-          With most loaders now using prefetchQuery this rarely shows, but
-          gives clear feedback for the remaining await-based routes. */}
       {isPending && (
         <div className="fixed inset-x-0 top-0 z-[9999] h-[2px]">
           <div className="h-full bg-primary animate-[progress_1.2s_ease-in-out_infinite] origin-left" />

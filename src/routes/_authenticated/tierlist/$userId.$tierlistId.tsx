@@ -13,10 +13,11 @@ import {
 } from '@/components/ui/dialog'
 import Input from '@/components/ui/input'
 import { updateTierlist } from '@/lib/react-query/mutations/tierlists'
+import { movieQueries } from '@/lib/react-query/queries/movies'
 import {
-  electricMoviesOnTiersCollection,
-  electricTierCollection,
-  electricTierlistCollection,
+  batchInsertMoviesOnTiers,
+  batchUpdateTierMoviePositions,
+  tierlistQueries,
   TierWithMovies,
   useTierlistLiveQuery,
 } from '@/lib/react-query/queries/tierlists'
@@ -35,7 +36,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Calendar, Pencil, Tag } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -44,12 +45,9 @@ export const Route = createFileRoute(
   '/_authenticated/tierlist/$userId/$tierlistId',
 )({
   component: RouteComponent,
-  loader: async () => {
-    await Promise.all([
-      electricTierlistCollection.preload(),
-      electricMoviesOnTiersCollection.preload(),
-      electricTierCollection.preload(),
-    ])
+  loader: ({ context, params }) => {
+    context.queryClient.prefetchQuery(tierlistQueries.user(params.userId))
+    context.queryClient.prefetchQuery(movieQueries.allWatched())
   },
   ssr: false,
 })
@@ -62,6 +60,7 @@ function TierlistContent() {
   const { userId, tierlistId } = Route.useParams()
   const { user } = Route.useRouteContext()
   const isOwner = user?.userId === userId
+  const queryClient = useQueryClient()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -74,15 +73,6 @@ function TierlistContent() {
 
   const tierlistFromDb = useTierlistLiveQuery(userId, tierlistId)
 
-  /**
-   * We need to use a local state copy of the tiers/movies during drag operations
-   * For some reason it seems that moving items between tiers relies on the onDragOver
-   * to update the state.
-   * Since our state is the electric shape, we would need to update the collection
-   * on every drag over to get the desired UX.
-   * To avoid that, we keep a local copy of the tiers/movies that we update during
-   * drag operations, and only sync back to the electric collection on drag end.
-   */
   const [localTiers, setLocalTiers] = useState<TierWithMovies[] | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -133,14 +123,16 @@ function TierlistContent() {
     return overId ? [{ id: overId }] : []
   }, [])
 
-  // Use local state when dragging, otherwise use the live query data
+  // Prefer localTiers whenever it is set (during drag AND while waiting for
+  // the server response after drag end), falling back to server data only
+  // when localTiers has not been populated yet (e.g. on initial mount).
   const tierlist = useMemo(() => {
     if (!tierlistFromDb) return null
     return {
       ...tierlistFromDb,
-      tiers: isDragging && localTiers ? localTiers : tierlistFromDb.tiers,
+      tiers: localTiers ?? tierlistFromDb.tiers,
     }
-  }, [tierlistFromDb, localTiers, isDragging])
+  }, [tierlistFromDb, localTiers])
 
   // Sync local state when DB data changes (and not currently dragging)
   useEffect(() => {
@@ -300,7 +292,7 @@ function TierlistContent() {
     const updates: Array<{
       movieOnTierId: string
       tierId: string
-      position: number
+      newPosition: number
     }> = []
 
     const inserts: Array<{
@@ -331,7 +323,7 @@ function TierlistContent() {
           updates.push({
             movieOnTierId: original.movieOnTierId,
             tierId: tier.id,
-            position: index,
+            newPosition: index,
           })
         }
       })
@@ -340,26 +332,15 @@ function TierlistContent() {
     // Batch update all changes at once
     if (updates.length > 0) {
       pendingUpdateRef.current = true
-      updates.forEach((update) => {
-        electricMoviesOnTiersCollection.update(
-          update.movieOnTierId,
-          (draft) => {
-            draft.tierId = update.tierId
-            draft.position = update.position
-          },
-        )
+      batchUpdateTierMoviePositions({ data: updates }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['tierlists'] })
       })
     }
 
     if (inserts.length > 0) {
       pendingUpdateRef.current = true
-      inserts.forEach((insert) => {
-        electricMoviesOnTiersCollection.insert({
-          id: crypto.randomUUID(),
-          movieId: insert.movieId,
-          tierId: insert.tierId,
-          position: insert.position,
-        })
+      batchInsertMoviesOnTiers({ data: inserts }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['tierlists'] })
       })
     }
 
