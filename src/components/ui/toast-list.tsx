@@ -12,9 +12,10 @@ type ToastType = 'error' | 'success' | 'warning' | 'default'
 
 interface TypeConfig {
   Icon: React.ComponentType<{ className?: string }>
+  iconWrapClass: string
   iconClass: string
-  borderClass: string
-  bgClass: string
+  accentBarClass: string
+  labelClass: string
 }
 
 function getTypeConfig(type: ToastType): TypeConfig {
@@ -22,30 +23,34 @@ function getTypeConfig(type: ToastType): TypeConfig {
     case 'success':
       return {
         Icon: CheckCircle2,
+        iconWrapClass: 'bg-success/15',
         iconClass: 'text-success',
-        borderClass: 'border-l-success',
-        bgClass: 'bg-success/5',
+        accentBarClass: 'bg-success',
+        labelClass: 'text-success',
       }
     case 'error':
       return {
         Icon: AlertCircle,
+        iconWrapClass: 'bg-destructive/15',
         iconClass: 'text-destructive',
-        borderClass: 'border-l-destructive',
-        bgClass: 'bg-destructive/5',
+        accentBarClass: 'bg-destructive',
+        labelClass: 'text-destructive',
       }
     case 'warning':
       return {
         Icon: AlertTriangle,
+        iconWrapClass: 'bg-warning/15',
         iconClass: 'text-warning',
-        borderClass: 'border-l-warning',
-        bgClass: 'bg-warning/5',
+        accentBarClass: 'bg-warning',
+        labelClass: 'text-warning',
       }
     default:
       return {
         Icon: Info,
+        iconWrapClass: 'bg-primary/15',
         iconClass: 'text-primary',
-        borderClass: 'border-l-primary',
-        bgClass: 'bg-background',
+        accentBarClass: 'bg-primary',
+        labelClass: 'text-primary',
       }
   }
 }
@@ -59,7 +64,8 @@ export default function ToastList() {
     const type =
       ((toast as unknown as Record<string, unknown>).type as ToastType) ??
       'default'
-    const { Icon, iconClass, borderClass, bgClass } = getTypeConfig(type)
+    const { Icon, iconWrapClass, iconClass, accentBarClass, labelClass } =
+      getTypeConfig(type)
 
     return (
       <Toast.Root
@@ -67,24 +73,37 @@ export default function ToastList() {
         toast={toast}
         className={cn(
           ANIMATION_CLASSES,
-          'rounded-lg border border-border border-l-4 bg-clip-padding shadow-lg select-none',
-          borderClass,
-          bgClass,
+          'rounded-xl border border-border bg-card shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-border/50 select-none overflow-hidden',
         )}
       >
         <Toast.Content className="overflow-hidden transition-opacity [transition-duration:250ms] data-[behind]:pointer-events-none data-[behind]:opacity-0 data-[expanded]:pointer-events-auto data-[expanded]:opacity-100">
-          <div className="flex items-start gap-3 p-4 pr-8">
-            <Icon className={cn('mt-0.5 h-4 w-4 shrink-0', iconClass)} />
-            <div className="flex-1 min-w-0">
-              <Toast.Title className="text-[0.925rem] leading-5 font-semibold text-foreground" />
-              <Toast.Description className="text-[0.875rem] leading-5 text-muted-foreground mt-0.5" />
+          <div className={cn('h-[3px] w-full', accentBarClass)} />
+
+          <div className="flex items-start gap-3 px-4 pt-3 pb-4 pr-10">
+            <div
+              className={cn(
+                'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg',
+                iconWrapClass,
+              )}
+            >
+              <Icon className={cn('h-3.5 w-3.5', iconClass)} />
+            </div>
+            <div className="flex-1 min-w-0 pt-0.5">
+              <Toast.Title
+                className={cn(
+                  'text-[0.875rem] leading-5 font-semibold tracking-tight',
+                  labelClass,
+                )}
+              />
+              <Toast.Description className="text-[0.8125rem] leading-5 text-muted-foreground mt-0.5" />
             </div>
           </div>
+
           <Toast.Close
-            className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            className="absolute top-[calc(3px+0.6rem)] right-3 flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             aria-label="Close"
           >
-            <XIcon className="h-3.5 w-3.5" />
+            <XIcon className="h-3 w-3" />
           </Toast.Close>
         </Toast.Content>
       </Toast.Root>
