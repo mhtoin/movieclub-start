@@ -463,7 +463,6 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
 
     createMutation.mutate({
       data: {
-        userId,
         title,
         watchDateFrom: watchDateFrom
           ? format(watchDateFrom, 'yyyy-MM-dd')

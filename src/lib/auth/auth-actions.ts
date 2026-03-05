@@ -18,22 +18,30 @@ export const requestPasswordResetFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const user = await getUserByEmail(data.email)
     if (!user) {
-      // We don't want to reveal if a user exists or not, so we just return success
       return { success: true }
+    }
+
+    const baseUrl = process.env.BASE_URL
+    if (!baseUrl) {
+      throw new Error('BASE_URL is not configured on the server')
     }
 
     // Generate a secure token
     const token = crypto.randomUUID()
     // Token expires in 1 hour
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60)
-
-    await createPasswordResetToken(user.id, token, expiresAt)
-
-    // In a real app, you'd get the base URL from an environment variable or request headers
-    const baseUrl = process.env.BASE_URL
     const resetLink = `${baseUrl}/reset-password?token=${token}`
 
-    await sendPasswordResetEmail(user.email, resetLink)
+    // Attempt to send the email BEFORE writing the token to the database.
+    // This way, if the send fails, there is nothing to clean up.
+    const emailResult = await sendPasswordResetEmail(user.email, resetLink)
+    if (!emailResult.success) {
+      throw new Error(
+        'Failed to send password reset email. Please try again later.',
+      )
+    }
+
+    await createPasswordResetToken(user.id, token, expiresAt)
 
     return { success: true }
   })

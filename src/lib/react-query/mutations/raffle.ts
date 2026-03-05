@@ -6,6 +6,7 @@ import {
   raffleToUser,
   shortlist,
 } from '@/db/schema'
+import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
@@ -13,6 +14,12 @@ import { and, eq } from 'drizzle-orm'
 
 export const startRaffle = createServerFn({ method: 'POST' }).handler(
   async () => {
+    const session = await useAppSession()
+    const currentUser = await getSessionUser(session.data?.sessionToken)
+    if (!currentUser) {
+      throw new Error('Unauthorized')
+    }
+
     try {
       const eligibleShortlists = await db
         .select()
@@ -65,6 +72,12 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
     (data: { movieId: string; watchDate: string; userId: string }) => data,
   )
   .handler(async ({ data }) => {
+    const session = await useAppSession()
+    const currentUser = await getSessionUser(session.data?.sessionToken)
+    if (!currentUser) {
+      throw new Error('Unauthorized')
+    }
+
     const { movieId, watchDate, userId } = data
 
     try {
@@ -156,7 +169,6 @@ export const useFinalizeRaffleMutation = () => {
       })
     },
     onSuccess: () => {
-      console.log('Successfully finalized raffle')
       queryClient.invalidateQueries({ queryKey: ['shortlists'] })
       queryClient.invalidateQueries({ queryKey: ['movies'] })
       queryClient.invalidateQueries({ queryKey: ['raffle', 'history'] })

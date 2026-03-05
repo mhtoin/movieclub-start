@@ -179,10 +179,18 @@ export async function getSessionUser(
   }
 }
 
+export async function deleteSessionById(id: string): Promise<void> {
+  await db.delete(sessionsTable).where(eq(sessionsTable.id, id))
+}
+
 export function useAppSession() {
+  const password = process.env.SESSION_PASSWORD
+  if (!password) {
+    throw new Error('SESSION_PASSWORD environment variable is required')
+  }
   return useSession<UserSession>({
     name: 'app-session',
-    password: process.env.SESSION_PASSWORD || 'default_session_password',
+    password,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
