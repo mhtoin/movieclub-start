@@ -76,11 +76,9 @@ export function useLoginMutation(): UseMutationResult<
   return useMutation({
     mutationFn: async (variables: LoginInput) => {
       try {
-        console.log('Login mutation called with:', variables)
         return await loginFn({ data: variables })
       } catch (error) {
         // For now, a bit of a hack to avoid treating redirects as errors
-        console.log('Login mutation error:', error)
         if (
           error instanceof Response &&
           error.status >= 300 &&
@@ -92,7 +90,6 @@ export function useLoginMutation(): UseMutationResult<
       }
     },
     onSuccess: () => {
-      console.log('Login mutation successful')
       // Invalidate router cache after successful login
       router.invalidate()
     },

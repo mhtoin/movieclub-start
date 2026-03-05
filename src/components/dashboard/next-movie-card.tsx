@@ -24,7 +24,6 @@ export function NextMovieCard({ movieData }: NextMovieCardProps) {
     : null
 
   const watchProviders = movie.watchProviders
-  console.log('watchProviders:', watchProviders)
 
   return (
     <div className="relative overflow-hidden rounded-lg border bg-card shadow-lg">

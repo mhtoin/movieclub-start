@@ -69,8 +69,6 @@ function TierlistContent() {
     }),
   )
 
-  console.log('Rendering TierlistContent for', { userId, tierlistId })
-
   const tierlistFromDb = useTierlistLiveQuery(userId, tierlistId)
 
   const [localTiers, setLocalTiers] = useState<TierWithMovies[] | null>(null)
@@ -246,8 +244,6 @@ function TierlistContent() {
       setIsDragging(false)
       return
     }
-
-    console.log({ active, over, currentContainer, targetContainer })
 
     // Compute the final tiers state (handle same-container reordering)
     let finalTiers = currentLocalTiers
