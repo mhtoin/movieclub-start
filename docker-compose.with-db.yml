@@ -1,6 +1,5 @@
 # docker-compose.with-db.yml
-# Runs the app and postgres together. Electric is external — set VITE_ELECTRIC_URL
-# in .env.production to point to it.
+# Runs the app and postgres together.
 #
 # Usage: docker compose -f docker-compose.with-db.yml up -d
 
@@ -9,6 +8,11 @@ services:
     image: postgres:16-alpine
     container_name: movieclub-postgres-prod
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     env_file:
       - .env.production
     environment:
@@ -31,25 +35,28 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_ELECTRIC_URL: ${VITE_ELECTRIC_URL}
-        VITE_ELECTRIC_SECRET: ${VITE_ELECTRIC_SECRET}
         VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY}
         VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
         VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
     container_name: movieclub-app-prod
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
     env_file:
       - .env.production
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-movieclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movieclub}?sslmode=disable
-      AUTH_SECRET: ${AUTH_SECRET:?Auth secret required}
+      SESSION_PASSWORD: ${SESSION_PASSWORD:?Session password required}
+      BASE_URL: ${BASE_URL:?BASE_URL required}
       RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY required}
       EMAIL_FROM: ${EMAIL_FROM:?EMAIL_FROM required}
       VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY:?TMDB API key required}
       VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
       VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
-      VITE_ELECTRIC_URL: ${VITE_ELECTRIC_URL:?VITE_ELECTRIC_URL required}
     depends_on:
       postgres:
         condition: service_healthy

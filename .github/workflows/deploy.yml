@@ -15,10 +15,9 @@ jobs:
     # file correctly (variables marked with :? will error without these).
     env:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      SESSION_PASSWORD: ${{ secrets.SESSION_PASSWORD }}
+      BASE_URL: ${{ vars.BASE_URL }}
       VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
-      VITE_ELECTRIC_URL: ${{ secrets.VITE_ELECTRIC_URL }}
-      VITE_ELECTRIC_SECRET: ${{ secrets.VITE_ELECTRIC_SECRET }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
 
@@ -35,8 +34,6 @@ jobs:
       - name: Rebuild app image
         run: |
           docker compose -f docker-compose.prod.yml build \
-            --build-arg VITE_ELECTRIC_URL="${{ secrets.VITE_ELECTRIC_URL }}" \
-            --build-arg VITE_ELECTRIC_SECRET="${{ secrets.VITE_ELECTRIC_SECRET }}" \
             --build-arg VITE_TMDB_API_KEY="${{ secrets.VITE_TMDB_API_KEY }}" \
             --build-arg VITE_TMDB_BASE_URL="${{ vars.VITE_TMDB_BASE_URL }}" \
             --build-arg VITE_TMDB_IMAGE_BASE_URL="${{ vars.VITE_TMDB_IMAGE_BASE_URL }}" \
