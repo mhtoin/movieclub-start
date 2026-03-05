@@ -1,209 +1,149 @@
 import { cn } from '@/lib/utils'
-import {
-  addMonths,
-  eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isBefore,
-  isSameDay,
-  isSameMonth,
-  isToday,
-  startOfDay,
-  startOfMonth,
-  startOfWeek,
-  subMonths,
-} from 'date-fns'
-import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { endOfYear, format, startOfYear } from 'date-fns'
+import { Calendar as CalendarIcon } from 'lucide-react'
 import * as React from 'react'
-import { Button } from './button'
+
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import {
-  PopoverBackdrop,
-  PopoverPopup,
-  PopoverPortal,
-  PopoverPositioner,
+  PopoverContent,
   PopoverRoot,
   PopoverTrigger,
-} from './popover'
+} from '@/components/ui/popover'
 
-const DAY_NAMES = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
-
-function getCalendarDays(month: Date): Date[] {
-  const start = startOfWeek(startOfMonth(month), { weekStartsOn: 1 })
-  const end = endOfWeek(endOfMonth(month), { weekStartsOn: 1 })
-  return eachDayOfInterval({ start, end })
+export interface DatePickerPreset {
+  label: string
+  getValue: () => Date
 }
 
-interface CalendarProps {
-  selected?: Date
-  onSelect: (date: Date) => void
-  minDate?: Date
-  maxDate?: Date
-  defaultMonth?: Date
-}
-
-function Calendar({
-  selected,
-  onSelect,
-  minDate,
-  maxDate,
-  defaultMonth,
-}: CalendarProps) {
-  const [month, setMonth] = React.useState<Date>(
-    () => defaultMonth ?? selected ?? new Date(),
-  )
-
-  const days = getCalendarDays(month)
-
-  const isDisabled = (day: Date) => {
-    if (minDate && isBefore(startOfDay(day), startOfDay(minDate))) return true
-    if (maxDate && isBefore(startOfDay(maxDate), startOfDay(day))) return true
-    return false
-  }
-
-  const handlePrevMonth = () => setMonth((m) => subMonths(m, 1))
-  const handleNextMonth = () => setMonth((m) => addMonths(m, 1))
-
-  return (
-    <div className="w-full select-none">
-      <div className="flex items-center justify-between mb-3">
-        <button
-          type="button"
-          onClick={handlePrevMonth}
-          className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          aria-label="Previous month"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <span className="text-sm font-semibold text-foreground">
-          {format(month, 'MMMM yyyy')}
-        </span>
-        <button
-          type="button"
-          onClick={handleNextMonth}
-          className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          aria-label="Next month"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="grid grid-cols-7 mb-1">
-        {DAY_NAMES.map((name) => (
-          <div
-            key={name}
-            className="flex items-center justify-center text-[10px] font-medium text-muted-foreground h-7"
-          >
-            {name}
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-y-0.5">
-        {days.map((day) => {
-          const outside = !isSameMonth(day, month)
-          const disabled = isDisabled(day)
-          const isSelected = selected ? isSameDay(day, selected) : false
-          const todayDay = isToday(day)
-
-          return (
-            <button
-              key={day.toISOString()}
-              type="button"
-              disabled={disabled}
-              onClick={() => !disabled && onSelect(day)}
-              className={cn(
-                'flex items-center justify-center h-8 w-full rounded-md text-sm transition-colors',
-                outside && 'text-muted-foreground/40',
-                !outside && !disabled && 'hover:bg-accent',
-                todayDay &&
-                  !isSelected &&
-                  'font-semibold text-primary ring-1 ring-inset ring-primary/40',
-                isSelected &&
-                  'bg-primary text-primary-foreground font-semibold hover:bg-primary/80',
-                disabled &&
-                  'text-muted-foreground/30 cursor-not-allowed pointer-events-none',
-              )}
-              aria-label={format(day, 'PPPP')}
-              aria-pressed={isSelected}
-            >
-              {format(day, 'd')}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
+export const DATE_PICKER_PRESETS = {
+  startOfYear: {
+    label: 'Start of year',
+    getValue: () => startOfYear(new Date()),
+  } satisfies DatePickerPreset,
+  endOfYear: {
+    label: 'End of year',
+    getValue: () => endOfYear(new Date()),
+  } satisfies DatePickerPreset,
+} as const
 
 export interface DatePickerProps {
+  /** Controlled selected date */
   value?: Date
+  /** Called when the user selects a date */
   onChange?: (date: Date) => void
+  /** Placeholder text shown when no date is selected */
   placeholder?: string
-  minDate?: Date
-  maxDate?: Date
+  /** date-fns format string used to display the selected date. Defaults to 'PPP' */
   displayFormat?: string
-  className?: string
+  /** The earliest selectable date */
+  minDate?: Date
+  /** The latest selectable date */
+  maxDate?: Date
+  /** Disables the entire picker */
   disabled?: boolean
+  /** Additional class names for the trigger button */
+  className?: string
+  /** Caption layout for the calendar header */
+  captionLayout?: 'label' | 'dropdown' | 'dropdown-years'
+  /** Optional preset shortcuts shown in a sidebar next to the calendar */
+  presets?: DatePickerPreset[]
 }
 
-const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
-  (
-    {
-      value,
-      onChange,
-      placeholder = 'Pick a date',
-      minDate,
-      maxDate,
-      displayFormat = 'PPP',
-      className,
-      disabled,
-    },
-    ref,
-  ) => {
-    const [open, setOpen] = React.useState(false)
+export function DatePicker({
+  value,
+  onChange,
+  placeholder = 'Pick a date',
+  displayFormat = 'PPP',
+  minDate,
+  maxDate,
+  disabled = false,
+  className,
+  captionLayout = 'dropdown',
+  presets,
+}: DatePickerProps) {
+  const [open, setOpen] = React.useState(false)
 
-    const handleSelect = (date: Date) => {
+  const disabledMatcher = React.useMemo(() => {
+    if (minDate && maxDate) return { before: minDate, after: maxDate }
+    if (minDate) return { before: minDate }
+    if (maxDate) return { after: maxDate }
+    return undefined
+  }, [minDate, maxDate])
+
+  const handleSelect = React.useCallback(
+    (date: Date | undefined) => {
+      if (date) {
+        onChange?.(date)
+        setOpen(false)
+      }
+    },
+    [onChange],
+  )
+
+  const handlePreset = React.useCallback(
+    (preset: DatePickerPreset) => {
+      const date = preset.getValue()
       onChange?.(date)
       setOpen(false)
-    }
+    },
+    [onChange],
+  )
 
-    return (
-      <PopoverRoot open={open} onOpenChange={setOpen}>
-        <PopoverTrigger
-          render={
-            <Button
-              ref={ref}
-              variant="outline"
-              className={cn(
-                'w-full justify-start gap-2 font-normal',
-                !value && 'text-muted-foreground',
-                className,
-              )}
-              disabled={disabled}
-            />
-          }
-        >
-          <CalendarIcon className="w-4 h-4 shrink-0" />
-          <span>{value ? format(value, displayFormat) : placeholder}</span>
-        </PopoverTrigger>
-
-        <PopoverPortal>
-          <PopoverBackdrop opacity="none" />
-          <PopoverPositioner side="bottom" align="start" sideOffset={6}>
-            <PopoverPopup size="auto" className="p-3 w-72">
-              <Calendar
-                selected={value}
-                onSelect={handleSelect}
-                minDate={minDate}
-                maxDate={maxDate}
-                defaultMonth={value}
-              />
-            </PopoverPopup>
-          </PopoverPositioner>
-        </PopoverPortal>
-      </PopoverRoot>
-    )
-  },
-)
-DatePicker.displayName = 'DatePicker'
-
-export { Calendar, DatePicker }
+  return (
+    <PopoverRoot open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            disabled={disabled}
+            data-empty={!value}
+            className={cn(
+              'w-full min-w-0 justify-start text-left font-normal data-[empty=true]:text-muted-foreground overflow-hidden',
+              className,
+            )}
+          />
+        }
+      >
+        <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+        <span className="truncate">
+          {value ? format(value, displayFormat) : placeholder}
+        </span>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
+        <div className="flex">
+          {presets && presets.length > 0 && (
+            <div className="flex flex-col gap-1 border-r border-border p-3 min-w-[9rem]">
+              {presets.map((preset) => (
+                <Button
+                  key={preset.label}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'justify-start text-left text-sm font-normal',
+                    value &&
+                      preset.getValue().toDateString() === value.toDateString()
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  onClick={() => handlePreset(preset)}
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          )}
+          <Calendar
+            mode="single"
+            selected={value}
+            onSelect={handleSelect}
+            disabled={disabledMatcher}
+            defaultMonth={value ?? minDate}
+            captionLayout={captionLayout}
+            autoFocus
+          />
+        </div>
+      </PopoverContent>
+    </PopoverRoot>
+  )
+}
