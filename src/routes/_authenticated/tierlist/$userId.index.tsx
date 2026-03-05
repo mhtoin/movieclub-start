@@ -1,6 +1,7 @@
 import { GenreFilter } from '@/components/discover/genre-filter'
 import { PageTitleBar } from '@/components/page-titlebar'
 import { Button } from '@/components/ui/button'
+import { DATE_PICKER_PRESETS, DatePicker } from '@/components/ui/date-picker'
 import {
   DialogBackdrop,
   DialogPopup,
@@ -27,6 +28,7 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { format } from 'date-fns'
 import {
   Calendar,
   Film,
@@ -395,8 +397,10 @@ function RouteComponent() {
 function CreateTierlistDialog({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
-  const [watchDateFrom, setWatchDateFrom] = useState('')
-  const [watchDateTo, setWatchDateTo] = useState('')
+  const [watchDateFrom, setWatchDateFrom] = useState<Date | undefined>(
+    undefined,
+  )
+  const [watchDateTo, setWatchDateTo] = useState<Date | undefined>(undefined)
   const [selectedGenres, setSelectedGenres] = useState<string[]>([])
   const [tiers, setTiers] = useState([
     { label: 'S', value: 0 },
@@ -428,8 +432,8 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
       })
       setOpen(false)
       setTitle('')
-      setWatchDateFrom('')
-      setWatchDateTo('')
+      setWatchDateFrom(undefined)
+      setWatchDateTo(undefined)
       setSelectedGenres([])
       setTiers([
         { label: 'S', value: 0 },
@@ -461,8 +465,12 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
       data: {
         userId,
         title,
-        watchDateFrom: watchDateFrom || undefined,
-        watchDateTo: watchDateTo || undefined,
+        watchDateFrom: watchDateFrom
+          ? format(watchDateFrom, 'yyyy-MM-dd')
+          : undefined,
+        watchDateTo: watchDateTo
+          ? format(watchDateTo, 'yyyy-MM-dd')
+          : undefined,
         genres: genreLabels,
         tiers,
       },
@@ -527,12 +535,14 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
                   <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                   From Date
                 </label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={watchDateFrom}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWatchDateFrom(e.target.value)
-                  }
+                  onChange={setWatchDateFrom}
+                  placeholder="From date"
+                  presets={[
+                    DATE_PICKER_PRESETS.startOfYear,
+                    DATE_PICKER_PRESETS.endOfYear,
+                  ]}
                 />
               </div>
               <div className="space-y-2">
@@ -540,12 +550,14 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
                   <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                   To Date
                 </label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={watchDateTo}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWatchDateTo(e.target.value)
-                  }
+                  onChange={setWatchDateTo}
+                  placeholder="To date"
+                  presets={[
+                    DATE_PICKER_PRESETS.startOfYear,
+                    DATE_PICKER_PRESETS.endOfYear,
+                  ]}
                 />
               </div>
             </div>
