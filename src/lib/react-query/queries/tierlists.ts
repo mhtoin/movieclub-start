@@ -199,6 +199,32 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
     return { txid }
   })
 
+export const getSingleTierlist = createServerFn({ method: 'GET' })
+  .inputValidator((id: string) => id)
+  .handler(async ({ data: tierlistId }) => {
+    await requireAuthenticatedUser()
+
+    try {
+      const result = await (db as any).query.tierlist.findFirst({
+        where: (tl: any, { eq }: any) => eq(tl.id, tierlistId),
+        with: {
+          tiers: {
+            with: {
+              moviesOnTiers: {
+                with: { movie: true },
+              },
+            },
+            orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
+          },
+        },
+      })
+      return (result as TierlistWithDetails) ?? null
+    } catch (error) {
+      console.error('Error fetching single tierlist:', error)
+      throw error
+    }
+  })
+
 export const getTierlists = createServerFn({ method: 'GET' }).handler(
   async () => {
     await requireAuthenticatedUser()
@@ -263,6 +289,11 @@ export const tierlistQueries = {
     queryOptions<TierlistWithDetails[]>({
       queryKey: ['tierlists', 'user', userId],
       queryFn: () => getUserTierlists({ data: userId }),
+    }),
+  single: (tierlistId: string) =>
+    queryOptions<TierlistWithDetails | null>({
+      queryKey: ['tierlists', 'single', tierlistId],
+      queryFn: () => getSingleTierlist({ data: tierlistId }),
     }),
 }
 
@@ -335,4 +366,71 @@ export const useTierlistLiveQuery = (
       tiers: [unrankedTier, ...sortedTiers],
     }
   }, [tierlists, allMovies, tierlistId])
+}
+
+export const useSingleTierlistLiveQuery = (
+  tierlistId: string,
+): TierlistWithTiers | null => {
+  const { data: tierlistData } = useSuspenseQuery(
+    tierlistQueries.single(tierlistId),
+  )
+  const { data: allMovies } = useSuspenseQuery(movieQueries.allWatched())
+
+  return useMemo(() => {
+    if (!tierlistData) return null
+
+    const rankedMovieIds = new Set<string>()
+    const tiersMap = new Map<string, TierWithMovies>()
+
+    for (const t of tierlistData.tiers) {
+      const movies = t.moviesOnTiers
+        .map((mot) => ({
+          ...mot.movie,
+          position: mot.position,
+          movieOnTierId: mot.id,
+        }))
+        .sort((a, b) => a.position - b.position)
+      tiersMap.set(t.id, { ...t, movies })
+      for (const mot of t.moviesOnTiers) {
+        rankedMovieIds.add(mot.movieId)
+      }
+    }
+
+    const sortedTiers = Array.from(tiersMap.values()).sort(
+      (a, b) => a.value - b.value,
+    )
+
+    const { watchDateFrom, watchDateTo, genres } = tierlistData
+
+    const unrankedMovies = (allMovies ?? []).filter((m) => {
+      if (rankedMovieIds.has(m.id)) return false
+      if (!m.watchDate) return false
+      if (watchDateFrom && new Date(m.watchDate) < new Date(watchDateFrom))
+        return false
+      if (watchDateTo && new Date(m.watchDate) > new Date(watchDateTo))
+        return false
+      if (genres && genres.length > 0) {
+        if (!m.genres) return false
+        if (!genres.some((g) => m.genres!.includes(g))) return false
+      }
+      return true
+    })
+
+    const unrankedTier: TierWithMovies = {
+      id: 'unranked',
+      label: 'Unranked',
+      value: 0,
+      tierlistId: tierlistData.id,
+      movies: unrankedMovies.map((m, index) => ({
+        ...m,
+        position: index,
+        movieOnTierId: `unranked-${m.id}`,
+      })),
+    }
+
+    return {
+      ...tierlistData,
+      tiers: [unrankedTier, ...sortedTiers],
+    }
+  }, [tierlistData, allMovies])
 }

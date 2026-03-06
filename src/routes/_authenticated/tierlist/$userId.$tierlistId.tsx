@@ -2,6 +2,7 @@ import { PageTitleBar } from '@/components/page-titlebar'
 import DragOverlayPortal from '@/components/tierlist/drag-overlay-portal'
 import StickyUnrankedTier from '@/components/tierlist/sticky-unranked-tier'
 import TierContainer from '@/components/tierlist/tier-container'
+import { TierlistDetailSkeleton } from '@/components/tierlist/tierlist-detail-skeleton'
 import { Button } from '@/components/ui/button'
 import {
   DialogBackdrop,
@@ -19,7 +20,7 @@ import {
   batchUpdateTierMoviePositions,
   tierlistQueries,
   TierWithMovies,
-  useTierlistLiveQuery,
+  useSingleTierlistLiveQuery,
 } from '@/lib/react-query/queries/tierlists'
 import {
   closestCorners,
@@ -39,21 +40,31 @@ import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Calendar, Pencil, Tag } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
 export const Route = createFileRoute(
   '/_authenticated/tierlist/$userId/$tierlistId',
 )({
   component: RouteComponent,
   loader: ({ context, params }) => {
-    context.queryClient.prefetchQuery(tierlistQueries.user(params.userId))
+    context.queryClient.prefetchQuery(tierlistQueries.single(params.tierlistId))
     context.queryClient.prefetchQuery(movieQueries.allWatched())
   },
-  ssr: false,
 })
 
 function RouteComponent() {
-  return <TierlistContent />
+  return (
+    <Suspense fallback={<TierlistDetailSkeleton />}>
+      <TierlistContent />
+    </Suspense>
+  )
 }
 
 function TierlistContent() {
@@ -69,13 +80,17 @@ function TierlistContent() {
     }),
   )
 
-  const tierlistFromDb = useTierlistLiveQuery(userId, tierlistId)
+  const tierlistFromDb = useSingleTierlistLiveQuery(tierlistId)
 
   const [localTiers, setLocalTiers] = useState<TierWithMovies[] | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
-  // Track if we're waiting for our own update to sync back
-  const pendingUpdateRef = useRef(false)
+  // Count of in-flight mutation batches — skip server→local sync while non-zero
+  const pendingMutationsRef = useRef(0)
+  // Promise chain ensuring consecutive drags are serialized
+  const mutationChainRef = useRef<Promise<void>>(Promise.resolve())
+  // Snapshot of the most-recently submitted visual state used as diff baseline
+  const committedTiersRef = useRef<TierWithMovies[] | null>(null)
 
   // Use ref for localTiers to avoid stale closures in callbacks
   const localTiersRef = useRef(localTiers)
@@ -135,11 +150,13 @@ function TierlistContent() {
   // Sync local state when DB data changes (and not currently dragging)
   useEffect(() => {
     if (tierlistFromDb && !isDragging) {
-      // Skip if this is our own update coming back
-      if (pendingUpdateRef.current) {
-        pendingUpdateRef.current = false
+      // Skip if one of our own mutations is still in-flight
+      if (pendingMutationsRef.current > 0) {
+        pendingMutationsRef.current -= 1
         return
       }
+      // Safe to accept the server snapshot — also reset committed state
+      committedTiersRef.current = null
       setLocalTiers(tierlistFromDb.tiers)
     }
   }, [tierlistFromDb, isDragging])
@@ -269,12 +286,16 @@ function TierlistContent() {
       }
     }
 
-    // Build a map of original movie positions/tiers from DB
+    // Build a map of original movie positions/tiers.
+    // Use the most-recently committed snapshot when available so that a
+    // second drag before the first write lands only diffs its own delta
+    // against what was already submitted — not against the stale server data.
+    const baselineTiers = committedTiersRef.current ?? tierlistFromDb.tiers
     const originalMovieData = new Map<
       string,
       { tierId: string; position: number; movieOnTierId: string }
     >()
-    tierlistFromDb.tiers.forEach((tier) => {
+    baselineTiers.forEach((tier) => {
       tier.movies.forEach((m) => {
         originalMovieData.set(m.id, {
           tierId: tier.id,
@@ -283,6 +304,9 @@ function TierlistContent() {
         })
       })
     })
+
+    // Record the new visual state as the committed baseline for the next drag
+    committedTiersRef.current = finalTiers
 
     // Collect all changes
     const updates: Array<{
@@ -325,18 +349,22 @@ function TierlistContent() {
       })
     })
 
-    // Batch update all changes at once
-    if (updates.length > 0) {
-      pendingUpdateRef.current = true
-      batchUpdateTierMoviePositions({ data: updates }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['tierlists'] })
-      })
-    }
+    // Enqueue this drag's DB work onto the serial mutation chain so that
+    // rapid consecutive drags never race each other on the server.
+    if (updates.length > 0 || inserts.length > 0) {
+      pendingMutationsRef.current += 1
 
-    if (inserts.length > 0) {
-      pendingUpdateRef.current = true
-      batchInsertMoviesOnTiers({ data: inserts }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['tierlists'] })
+      mutationChainRef.current = mutationChainRef.current.then(async () => {
+        try {
+          if (updates.length > 0) {
+            await batchUpdateTierMoviePositions({ data: updates })
+          }
+          if (inserts.length > 0) {
+            await batchInsertMoviesOnTiers({ data: inserts })
+          }
+        } finally {
+          queryClient.invalidateQueries({ queryKey: ['tierlists'] })
+        }
       })
     }
 
