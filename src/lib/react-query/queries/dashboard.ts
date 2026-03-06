@@ -1,6 +1,7 @@
 import { db } from '@/db/db'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { requireAuthenticatedUser, requireCurrentUser } from '@/lib/auth/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, count, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm'
@@ -99,6 +100,8 @@ export interface NextMovieToWatch {
 export const getDashboardStats = createServerFn({ method: 'GET' })
   .inputValidator((data: { userId: string }) => data)
   .handler(async ({ data }): Promise<DashboardStats> => {
+    await requireCurrentUser(data.userId)
+
     try {
       const [
         totalWatchedResult,
@@ -222,6 +225,12 @@ export const getDashboardStats = createServerFn({ method: 'GET' })
 export const getDashboardInsights = createServerFn({ method: 'GET' })
   .inputValidator((data: { userId?: string }) => data)
   .handler(async ({ data }): Promise<DashboardInsights> => {
+    if (data.userId) {
+      await requireCurrentUser(data.userId)
+    } else {
+      await requireAuthenticatedUser()
+    }
+
     try {
       const whereConditions = data.userId
         ? and(isNotNull(movie.watchDate), eq(movie.userId, data.userId))
@@ -443,6 +452,8 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
 
 export const getNextMovieToWatch = createServerFn({ method: 'GET' }).handler(
   async (): Promise<NextMovieToWatch | null> => {
+    await requireAuthenticatedUser()
+
     try {
       const rows = await db
         .select()

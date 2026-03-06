@@ -1,6 +1,7 @@
 import { db } from '@/db/db'
 import { movie, type MovieWithUser } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { requireAuthenticatedUser } from '@/lib/auth/auth'
 import { groupBy } from '@/lib/utils'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
@@ -19,6 +20,8 @@ import { z } from 'zod'
 
 export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
   async (): Promise<MovieWithUser | null> => {
+    await requireAuthenticatedUser()
+
     try {
       const rows = await db
         .select()
@@ -48,6 +51,8 @@ export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
 export const getDistinctWatchedMonths = createServerFn({
   method: 'GET',
 }).handler(async () => {
+  await requireAuthenticatedUser()
+
   const rows = await db
     .selectDistinct({
       month: sql<string>`substring(${movie.watchDate}, 1, 7)`,
@@ -78,6 +83,8 @@ const watchedByMonthSchema = z.object({
 export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
   .inputValidator((data: z.infer<typeof watchedByMonthSchema>) => data)
   .handler(async ({ data }) => {
+    await requireAuthenticatedUser()
+
     const { search, username } = data
 
     // Conditionally construct filter conditions
@@ -113,6 +120,8 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
 
 export const getAllWatchedMovies = createServerFn({ method: 'GET' }).handler(
   async () => {
+    await requireAuthenticatedUser()
+
     return db
       .select()
       .from(movie)

@@ -1,9 +1,12 @@
 import { db } from '@/db/db'
 import { user } from '@/db/schema/users'
+import { requireAuthenticatedUser } from '@/lib/auth/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 
 export const getUsers = createServerFn({ method: 'GET' }).handler(async () => {
+  await requireAuthenticatedUser()
+
   try {
     const users = await db
       .select({

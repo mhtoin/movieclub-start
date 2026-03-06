@@ -2,6 +2,7 @@ import { db } from '@/db/db'
 import { movieToShortlist, raffle, raffleToUser, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { requireAuthenticatedUser } from '@/lib/auth/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq } from 'drizzle-orm'
@@ -9,6 +10,8 @@ import { and, desc, eq } from 'drizzle-orm'
 export const getParticipatingShortlists = createServerFn({
   method: 'GET',
 }).handler(async () => {
+  await requireAuthenticatedUser()
+
   try {
     // Get all shortlists that are ready and participating
     const participatingShortlists = await db
@@ -66,6 +69,8 @@ export const raffleQueries = {
 
 export const getRaffleHistory = createServerFn({ method: 'GET' }).handler(
   async () => {
+    await requireAuthenticatedUser()
+
     try {
       const rows = await db
         .select()

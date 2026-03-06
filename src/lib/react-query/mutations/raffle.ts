@@ -6,7 +6,7 @@ import {
   raffleToUser,
   shortlist,
 } from '@/db/schema'
-import { getSessionUser, useAppSession } from '@/lib/auth/auth'
+import { requireAuthenticatedUser } from '@/lib/auth/auth'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
@@ -14,11 +14,7 @@ import { and, eq } from 'drizzle-orm'
 
 export const startRaffle = createServerFn({ method: 'POST' }).handler(
   async () => {
-    const session = await useAppSession()
-    const currentUser = await getSessionUser(session.data?.sessionToken)
-    if (!currentUser) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuthenticatedUser()
 
     try {
       const eligibleShortlists = await db
@@ -72,34 +68,32 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
     (data: { movieId: string; watchDate: string; userId: string }) => data,
   )
   .handler(async ({ data }) => {
-    const session = await useAppSession()
-    const currentUser = await getSessionUser(session.data?.sessionToken)
-    if (!currentUser) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuthenticatedUser()
 
     const { movieId, watchDate, userId } = data
 
     try {
       const raffleId = crypto.randomUUID()
-      await db.insert(raffleTable).values({
-        id: raffleId,
-        winningMovieID: movieId,
-        date: watchDate,
+      await db.transaction(async (tx) => {
+        await tx.insert(raffleTable).values({
+          id: raffleId,
+          winningMovieID: movieId,
+          date: watchDate,
+        })
+        await tx.insert(raffleToUser).values({ a: raffleId, b: userId })
+
+        await tx
+          .update(movie)
+          .set({ watchDate: watchDate, userId: userId })
+          .where(eq(movie.id, movieId))
+
+        await tx.delete(movieToShortlist).where(eq(movieToShortlist.a, movieId))
+
+        await tx
+          .update(shortlist)
+          .set({ isReady: false })
+          .where(eq(shortlist.participating, true))
       })
-      await db.insert(raffleToUser).values({ a: raffleId, b: userId })
-
-      await db
-        .update(movie)
-        .set({ watchDate: watchDate, userId: userId })
-        .where(eq(movie.id, movieId))
-
-      await db.delete(movieToShortlist).where(eq(movieToShortlist.a, movieId))
-
-      await db
-        .update(shortlist)
-        .set({ isReady: false })
-        .where(eq(shortlist.participating, true))
 
       return { success: true }
     } catch (error) {

@@ -3,6 +3,7 @@ import type { ShortlistWithUserMovies } from '@/db/schema'
 import { movieToShortlist, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { requireAuthenticatedUser } from '@/lib/auth/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
@@ -10,6 +11,8 @@ import { eq } from 'drizzle-orm'
 export const getUserShortlist = createServerFn({ method: 'GET' })
   .inputValidator((userId: string) => userId)
   .handler(async ({ data: userId }) => {
+    await requireAuthenticatedUser()
+
     try {
       const rows = await db
         .select()
@@ -34,6 +37,8 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
 
 export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
   async (): Promise<ShortlistWithUserMovies[]> => {
+    await requireAuthenticatedUser()
+
     try {
       const allShortlists = await db
         .select()

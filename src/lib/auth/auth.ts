@@ -5,7 +5,8 @@ import { Session, SessionWithToken, UserSession } from '@/types/auth'
 import { useSession } from '@tanstack/react-start/server'
 import { eq } from 'drizzle-orm'
 
-const sessionExpiresInSeconds = 60 * 60 * 24 // 1 day
+const sessionDurationInDays = 30
+const sessionExpiresInSeconds = 60 * 60 * 24 * sessionDurationInDays
 
 function generateSecureRandomString(): string {
   // Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion)
@@ -37,7 +38,7 @@ function generateSecureRandomString(): string {
 
 export async function createSession(userId: string): Promise<SessionWithToken> {
   const now = new Date()
-  const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
+  const expiresAt = new Date(now.getTime() + sessionExpiresInSeconds * 1000)
 
   const id = generateSecureRandomString()
   const secret = generateSecureRandomString()
@@ -177,6 +178,29 @@ export async function getSessionUser(
     image: user.image,
     colorScheme: user.colorScheme as UserSession['colorScheme'],
   }
+}
+
+export async function requireAuthenticatedUser(): Promise<UserSession> {
+  const session = await useAppSession()
+  const user = await getSessionUser(session.data?.sessionToken)
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  return user
+}
+
+export async function requireCurrentUser(
+  targetUserId: string,
+): Promise<UserSession> {
+  const currentUser = await requireAuthenticatedUser()
+
+  if (currentUser.userId !== targetUserId) {
+    throw new Error('Forbidden')
+  }
+
+  return currentUser
 }
 
 export async function deleteSessionById(id: string): Promise<void> {

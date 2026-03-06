@@ -1,8 +1,18 @@
 import { db } from '@/db/db'
-import { tierlist } from '@/db/schema'
+import { movie, moviesOnTiers, tier, tierlist } from '@/db/schema'
+import { requireAuthenticatedUser, requireCurrentUser } from '@/lib/auth/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
+import { InferSelectModel } from 'drizzle-orm'
+
+type Movie = InferSelectModel<typeof movie>
+type MovieOnTier = InferSelectModel<typeof moviesOnTiers>
+type Tier = InferSelectModel<typeof tier>
+type Tierlist = InferSelectModel<typeof tierlist>
+
+type TierlistWithDetails = Tierlist & {
+  tiers: Array<Tier & { moviesOnTiers: Array<MovieOnTier & { movie: Movie }> }>
+}
 
 const TMDB_CONFIG = {
   API_KEY: import.meta.env.VITE_TMDB_API_KEY,
@@ -39,6 +49,8 @@ interface TMDBResponse {
  */
 export const getTrendingMovies = createServerFn({ method: 'GET' }).handler(
   async (): Promise<TMDBMovie[]> => {
+    await requireAuthenticatedUser()
+
     if (!TMDB_CONFIG.API_KEY) {
       console.error('TMDB API key is not configured')
       return []
@@ -84,14 +96,16 @@ export const getTrendingMovies = createServerFn({ method: 'GET' }).handler(
 export const getRecommendations = createServerFn({ method: 'GET' })
   .inputValidator((userId: string) => userId)
   .handler(async ({ data: userId }): Promise<TMDBMovie[]> => {
+    await requireCurrentUser(userId)
+
     if (!TMDB_CONFIG.API_KEY || !userId) {
       return []
     }
 
     try {
       // Get user's tierlists
-      const userTierlists = await db.query.tierlist.findMany({
-        where: eq(tierlist.userId, userId),
+      const userTierlists = (await (db as any).query.tierlist.findMany({
+        where: (tierlist: any, { eq }: any) => eq(tierlist.userId, userId),
         with: {
           tiers: {
             with: {
@@ -101,10 +115,10 @@ export const getRecommendations = createServerFn({ method: 'GET' })
                 },
               },
             },
-            orderBy: (tiers, { asc }) => [asc(tiers.value)],
+            orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
           },
         },
-      })
+      })) as TierlistWithDetails[]
 
       if (userTierlists.length === 0) {
         return []
