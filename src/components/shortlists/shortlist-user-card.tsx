@@ -54,8 +54,10 @@ function MovieRow({
             <img
               src={posterUrl}
               alt={movie.title}
+              width={48}
+              height={72}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
+              loading="eager"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -142,8 +144,8 @@ export function ShortlistUserCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.35, delay, ease: 'easeOut' }}
       className={`rounded-2xl bg-card border overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col ${
         !participating ? 'opacity-55' : ''
@@ -166,6 +168,8 @@ export function ShortlistUserCard({
           <img
             src={user.image}
             alt={user.name}
+            width={44}
+            height={44}
             className={`w-11 h-11 rounded-full border-2 flex-shrink-0 ${
               !participating ? 'grayscale' : ''
             }`}

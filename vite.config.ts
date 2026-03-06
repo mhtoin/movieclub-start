@@ -13,7 +13,18 @@ const config = defineConfig({
     }),
     tailwindcss(),
     tanstackStart(),
-    nitro(),
+    nitro({
+      routeRules: {
+        // Hashed assets never change — cache forever
+        '/assets/**': {
+          headers: { 'Cache-Control': 'public, max-age=31536000, immutable' },
+        },
+        // HTML documents must not be cached so redeployed asset hashes are always fresh
+        '/**': {
+          headers: { 'Cache-Control': 'no-store, no-cache' },
+        },
+      },
+    }),
     viteReact(),
   ],
 })
