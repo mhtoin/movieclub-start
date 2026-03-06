@@ -1,9 +1,11 @@
 import { db } from '@/db/db'
 import { movie, moviesOnTiers, tier, tierlist, user } from '@/db/schema'
+import { requireAuthenticatedUser } from '@/lib/auth/auth'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { eq as dbEq, InferSelectModel, sql } from 'drizzle-orm'
+import { and, eq as dbEq, inArray, InferSelectModel, sql } from 'drizzle-orm'
 import { useMemo } from 'react'
+import { z } from 'zod'
 import { movieQueries } from './movies'
 
 type Tierlist = InferSelectModel<typeof tierlist>
@@ -32,14 +34,82 @@ interface TierlistWithTiers extends Tierlist {
   tiers: TierWithMovies[]
 }
 
+const updateTierMoviePositionSchema = z.object({
+  movieOnTierId: z.string().min(1),
+  newPosition: z.number().int().min(0),
+  tierId: z.string().min(1).optional(),
+})
+
+const batchUpdateTierMoviePositionsSchema = z.array(
+  z.object({
+    movieOnTierId: z.string().min(1),
+    newPosition: z.number().int().min(0),
+    tierId: z.string().min(1),
+  }),
+)
+
+const batchInsertMoviesOnTiersSchema = z.array(
+  z.object({
+    movieId: z.string().min(1),
+    tierId: z.string().min(1),
+    position: z.number().int().min(0),
+  }),
+)
+
+async function assertOwnedTierIds(userId: string, tierIds: string[]) {
+  const uniqueTierIds = [...new Set(tierIds)]
+
+  if (uniqueTierIds.length === 0) {
+    return
+  }
+
+  const ownedTiers = await db
+    .select({ id: tier.id })
+    .from(tier)
+    .innerJoin(tierlist, dbEq(tier.tierlistId, tierlist.id))
+    .where(and(inArray(tier.id, uniqueTierIds), dbEq(tierlist.userId, userId)))
+
+  if (ownedTiers.length !== uniqueTierIds.length) {
+    throw new Error('Forbidden')
+  }
+}
+
+async function assertOwnedMovieOnTierIds(
+  userId: string,
+  movieOnTierIds: string[],
+) {
+  const uniqueMovieOnTierIds = [...new Set(movieOnTierIds)]
+
+  if (uniqueMovieOnTierIds.length === 0) {
+    return
+  }
+
+  const ownedMovieOnTiers = await db
+    .select({ id: moviesOnTiers.id })
+    .from(moviesOnTiers)
+    .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
+    .innerJoin(tierlist, dbEq(tier.tierlistId, tierlist.id))
+    .where(
+      and(
+        inArray(moviesOnTiers.id, uniqueMovieOnTierIds),
+        dbEq(tierlist.userId, userId),
+      ),
+    )
+
+  if (ownedMovieOnTiers.length !== uniqueMovieOnTierIds.length) {
+    throw new Error('Forbidden')
+  }
+}
+
 export const updateTierMoviePosition = createServerFn({ method: 'POST' })
-  .inputValidator(
-    (data: { movieOnTierId: string; newPosition: number; tierId?: string }) =>
-      data,
-  )
+  .inputValidator(updateTierMoviePositionSchema)
   .handler(async ({ data }) => {
+    const currentUser = await requireAuthenticatedUser()
     const { movieOnTierId, newPosition, tierId } = data
     const id = movieOnTierId as (typeof moviesOnTiers.$inferSelect)['id']
+
+    await assertOwnedMovieOnTierIds(currentUser.userId, [movieOnTierId])
+    await assertOwnedTierIds(currentUser.userId, tierId ? [tierId] : [])
 
     const txid = await db.transaction(async (tx) => {
       const updateData: { position: number; tierId?: string } = {
@@ -64,17 +134,20 @@ export const updateTierMoviePosition = createServerFn({ method: 'POST' })
   })
 
 export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
-  .inputValidator(
-    (
-      data: Array<{
-        movieOnTierId: string
-        newPosition: number
-        tierId: string
-      }>,
-    ) => data,
-  )
+  .inputValidator(batchUpdateTierMoviePositionsSchema)
   .handler(async ({ data }) => {
     if (data.length === 0) return { txid: 0 }
+
+    const currentUser = await requireAuthenticatedUser()
+
+    await assertOwnedMovieOnTierIds(
+      currentUser.userId,
+      data.map((update) => update.movieOnTierId),
+    )
+    await assertOwnedTierIds(
+      currentUser.userId,
+      data.map((update) => update.tierId),
+    )
 
     const txid = await db.transaction(async (tx) => {
       for (const update of data) {
@@ -96,17 +169,16 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
   })
 
 export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
-  .inputValidator(
-    (
-      data: Array<{
-        movieId: string
-        tierId: string
-        position: number
-      }>,
-    ) => data,
-  )
+  .inputValidator(batchInsertMoviesOnTiersSchema)
   .handler(async ({ data }) => {
     if (data.length === 0) return { txid: 0 }
+
+    const currentUser = await requireAuthenticatedUser()
+
+    await assertOwnedTierIds(
+      currentUser.userId,
+      data.map((insert) => insert.tierId),
+    )
 
     const txid = await db.transaction(async (tx) => {
       for (const insert of data) {
@@ -129,6 +201,8 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
 
 export const getTierlists = createServerFn({ method: 'GET' }).handler(
   async () => {
+    await requireAuthenticatedUser()
+
     try {
       const users = await (db as any).query.user.findMany({
         with: {
@@ -154,6 +228,8 @@ export const getTierlists = createServerFn({ method: 'GET' }).handler(
 export const getUserTierlists = createServerFn({ method: 'GET' })
   .inputValidator((userId: string) => userId)
   .handler(async ({ data: userId }) => {
+    await requireAuthenticatedUser()
+
     try {
       const userTierlists = await (db as any).query.tierlist.findMany({
         where: (tierlist: any, { eq }: any) => eq(tierlist.userId, userId),

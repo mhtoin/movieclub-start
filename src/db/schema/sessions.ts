@@ -1,19 +1,32 @@
-import { foreignKey, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { user } from "./users";
+import {
+  foreignKey,
+  index,
+  pgTable,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core'
+import { user } from './users'
 
-export const sessionsTable = pgTable("session", {
+export const sessionsTable = pgTable(
+  'session',
+  {
     id: text().primaryKey().notNull(),
     userId: text().notNull(),
     secretHash: text().notNull(),
     expiresAt: timestamp({ precision: 3, mode: 'date' }).notNull(),
     createdAt: timestamp({ precision: 3, mode: 'date' }).notNull(),
-}, (table) => [
+  },
+  (table) => [
+    index('session_expiresAt_idx').on(table.expiresAt),
     foreignKey({
-            columns: [table.userId],
-            foreignColumns: [user.id],
-            name: "Session_userId_fkey"
-        }).onUpdate("cascade").onDelete("cascade"),
-]);
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: 'Session_userId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
+  ],
+)
 
 // Export alias for relations
-export const session = sessionsTable;
+export const session = sessionsTable

@@ -114,7 +114,7 @@ export const recommendedMovie = pgTable(
       name: 'RecommendedMovie_movieId_fkey',
     })
       .onUpdate('cascade')
-      .onDelete('set default'),
+      .onDelete('cascade'),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [user.id],

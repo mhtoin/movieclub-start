@@ -1,0 +1,3 @@
+CREATE INDEX IF NOT EXISTS "session_expiresAt_idx" ON "session" USING btree ("expiresAt");--> statement-breakpoint
+ALTER TABLE "recommended_movie" DROP CONSTRAINT IF EXISTS "RecommendedMovie_movieId_fkey";--> statement-breakpoint
+ALTER TABLE "recommended_movie" ADD CONSTRAINT "RecommendedMovie_movieId_fkey" FOREIGN KEY ("movieId") REFERENCES "public"."movie"("id") ON DELETE cascade ON UPDATE cascade;

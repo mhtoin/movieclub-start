@@ -10,13 +10,87 @@ import {
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import bcrypt from 'bcryptjs'
+import { z } from 'zod'
 import { sendPasswordResetEmail } from '../email'
 import { createSession, useAppSession } from './auth'
 
+const passwordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters long')
+  .max(72, 'Password must be 72 characters or fewer')
+
+const emailSchema = z.string().trim().email('Please enter a valid email')
+
+const requestPasswordResetSchema = z.object({
+  email: emailSchema,
+})
+
+const resetPasswordSchema = z.object({
+  token: z.string().uuid('Invalid password reset token'),
+  password: passwordSchema,
+})
+
+const registerSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  name: z.string().trim().min(1, 'Name is required').max(100),
+})
+
+const loginSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, 'Password is required'),
+})
+
+const authRateLimitStore = new Map<string, { count: number; resetAt: number }>()
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase()
+}
+
+function cleanupExpiredRateLimits(now: number) {
+  for (const [key, entry] of authRateLimitStore.entries()) {
+    if (entry.resetAt <= now) {
+      authRateLimitStore.delete(key)
+    }
+  }
+}
+
+function enforceRateLimit(
+  key: string,
+  { maxAttempts, windowMs }: { maxAttempts: number; windowMs: number },
+) {
+  const now = Date.now()
+  cleanupExpiredRateLimits(now)
+
+  const existing = authRateLimitStore.get(key)
+
+  if (!existing || existing.resetAt <= now) {
+    authRateLimitStore.set(key, { count: 1, resetAt: now + windowMs })
+    return
+  }
+
+  if (existing.count >= maxAttempts) {
+    throw new Error('Too many attempts. Please try again later.')
+  }
+
+  existing.count += 1
+  authRateLimitStore.set(key, existing)
+}
+
+function clearRateLimit(key: string) {
+  authRateLimitStore.delete(key)
+}
+
 export const requestPasswordResetFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: { email: string }) => data)
+  .inputValidator(requestPasswordResetSchema)
   .handler(async ({ data }) => {
-    const user = await getUserByEmail(data.email)
+    const email = normalizeEmail(data.email)
+    enforceRateLimit(`password-reset:${email}`, {
+      maxAttempts: 3,
+      windowMs: 15 * 60 * 1000,
+    })
+
+    const user = await getUserByEmail(email)
     if (!user) {
       return { success: true }
     }
@@ -47,8 +121,13 @@ export const requestPasswordResetFn = createServerFn({ method: 'POST' })
   })
 
 export const resetPasswordFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: { token: string; password: string }) => data)
+  .inputValidator(resetPasswordSchema)
   .handler(async ({ data }) => {
+    enforceRateLimit(`reset-password:${data.token}`, {
+      maxAttempts: 5,
+      windowMs: 15 * 60 * 1000,
+    })
+
     const resetToken = await getPasswordResetToken(data.token)
 
     if (!resetToken) {
@@ -68,16 +147,21 @@ export const resetPasswordFn = createServerFn({ method: 'POST' })
     const hashedPassword = await bcrypt.hash(data.password, 12)
     await updateUserPassword(user.email, hashedPassword)
     await deletePasswordResetToken(resetToken.id)
+    clearRateLimit(`reset-password:${data.token}`)
 
     return { success: true }
   })
 
 export const registerFn = createServerFn({ method: 'POST' })
-  .inputValidator(
-    (data: { email: string; password: string; name: string }) => data,
-  )
+  .inputValidator(registerSchema)
   .handler(async ({ data }) => {
-    const existingUser = await getUserByEmail(data.email)
+    const email = normalizeEmail(data.email)
+    enforceRateLimit(`register:${email}`, {
+      maxAttempts: 5,
+      windowMs: 60 * 60 * 1000,
+    })
+
+    const existingUser = await getUserByEmail(email)
     if (existingUser) {
       throw new Error('User already exists')
     }
@@ -85,9 +169,9 @@ export const registerFn = createServerFn({ method: 'POST' })
     const hashedPassword = await bcrypt.hash(data.password, 12)
 
     const user = await createUser({
-      email: data.email,
+      email,
       password: hashedPassword,
-      name: data.name,
+      name: data.name.trim(),
     })
 
     const session = await createSession(user.id)
@@ -100,23 +184,31 @@ export const registerFn = createServerFn({ method: 'POST' })
       sessionToken: session.token,
     })
 
+    clearRateLimit(`register:${email}`)
+
     throw redirect({ to: '/home' })
   })
 export const loginFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: { email: string; password: string }) => data)
+  .inputValidator(loginSchema)
   .handler(async ({ data }) => {
-    const user = await getUserByEmail(data.email)
+    const email = normalizeEmail(data.email)
+    enforceRateLimit(`login:${email}`, {
+      maxAttempts: 5,
+      windowMs: 15 * 60 * 1000,
+    })
+
+    const user = await getUserByEmail(email)
     if (!user || !user.password) {
       console.error(
         'Login failed: User not found or missing password for',
-        data.email,
+        email,
       )
       throw new Error('Invalid email or password')
     }
 
     const passwordMatch = await bcrypt.compare(data.password, user.password)
     if (!passwordMatch) {
-      console.error('Login failed: Incorrect password for', data.email)
+      console.error('Login failed: Incorrect password for', email)
       throw new Error('Invalid email or password')
     }
 
@@ -129,6 +221,8 @@ export const loginFn = createServerFn({ method: 'POST' })
       image: user.image,
       sessionToken: session.token,
     })
+
+    clearRateLimit(`login:${email}`)
 
     throw redirect({ to: '/home' })
   })
