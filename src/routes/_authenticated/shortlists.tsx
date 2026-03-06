@@ -10,8 +10,8 @@ import { cn } from '@/lib/utils'
 import { Dices } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/shortlists')({
-  loader: async ({ context }) => {
-    await context.queryClient.prefetchQuery(shortlistQueries.all())
+  loader: ({ context }) => {
+    context.queryClient.prefetchQuery(shortlistQueries.all())
   },
   component: ShortlistsPage,
 })

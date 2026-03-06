@@ -55,13 +55,11 @@ export const Route = createFileRoute('/_authenticated')({
     }
     return { user, backgroundPreference }
   },
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     const user = context.user
     if (user?.userId) {
-      await Promise.all([
-        context.queryClient.prefetchQuery(shortlistQueries.byUser(user.userId)),
-        context.queryClient.prefetchQuery(movieQueries.latest()),
-      ])
+      context.queryClient.prefetchQuery(shortlistQueries.byUser(user.userId))
+      context.queryClient.prefetchQuery(movieQueries.latest())
     }
   },
   component: AuthenticatedLayout,
