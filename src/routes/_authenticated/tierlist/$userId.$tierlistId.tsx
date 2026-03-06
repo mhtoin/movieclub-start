@@ -84,10 +84,11 @@ function TierlistContent() {
 
   const [localTiers, setLocalTiers] = useState<TierWithMovies[] | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  // When false, server→local syncing is suppressed while mutations are in flight.
+  // Opened only after the full mutation chain resolves AND the refetch has landed.
+  const [syncEnabled, setSyncEnabled] = useState(true)
 
-  // Count of in-flight mutation batches — skip server→local sync while non-zero
-  const pendingMutationsRef = useRef(0)
-  // Promise chain ensuring consecutive drags are serialized
+  // Promise chain ensuring consecutive drags are serialized on the server
   const mutationChainRef = useRef<Promise<void>>(Promise.resolve())
   // Snapshot of the most-recently submitted visual state used as diff baseline
   const committedTiersRef = useRef<TierWithMovies[] | null>(null)
@@ -147,19 +148,14 @@ function TierlistContent() {
     }
   }, [tierlistFromDb, localTiers])
 
-  // Sync local state when DB data changes (and not currently dragging)
+  // Sync local state when DB data changes (and not currently dragging).
+  // Suppressed while syncEnabled=false (i.e. while our mutations are in flight).
   useEffect(() => {
-    if (tierlistFromDb && !isDragging) {
-      // Skip if one of our own mutations is still in-flight
-      if (pendingMutationsRef.current > 0) {
-        pendingMutationsRef.current -= 1
-        return
-      }
-      // Safe to accept the server snapshot — also reset committed state
+    if (tierlistFromDb && !isDragging && syncEnabled) {
       committedTiersRef.current = null
       setLocalTiers(tierlistFromDb.tiers)
     }
-  }, [tierlistFromDb, isDragging])
+  }, [tierlistFromDb, isDragging, syncEnabled])
 
   function handleDragStart() {
     setIsDragging(true)
@@ -352,7 +348,9 @@ function TierlistContent() {
     // Enqueue this drag's DB work onto the serial mutation chain so that
     // rapid consecutive drags never race each other on the server.
     if (updates.length > 0 || inserts.length > 0) {
-      pendingMutationsRef.current += 1
+      // Disable server→local sync immediately so no stale refetch overwrites
+      // the optimistic local state while our writes are in flight.
+      setSyncEnabled(false)
 
       mutationChainRef.current = mutationChainRef.current.then(async () => {
         try {
@@ -363,7 +361,21 @@ function TierlistContent() {
             await batchInsertMoviesOnTiers({ data: inserts })
           }
         } finally {
-          queryClient.invalidateQueries({ queryKey: ['tierlists'] })
+          // Await the refetch so that by the time we open the sync gate the
+          // query cache already holds the committed server state.
+          await queryClient.invalidateQueries({ queryKey: ['tierlists'] })
+        }
+      })
+
+      // Capture the tip of the chain *after* appending this drag's work.
+      // If no further drag is queued before this promise resolves we know we
+      // are the last pending mutation and it is safe to re-open the sync gate.
+      const drainPromise = mutationChainRef.current
+      drainPromise.then(() => {
+        if (mutationChainRef.current === drainPromise) {
+          // All mutations have committed and the refetch has landed —
+          // re-enable sync so the fresh server state is applied.
+          setSyncEnabled(true)
         }
       })
     }
