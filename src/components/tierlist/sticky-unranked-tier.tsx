@@ -11,7 +11,11 @@ interface StickyUnrankedTierProps {
   disabled?: boolean
 }
 
-function StickyUnrankedTier({ tier, isOwner = true, disabled = false }: StickyUnrankedTierProps) {
+function StickyUnrankedTier({
+  tier,
+  isOwner = true,
+  disabled = false,
+}: StickyUnrankedTierProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const { setNodeRef, isOver } = useDroppable({
     id: tier.id,
