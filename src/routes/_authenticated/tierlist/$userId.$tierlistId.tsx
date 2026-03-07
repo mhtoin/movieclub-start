@@ -419,20 +419,12 @@ function TierlistContent() {
             : ''
         }`}
         actions={
-          <div className="flex items-center gap-2">
-            {isSaving && (
-              <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Saving…
-              </div>
-            )}
-            {isOwner && (
-              <RenameTierlistDialog
-                currentTitle={tierlist.title || 'Untitled Tierlist'}
-                onRename={handleRename}
-              />
-            )}
-          </div>
+          isOwner && (
+            <RenameTierlistDialog
+              currentTitle={tierlist.title || 'Untitled Tierlist'}
+              onRename={handleRename}
+            />
+          )
         }
       />
       {(dateRangeText || (tierlist.genres && tierlist.genres.length > 0)) && (
@@ -467,7 +459,15 @@ function TierlistContent() {
       )}
 
       <div className="relative flex-1 overflow-y-auto pr-20">
-        {isSaving && <div className="absolute inset-0 z-20 cursor-wait" />}
+        {isSaving && (
+          <>
+            <div className="absolute inset-0 z-20 cursor-wait" />
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-4 py-2 text-sm font-medium shadow-lg backdrop-blur-sm">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              Saving…
+            </div>
+          </>
+        )}
         <div className="p-6">
           <DndContext
             sensors={isSaving ? noSensors : sensors}
@@ -476,7 +476,9 @@ function TierlistContent() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div className="space-y-4">
+            <div
+              className={`space-y-4 transition-opacity duration-200 ${isSaving ? 'opacity-50' : ''}`}
+            >
               {rankedTiers.map((tier) => (
                 <TierContainer
                   key={tier.id}
@@ -487,7 +489,11 @@ function TierlistContent() {
               ))}
             </div>
             {unrankedTier && (
-              <StickyUnrankedTier tier={unrankedTier} isOwner={isOwner} />
+              <StickyUnrankedTier
+                tier={unrankedTier}
+                isOwner={isOwner}
+                disabled={isSaving}
+              />
             )}
             <DragOverlayPortal />
           </DndContext>

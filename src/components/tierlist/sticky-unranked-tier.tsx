@@ -8,9 +8,10 @@ import TierItem from './tier-item'
 interface StickyUnrankedTierProps {
   tier: TierWithMovies
   isOwner?: boolean
+  disabled?: boolean
 }
 
-function StickyUnrankedTier({ tier, isOwner = true }: StickyUnrankedTierProps) {
+function StickyUnrankedTier({ tier, isOwner = true, disabled = false }: StickyUnrankedTierProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const { setNodeRef, isOver } = useDroppable({
     id: tier.id,
@@ -24,7 +25,7 @@ function StickyUnrankedTier({ tier, isOwner = true }: StickyUnrankedTierProps) {
       <div
         className={`fixed right-0 top-1/2 -translate-y-1/2 z-50 flex items-stretch transition-all duration-300 ease-in-out ${
           isExpanded ? 'translate-x-0' : 'translate-x-[calc(100%-2.5rem)]'
-        }`}
+        } ${disabled ? 'opacity-50' : ''}`}
       >
         <button
           onClick={() => setIsExpanded(!isExpanded)}
