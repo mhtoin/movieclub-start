@@ -39,7 +39,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Calendar, Pencil, Tag } from 'lucide-react'
+import { Calendar, Loader2, Pencil, Tag } from 'lucide-react'
 import {
   Suspense,
   useCallback,
@@ -79,19 +79,17 @@ function TierlistContent() {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   )
+  // Empty sensor set used while a save is in flight — physically prevents
+  // a new drag from starting until the previous one has been committed.
+  const noSensors = useSensors()
 
   const tierlistFromDb = useSingleTierlistLiveQuery(tierlistId)
 
   const [localTiers, setLocalTiers] = useState<TierWithMovies[] | null>(null)
   const [isDragging, setIsDragging] = useState(false)
-  // When false, server→local syncing is suppressed while mutations are in flight.
-  // Opened only after the full mutation chain resolves AND the refetch has landed.
-  const [syncEnabled, setSyncEnabled] = useState(true)
-
-  // Promise chain ensuring consecutive drags are serialized on the server
-  const mutationChainRef = useRef<Promise<void>>(Promise.resolve())
-  // Snapshot of the most-recently submitted visual state used as diff baseline
-  const committedTiersRef = useRef<TierWithMovies[] | null>(null)
+  // True while a drag's mutations are in flight + refetch is pending.
+  // Drives both the disabled-sensor swap and the sync-gate below.
+  const [isSaving, setIsSaving] = useState(false)
 
   // Use ref for localTiers to avoid stale closures in callbacks
   const localTiersRef = useRef(localTiers)
@@ -148,14 +146,14 @@ function TierlistContent() {
     }
   }, [tierlistFromDb, localTiers])
 
-  // Sync local state when DB data changes (and not currently dragging).
-  // Suppressed while syncEnabled=false (i.e. while our mutations are in flight).
+  // Sync local state when server data changes.
+  // Gated on !isSaving so in-flight mutations never get overwritten by a
+  // stale or intermediate refetch (including SSE-triggered ones).
   useEffect(() => {
-    if (tierlistFromDb && !isDragging && syncEnabled) {
-      committedTiersRef.current = null
+    if (tierlistFromDb && !isDragging && !isSaving) {
       setLocalTiers(tierlistFromDb.tiers)
     }
-  }, [tierlistFromDb, isDragging, syncEnabled])
+  }, [tierlistFromDb, isDragging, isSaving])
 
   function handleDragStart() {
     setIsDragging(true)
@@ -282,16 +280,14 @@ function TierlistContent() {
       }
     }
 
-    // Build a map of original movie positions/tiers.
-    // Use the most-recently committed snapshot when available so that a
-    // second drag before the first write lands only diffs its own delta
-    // against what was already submitted — not against the stale server data.
-    const baselineTiers = committedTiersRef.current ?? tierlistFromDb.tiers
+    // Diff against the last committed server snapshot.
+    // Since isSaving blocks new drags, tierlistFromDb always reflects the
+    // state that was committed before this drag started.
     const originalMovieData = new Map<
       string,
       { tierId: string; position: number; movieOnTierId: string }
     >()
-    baselineTiers.forEach((tier) => {
+    tierlistFromDb.tiers.forEach((tier) => {
       tier.movies.forEach((m) => {
         originalMovieData.set(m.id, {
           tierId: tier.id,
@@ -300,9 +296,6 @@ function TierlistContent() {
         })
       })
     })
-
-    // Record the new visual state as the committed baseline for the next drag
-    committedTiersRef.current = finalTiers
 
     // Collect all changes
     const updates: Array<{
@@ -345,14 +338,10 @@ function TierlistContent() {
       })
     })
 
-    // Enqueue this drag's DB work onto the serial mutation chain so that
-    // rapid consecutive drags never race each other on the server.
     if (updates.length > 0 || inserts.length > 0) {
-      // Disable server→local sync immediately so no stale refetch overwrites
-      // the optimistic local state while our writes are in flight.
-      setSyncEnabled(false)
-
-      mutationChainRef.current = mutationChainRef.current.then(async () => {
+      // Block new drags immediately — prevents any race before we even hit await.
+      setIsSaving(true)
+      ;(async () => {
         try {
           if (updates.length > 0) {
             await batchUpdateTierMoviePositions({ data: updates })
@@ -360,24 +349,13 @@ function TierlistContent() {
           if (inserts.length > 0) {
             await batchInsertMoviesOnTiers({ data: inserts })
           }
-        } finally {
-          // Await the refetch so that by the time we open the sync gate the
-          // query cache already holds the committed server state.
+          // Wait for the refetch to complete so tierlistFromDb is already
+          // up-to-date when isSaving flips to false and the useEffect fires.
           await queryClient.invalidateQueries({ queryKey: ['tierlists'] })
+        } finally {
+          setIsSaving(false)
         }
-      })
-
-      // Capture the tip of the chain *after* appending this drag's work.
-      // If no further drag is queued before this promise resolves we know we
-      // are the last pending mutation and it is safe to re-open the sync gate.
-      const drainPromise = mutationChainRef.current
-      drainPromise.then(() => {
-        if (mutationChainRef.current === drainPromise) {
-          // All mutations have committed and the refetch has landed —
-          // re-enable sync so the fresh server state is applied.
-          setSyncEnabled(true)
-        }
-      })
+      })()
     }
 
     setIsDragging(false)
@@ -441,12 +419,20 @@ function TierlistContent() {
             : ''
         }`}
         actions={
-          isOwner && (
-            <RenameTierlistDialog
-              currentTitle={tierlist.title || 'Untitled Tierlist'}
-              onRename={handleRename}
-            />
-          )
+          <div className="flex items-center gap-2">
+            {isSaving && (
+              <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Saving…
+              </div>
+            )}
+            {isOwner && (
+              <RenameTierlistDialog
+                currentTitle={tierlist.title || 'Untitled Tierlist'}
+                onRename={handleRename}
+              />
+            )}
+          </div>
         }
       />
       {(dateRangeText || (tierlist.genres && tierlist.genres.length > 0)) && (
@@ -480,10 +466,11 @@ function TierlistContent() {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto pr-20">
+      <div className="relative flex-1 overflow-y-auto pr-20">
+        {isSaving && <div className="absolute inset-0 z-20 cursor-wait" />}
         <div className="p-6">
           <DndContext
-            sensors={sensors}
+            sensors={isSaving ? noSensors : sensors}
             collisionDetection={collisionDetectionStrategy}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
