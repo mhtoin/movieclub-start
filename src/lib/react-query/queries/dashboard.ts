@@ -76,7 +76,7 @@ export interface NextMovieToWatch {
     title: string
     originalTitle: string
     overview: string
-    releaseDate: string
+    releaseDate: string | null
     runtime: number | null
     voteAverage: number
     genres: string[] | null

@@ -22,7 +22,7 @@ const mapDbMovieToTmdbMovie = (dbMovie: Movie): TMDBMovie => {
     overview: dbMovie.overview,
     poster_path: (images as any)?.posters?.[0]?.file_path ?? null,
     backdrop_path: (images as any)?.backdrops?.[0]?.file_path ?? null,
-    release_date: dbMovie.releaseDate,
+    release_date: dbMovie.releaseDate ?? '',
     vote_average: dbMovie.voteAverage ?? 0,
     vote_count: dbMovie.voteCount,
     genre_ids: [],

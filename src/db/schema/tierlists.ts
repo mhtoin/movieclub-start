@@ -1,4 +1,5 @@
 import {
+  date,
   foreignKey,
   index,
   integer,
@@ -16,8 +17,8 @@ export const tierlist = pgTable(
     id: text().primaryKey().notNull(),
     userId: text().notNull(),
     title: text(),
-    watchDateFrom: text(),
-    watchDateTo: text(),
+    watchDateFrom: date(),
+    watchDateTo: date(),
     genres: text().array(),
     createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
   },

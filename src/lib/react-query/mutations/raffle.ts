@@ -78,13 +78,13 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
         await tx.insert(raffleTable).values({
           id: raffleId,
           winningMovieId: movieId,
-          date: watchDate,
+          raffledAt: new Date(watchDate),
         })
         await tx.insert(raffleToUser).values({ a: raffleId, b: userId })
 
         await tx
           .update(movie)
-          .set({ watchDate: watchDate, userId: userId })
+          .set({ watchDate: new Date(watchDate), userId: userId })
           .where(eq(movie.id, movieId))
 
         await tx.delete(movieToShortlist).where(eq(movieToShortlist.a, movieId))

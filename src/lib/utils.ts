@@ -24,11 +24,11 @@ export function getMovieBackdropUrl(
  * Formats a raffle date string to a human-readable format.
  * Falls back to the raw string if parsing fails.
  */
-export function formatRaffleDate(date: string): string {
+export function formatRaffleDate(date: string | Date): string {
   try {
     return format(new Date(date), 'dd MMM yyyy')
   } catch {
-    return date
+    return String(date)
   }
 }
 

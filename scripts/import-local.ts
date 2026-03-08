@@ -145,9 +145,10 @@ function transformRow(
       }
       if (
         transformed.release_date === null ||
-        transformed.release_date === undefined
+        transformed.release_date === undefined ||
+        transformed.release_date === ''
       ) {
-        transformed.release_date = ''
+        transformed.release_date = null
       }
       break
     case 'Shortlist':

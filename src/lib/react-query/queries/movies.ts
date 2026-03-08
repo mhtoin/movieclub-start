@@ -55,13 +55,11 @@ export const getDistinctWatchedMonths = createServerFn({
 
   const rows = await db
     .selectDistinct({
-      month: sql<string>`substring(${movie.watchDate}, 1, 7)`,
+      month: sql<string>`to_char(${movie.watchDate}, 'YYYY-MM')`,
     })
     .from(movie)
     .where(isNotNull(movie.watchDate))
-    .orderBy(sql`substring(${movie.watchDate}, 1, 7) desc`)
-
-  if (!rows) return null
+    .orderBy(sql`to_char(${movie.watchDate}, 'YYYY-MM') desc`)
 
   return rows
     .filter((row) => row.month)

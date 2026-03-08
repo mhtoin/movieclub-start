@@ -78,7 +78,7 @@ export const getRaffleHistory = createServerFn({ method: 'GET' }).handler(
         .leftJoin(movie, eq(raffle.winningMovieId, movie.id))
         .leftJoin(raffleToUser, eq(raffleToUser.a, raffle.id))
         .leftJoin(user, eq(raffleToUser.b, user.id))
-        .orderBy(desc(raffle.date))
+        .orderBy(desc(raffle.raffledAt))
       const seen = new Set<string>()
       return rows
         .filter((r) => {
@@ -88,7 +88,7 @@ export const getRaffleHistory = createServerFn({ method: 'GET' }).handler(
         })
         .map((r) => ({
           id: r.raffle.id,
-          date: r.raffle.date,
+          date: r.raffle.raffledAt,
           movie: r.movie ?? null,
           winner: r.user ?? null,
         }))

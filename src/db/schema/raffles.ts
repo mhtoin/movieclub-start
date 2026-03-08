@@ -11,7 +11,7 @@ import { user } from './users'
 export const raffle = pgTable('raffle', {
   id: text().primaryKey().notNull(),
   winningMovieId: text().notNull(),
-  date: text().notNull(),
+  raffledAt: timestamp({ precision: 3, mode: 'date' }).notNull(),
   createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
 })
 

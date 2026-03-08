@@ -1,5 +1,6 @@
 import {
   boolean,
+  date,
   doublePrecision,
   foreignKey,
   index,
@@ -29,12 +30,12 @@ export const movie = pgTable(
     originalTitle: text('original_title').notNull(),
     overview: text().notNull(),
     popularity: doublePrecision().notNull(),
-    releaseDate: text('release_date').notNull(),
+    releaseDate: date('release_date'),
     title: text().notNull(),
     video: boolean().notNull(),
     voteAverage: doublePrecision('vote_average').notNull(),
     voteCount: integer('vote_count').notNull(),
-    watchDate: text(),
+    watchDate: timestamp({ precision: 3, mode: 'date' }),
     userId: text().references(() => user.id),
     runtime: integer(),
     genres: text().array(),
@@ -74,9 +75,8 @@ export const review = pgTable(
     content: text().notNull(),
     userId: text().notNull(),
     movieId: text().notNull(),
-    timestamp: text().notNull(),
-    rating: doublePrecision().notNull(),
     createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
+    rating: doublePrecision().notNull(),
   },
   (table) => [
     foreignKey({

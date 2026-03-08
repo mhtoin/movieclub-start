@@ -17,7 +17,7 @@ export type Shortlist = {
     title: string
     originalTitle: string
     overview: string
-    releaseDate: string
+    releaseDate: string | null
     voteAverage: number
     voteCount: number
     runtime?: number | null
