@@ -18,6 +18,7 @@ export const sessionsTable = pgTable(
   },
   (table) => [
     index('session_expiresAt_idx').on(table.expiresAt),
+    index('session_userId_idx').on(table.userId),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [user.id],

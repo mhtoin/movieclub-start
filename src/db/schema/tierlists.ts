@@ -1,8 +1,10 @@
 import {
   foreignKey,
+  index,
   integer,
   pgTable,
   text,
+  timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { movie } from './movies'
@@ -17,6 +19,7 @@ export const tierlist = pgTable(
     watchDateFrom: text(),
     watchDateTo: text(),
     genres: text().array(),
+    createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     foreignKey({
@@ -45,6 +48,7 @@ export const tier = pgTable(
     })
       .onUpdate('cascade')
       .onDelete('cascade'),
+    index('tier_tierlistId_idx').on(table.tierlistId),
   ],
 )
 
@@ -76,5 +80,6 @@ export const moviesOnTiers = pgTable(
     })
       .onUpdate('cascade')
       .onDelete('cascade'),
+    index('movies_on_tiers_tierId_idx').on(table.tierId),
   ],
 )

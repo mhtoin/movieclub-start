@@ -75,7 +75,7 @@ export const getRaffleHistory = createServerFn({ method: 'GET' }).handler(
       const rows = await db
         .select()
         .from(raffle)
-        .leftJoin(movie, eq(raffle.winningMovieID, movie.id))
+        .leftJoin(movie, eq(raffle.winningMovieId, movie.id))
         .leftJoin(raffleToUser, eq(raffleToUser.a, raffle.id))
         .leftJoin(user, eq(raffleToUser.b, user.id))
         .orderBy(desc(raffle.date))

@@ -28,6 +28,7 @@ const MOVIE_COLUMNS_TO_DROP = [
   'movieOfTheWeek',
   'shortlistIDs',
   'raffleIDs',
+  'tierIds',
 ]
 
 // Columns to drop from Shortlist table
@@ -37,7 +38,12 @@ const SHORTLIST_COLUMNS_TO_DROP = ['movieIDs']
 const RAFFLE_COLUMNS_TO_DROP = ['participantIDs', 'movieIDs']
 
 // Columns to drop from User table
-const USER_COLUMNS_TO_DROP = ['raffleIDs']
+const USER_COLUMNS_TO_DROP = [
+  'raffleIDs',
+  'shortlistId',
+  'accountId',
+  'sessionId',
+]
 
 // Columns to drop from Tierlist table
 const TIERLIST_COLUMNS_TO_DROP = ['tierIds', 'watchDate']
@@ -159,6 +165,11 @@ function transformRow(
       break
     case 'Raffle':
       columnsToDrop = RAFFLE_COLUMNS_TO_DROP
+      // Rename column to match new schema
+      if ('winningMovieID' in transformed) {
+        transformed.winningMovieId = transformed.winningMovieID
+        delete transformed.winningMovieID
+      }
       break
     case 'User':
       columnsToDrop = USER_COLUMNS_TO_DROP

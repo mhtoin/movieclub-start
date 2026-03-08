@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, lt } from 'drizzle-orm'
 import { db } from '../db'
 import {
   passwordResetToken,
@@ -99,6 +99,11 @@ export async function createPasswordResetToken(
     await db
       .delete(passwordResetToken)
       .where(eq(passwordResetToken.userId, userId))
+
+    // Delete expired tokens
+    await db
+      .delete(passwordResetToken)
+      .where(lt(passwordResetToken.expiresAt, new Date()))
 
     // Insert the new token
     await db.insert(passwordResetToken).values({

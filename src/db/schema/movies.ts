@@ -9,6 +9,7 @@ import {
   pgTable,
   primaryKey,
   text,
+  timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { raffle } from './raffles'
@@ -45,7 +46,7 @@ export const movie = pgTable(
     videos: jsonb('videos').$type<Record<string, any> | null>().default(null),
     cast: jsonb('cast').$type<any[] | null>().default(null),
     crew: jsonb('crew').$type<any[] | null>().default(null),
-    tierIds: text().array(),
+    createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     uniqueIndex('Movie_tmdbId_key').using(
@@ -62,6 +63,7 @@ export const movie = pgTable(
     // Indexes for common query patterns
     index('movie_watchDate_idx').on(table.watchDate),
     index('movie_userId_idx').on(table.userId),
+    index('movie_genres_idx').using('gin', table.genres),
   ],
 )
 
@@ -74,6 +76,7 @@ export const review = pgTable(
     movieId: text().notNull(),
     timestamp: text().notNull(),
     rating: doublePrecision().notNull(),
+    createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     foreignKey({
@@ -90,6 +93,8 @@ export const review = pgTable(
     })
       .onUpdate('cascade')
       .onDelete('restrict'),
+    index('review_movieId_idx').on(table.movieId),
+    index('review_userId_idx').on(table.userId),
   ],
 )
 
@@ -100,6 +105,7 @@ export const recommendedMovie = pgTable(
     movieId: text().notNull(),
     userId: text().notNull(),
     sourceMovieId: text().notNull(),
+    createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     uniqueIndex('RecommendedMovie_movieId_userId_sourceMovieId_key').using(
@@ -129,6 +135,7 @@ export const recommendedMovie = pgTable(
     })
       .onUpdate('cascade')
       .onDelete('restrict'),
+    index('recommended_movie_userId_idx').on(table.userId),
   ],
 )
 
@@ -139,6 +146,10 @@ export const movieToShortlist = pgTable(
     b: text('B').notNull(),
   },
   (table) => [
+    index('_movie_to_shortlist_A_idx').using(
+      'btree',
+      table.a.asc().nullsLast().op('text_ops'),
+    ),
     index().using('btree', table.b.asc().nullsLast().op('text_ops')),
     foreignKey({
       columns: [table.a],
@@ -168,6 +179,10 @@ export const movieToRaffle = pgTable(
     b: text('B').notNull(),
   },
   (table) => [
+    index('_movie_to_raffle_A_idx').using(
+      'btree',
+      table.a.asc().nullsLast().op('text_ops'),
+    ),
     index().using('btree', table.b.asc().nullsLast().op('text_ops')),
     foreignKey({
       columns: [table.a],

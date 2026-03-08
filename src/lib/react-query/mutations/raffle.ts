@@ -77,7 +77,7 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
       await db.transaction(async (tx) => {
         await tx.insert(raffleTable).values({
           id: raffleId,
-          winningMovieID: movieId,
+          winningMovieId: movieId,
           date: watchDate,
         })
         await tx.insert(raffleToUser).values({ a: raffleId, b: userId })
