@@ -168,10 +168,15 @@ function transformRow(
       break
     case 'Raffle':
       columnsToDrop = RAFFLE_COLUMNS_TO_DROP
-      // Rename column to match new schema
+      // Rename winningMovieID -> winningMovieId
       if ('winningMovieID' in transformed) {
         transformed.winningMovieId = transformed.winningMovieID
         delete transformed.winningMovieID
+      }
+      // Rename date -> raffledAt
+      if ('date' in transformed) {
+        transformed.raffledAt = transformed.date
+        delete transformed.date
       }
       break
     case 'User':
