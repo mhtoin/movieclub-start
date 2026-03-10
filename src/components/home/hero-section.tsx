@@ -51,7 +51,7 @@ export function HeroSection({ movie, movieUser }: HeroSectionProps) {
   const posterPath = movie.images?.posters?.[0]?.file_path
   const logoPath = movie.images?.logos?.[0]?.file_path
   const backdropUrl = backdropPath
-    ? `https://image.tmdb.org/t/p/original${backdropPath}`
+    ? `https://image.tmdb.org/t/p/w1280${backdropPath}`
     : ''
   const posterUrl = posterPath
     ? `https://image.tmdb.org/t/p/w500${posterPath}`

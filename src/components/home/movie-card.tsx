@@ -69,24 +69,29 @@ export function MovieCard({ movie, index }: MovieCardProps) {
             layoutId={prefersSimpleAnimations ? undefined : layoutId}
             layoutDependency={isOpen}
             transition={{ layout: layoutTransition }}
-            style={{
-              willChange: 'transform',
-            }}
             className="relative h-[200px] w-[320px] overflow-hidden rounded-2xl border border-border/30 bg-card shadow-xl sm:h-[240px] sm:w-[400px]"
           >
             {backdropUrl ? (
               <img
                 src={backdropUrl}
+                srcSet={`${backdropUrl.replace('/w780', '/w342')} 342w, ${backdropUrl.replace('/w780', '/w500')} 500w, ${backdropUrl} 780w`}
+                sizes="(max-width: 640px) 320px, 400px"
                 alt={movie.title}
                 className="absolute inset-0 h-full w-full object-cover"
                 loading="lazy"
+                width={780}
+                height={439}
               />
             ) : posterUrl ? (
               <img
                 src={posterUrl}
+                srcSet={`${posterUrl.replace('/w342', '/w185')} 185w, ${posterUrl} 342w`}
+                sizes="(max-width: 640px) 320px, 400px"
                 alt={movie.title}
                 className="absolute inset-0 h-full w-full object-cover blur-sm scale-110"
                 loading="lazy"
+                width={342}
+                height={513}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-muted">

@@ -34,9 +34,13 @@ export function MoviePosterCard({
             {posterUrl ? (
               <img
                 src={posterUrl}
+                srcSet={`${posterUrl.replace('/w500', '/w342')} 342w, ${posterUrl} 500w`}
+                sizes="340px"
                 alt={`${title} poster`}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
+                width={500}
+                height={750}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-muted">

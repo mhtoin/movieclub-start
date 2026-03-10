@@ -35,6 +35,14 @@ export const Route = createRootRouteWithContext<{
     ],
     links: [
       {
+        rel: 'preconnect',
+        href: 'https://image.tmdb.org',
+      },
+      {
+        rel: 'dns-prefetch',
+        href: 'https://image.tmdb.org',
+      },
+      {
         rel: 'stylesheet',
         href: appCss,
       },

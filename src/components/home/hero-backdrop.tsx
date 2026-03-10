@@ -18,9 +18,15 @@ export function HeroBackdrop({ backdropUrl, title }: HeroBackdropProps) {
         {backdropUrl ? (
           <img
             src={backdropUrl}
+            srcSet={`${backdropUrl.replace('/w1280', '/w780')} 780w, ${backdropUrl} 1280w`}
+            sizes="100vw"
             alt={title}
             className="h-full w-full object-cover"
             loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            width={1280}
+            height={720}
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-primary/20 via-background to-background" />
