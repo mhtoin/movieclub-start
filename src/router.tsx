@@ -21,7 +21,7 @@ export const getRouter = () => {
     scrollRestoration: true,
     context: { queryClient },
     defaultPreload: 'intent',
-    defaultPreloadStaleTime: 1000 * 60 * 5, // match staleTime — don't re-run loaders on hover if cache is fresh
+    defaultPreloadStaleTime: 0, // let React Query manage freshness via its own staleTime
     defaultViewTransition: true,
     // Show a pending state after 500 ms (halved from the 1 s default) so that
     // cold navigations with blocking loaders get feedback faster.

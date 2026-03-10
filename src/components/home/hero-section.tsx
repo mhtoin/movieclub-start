@@ -1,3 +1,4 @@
+import type { MovieWithCredits } from '@/db/schema/movies'
 import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 import { useState } from 'react'
@@ -13,32 +14,8 @@ interface MovieUser {
   email: string | null
 }
 
-interface MovieData {
-  title: string
-  tagline: string | null
-  overview: string
-  releaseDate: string | null
-  runtime: number | null
-  voteAverage: number
-  voteCount: number
-  originalLanguage: string | null
-  genres: string[] | null
-  cast: any[] | null
-  crew: any[] | null
-  watchDate: string | null
-  imdbId: string | null
-  tmdbId: number | null
-  videos: Record<string, any> | null
-  watchProviders: Record<string, any> | null
-  images?: {
-    backdrops?: { file_path: string }[]
-    posters?: { file_path: string }[]
-    logos?: { file_path: string }[]
-  } | null
-}
-
 interface HeroSectionProps {
-  movie: MovieData
+  movie: MovieWithCredits
   movieUser: MovieUser
 }
 

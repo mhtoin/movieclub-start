@@ -96,6 +96,7 @@ export const shortlistQueries = {
         return result
       },
       enabled: !!userId,
+      staleTime: 1000 * 60 * 5,
     }),
   all: () =>
     queryOptions({
@@ -104,5 +105,6 @@ export const shortlistQueries = {
         const result = await getAllShortlists()
         return result
       },
+      staleTime: 1000 * 60 * 5,
     }),
 }

@@ -6,7 +6,10 @@ import { ErrorComponent } from '@/components/error-component'
 import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolbar'
 import Sidebar from '@/components/sidebar/sidebar'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
-import { getBackgroundServerFn } from '@/lib/background-preference'
+import {
+  type BackgroundPreference,
+  backgroundValidator,
+} from '@/lib/background-preference'
 import { useSSEInvalidation } from '@/lib/hooks/use-sse-invalidation'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
@@ -19,13 +22,25 @@ import {
 } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
-// Server function to get the current user
-const getCurrentUserServerFn = createServerFn({ method: 'GET' }).handler(
+// Server function to get the current user + background preference in a single
+const getAuthContextServerFn = createServerFn({ method: 'GET' }).handler(
   async () => {
     try {
       const session = await useAppSession()
       const sessionToken = session.data?.sessionToken
-      return await getSessionUser(sessionToken)
+      const user = await getSessionUser(sessionToken)
+
+      // Read background preference from cookie
+      const { getCookie } = await import('@tanstack/react-start/server')
+      const cookieBackground = getCookie('background-style') || 'backdropVeil'
+      let backgroundPreference: BackgroundPreference = 'backdropVeil'
+      try {
+        backgroundPreference = backgroundValidator.parse(cookieBackground)
+      } catch {
+        // keep default
+      }
+
+      return { user, backgroundPreference }
     } catch (error) {
       // If there's a database connection error, throw it to be caught by errorComponent
       if (
@@ -46,10 +61,7 @@ const getCurrentUserServerFn = createServerFn({ method: 'GET' }).handler(
 export const Route = createFileRoute('/_authenticated')({
   errorComponent: ErrorComponent,
   beforeLoad: async () => {
-    const [user, backgroundPreference] = await Promise.all([
-      getCurrentUserServerFn(),
-      getBackgroundServerFn(),
-    ])
+    const { user, backgroundPreference } = await getAuthContextServerFn()
     if (!user) {
       throw redirect({ to: '/' })
     }

@@ -1,3 +1,4 @@
+import type { MovieWithCredits } from '@/db/schema/movies'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, Film, Info, Star, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -10,20 +11,8 @@ interface Slide {
   content: ReactNode
 }
 
-interface MovieData {
-  overview: string
-  releaseDate: string | null
-  runtime: number | null
-  voteAverage: number
-  voteCount: number
-  originalLanguage: string | null
-  genres: string[] | null
-  cast: any[] | null
-  crew: any[] | null
-}
-
 interface MovieInfoSlidesProps {
-  movie: MovieData
+  movie: MovieWithCredits
 }
 
 export function useMovieInfoSlides({ movie }: MovieInfoSlidesProps): Slide[] {

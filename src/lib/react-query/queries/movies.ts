@@ -155,6 +155,7 @@ export const movieQueries = {
     queryOptions({
       queryKey: [...movieQueries.all(), 'latest'],
       queryFn: getLatestMovies,
+      staleTime: 1000 * 60 * 5,
     }),
   watched: (search?: string, username?: string, genre?: string) =>
     queryOptions({

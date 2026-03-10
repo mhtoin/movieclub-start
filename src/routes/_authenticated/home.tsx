@@ -6,7 +6,7 @@ import { TrendingSection } from '@/components/home/trending-section'
 import { homeQueries } from '@/lib/react-query/queries/home'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense } from 'react'
 
@@ -27,7 +27,7 @@ export const Route = createFileRoute('/_authenticated/home')({
 
 function Home() {
   const { user } = Route.useRouteContext()
-  const { data: latestMovie } = useQuery(movieQueries.latest())
+  const { data: latestMovie } = useSuspenseQuery(movieQueries.latest())
 
   if (!latestMovie) {
     return <EmptyState />
