@@ -1,4 +1,4 @@
-import { Movie } from '@/db/schema/movies'
+import { MovieWithCredits } from '@/db/schema/movies'
 import {
   useRemoveFromShortlistMutation,
   useUpdateSelectedIndexMutation,
@@ -20,7 +20,7 @@ import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 interface ShortlistItemDialogProps {
-  movie: Movie | null
+  movie: MovieWithCredits | null
   open: boolean
   onOpenChange: (open: boolean) => void
   layoutId: string

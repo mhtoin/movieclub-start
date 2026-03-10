@@ -6,7 +6,7 @@ import {
   text,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
-import { movie } from './movies'
+import { type MovieWithCredits } from './movies'
 import { user } from './users'
 
 export const shortlist = pgTable(
@@ -38,5 +38,5 @@ export type Shortlist = typeof shortlist.$inferSelect
 export type NewShortlist = typeof shortlist.$inferInsert
 export type ShortlistWithUserMovies = Shortlist & {
   user: typeof user.$inferSelect
-  movies: (typeof movie.$inferSelect)[]
+  movies: MovieWithCredits[]
 }

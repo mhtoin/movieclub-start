@@ -1,5 +1,10 @@
 import { db } from '@/db/db'
-import { movie, type MovieWithUser } from '@/db/schema/movies'
+import {
+  movie,
+  movieCredits,
+  type MovieWithCredits,
+  type MovieWithUser,
+} from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { requireAuthenticatedUser } from '@/lib/auth/auth'
 import { groupBy } from '@/lib/utils'
@@ -27,6 +32,7 @@ export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
         .select()
         .from(movie)
         .innerJoin(user, eq(user.id, movie.userId))
+        .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
         .where(isNotNull(movie.watchDate))
         .orderBy(desc(movie.watchDate))
         .limit(1)
@@ -38,7 +44,11 @@ export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
       if (!movieData) return null
 
       return {
-        movie: movieData,
+        movie: {
+          ...movieData,
+          cast: rows[0].movie_credits?.cast ?? null,
+          crew: rows[0].movie_credits?.crew ?? null,
+        },
         user: rows[0].user,
       }
     } catch (error) {
@@ -105,15 +115,26 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
       .select()
       .from(movie)
       .innerJoin(user, eq(user.id, movie.userId))
+      .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
       .where(and(...conditions))
       .orderBy(desc(movie.watchDate))
 
-    return groupBy(movies, (item) => {
-      const watchDate = item.movie.watchDate
-      if (!watchDate) return 'Unknown'
-      const date = new Date(watchDate)
-      return format(date, 'yyyy-MM')
-    })
+    return groupBy(
+      movies.map((row) => ({
+        movie: {
+          ...row.movie,
+          cast: row.movie_credits?.cast ?? null,
+          crew: row.movie_credits?.crew ?? null,
+        } as MovieWithCredits,
+        user: row.user,
+      })),
+      (item) => {
+        const watchDate = item.movie.watchDate
+        if (!watchDate) return 'Unknown'
+        const date = new Date(watchDate)
+        return format(date, 'yyyy-MM')
+      },
+    )
   })
 
 export const getAllWatchedMovies = createServerFn({ method: 'GET' }).handler(

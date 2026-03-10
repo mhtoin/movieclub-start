@@ -45,8 +45,6 @@ export const movie = pgTable(
       .default(null),
     images: jsonb('images').$type<Record<string, any> | null>().default(null),
     videos: jsonb('videos').$type<Record<string, any> | null>().default(null),
-    cast: jsonb('cast').$type<any[] | null>().default(null),
-    crew: jsonb('crew').$type<any[] | null>().default(null),
     createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
@@ -67,6 +65,18 @@ export const movie = pgTable(
     index('movie_genres_idx').using('gin', table.genres),
   ],
 )
+
+export const movieCredits = pgTable('movie_credits', {
+  id: text()
+    .primaryKey()
+    .notNull()
+    .references(() => movie.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade',
+    }),
+  cast: jsonb('cast').$type<any[] | null>().default(null),
+  crew: jsonb('crew').$type<any[] | null>().default(null),
+})
 
 export const review = pgTable(
   'review',
@@ -204,7 +214,11 @@ export const movieToRaffle = pgTable(
 
 export type Movie = typeof movie.$inferSelect
 export type Review = typeof review.$inferSelect
+export type MovieWithCredits = Movie & {
+  cast?: any[] | null
+  crew?: any[] | null
+}
 export type MovieWithUser = {
-  movie: Movie
+  movie: MovieWithCredits
   user: typeof user.$inferSelect
 }

@@ -1,6 +1,7 @@
 import { db } from '@/db/db'
 import {
   movie,
+  movieCredits,
   movieToShortlist,
   raffle as raffleTable,
   raffleToUser,
@@ -32,10 +33,12 @@ export const startRaffle = createServerFn({ method: 'POST' }).handler(
         .select({
           movie: movie,
           userId: shortlist.userId,
+          credits: movieCredits,
         })
         .from(movieToShortlist)
         .innerJoin(movie, eq(movieToShortlist.a, movie.id))
         .innerJoin(shortlist, eq(movieToShortlist.b, shortlist.id))
+        .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
         .where(
           and(eq(shortlist.isReady, true), eq(shortlist.participating, true)),
         )
@@ -55,6 +58,8 @@ export const startRaffle = createServerFn({ method: 'POST' }).handler(
         success: true,
         movie: winningEntry.movie,
         userId: winningEntry.userId,
+        cast: winningEntry.credits?.cast ?? null,
+        crew: winningEntry.credits?.crew ?? null,
       }
     } catch (error) {
       console.error('Error starting raffle:', error)
@@ -113,7 +118,12 @@ export const useStartRaffleMutation = () => {
         throw new Error('Failed to start raffle')
       }
 
-      return { movie: response.movie, userId: response.userId }
+      return {
+        movie: response.movie,
+        userId: response.userId,
+        cast: response.cast,
+        crew: response.crew,
+      }
     },
     onError: (error) => {
       console.error('Error starting raffle:', error)

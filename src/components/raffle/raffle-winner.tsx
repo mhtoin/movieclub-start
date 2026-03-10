@@ -27,6 +27,7 @@ interface WinnerUser {
 
 interface Props {
   movie: Movie
+  credits: { cast: any[] | null; crew: any[] | null } | null
   winnerUser: WinnerUser | null
   watchDate: Date | undefined
   dryRun: boolean
@@ -223,17 +224,19 @@ const VictoryPage = memo(function VictoryPage({
 const DetailsPage = memo(function DetailsPage({
   movie,
   posterUrl,
+  credits,
 }: {
   movie: Movie
   posterUrl: string | null
+  credits: { cast: any[] | null; crew: any[] | null } | null
 }) {
   const year = useMemo(
     () =>
       movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : null,
     [movie.releaseDate],
   )
-  const director = useMemo(() => getDirector(movie.crew), [movie.crew])
-  const topCast = useMemo(() => getTopCast(movie.cast), [movie.cast])
+  const director = useMemo(() => getDirector(credits?.crew ?? null), [credits])
+  const topCast = useMemo(() => getTopCast(credits?.cast ?? null), [credits])
   const providers = useMemo(
     () => getProviders(movie.watchProviders),
     [movie.watchProviders],
@@ -414,6 +417,7 @@ const SLIDE_VARIANTS = {
 
 export function RaffleWinner({
   movie,
+  credits,
   winnerUser,
   watchDate,
   dryRun,
@@ -528,7 +532,11 @@ export function RaffleWinner({
                 posterUrl={posterUrl}
               />
             ) : (
-              <DetailsPage movie={movie} posterUrl={posterUrl} />
+              <DetailsPage
+                movie={movie}
+                posterUrl={posterUrl}
+                credits={credits}
+              />
             )}
           </motion.div>
         </AnimatePresence>

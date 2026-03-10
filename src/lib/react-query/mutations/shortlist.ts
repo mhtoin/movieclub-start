@@ -1,5 +1,5 @@
 import { db } from '@/db/db'
-import { movie, movieToShortlist, shortlist } from '@/db/schema'
+import { movie, movieCredits, movieToShortlist, shortlist } from '@/db/schema'
 import { user } from '@/db/schema/users'
 import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
@@ -117,12 +117,13 @@ export const addToShortlist = createServerFn({ method: 'POST' })
       }
 
       const movieData = await createDbMovie(movieDetailsResponse)
+      const { credits, ...movieInsertFields } = movieData
 
       const newMovie = await db
         .insert(movie)
         .values({
           id: crypto.randomUUID(),
-          ...movieData,
+          ...movieInsertFields,
         })
         .returning()
 
@@ -130,6 +131,14 @@ export const addToShortlist = createServerFn({ method: 'POST' })
         throw new Error('Failed to insert movie into the database')
       }
       movieEntry = newMovie[0]
+
+      // Store cast/crew in the separate movie_credits table
+      if (credits.cast != null || credits.crew != null) {
+        await db
+          .insert(movieCredits)
+          .values({ id: movieEntry.id, cast: credits.cast, crew: credits.crew })
+          .onConflictDoNothing()
+      }
 
       // Generate blur data asynchronously in the background
       if (movieData.images) {

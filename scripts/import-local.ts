@@ -29,6 +29,8 @@ const MOVIE_COLUMNS_TO_DROP = [
   'shortlistIDs',
   'raffleIDs',
   'tierIds',
+  'cast',
+  'crew',
 ]
 
 // Columns to drop from Shortlist table
@@ -281,6 +283,62 @@ async function importTable(
   return insertedCount
 }
 
+async function importMovieCredits(sql: postgres.Sql): Promise<number> {
+  console.log('  Importing movie credits (cast/crew) → "movie_credits"...')
+
+  const rows = readCsvFile('Movie')
+  if (!rows || rows.length === 0) {
+    console.log('    → No Movie data to read (skipping)')
+    return 0
+  }
+
+  const creditsRows = rows
+    .filter((row) => row.cast != null || row.crew != null)
+    .map((row) => ({
+      id: row.id as string,
+      cast: row.cast ?? null,
+      crew: row.crew ?? null,
+    }))
+
+  if (creditsRows.length === 0) {
+    console.log('    → No rows with cast/crew data (skipping)')
+    return 0
+  }
+
+  let insertedCount = 0
+  const failedRows: { id: string; error: string }[] = []
+
+  for (const row of creditsRows) {
+    const cast =
+      typeof row.cast === 'object' && row.cast !== null
+        ? JSON.stringify(row.cast)
+        : row.cast
+    const crew =
+      typeof row.crew === 'object' && row.crew !== null
+        ? JSON.stringify(row.crew)
+        : row.crew
+    try {
+      await sql.unsafe(
+        `INSERT INTO "movie_credits" ("id", "cast", "crew") VALUES ($1, $2, $3) ON CONFLICT ("id") DO NOTHING`,
+        [row.id, cast, crew] as postgres.ParameterOrJSON<never>[],
+      )
+      insertedCount++
+    } catch (error) {
+      failedRows.push({ id: row.id, error: (error as Error).message })
+    }
+  }
+
+  console.log(`    → ${insertedCount}/${creditsRows.length} rows imported`)
+  if (failedRows.length > 0) {
+    console.log(`    ⚠️ ${failedRows.length} rows failed:`)
+    for (const { id, error } of failedRows) {
+      console.log(`      - ${id}: ${error}`)
+    }
+  }
+
+  return insertedCount
+}
+
 async function main() {
   console.log('🚀 Starting local database import...\n')
   console.log(`Source directory: ${EXPORT_DIR}`)
@@ -327,6 +385,10 @@ async function main() {
       const count = await importTable(sql, table)
       totalRows += count
     }
+
+    // Import movie_credits (cast/crew split from movie table)
+    const creditsCount = await importMovieCredits(sql)
+    totalRows += creditsCount
 
     console.log(`\n✅ Import complete! Total rows: ${totalRows}`)
   } finally {

@@ -1,6 +1,6 @@
 import { db } from '@/db/db'
 import type { ShortlistWithUserMovies } from '@/db/schema'
-import { movieToShortlist, shortlist } from '@/db/schema'
+import { movieCredits, movieToShortlist, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { requireAuthenticatedUser } from '@/lib/auth/auth'
@@ -20,6 +20,7 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
         .where(eq(shortlist.userId, userId))
         .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
         .leftJoin(movie, eq(movieToShortlist.a, movie.id))
+        .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
 
       if (rows.length === 0) {
         return null
@@ -27,7 +28,17 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
 
       return {
         ...rows[0].shortlist,
-        movies: rows.flatMap((row) => (row.movie ? [row.movie] : [])),
+        movies: rows.flatMap((row) =>
+          row.movie
+            ? [
+                {
+                  ...row.movie,
+                  cast: row.movie_credits?.cast ?? null,
+                  crew: row.movie_credits?.crew ?? null,
+                },
+              ]
+            : [],
+        ),
       }
     } catch (error) {
       console.error('Error fetching shortlist:', error)
@@ -46,6 +57,7 @@ export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
         .innerJoin(user, eq(shortlist.userId, user.id))
         .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
         .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+        .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
 
       const shortlistsMap = new Map<string, ShortlistWithUserMovies>()
 
@@ -59,7 +71,11 @@ export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
           })
         }
         if (row.movie) {
-          shortlistsMap.get(shortlistId)!.movies.push(row.movie)
+          shortlistsMap.get(shortlistId)!.movies.push({
+            ...row.movie,
+            cast: row.movie_credits?.cast ?? null,
+            crew: row.movie_credits?.crew ?? null,
+          })
         }
       }
 

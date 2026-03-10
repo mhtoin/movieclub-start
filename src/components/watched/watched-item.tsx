@@ -1,6 +1,7 @@
-import type { Movie } from '@/db/schema/movies'
+import type { MovieWithCredits } from '@/db/schema/movies'
 import { User } from '@/db/schema/users'
 import { useElementInView } from '@/lib/hooks'
+import { getImageUrl } from '@/lib/tmdb-api'
 import { getRouteApi } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { Calendar, Clock, Users, X } from 'lucide-react'
@@ -14,7 +15,7 @@ export function WatchedItem({
   user,
   compact = false,
 }: {
-  movie: Movie
+  movie: MovieWithCredits
   user: User
   compact?: boolean
 }) {
@@ -43,6 +44,10 @@ export function WatchedItem({
     : null
 
   const watchDate = movie?.watchDate ? new Date(movie.watchDate) : null
+
+  const cast = Array.isArray(movie?.cast)
+    ? (movie.cast as any[]).slice(0, 6)
+    : []
 
   const opacity = Math.max(0.3, intersectionRatio)
   const translateY = isInView ? 0 : 20
@@ -182,35 +187,43 @@ export function WatchedItem({
               </div>
             )}
 
-            {movie?.cast && movie?.cast.length > 0 && (
-              <div className="pb-4">
-                <h3 className="text-base md:text-lg font-semibold mb-3">
-                  Cast
+            {cast.length > 0 && (
+              <div>
+                <h3 className="text-base md:text-lg font-semibold mb-3 flex items-center gap-1.5">
+                  <Users className="w-4 h-4" /> Cast
                 </h3>
-                <div className="grid grid-cols-1 gap-3">
-                  {movie?.cast?.slice(0, 6).map((actor: any) => (
-                    <div key={actor.id} className="flex gap-3">
-                      {actor.profile_path ? (
-                        <img
-                          src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
-                          alt={actor.name}
-                          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <Users className="h-6 w-6 text-muted-foreground" />
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                  {cast.map((member: any) => {
+                    const profileUrl = member.profile_path
+                      ? getImageUrl(member.profile_path, 'w185')
+                      : null
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex flex-col items-center gap-1 text-center"
+                      >
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-muted border border-border/40">
+                          {profileUrl ? (
+                            <img
+                              src={profileUrl}
+                              alt={member.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-lg">
+                              {member.name?.[0] ?? '?'}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-medium truncate text-sm">
-                          {actor.name}
+                        <p className="text-[10px] font-medium leading-tight text-foreground line-clamp-1">
+                          {member.name}
                         </p>
-                        <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                          {actor.character}
+                        <p className="text-[9px] text-muted-foreground leading-tight line-clamp-1">
+                          {member.character}
                         </p>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -393,31 +406,43 @@ export function WatchedItem({
               </div>
             )}
 
-            {movie?.cast && movie?.cast.length > 0 && (
+            {cast.length > 0 && (
               <div>
-                <h3 className="text-xl font-semibold mb-3">Cast</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {movie?.cast?.slice(0, 6).map((actor: any) => (
-                    <div key={actor.id} className="flex gap-3">
-                      {actor.profile_path ? (
-                        <img
-                          src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
-                          alt={actor.name}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                          <Users className="h-6 w-6 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mb-3 flex items-center gap-1.5">
+                  <Users className="w-5 h-5" /> Cast
+                </h3>
+                <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-8 gap-3">
+                  {cast.map((member: any) => {
+                    const profileUrl = member.profile_path
+                      ? getImageUrl(member.profile_path, 'w185')
+                      : null
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex flex-col items-center gap-1 text-center"
+                      >
+                        <div className="w-14 h-14 rounded-full overflow-hidden bg-muted border border-border/40">
+                          {profileUrl ? (
+                            <img
+                              src={profileUrl}
+                              alt={member.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-lg">
+                              {member.name?.[0] ?? '?'}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-medium truncate">{actor.name}</p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {actor.character}
+                        <p className="text-[10px] font-medium leading-tight text-foreground line-clamp-1">
+                          {member.name}
+                        </p>
+                        <p className="text-[9px] text-muted-foreground leading-tight line-clamp-1">
+                          {member.character}
                         </p>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}

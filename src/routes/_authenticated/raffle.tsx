@@ -34,13 +34,20 @@ function RafflePage() {
   const [dryRun, setDryRun] = useState(false)
   const [winningMovie, setWinningMovie] = useState<Movie | null>(null)
   const [winningUserId, setWinningUserId] = useState<string | null>(null)
+  const [winningCredits, setWinningCredits] = useState<{
+    cast: any[] | null
+    crew: any[] | null
+  } | null>(null)
 
   const startMutation = useStartRaffleMutation()
   const finalizeMutation = useFinalizeRaffleMutation()
 
-  const pendingDraw = useRef<Promise<{ movie: Movie; userId: string }> | null>(
-    null,
-  )
+  const pendingDraw = useRef<Promise<{
+    movie: Movie
+    userId: string
+    cast: any[] | null
+    crew: any[] | null
+  }> | null>(null)
 
   const { data: shortlists = [] } = useQuery(shortlistQueries.all())
   const participatingMovies = useMemo(
@@ -65,6 +72,10 @@ function RafflePage() {
       const result = await (pendingDraw.current ?? startMutation.mutateAsync())
       setWinningMovie(result.movie)
       setWinningUserId(result.userId)
+      setWinningCredits({
+        cast: result.cast ?? null,
+        crew: result.crew ?? null,
+      })
       setPhase('spinning')
     } catch {
       setPhase('setup')
@@ -90,12 +101,14 @@ function RafflePage() {
     setPhase('setup')
     setWinningMovie(null)
     setWinningUserId(null)
+    setWinningCredits(null)
   }
 
   const handleRerun = () => {
     setPhase('setup')
     setWinningMovie(null)
     setWinningUserId(null)
+    setWinningCredits(null)
   }
 
   return (
@@ -145,6 +158,7 @@ function RafflePage() {
         {phase === 'winner' && winningMovie && (
           <RaffleWinner
             movie={winningMovie}
+            credits={winningCredits}
             winnerUser={winnerUser}
             watchDate={watchDate}
             dryRun={dryRun}

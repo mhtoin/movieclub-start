@@ -115,8 +115,10 @@ export const createDbMovie = async (movieData: TMDBMovieResponse) => {
       logos,
     },
     videos: trailers,
-    cast: cast,
-    crew: crew,
+    credits: {
+      cast: cast ?? null,
+      crew: crew ?? null,
+    },
   }
 }
 

@@ -1,5 +1,5 @@
 import { db } from '@/db/db'
-import { movie } from '@/db/schema/movies'
+import { movie, movieCredits } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { requireAuthenticatedUser, requireCurrentUser } from '@/lib/auth/auth'
 import { queryOptions } from '@tanstack/react-query'
@@ -242,14 +242,15 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
           genres: movie.genres,
           voteAverage: movie.voteAverage,
           releaseDate: movie.releaseDate,
-          cast: movie.cast,
-          crew: movie.crew,
+          cast: movieCredits.cast,
+          crew: movieCredits.crew,
           originalLanguage: movie.originalLanguage,
           title: movie.title,
           runtime: movie.runtime,
           userId: movie.userId,
         })
         .from(movie)
+        .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
         .where(whereConditions)
 
       // Genre distribution
