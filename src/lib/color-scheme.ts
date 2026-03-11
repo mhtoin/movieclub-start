@@ -97,33 +97,16 @@ export const getSchemeServerFn = createServerFn().handler(async () => {
 })
 
 export const getThemeAndSchemeServerFn = createServerFn().handler(async () => {
+  // Cookie-only: no DB call needed. The cookie is kept in sync with the DB
+  // by setSchemeServerFn whenever the user changes their scheme.
   const theme = (getCookie('theme') || 'light') as 'light' | 'dark'
-  const cookieScheme = (getCookie('color-scheme') || 'default') as ColorScheme
-
+  const cookieScheme = getCookie('color-scheme') || 'default'
   let colorScheme: ColorScheme = 'default'
   try {
-    const session = await useAppSession()
-    if (session?.data?.sessionToken) {
-      const user = await getSessionUser(session.data.sessionToken)
-      if (
-        user &&
-        user.colorScheme &&
-        schemeValidator.safeParse(user.colorScheme).success
-      ) {
-        if (user.colorScheme !== cookieScheme) {
-          setCookie('color-scheme', user.colorScheme)
-        }
-        colorScheme = user.colorScheme as ColorScheme
-      } else {
-        colorScheme = schemeValidator.parse(cookieScheme)
-      }
-    } else {
-      colorScheme = schemeValidator.parse(cookieScheme)
-    }
+    colorScheme = schemeValidator.parse(cookieScheme)
   } catch {
     colorScheme = 'default'
   }
-
   return { theme, colorScheme }
 })
 

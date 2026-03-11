@@ -152,6 +152,18 @@ function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
   return c === 0
 }
 
+// Short-lived cache for getSessionUser to deduplicate auth during SSR.
+// During a single page render TanStack Start calls multiple server functions
+// (beforeLoad, prefetchQuery×N) which each need to authenticate. Without this
+// cache, each call independently hits the DB for session + user lookups.
+// A 5-second TTL ensures the cache only helps within a single request cycle
+// while staying safe for concurrent requests with different sessions.
+const sessionUserCache = new Map<
+  string,
+  { user: UserSession | null; expiry: number }
+>()
+const SESSION_CACHE_TTL_MS = 5_000
+
 export async function getSessionUser(
   sessionToken?: string,
 ): Promise<UserSession | null> {
@@ -159,25 +171,54 @@ export async function getSessionUser(
     return null
   }
 
+  // Check cache first
+  const cached = sessionUserCache.get(sessionToken)
+  if (cached && cached.expiry > Date.now()) {
+    return cached.user
+  }
+
   const session = await validateSessionToken(sessionToken)
 
   if (!session) {
+    sessionUserCache.set(sessionToken, {
+      user: null,
+      expiry: Date.now() + SESSION_CACHE_TTL_MS,
+    })
     return null
   }
 
   const user = await getUserById(session.userId)
 
   if (!user) {
+    sessionUserCache.set(sessionToken, {
+      user: null,
+      expiry: Date.now() + SESSION_CACHE_TTL_MS,
+    })
     return null
   }
 
-  return {
+  const userSession: UserSession = {
     userId: user.id,
     email: user.email,
     name: user.name,
     image: user.image,
     colorScheme: user.colorScheme as UserSession['colorScheme'],
   }
+
+  sessionUserCache.set(sessionToken, {
+    user: userSession,
+    expiry: Date.now() + SESSION_CACHE_TTL_MS,
+  })
+
+  // Prune stale entries periodically (keep map from growing unbounded)
+  if (sessionUserCache.size > 100) {
+    const now = Date.now()
+    for (const [key, entry] of sessionUserCache) {
+      if (entry.expiry <= now) sessionUserCache.delete(key)
+    }
+  }
+
+  return userSession
 }
 
 export async function requireAuthenticatedUser(): Promise<UserSession> {
