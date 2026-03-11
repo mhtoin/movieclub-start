@@ -3,15 +3,16 @@ import type { ShortlistWithUserMovies } from '@/db/schema'
 import { movieCredits, movieToShortlist, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
-import { requireAuthenticatedUser } from '@/lib/auth/auth'
+import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 
 export const getUserShortlist = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
   .inputValidator((userId: string) => userId)
-  .handler(async ({ data: userId }) => {
-    await requireAuthenticatedUser()
+  .handler(async ({ context, data: userId }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const rows = await db
@@ -46,9 +47,10 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
     }
   })
 
-export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<ShortlistWithUserMovies[]> => {
-    await requireAuthenticatedUser()
+export const getAllShortlists = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<ShortlistWithUserMovies[]> => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const allShortlists = await db
@@ -84,8 +86,7 @@ export const getAllShortlists = createServerFn({ method: 'GET' }).handler(
       console.error('Error fetching all shortlists:', error)
       return []
     }
-  },
-)
+  })
 
 export const shortlistQueries = {
   byUser: (userId: string) =>

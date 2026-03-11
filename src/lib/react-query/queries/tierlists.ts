@@ -1,6 +1,6 @@
 import { db } from '@/db/db'
 import { movie, moviesOnTiers, tier, tierlist, user } from '@/db/schema'
-import { requireAuthenticatedUser } from '@/lib/auth/auth'
+import { authMiddleware } from '@/middleware/auth'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq as dbEq, inArray, InferSelectModel, sql } from 'drizzle-orm'
@@ -102,9 +102,11 @@ async function assertOwnedMovieOnTierIds(
 }
 
 export const updateTierMoviePosition = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(updateTierMoviePositionSchema)
-  .handler(async ({ data }) => {
-    const currentUser = await requireAuthenticatedUser()
+  .handler(async ({ context, data }) => {
+    if (!context.user) throw new Error('Unauthorized')
+    const currentUser = context.user
     const { movieOnTierId, newPosition, tierId } = data
     const id = movieOnTierId as (typeof moviesOnTiers.$inferSelect)['id']
 
@@ -134,11 +136,13 @@ export const updateTierMoviePosition = createServerFn({ method: 'POST' })
   })
 
 export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(batchUpdateTierMoviePositionsSchema)
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     if (data.length === 0) return { txid: 0 }
 
-    const currentUser = await requireAuthenticatedUser()
+    if (!context.user) throw new Error('Unauthorized')
+    const currentUser = context.user
 
     await assertOwnedMovieOnTierIds(
       currentUser.userId,
@@ -169,11 +173,13 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
   })
 
 export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(batchInsertMoviesOnTiersSchema)
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     if (data.length === 0) return { txid: 0 }
 
-    const currentUser = await requireAuthenticatedUser()
+    if (!context.user) throw new Error('Unauthorized')
+    const currentUser = context.user
 
     await assertOwnedTierIds(
       currentUser.userId,
@@ -200,9 +206,10 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
   })
 
 export const getSingleTierlist = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
   .inputValidator((id: string) => id)
-  .handler(async ({ data: tierlistId }) => {
-    await requireAuthenticatedUser()
+  .handler(async ({ context, data: tierlistId }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const result = await (db as any).query.tierlist.findFirst({
@@ -225,9 +232,10 @@ export const getSingleTierlist = createServerFn({ method: 'GET' })
     }
   })
 
-export const getTierlists = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    await requireAuthenticatedUser()
+export const getTierlists = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const users = await (db as any).query.user.findMany({
@@ -248,13 +256,13 @@ export const getTierlists = createServerFn({ method: 'GET' }).handler(
       console.error('Error fetching tierlists:', error)
       throw error
     }
-  },
-)
+  })
 
 export const getUserTierlists = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
   .inputValidator((userId: string) => userId)
-  .handler(async ({ data: userId }) => {
-    await requireAuthenticatedUser()
+  .handler(async ({ context, data: userId }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const userTierlists = await (db as any).query.tierlist.findMany({

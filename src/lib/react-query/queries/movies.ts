@@ -6,8 +6,8 @@ import {
   type MovieWithUser,
 } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
-import { requireAuthenticatedUser } from '@/lib/auth/auth'
 import { groupBy } from '@/lib/utils'
+import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { format } from 'date-fns'
@@ -23,9 +23,10 @@ import {
 } from 'drizzle-orm'
 import { z } from 'zod'
 
-export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<MovieWithUser | null> => {
-    await requireAuthenticatedUser()
+export const getLatestMovies = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<MovieWithUser | null> => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const rows = await db
@@ -55,32 +56,31 @@ export const getLatestMovies = createServerFn({ method: 'GET' }).handler(
       console.error('Error fetching latest movie:', error)
       return null
     }
-  },
-)
+  })
 
-export const getDistinctWatchedMonths = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  await requireAuthenticatedUser()
+export const getDistinctWatchedMonths = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
-  const rows = await db
-    .selectDistinct({
-      month: sql<string>`to_char(${movie.watchDate}, 'YYYY-MM')`,
-    })
-    .from(movie)
-    .where(isNotNull(movie.watchDate))
-    .orderBy(sql`to_char(${movie.watchDate}, 'YYYY-MM') desc`)
+    const rows = await db
+      .selectDistinct({
+        month: sql<string>`to_char(${movie.watchDate}, 'YYYY-MM')`,
+      })
+      .from(movie)
+      .where(isNotNull(movie.watchDate))
+      .orderBy(sql`to_char(${movie.watchDate}, 'YYYY-MM') desc`)
 
-  return rows
-    .filter((row) => row.month)
-    .map((row) => ({
-      value: row.month,
-      label: new Date(row.month + '-01').toLocaleString('default', {
-        month: 'long',
-        year: 'numeric',
-      }),
-    }))
-})
+    return rows
+      .filter((row) => row.month)
+      .map((row) => ({
+        value: row.month,
+        label: new Date(row.month + '-01').toLocaleString('default', {
+          month: 'long',
+          year: 'numeric',
+        }),
+      }))
+  })
 
 const watchedByMonthSchema = z.object({
   search: z.string().optional(),
@@ -89,9 +89,10 @@ const watchedByMonthSchema = z.object({
 })
 
 export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
   .inputValidator((data: z.infer<typeof watchedByMonthSchema>) => data)
-  .handler(async ({ data }) => {
-    await requireAuthenticatedUser()
+  .handler(async ({ context, data }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     const { search, username } = data
 
@@ -137,17 +138,17 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
     )
   })
 
-export const getAllWatchedMovies = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    await requireAuthenticatedUser()
+export const getAllWatchedMovies = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     return db
       .select()
       .from(movie)
       .where(isNotNull(movie.watchDate))
       .orderBy(desc(movie.watchDate))
-  },
-)
+  })
 
 export const movieQueries = {
   all: () => ['movies'],

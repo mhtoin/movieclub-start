@@ -1,7 +1,7 @@
 import { db } from '@/db/db'
 import { movie, movieCredits } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
-import { requireAuthenticatedUser, requireCurrentUser } from '@/lib/auth/auth'
+import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, count, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm'
@@ -98,9 +98,11 @@ export interface NextMovieToWatch {
 }
 
 export const getDashboardStats = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
   .inputValidator((data: { userId: string }) => data)
-  .handler(async ({ data }): Promise<DashboardStats> => {
-    await requireCurrentUser(data.userId)
+  .handler(async ({ context, data }): Promise<DashboardStats> => {
+    if (!context.user || context.user.userId !== data.userId)
+      throw new Error('Forbidden')
 
     try {
       const [
@@ -223,12 +225,14 @@ export const getDashboardStats = createServerFn({ method: 'GET' })
   })
 
 export const getDashboardInsights = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
   .inputValidator((data: { userId?: string }) => data)
-  .handler(async ({ data }): Promise<DashboardInsights> => {
+  .handler(async ({ context, data }): Promise<DashboardInsights> => {
     if (data.userId) {
-      await requireCurrentUser(data.userId)
+      if (!context.user || context.user.userId !== data.userId)
+        throw new Error('Forbidden')
     } else {
-      await requireAuthenticatedUser()
+      if (!context.user) throw new Error('Unauthorized')
     }
 
     try {
@@ -451,9 +455,10 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
     }
   })
 
-export const getNextMovieToWatch = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<NextMovieToWatch | null> => {
-    await requireAuthenticatedUser()
+export const getNextMovieToWatch = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<NextMovieToWatch | null> => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const rows = await db
@@ -479,8 +484,7 @@ export const getNextMovieToWatch = createServerFn({ method: 'GET' }).handler(
       console.error('Error fetching next movie to watch:', error)
       return null
     }
-  },
-)
+  })
 
 export const dashboardQueries = {
   all: () => ['dashboard'],

@@ -13,9 +13,8 @@ import { Suspense } from 'react'
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
     const userId = context.user?.userId
-    // Hero content — await so it's ready before navigation completes
-    await context.queryClient.ensureQueryData(movieQueries.latest())
     // Secondary sections — fire-and-forget, stream in while hero is visible
+    context.queryClient.prefetchQuery(movieQueries.latest())
     context.queryClient.prefetchQuery(homeQueries.trending())
     context.queryClient.prefetchQuery(tmdbQueries.genres())
     if (userId) {

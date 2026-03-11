@@ -1,6 +1,6 @@
 import { db } from '@/db/db'
 import { tier, tierlist } from '@/db/schema'
-import { getSessionUser, useAppSession } from '@/lib/auth/auth'
+import { authMiddleware } from '@/middleware/auth'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
@@ -19,13 +19,11 @@ const createTierlistSchema = z.object({
 })
 
 export const createTierlist = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(createTierlistSchema)
-  .handler(async ({ data }) => {
-    const session = await useAppSession()
-    const currentUser = await getSessionUser(session.data?.sessionToken)
-    if (!currentUser) {
-      throw new Error('Unauthorized')
-    }
+  .handler(async ({ context, data }) => {
+    if (!context.user) throw new Error('Unauthorized')
+    const currentUser = context.user
 
     const { tiers, ...tierlistData } = data
     const tierlistId = crypto.randomUUID()
@@ -53,13 +51,11 @@ export const createTierlist = createServerFn({ method: 'POST' })
   })
 
 export const deleteTierlist = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(z.object({ id: z.string() }))
-  .handler(async ({ data }) => {
-    const session = await useAppSession()
-    const currentUser = await getSessionUser(session.data?.sessionToken)
-    if (!currentUser) {
-      throw new Error('Unauthorized')
-    }
+  .handler(async ({ context, data }) => {
+    if (!context.user) throw new Error('Unauthorized')
+    const currentUser = context.user
 
     const existing = await db
       .select({ userId: tierlist.userId })
@@ -76,6 +72,7 @@ export const deleteTierlist = createServerFn({ method: 'POST' })
   })
 
 export const updateTierlist = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(
     z.object({
       id: z.string(),
@@ -85,12 +82,9 @@ export const updateTierlist = createServerFn({ method: 'POST' })
       genres: z.array(z.string()).optional(),
     }),
   )
-  .handler(async ({ data }) => {
-    const session = await useAppSession()
-    const currentUser = await getSessionUser(session.data?.sessionToken)
-    if (!currentUser) {
-      throw new Error('Unauthorized')
-    }
+  .handler(async ({ context, data }) => {
+    if (!context.user) throw new Error('Unauthorized')
+    const currentUser = context.user
 
     const existing = await db
       .select({ userId: tierlist.userId })

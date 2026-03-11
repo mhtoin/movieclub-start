@@ -1,10 +1,10 @@
 import { db } from '@/db/db'
 import { user as userTable } from '@/db/schema/users'
+import { authMiddleware } from '@/middleware/auth'
 import { createServerFn } from '@tanstack/react-start'
 import { getCookie, setCookie } from '@tanstack/react-start/server'
 import { eq } from 'drizzle-orm/sql/expressions/conditions'
 import * as z from 'zod'
-import { getSessionUser, useAppSession } from './auth/auth'
 
 const schemeValidator = z.enum([
   'default',
@@ -72,16 +72,15 @@ export const COLOR_SCHEMES = {
   { label: string; colors: { light: string; dark: string } }
 >
 
-export const getSchemeServerFn = createServerFn().handler(async () => {
-  const cookieScheme = (getCookie('color-scheme') || 'default') as ColorScheme
+export const getSchemeServerFn = createServerFn()
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    const cookieScheme = (getCookie('color-scheme') || 'default') as ColorScheme
 
-  try {
-    const session = await useAppSession()
-    if (session?.data?.sessionToken) {
-      const user = await getSessionUser(session.data.sessionToken)
+    try {
+      const user = context.user
       if (
-        user &&
-        user.colorScheme &&
+        user?.colorScheme &&
         schemeValidator.safeParse(user.colorScheme).success
       ) {
         if (user.colorScheme !== cookieScheme) {
@@ -89,12 +88,11 @@ export const getSchemeServerFn = createServerFn().handler(async () => {
         }
         return user.colorScheme as ColorScheme
       }
+      return schemeValidator.parse(cookieScheme)
+    } catch {
+      return 'default'
     }
-    return schemeValidator.parse(cookieScheme)
-  } catch {
-    return 'default'
-  }
-})
+  })
 
 export const getThemeAndSchemeServerFn = createServerFn().handler(async () => {
   // Cookie-only: no DB call needed. The cookie is kept in sync with the DB
@@ -111,20 +109,18 @@ export const getThemeAndSchemeServerFn = createServerFn().handler(async () => {
 })
 
 export const setSchemeServerFn = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(schemeValidator)
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     setCookie('color-scheme', data)
 
     try {
-      const session = await useAppSession()
-      if (session?.data?.sessionToken) {
-        const user = await getSessionUser(session.data.sessionToken)
-        if (user) {
-          await db
-            .update(userTable)
-            .set({ colorScheme: data })
-            .where(eq(userTable.id, user.userId))
-        }
+      const user = context.user
+      if (user) {
+        await db
+          .update(userTable)
+          .set({ colorScheme: data })
+          .where(eq(userTable.id, user.userId))
       }
     } catch {
       // Ignore errors

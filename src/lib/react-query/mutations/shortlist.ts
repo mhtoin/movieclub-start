@@ -1,21 +1,20 @@
 import { db } from '@/db/db'
 import { movie, movieCredits, movieToShortlist, shortlist } from '@/db/schema'
 import { user } from '@/db/schema/users'
-import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
 import { fetchMovieDetails } from '@/lib/tmdb-api'
+import { authMiddleware } from '@/middleware/auth'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq } from 'drizzle-orm'
 
 export const removeFromShortlist = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator((data: { movieId: string }) => data)
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const { movieId } = data
-    const session = await useAppSession()
-    const sessionToken = session.data?.sessionToken
-    const user = await getSessionUser(sessionToken)
+    const user = context.user
 
     if (!user) {
       throw new Error('Unauthorized')
@@ -61,12 +60,11 @@ export const removeFromShortlist = createServerFn({ method: 'POST' })
   })
 
 export const addToShortlist = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator((data: { movieId: number }) => data)
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const { movieId } = data
-    const session = await useAppSession()
-    const sessionToken = session.data?.sessionToken
-    const user = await getSessionUser(sessionToken)
+    const user = context.user
 
     if (!user) {
       throw new Error('Unauthorized')
@@ -240,12 +238,11 @@ export const useAddToShortlistMutation = () => {
 }
 
 export const toggleIsReady = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator((data: { isReady: boolean }) => data)
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const { isReady } = data
-    const session = await useAppSession()
-    const sessionToken = session.data?.sessionToken
-    const user = await getSessionUser(sessionToken)
+    const user = context.user
 
     if (!user) {
       throw new Error('Unauthorized')
@@ -288,12 +285,11 @@ export const toggleIsReady = createServerFn({ method: 'POST' })
   })
 
 export const toggleParticipating = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator((data: { participating: boolean }) => data)
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const { participating } = data
-    const session = await useAppSession()
-    const sessionToken = session.data?.sessionToken
-    const user = await getSessionUser(sessionToken)
+    const user = context.user
 
     if (!user) {
       throw new Error('Unauthorized')
@@ -402,15 +398,14 @@ export const useToggleParticipatingMutation = () => {
 }
 
 export const updateUserShortlistStatus = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(
     (data: { userId: string; isReady?: boolean; participating?: boolean }) =>
       data,
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const { userId, isReady, participating } = data
-    const session = await useAppSession()
-    const sessionToken = session.data?.sessionToken
-    const sessionUser = await getSessionUser(sessionToken)
+    const sessionUser = context.user
 
     if (!sessionUser) {
       throw new Error('Unauthorized')
@@ -495,12 +490,11 @@ export const useUpdateUserShortlistStatusMutation = () => {
 }
 
 export const updateSelectedIndex = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator((data: { selectedIndex: number | null }) => data)
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const { selectedIndex } = data
-    const session = await useAppSession()
-    const sessionToken = session.data?.sessionToken
-    const user = await getSessionUser(sessionToken)
+    const user = context.user
 
     if (!user) {
       throw new Error('Unauthorized')

@@ -1,34 +1,16 @@
 import { ErrorComponent } from '@/components/error-component'
 import LoginDialog from '@/components/login/login-dialog'
-import { getSessionUser, useAppSession } from '@/lib/auth/auth'
+import { authMiddleware } from '@/middleware/auth'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { Clapperboard, Film, Sparkles, Users } from 'lucide-react'
 
 // Server function to get the current user
-const getCurrentUserServerFn = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    try {
-      const session = await useAppSession()
-      const sessionToken = session.data?.sessionToken
-      return await getSessionUser(sessionToken)
-    } catch (error) {
-      // If there's a database connection error, throw it to be caught by errorComponent
-      if (
-        error instanceof Error &&
-        (error.message.includes('connect') ||
-          error.message.includes('ECONNREFUSED') ||
-          error.message.includes('database'))
-      ) {
-        throw new Error(
-          'Failed to connect to the database. Please ensure the database is running.',
-          { cause: error },
-        )
-      }
-      throw error
-    }
-  },
-)
+const getCurrentUserServerFn = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    return context.user
+  })
 
 export const Route = createFileRoute('/')({
   errorComponent: ErrorComponent,

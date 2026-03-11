@@ -2,51 +2,51 @@ import { db } from '@/db/db'
 import { movieToShortlist, raffle, raffleToUser, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
-import { requireAuthenticatedUser } from '@/lib/auth/auth'
+import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq } from 'drizzle-orm'
 
-export const getParticipatingShortlists = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  await requireAuthenticatedUser()
+export const getParticipatingShortlists = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
-  try {
-    // Get all shortlists that are ready and participating
-    const participatingShortlists = await db
-      .select()
-      .from(shortlist)
-      .where(
-        and(eq(shortlist.isReady, true), eq(shortlist.participating, true)),
-      )
-      .innerJoin(user, eq(shortlist.userId, user.id))
-      .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+    try {
+      // Get all shortlists that are ready and participating
+      const participatingShortlists = await db
+        .select()
+        .from(shortlist)
+        .where(
+          and(eq(shortlist.isReady, true), eq(shortlist.participating, true)),
+        )
+        .innerJoin(user, eq(shortlist.userId, user.id))
+        .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+        .innerJoin(movie, eq(movieToShortlist.a, movie.id))
 
-    // Transform into a useful structure
-    const shortlistsMap = new Map()
+      // Transform into a useful structure
+      const shortlistsMap = new Map()
 
-    for (const row of participatingShortlists) {
-      const shortlistId = row.shortlist.id
-      if (!shortlistsMap.has(shortlistId)) {
-        shortlistsMap.set(shortlistId, {
-          ...row.shortlist,
-          user: row.user,
-          movies: [],
-        })
+      for (const row of participatingShortlists) {
+        const shortlistId = row.shortlist.id
+        if (!shortlistsMap.has(shortlistId)) {
+          shortlistsMap.set(shortlistId, {
+            ...row.shortlist,
+            user: row.user,
+            movies: [],
+          })
+        }
+        if (row.movie) {
+          shortlistsMap.get(shortlistId).movies.push(row.movie)
+        }
       }
-      if (row.movie) {
-        shortlistsMap.get(shortlistId).movies.push(row.movie)
-      }
+
+      return Array.from(shortlistsMap.values())
+    } catch (error) {
+      console.error('Error fetching participating shortlists:', error)
+      return []
     }
-
-    return Array.from(shortlistsMap.values())
-  } catch (error) {
-    console.error('Error fetching participating shortlists:', error)
-    return []
-  }
-})
+  })
 
 export const raffleQueries = {
   participating: () =>
@@ -67,9 +67,10 @@ export const raffleQueries = {
     }),
 }
 
-export const getRaffleHistory = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    await requireAuthenticatedUser()
+export const getRaffleHistory = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const rows = await db
@@ -96,5 +97,4 @@ export const getRaffleHistory = createServerFn({ method: 'GET' }).handler(
       console.error('Error fetching raffle history:', error)
       return []
     }
-  },
-)
+  })

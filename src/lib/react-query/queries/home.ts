@@ -1,6 +1,6 @@
 import { db } from '@/db/db'
 import { movie, moviesOnTiers, tier, tierlist } from '@/db/schema'
-import { requireAuthenticatedUser, requireCurrentUser } from '@/lib/auth/auth'
+import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { InferSelectModel } from 'drizzle-orm'
@@ -45,11 +45,11 @@ interface TMDBResponse {
 
 /**
  * Fetch trending movies from TMDB filtered by specific watch providers
- * Providers: 8 (Netflix), 323 (Viaplay), 463 (HBO Max), 496 (Mubi)
  */
-export const getTrendingMovies = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<TMDBMovie[]> => {
-    await requireAuthenticatedUser()
+export const getTrendingMovies = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<TMDBMovie[]> => {
+    if (!context.user) throw new Error('Unauthorized')
 
     if (!TMDB_CONFIG.API_KEY) {
       console.error('TMDB API key is not configured')
@@ -87,16 +87,17 @@ export const getTrendingMovies = createServerFn({ method: 'GET' }).handler(
       console.error('Error fetching trending movies:', error)
       return []
     }
-  },
-)
+  })
 
 /**
  * Get movie recommendations based on user's highly ranked tierlist movies
  */
 export const getRecommendations = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
   .inputValidator((userId: string) => userId)
-  .handler(async ({ data: userId }): Promise<TMDBMovie[]> => {
-    await requireCurrentUser(userId)
+  .handler(async ({ context, data: userId }): Promise<TMDBMovie[]> => {
+    if (!context.user || context.user.userId !== userId)
+      throw new Error('Forbidden')
 
     if (!TMDB_CONFIG.API_KEY || !userId) {
       return []

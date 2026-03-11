@@ -7,15 +7,16 @@ import {
   raffleToUser,
   shortlist,
 } from '@/db/schema'
-import { requireAuthenticatedUser } from '@/lib/auth/auth'
+import { authMiddleware } from '@/middleware/auth'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq } from 'drizzle-orm'
 
-export const startRaffle = createServerFn({ method: 'POST' }).handler(
-  async () => {
-    await requireAuthenticatedUser()
+export const startRaffle = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     try {
       const eligibleShortlists = await db
@@ -65,15 +66,15 @@ export const startRaffle = createServerFn({ method: 'POST' }).handler(
       console.error('Error starting raffle:', error)
       throw error
     }
-  },
-)
+  })
 
 export const finalizeRaffle = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .inputValidator(
     (data: { movieId: string; watchDate: string; userId: string }) => data,
   )
-  .handler(async ({ data }) => {
-    await requireAuthenticatedUser()
+  .handler(async ({ context, data }) => {
+    if (!context.user) throw new Error('Unauthorized')
 
     const { movieId, watchDate, userId } = data
 

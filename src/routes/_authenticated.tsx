@@ -5,7 +5,6 @@ import {
 import { ErrorComponent } from '@/components/error-component'
 import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolbar'
 import Sidebar from '@/components/sidebar/sidebar'
-import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 import {
   type BackgroundPreference,
   backgroundValidator,
@@ -14,6 +13,7 @@ import { DeviceCapabilityProvider } from '@/lib/hooks/use-device-capability'
 import { useSSEInvalidation } from '@/lib/hooks/use-sse-invalidation'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
+import { authMiddleware } from '@/middleware/auth'
 import {
   createFileRoute,
   Outlet,
@@ -24,40 +24,21 @@ import {
 import { createServerFn } from '@tanstack/react-start'
 
 // Server function to get the current user + background preference in a single
-const getAuthContextServerFn = createServerFn({ method: 'GET' }).handler(
-  async () => {
+const getAuthContextServerFn = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    // Read background preference from cookie
+    const { getCookie } = await import('@tanstack/react-start/server')
+    const cookieBackground = getCookie('background-style') || 'backdropVeil'
+    let backgroundPreference: BackgroundPreference = 'backdropVeil'
     try {
-      const session = await useAppSession()
-      const sessionToken = session.data?.sessionToken
-      const user = await getSessionUser(sessionToken)
-
-      // Read background preference from cookie
-      const { getCookie } = await import('@tanstack/react-start/server')
-      const cookieBackground = getCookie('background-style') || 'backdropVeil'
-      let backgroundPreference: BackgroundPreference = 'backdropVeil'
-      try {
-        backgroundPreference = backgroundValidator.parse(cookieBackground)
-      } catch {
-        // keep default
-      }
-
-      return { user, backgroundPreference }
-    } catch (error) {
-      // If there's a database connection error, throw it to be caught by errorComponent
-      if (
-        error instanceof Error &&
-        (error.message.includes('connect') ||
-          error.message.includes('ECONNREFUSED'))
-      ) {
-        throw new Error(
-          'Failed to connect to the database. Please ensure the database is running.',
-          { cause: error },
-        )
-      }
-      throw error
+      backgroundPreference = backgroundValidator.parse(cookieBackground)
+    } catch {
+      // keep default
     }
-  },
-)
+
+    return { user: context.user, backgroundPreference }
+  })
 
 export const Route = createFileRoute('/_authenticated')({
   errorComponent: ErrorComponent,
