@@ -21,13 +21,12 @@ import {
   useMatches,
   useRouterState,
 } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
+import { createIsomorphicFn, createServerFn } from '@tanstack/react-start'
 
-// Server function to get the current user + background preference in a single
+// Server function used by the client path to fetch auth context via RPC.
 const getAuthContextServerFn = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
-    // Read background preference from cookie
     const { getCookie } = await import('@tanstack/react-start/server')
     const cookieBackground = getCookie('background-style') || 'backdropVeil'
     let backgroundPreference: BackgroundPreference = 'backdropVeil'
@@ -36,36 +35,45 @@ const getAuthContextServerFn = createServerFn({ method: 'GET' })
     } catch {
       // keep default
     }
-
     return { user: context.user, backgroundPreference }
   })
+
+// On the server (SSR): resolve auth directly in-process — no server function
+// overhead, no serialization, no extra hop through the function pipeline.
+// On the client: delegate to the server function so cookies are read server-side,
+// with the result cached in React Query for 2 minutes.
+const getAuthContext = createIsomorphicFn()
+  .server(async () => {
+    const { useAppSession, getSessionUser } = await import('@/lib/auth/auth')
+    const { getCookie } = await import('@tanstack/react-start/server')
+    const session = await useAppSession()
+    const user = await getSessionUser(session.data?.sessionToken)
+    const cookieBg = getCookie('background-style') || 'backdropVeil'
+    let backgroundPreference: BackgroundPreference = 'backdropVeil'
+    try {
+      backgroundPreference = backgroundValidator.parse(cookieBg)
+    } catch {
+      // keep default
+    }
+    return { user, backgroundPreference }
+  })
+  .client(() => getAuthContextServerFn())
 
 export const Route = createFileRoute('/_authenticated')({
   errorComponent: ErrorComponent,
   beforeLoad: async ({ context }) => {
     if (import.meta.env.SSR) {
-      // During SSR: call auth directly in-process — no server function
-      // overhead, no extra HTTP hop, no serialization cost.
-      const { useAppSession, getSessionUser } = await import('@/lib/auth/auth')
-      const { getCookie } = await import('@tanstack/react-start/server')
-      const session = await useAppSession()
-      const user = await getSessionUser(session.data?.sessionToken)
+      // Server path: getAuthContext.server() is called directly in-process.
+      const { user, backgroundPreference } = await getAuthContext()
       if (!user) throw redirect({ to: '/' })
-      const cookieBg = getCookie('background-style') || 'backdropVeil'
-      let backgroundPreference: BackgroundPreference = 'backdropVeil'
-      try {
-        backgroundPreference = backgroundValidator.parse(cookieBg)
-      } catch {
-        // keep default
-      }
       return { user, backgroundPreference }
     }
-    // On the client: use the React Query cache so subsequent navigations
-    // between authenticated routes skip the network round-trip entirely.
+    // Client path: result is cached in React Query, so navigating between
+    // authenticated routes does not make a network round-trip.
     const { user, backgroundPreference } = await context.queryClient.fetchQuery(
       {
         queryKey: ['authContext'],
-        queryFn: () => getAuthContextServerFn(),
+        queryFn: () => getAuthContext(),
         staleTime: 1000 * 60 * 2,
       },
     )
