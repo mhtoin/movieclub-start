@@ -36,7 +36,8 @@ export default function MoviePoster({
             src={posterUrl}
             alt={movie.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="eager"
+            loading={movieIndex < 4 ? 'eager' : 'lazy'}
+            fetchPriority={movieIndex === 0 ? 'high' : 'auto'}
           />
         ) : (
           <div className="w-full h-full bg-muted flex items-center justify-center">

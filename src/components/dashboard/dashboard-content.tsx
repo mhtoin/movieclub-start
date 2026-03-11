@@ -1,7 +1,4 @@
-import { DeepDiveTabContent } from '@/components/dashboard/deep-dive-tab-content'
-import { GenresTabContent } from '@/components/dashboard/genres-tab-content'
 import { InsightsSkeleton } from '@/components/dashboard/insights-skeleton'
-import { PeopleTabContent } from '@/components/dashboard/people-tab-content'
 import { FilterScope, ScopeToggle } from '@/components/dashboard/scope-toggle'
 import { SpotlightSection } from '@/components/dashboard/spotlight-section'
 import { StatCardsSection } from '@/components/dashboard/stat-cards-section'
@@ -17,7 +14,23 @@ import {
 } from '@/components/ui/tabs'
 import type { LucideIcon } from 'lucide-react'
 import { BarChart3, Film, TrendingUp, Users } from 'lucide-react'
-import { Suspense, useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
+
+const GenresTabContent = lazy(() =>
+  import('@/components/dashboard/genres-tab-content').then((m) => ({
+    default: m.GenresTabContent,
+  })),
+)
+const PeopleTabContent = lazy(() =>
+  import('@/components/dashboard/people-tab-content').then((m) => ({
+    default: m.PeopleTabContent,
+  })),
+)
+const DeepDiveTabContent = lazy(() =>
+  import('@/components/dashboard/deep-dive-tab-content').then((m) => ({
+    default: m.DeepDiveTabContent,
+  })),
+)
 
 const tabs: { value: string; label: string; icon: LucideIcon }[] = [
   { value: 'overview', label: 'Overview', icon: Film },

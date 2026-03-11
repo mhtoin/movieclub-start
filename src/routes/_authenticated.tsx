@@ -3,7 +3,6 @@ import {
   type BackgroundOptionKey,
 } from '@/components/background-options'
 import { ErrorComponent } from '@/components/error-component'
-import { ShortlistToolbar } from '@/components/shortlist-toolbar/shortlist-toolbar'
 import Sidebar from '@/components/sidebar/sidebar'
 import {
   type BackgroundPreference,
@@ -22,6 +21,13 @@ import {
   useRouterState,
 } from '@tanstack/react-router'
 import { createIsomorphicFn, createServerFn } from '@tanstack/react-start'
+import { lazy, Suspense } from 'react'
+
+const ShortlistToolbar = lazy(() =>
+  import('@/components/shortlist-toolbar/shortlist-toolbar').then((m) => ({
+    default: m.ShortlistToolbar,
+  })),
+)
 
 // Server function used by the client path to fetch auth context via RPC.
 const getAuthContextServerFn = createServerFn({ method: 'GET' })
@@ -121,7 +127,9 @@ function AuthenticatedLayout() {
           }
         >
           <Outlet />
-          <ShortlistToolbar userId={user?.userId} />
+          <Suspense fallback={null}>
+            <ShortlistToolbar userId={user?.userId} />
+          </Suspense>
         </div>
       </div>
     </DeviceCapabilityProvider>
