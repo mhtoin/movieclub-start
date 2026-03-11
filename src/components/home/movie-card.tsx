@@ -1,22 +1,9 @@
+import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
 import type { TMDBMovie } from '@/lib/react-query/queries/home'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Calendar, Film, Star } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { MovieCardDialog } from './movie-card-dialog'
-
-// Detect low-end devices for performance optimization
-function useIsLowEndDevice() {
-  const [isLowEnd, setIsLowEnd] = useState(false)
-
-  useEffect(() => {
-    const cores = navigator.hardwareConcurrency || 4
-    const memory =
-      (navigator as unknown as { deviceMemory?: number }).deviceMemory || 4
-    setIsLowEnd(cores <= 2 || memory <= 2)
-  }, [])
-
-  return isLowEnd
-}
 
 interface MovieCardProps {
   movie: TMDBMovie

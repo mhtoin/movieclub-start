@@ -10,6 +10,7 @@ import {
   type BackgroundPreference,
   backgroundValidator,
 } from '@/lib/background-preference'
+import { DeviceCapabilityProvider } from '@/lib/hooks/use-device-capability'
 import { useSSEInvalidation } from '@/lib/hooks/use-sse-invalidation'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
@@ -91,24 +92,26 @@ function AuthenticatedLayout() {
       ?.component ?? BACKGROUND_OPTIONS.backdropVeil.component
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden relative">
-      {isPending && (
-        <div className="fixed inset-x-0 top-0 z-[9999] h-[2px]">
-          <div className="h-full bg-primary animate-[progress_1.2s_ease-in-out_infinite] origin-left" />
+    <DeviceCapabilityProvider>
+      <div className="h-screen flex flex-col overflow-hidden relative">
+        {isPending && (
+          <div className="fixed inset-x-0 top-0 z-[9999] h-[2px]">
+            <div className="h-full bg-primary animate-[progress_1.2s_ease-in-out_infinite] origin-left" />
+          </div>
+        )}
+        <Sidebar />
+        <BackgroundComponent />
+        <div
+          className={
+            isHomePage
+              ? 'flex-1 overflow-auto relative z-10 isolate'
+              : 'pt-4 pb-24 md:pb-4 md:pl-16 px-4 flex-1 overflow-auto relative z-10 isolate'
+          }
+        >
+          <Outlet />
+          <ShortlistToolbar userId={user?.userId} />
         </div>
-      )}
-      <Sidebar />
-      <BackgroundComponent />
-      <div
-        className={
-          isHomePage
-            ? 'flex-1 overflow-auto relative z-10 isolate'
-            : 'pt-4 pb-24 md:pb-4 md:pl-16 px-4 flex-1 overflow-auto relative z-10 isolate'
-        }
-      >
-        <Outlet />
-        <ShortlistToolbar userId={user?.userId} />
       </div>
-    </div>
+    </DeviceCapabilityProvider>
   )
 }

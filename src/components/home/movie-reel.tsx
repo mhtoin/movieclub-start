@@ -1,3 +1,4 @@
+import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
 import type { TMDBMovie } from '@/lib/react-query/queries/home'
 import { cn } from '@/lib/utils'
 import { LayoutGroup, motion } from 'framer-motion'
@@ -27,6 +28,7 @@ export function MovieReel({
   movies,
   accentColor = 'orange',
 }: MovieReelProps) {
+  const isLowEnd = useIsLowEndDevice()
   const layoutGroupId = useId()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollPrev, setCanScrollPrev] = useState(false)
@@ -154,16 +156,27 @@ export function MovieReel({
               isDragging ? 'cursor-grabbing' : 'cursor-grab',
             )}
           >
-            <LayoutGroup id={layoutGroupId}>
-              {movies.map((movie, index) => (
+            {isLowEnd ? (
+              movies.map((movie, index) => (
                 <div
                   className="min-w-0 flex-shrink-0 snap-start"
                   key={movie.id}
                 >
                   <MovieCard movie={movie} index={index} />
                 </div>
-              ))}
-            </LayoutGroup>
+              ))
+            ) : (
+              <LayoutGroup id={layoutGroupId}>
+                {movies.map((movie, index) => (
+                  <div
+                    className="min-w-0 flex-shrink-0 snap-start"
+                    key={movie.id}
+                  >
+                    <MovieCard movie={movie} index={index} />
+                  </div>
+                ))}
+              </LayoutGroup>
+            )}
           </div>
         </div>
       </div>

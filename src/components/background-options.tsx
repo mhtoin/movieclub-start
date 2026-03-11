@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 import { getImageUrl } from '@/lib/tmdb-api'
@@ -68,38 +68,24 @@ export function NoneBackground() {
 }
 
 export function ProjectorBackground() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  if (!mounted) return <div className="app-background-option" aria-hidden />
+
   const dustMotes = [
     { cx: 960, cy: 85, r: 1.2, i: 1 },
-    { cx: 938, cy: 130, r: 1.6, i: 3 },
     { cx: 982, cy: 108, r: 1.0, i: 2 },
-    { cx: 948, cy: 165, r: 1.5, i: 4 },
     { cx: 970, cy: 200, r: 2.0, i: 1 },
-    { cx: 925, cy: 240, r: 1.3, i: 2 },
     { cx: 995, cy: 220, r: 1.7, i: 3 },
     { cx: 900, cy: 280, r: 2.5, i: 1 },
-    { cx: 1020, cy: 300, r: 1.8, i: 4 },
-    { cx: 860, cy: 320, r: 1.4, i: 2 },
     { cx: 1060, cy: 265, r: 2.1, i: 3 },
-    { cx: 940, cy: 350, r: 1.6, i: 1 },
-    { cx: 975, cy: 190, r: 1.5, i: 4 },
-    { cx: 890, cy: 380, r: 1.6, i: 4 },
     { cx: 1030, cy: 410, r: 2.0, i: 1 },
-    { cx: 910, cy: 440, r: 1.3, i: 2 },
-    { cx: 1020, cy: 430, r: 1.8, i: 2 },
     { cx: 955, cy: 475, r: 2.9, i: 3 },
-    { cx: 835, cy: 490, r: 1.5, i: 1 },
-    { cx: 1085, cy: 480, r: 1.2, i: 4 },
-    { cx: 920, cy: 510, r: 1.4, i: 2 },
     { cx: 985, cy: 545, r: 2.2, i: 3 },
-    { cx: 940, cy: 590, r: 3.2, i: 3 },
-    { cx: 870, cy: 570, r: 1.7, i: 4 },
     { cx: 1050, cy: 560, r: 1.9, i: 1 },
-    { cx: 870, cy: 720, r: 2.2, i: 1 },
-    { cx: 1050, cy: 640, r: 1.8, i: 2 },
     { cx: 955, cy: 860, r: 2.8, i: 3 },
-    { cx: 985, cy: 760, r: 2.4, i: 3 },
-    { cx: 860, cy: 160, r: 1.9, i: 4 },
-    { cx: 1000, cy: 680, r: 1.6, i: 2 },
     { cx: 930, cy: 800, r: 1.3, i: 1 },
   ]
 
@@ -140,7 +126,7 @@ export function ProjectorBackground() {
               width="500%"
               height="500%"
             >
-              <feGaussianBlur stdDeviation="1.5" />
+              <feGaussianBlur stdDeviation="1" />
             </filter>
           </defs>
           <ellipse
@@ -225,60 +211,31 @@ export function ProjectorBackground() {
 }
 
 export function DustBackground() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  if (!mounted) return <div className="app-background-option" aria-hidden />
+
   const motes = [
     { cx: 112, cy: 68, r: 1.8, i: 1 },
-    { cx: 340, cy: 45, r: 1.2, i: 5 },
     { cx: 580, cy: 92, r: 2.0, i: 3 },
-    { cx: 760, cy: 34, r: 1.4, i: 6 },
     { cx: 960, cy: 72, r: 1.6, i: 2 },
-    { cx: 1180, cy: 50, r: 1.0, i: 7 },
     { cx: 1420, cy: 88, r: 2.2, i: 4 },
-    { cx: 1680, cy: 55, r: 1.5, i: 1 },
     { cx: 1840, cy: 100, r: 1.3, i: 5 },
-    { cx: 65, cy: 220, r: 2.4, i: 2 },
     { cx: 230, cy: 185, r: 1.3, i: 6 },
-    { cx: 480, cy: 240, r: 1.7, i: 1 },
     { cx: 690, cy: 200, r: 2.8, i: 3 },
-    { cx: 870, cy: 260, r: 1.2, i: 7 },
     { cx: 1060, cy: 180, r: 1.9, i: 5 },
-    { cx: 1260, cy: 230, r: 1.4, i: 2 },
     { cx: 1500, cy: 195, r: 2.0, i: 8 },
-    { cx: 1740, cy: 250, r: 1.6, i: 4 },
-    { cx: 1900, cy: 210, r: 1.1, i: 6 },
-    { cx: 150, cy: 400, r: 2.6, i: 3 },
     { cx: 390, cy: 370, r: 1.5, i: 7 },
-    { cx: 610, cy: 440, r: 1.2, i: 1 },
     { cx: 800, cy: 390, r: 2.1, i: 5 },
-    { cx: 1020, cy: 420, r: 1.7, i: 8 },
     { cx: 1210, cy: 380, r: 1.3, i: 2 },
-    { cx: 1440, cy: 450, r: 2.5, i: 6 },
     { cx: 1650, cy: 400, r: 1.4, i: 3 },
-    { cx: 1860, cy: 430, r: 1.9, i: 7 },
-    { cx: 80, cy: 600, r: 1.6, i: 4 },
     { cx: 300, cy: 580, r: 2.3, i: 1 },
-    { cx: 520, cy: 640, r: 1.1, i: 8 },
-    { cx: 730, cy: 605, r: 1.8, i: 5 },
     { cx: 950, cy: 625, r: 2.7, i: 2 },
-    { cx: 1150, cy: 590, r: 1.4, i: 6 },
-    { cx: 1380, cy: 650, r: 1.0, i: 3 },
     { cx: 1590, cy: 610, r: 2.2, i: 7 },
-    { cx: 1800, cy: 640, r: 1.5, i: 4 },
-    { cx: 180, cy: 810, r: 1.9, i: 5 },
-    { cx: 420, cy: 790, r: 1.3, i: 2 },
     { cx: 660, cy: 840, r: 2.4, i: 8 },
-    { cx: 880, cy: 800, r: 1.6, i: 1 },
-    { cx: 1100, cy: 850, r: 1.2, i: 6 },
     { cx: 1330, cy: 820, r: 2.0, i: 3 },
-    { cx: 1560, cy: 870, r: 1.7, i: 7 },
-    { cx: 1760, cy: 800, r: 1.1, i: 4 },
-    { cx: 95, cy: 980, r: 2.1, i: 3 },
-    { cx: 350, cy: 1000, r: 1.4, i: 5 },
-    { cx: 590, cy: 970, r: 1.8, i: 1 },
-    { cx: 830, cy: 1010, r: 1.2, i: 8 },
-    { cx: 1070, cy: 990, r: 2.5, i: 2 },
-    { cx: 1310, cy: 1020, r: 1.6, i: 6 },
-    { cx: 1540, cy: 975, r: 1.0, i: 4 },
-    { cx: 1770, cy: 1005, r: 1.9, i: 7 },
   ]
 
   return (
@@ -297,7 +254,7 @@ export function DustBackground() {
               width="700%"
               height="700%"
             >
-              <feGaussianBlur stdDeviation="1.2" />
+              <feGaussianBlur stdDeviation="0.8" />
             </filter>
           </defs>
           {motes.map((d) => (
