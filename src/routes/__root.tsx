@@ -1,19 +1,49 @@
 import { Toast } from '@base-ui/react/toast'
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
+  createRootRouteWithContext,
   HeadContent,
   Scripts,
-  createRootRouteWithContext,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
 import ToastList from '@/components/ui/toast-list'
 import { getThemeAndSchemeServerFn } from '@/lib/color-scheme'
 import type { QueryClient } from '@tanstack/react-query'
+import { lazy, Suspense } from 'react'
 import appCss from '../styles.css?url'
+
+// Devtools are loaded lazily so they are never included in the production
+// bundle. The import() calls are only evaluated when DEV is true.
+const Devtools = import.meta.env.DEV
+  ? lazy(async () => {
+      const [
+        { TanStackDevtools },
+        { TanStackRouterDevtoolsPanel },
+        { ReactQueryDevtools },
+      ] = await Promise.all([
+        import('@tanstack/react-devtools'),
+        import('@tanstack/react-router-devtools'),
+        import('@tanstack/react-query-devtools'),
+      ])
+      function AllDevtools() {
+        return (
+          <>
+            <TanStackDevtools
+              plugins={[
+                {
+                  name: 'Tanstack Router',
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+              ]}
+            />
+            <ReactQueryDevtools buttonPosition="bottom-left" />
+          </>
+        )
+      }
+      return { default: AllDevtools }
+    })
+  : null
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -76,18 +106,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               </Toast.Viewport>
             </Toast.Portal>
           </Toast.Provider>
-          {import.meta.env.DEV && (
-            <>
-              <TanStackDevtools
-                plugins={[
-                  {
-                    name: 'Tanstack Router',
-                    render: <TanStackRouterDevtoolsPanel />,
-                  },
-                ]}
-              />
-              <ReactQueryDevtools buttonPosition="bottom-left" />
-            </>
+          {import.meta.env.DEV && Devtools && (
+            <Suspense fallback={null}>
+              <Devtools />
+            </Suspense>
           )}
         </ThemeProvider>
         <Scripts />

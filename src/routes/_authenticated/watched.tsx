@@ -51,13 +51,16 @@ export const Route = createFileRoute('/_authenticated/watched')({
       retainSearchParams(['user', 'genre', 'month', 'search']),
     ],
   },
-  loaderDeps: ({ search: { search, user, genre } }) => ({
+  loaderDeps: ({ search: { search, user, genre, month } }) => ({
     search,
     user,
     genre,
+    month,
   }),
-  loader: ({ context, deps: { search, user, genre } }) => {
-    context.queryClient.prefetchQuery(movieQueries.watched(search, user, genre))
+  loader: ({ context, deps: { search, user, genre, month } }) => {
+    context.queryClient.prefetchQuery(
+      movieQueries.watched(search, user, genre, month),
+    )
     context.queryClient.prefetchQuery(userQueries.all())
     context.queryClient.prefetchQuery(tmdbQueries.genres())
     context.queryClient.prefetchQuery(movieQueries.months())
@@ -69,13 +72,15 @@ function WatchedMoviesList({
   searchQuery,
   user,
   genre,
+  month,
 }: {
   searchQuery: string
   user: string
   genre: string
+  month: string
 }) {
   const { data } = useSuspenseQuery(
-    movieQueries.watched(searchQuery, user, genre),
+    movieQueries.watched(searchQuery, user, genre, month),
   )
   const isMobile = !useMediaQuery('(min-width: 768px)')
 
@@ -202,7 +207,7 @@ function WatchedMoviesList({
 }
 
 function RouteComponent() {
-  const { search: urlSearch, user, genre } = Route.useSearch()
+  const { search: urlSearch, user, genre, month } = Route.useSearch()
   // Local state for the input — stays snappy on every keystroke.
   // The URL param (urlSearch) is the debounced, committed value used for
   // data-fetching; it only updates after the user pauses typing.
@@ -373,6 +378,7 @@ function RouteComponent() {
               searchQuery={urlSearch}
               user={user}
               genre={genre}
+              month={month}
             />
           </Suspense>
         </div>

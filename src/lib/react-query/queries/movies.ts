@@ -86,6 +86,8 @@ const watchedByMonthSchema = z.object({
   search: z.string().optional(),
   username: z.string().optional(),
   genre: z.string().optional(),
+  // 'YYYY-MM' string — when provided, only movies from that month are fetched
+  month: z.string().optional(),
 })
 
 export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
@@ -109,6 +111,13 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
 
     if (data.genre && data.genre.trim() !== '') {
       conditions.push(arrayContains(movie.genres, [data.genre]))
+    }
+
+    // Filter to a single month server-side, avoiding a full-table fetch
+    if (data.month && data.month.trim() !== '') {
+      conditions.push(
+        sql`to_char(${movie.watchDate}, 'YYYY-MM') = ${data.month.trim()}`,
+      )
     }
 
     // Fetch movies with combined filters
@@ -158,12 +167,24 @@ export const movieQueries = {
       queryFn: getLatestMovies,
       staleTime: 1000 * 60 * 5,
     }),
-  watched: (search?: string, username?: string, genre?: string) =>
+  watched: (
+    search?: string,
+    username?: string,
+    genre?: string,
+    month?: string,
+  ) =>
     queryOptions({
-      queryKey: [...movieQueries.all(), 'watched', search, username, genre],
+      queryKey: [
+        ...movieQueries.all(),
+        'watched',
+        search,
+        username,
+        genre,
+        month,
+      ],
       queryFn: async () => {
         const result = await getWatchedMoviesByMonth({
-          data: { search, username, genre },
+          data: { search, username, genre, month },
         })
         return result
       },

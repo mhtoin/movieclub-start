@@ -42,8 +42,16 @@ const getAuthContextServerFn = createServerFn({ method: 'GET' })
 
 export const Route = createFileRoute('/_authenticated')({
   errorComponent: ErrorComponent,
-  beforeLoad: async () => {
-    const { user, backgroundPreference } = await getAuthContextServerFn()
+  beforeLoad: async ({ context }) => {
+    const { user, backgroundPreference } = await context.queryClient.fetchQuery(
+      {
+        queryKey: ['authContext'],
+        queryFn: () => getAuthContextServerFn(),
+        // Cache for 2 minutes — avoids a network round-trip on every
+        // client-side navigation between authenticated routes.
+        staleTime: 1000 * 60 * 2,
+      },
+    )
     if (!user) {
       throw redirect({ to: '/' })
     }
