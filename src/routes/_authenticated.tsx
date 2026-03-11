@@ -43,18 +43,33 @@ const getAuthContextServerFn = createServerFn({ method: 'GET' })
 export const Route = createFileRoute('/_authenticated')({
   errorComponent: ErrorComponent,
   beforeLoad: async ({ context }) => {
+    if (import.meta.env.SSR) {
+      // During SSR: call auth directly in-process — no server function
+      // overhead, no extra HTTP hop, no serialization cost.
+      const { useAppSession, getSessionUser } = await import('@/lib/auth/auth')
+      const { getCookie } = await import('@tanstack/react-start/server')
+      const session = await useAppSession()
+      const user = await getSessionUser(session.data?.sessionToken)
+      if (!user) throw redirect({ to: '/' })
+      const cookieBg = getCookie('background-style') || 'backdropVeil'
+      let backgroundPreference: BackgroundPreference = 'backdropVeil'
+      try {
+        backgroundPreference = backgroundValidator.parse(cookieBg)
+      } catch {
+        // keep default
+      }
+      return { user, backgroundPreference }
+    }
+    // On the client: use the React Query cache so subsequent navigations
+    // between authenticated routes skip the network round-trip entirely.
     const { user, backgroundPreference } = await context.queryClient.fetchQuery(
       {
         queryKey: ['authContext'],
         queryFn: () => getAuthContextServerFn(),
-        // Cache for 2 minutes — avoids a network round-trip on every
-        // client-side navigation between authenticated routes.
         staleTime: 1000 * 60 * 2,
       },
     )
-    if (!user) {
-      throw redirect({ to: '/' })
-    }
+    if (!user) throw redirect({ to: '/' })
     return { user, backgroundPreference }
   },
   loader: ({ context }) => {
