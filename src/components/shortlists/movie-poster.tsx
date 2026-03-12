@@ -1,5 +1,5 @@
 import type { Movie } from '@/db/schema/movies'
-import { getImageUrl } from '@/lib/tmdb-api'
+import { getResponsiveImageProps } from '@/lib/tmdb-api'
 
 export default function MoviePoster({
   movie,
@@ -18,7 +18,7 @@ export default function MoviePoster({
   setHoveredMovieId: (id: string | null) => void
 }) {
   const posterPath = movie.images?.posters?.[0]?.file_path
-  const posterUrl = posterPath ? getImageUrl(posterPath, 'w500') : null
+  const posterImage = getResponsiveImageProps(posterPath, 'poster', 'w342')
   return (
     <div
       key={movie.id}
@@ -31,13 +31,16 @@ export default function MoviePoster({
       onMouseLeave={() => setHoveredMovieId(null)}
     >
       <div className="aspect-[2/3] relative overflow-hidden rounded-lg sm:rounded-md border border-border shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:border-primary/50 active:scale-[0.98] active:shadow-inner">
-        {posterUrl ? (
+        {posterImage ? (
           <img
-            src={posterUrl}
+            src={posterImage.src}
+            srcSet={posterImage.srcSet}
+            sizes="(min-width: 1024px) 10rem, (min-width: 640px) 18vw, 31vw"
             alt={movie.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading={movieIndex < 4 ? 'eager' : 'lazy'}
             fetchPriority={movieIndex === 0 ? 'high' : 'auto'}
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full bg-muted flex items-center justify-center">

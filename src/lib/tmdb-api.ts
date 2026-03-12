@@ -35,12 +35,41 @@ const TMDB_CONFIG = {
     import.meta.env.VITE_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p',
 }
 
+const TMDB_IMAGE_CANDIDATES = {
+  poster: ['w92', 'w154', 'w185', 'w342', 'w500'],
+  backdrop: ['w300', 'w780', 'w1280'],
+} as const
+
+type TmdbImageVariant = keyof typeof TMDB_IMAGE_CANDIDATES
+
 export function getImageUrl(
   path: string | null,
   size: string = 'w500',
 ): string | null {
   if (!path) return null
   return `${TMDB_CONFIG.IMAGE_BASE_URL}/${size}${path}`
+}
+
+function getTmdbWidthDescriptor(size: string): string {
+  const width = Number.parseInt(size.slice(1), 10)
+  return Number.isFinite(width) ? `${width}w` : size
+}
+
+export function getResponsiveImageProps(
+  path: string | null,
+  variant: TmdbImageVariant,
+  fallbackSize?: string,
+) {
+  if (!path) return null
+
+  const candidates = TMDB_IMAGE_CANDIDATES[variant]
+  const src =
+    getImageUrl(path, fallbackSize ?? candidates[candidates.length - 1]) ?? ''
+  const srcSet = candidates
+    .map((size) => `${getImageUrl(path, size)} ${getTmdbWidthDescriptor(size)}`)
+    .join(', ')
+
+  return { src, srcSet }
 }
 
 export async function fetchTrendingMovies(

@@ -1,6 +1,6 @@
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import type { Movie } from '@/db/schema/movies'
-import { getImageUrl } from '@/lib/tmdb-api'
+import { getResponsiveImageProps } from '@/lib/tmdb-api'
 import { CheckCircle2, Film, Plus, Star, XCircle } from 'lucide-react'
 
 function getCardColor(index: number) {
@@ -31,7 +31,7 @@ function MovieRow({
   cardIndex?: number
 }) {
   const posterPath = movie.images?.posters?.[0]?.file_path
-  const posterUrl = posterPath ? getImageUrl(posterPath, 'w185') : null
+  const posterImage = getResponsiveImageProps(posterPath, 'poster', 'w154')
   const year = movie.releaseDate
     ? new Date(movie.releaseDate).getFullYear()
     : null
@@ -50,14 +50,17 @@ function MovieRow({
     >
       <div className="relative w-12 flex-shrink-0 rounded-md overflow-hidden border border-border/50 shadow-sm bg-muted">
         <div className="aspect-[2/3]">
-          {posterUrl ? (
+          {posterImage ? (
             <img
-              src={posterUrl}
+              src={posterImage.src}
+              srcSet={posterImage.srcSet}
+              sizes="48px"
               alt={movie.title}
               width={48}
               height={72}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               loading={cardIndex === 0 && position === 1 ? 'eager' : 'lazy'}
+              decoding="async"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -164,6 +167,8 @@ export function ShortlistUserCard({
               !participating ? 'grayscale' : ''
             }`}
             style={{ borderColor: color }}
+            loading={colorIndex < 6 ? 'eager' : 'lazy'}
+            decoding="async"
           />
         ) : (
           <div

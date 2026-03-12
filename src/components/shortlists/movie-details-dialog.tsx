@@ -1,4 +1,4 @@
-import { getImageUrl } from '@/lib/tmdb-api'
+import { getResponsiveImageProps } from '@/lib/tmdb-api'
 import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatedPoster } from '../discover/animated-poster'
@@ -19,9 +19,13 @@ export function MovieDetailsDialog({
 }: MovieDetailsDialogProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const posterPath = movie?.images?.posters?.[0]?.file_path
-  const posterUrl = posterPath ? getImageUrl(posterPath, 'w500') : null
+  const posterImage = getResponsiveImageProps(posterPath, 'poster', 'w500')
   const backdropPath = movie?.images?.backdrops?.[0]?.file_path
-  const backdropUrl = backdropPath ? getImageUrl(backdropPath, 'w1280') : null
+  const backdropImage = getResponsiveImageProps(
+    backdropPath,
+    'backdrop',
+    'w1280',
+  )
 
   const {
     mounted,
@@ -77,7 +81,7 @@ export function MovieDetailsDialog({
         onClick={handleBackdropClick}
       />
       <AnimatedPoster
-        posterUrl={posterUrl}
+        posterUrl={posterImage?.src ?? null}
         movieTitle={movie.title}
         triggerRect={triggerRect}
         showImage={showImage}
@@ -90,11 +94,14 @@ export function MovieDetailsDialog({
         style={getContainerStyle()}
       >
         <div className="relative h-64 flex-shrink-0">
-          {backdropUrl ? (
+          {backdropImage ? (
             <img
-              src={backdropUrl}
+              src={backdropImage.src}
+              srcSet={backdropImage.srcSet}
+              sizes="(min-width: 1024px) 48rem, 90vw"
               alt={movie.title}
               className="w-full h-full object-cover"
+              decoding="async"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20" />
@@ -111,7 +118,7 @@ export function MovieDetailsDialog({
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="p-6">
             <div className="flex gap-6">
-              {posterUrl && (
+              {posterImage && (
                 <div className="flex-shrink-0 w-48 invisible">
                   <div className="aspect-[2/3]" />
                 </div>
