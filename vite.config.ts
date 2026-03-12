@@ -21,6 +21,16 @@ const config = defineConfig({
           return 'assets/[name]-[hash][extname]'
         },
         manualChunks(id) {
+          // React core must be its own chunk so Rollup uses it (not framer-motion)
+          // as the shared JSX runtime for all other chunks.
+          if (
+            id.includes('/node_modules/react/') ||
+            id.includes('/node_modules/react-dom/') ||
+            id.includes('/node_modules/react-is/') ||
+            id.includes('/node_modules/scheduler/')
+          ) {
+            return 'vendor-react'
+          }
           if (id.includes('recharts') || id.includes('d3-')) {
             return 'vendor-recharts'
           }
