@@ -72,6 +72,11 @@ export const Route = createRootRouteWithContext<{
         href: 'https://image.tmdb.org',
       },
       {
+        rel: 'preload',
+        href: appCss,
+        as: 'style',
+      },
+      {
         rel: 'stylesheet',
         href: appCss,
       },

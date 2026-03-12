@@ -23,10 +23,12 @@ function MovieRow({
   movie,
   position,
   onMovieClick,
+  cardIndex = 0,
 }: {
   movie: Movie
   position: number
   onMovieClick: (movie: Movie, e: React.MouseEvent<HTMLDivElement>) => void
+  cardIndex?: number
 }) {
   const posterPath = movie.images?.posters?.[0]?.file_path
   const posterUrl = posterPath ? getImageUrl(posterPath, 'w185') : null
@@ -55,7 +57,7 @@ function MovieRow({
               width={48}
               height={72}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="eager"
+              loading={cardIndex === 0 && position === 1 ? 'eager' : 'lazy'}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -219,6 +221,7 @@ export function ShortlistUserCard({
               key={film.id}
               movie={film}
               position={idx + 1}
+              cardIndex={colorIndex}
               onMovieClick={handleMovieClick}
             />
           ) : (

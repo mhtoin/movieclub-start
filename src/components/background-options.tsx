@@ -27,7 +27,7 @@ function useLatestMovieBackdrop() {
       return null
     }
 
-    const preferredSize = primaryBackdrop ? 'w1280' : 'w780'
+    const preferredSize = primaryBackdrop ? 'w780' : 'w500'
     return getImageUrl(selectedPath, preferredSize)
   }, [data])
 }
