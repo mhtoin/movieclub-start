@@ -1,7 +1,6 @@
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import type { Movie } from '@/db/schema/movies'
 import { getImageUrl } from '@/lib/tmdb-api'
-import { motion } from 'framer-motion'
 import { CheckCircle2, Film, Plus, Star, XCircle } from 'lucide-react'
 
 function getCardColor(index: number) {
@@ -47,7 +46,6 @@ function MovieRow({
       className="flex gap-3 p-3 cursor-pointer group hover:bg-accent/40 transition-colors duration-150 rounded-xl mx-1"
       onClick={(e) => onMovieClick(movie, e)}
     >
-      {/* Poster thumbnail */}
       <div className="relative w-12 flex-shrink-0 rounded-md overflow-hidden border border-border/50 shadow-sm bg-muted">
         <div className="aspect-[2/3]">
           {posterUrl ? (
@@ -65,15 +63,12 @@ function MovieRow({
             </div>
           )}
         </div>
-        {/* Position number */}
         <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-black/60 flex items-center justify-center">
           <span className="text-[9px] font-bold text-white leading-none">
             {position}
           </span>
         </div>
       </div>
-
-      {/* Info */}
       <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
         <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
           {movie.title}
@@ -143,27 +138,20 @@ export function ShortlistUserCard({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35, delay, ease: 'easeOut' }}
-      className={`rounded-2xl bg-card border overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col ${
+    <div
+      className={`rounded-2xl bg-card border overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col animate-fade-in ${
         !participating ? 'opacity-55' : ''
       }`}
-      style={{ borderColor: `${color}45` }}
+      style={{ borderColor: `${color}45`, animationDelay: `${delay}s` }}
     >
-      {/* Accent top strip */}
       <div
         className="h-1 w-full"
         style={{ background: `linear-gradient(90deg, ${strip}, ${color}60)` }}
       />
-
-      {/* Header */}
       <div
         className="flex items-center gap-3 px-4 pt-3.5 pb-3"
         style={{ borderBottom: `1px solid ${color}20`, background: faint }}
       >
-        {/* Avatar */}
         {user.image ? (
           <img
             src={user.image}
@@ -183,8 +171,6 @@ export function ShortlistUserCard({
             {user.name.charAt(0).toUpperCase()}
           </div>
         )}
-
-        {/* Name + pill count */}
         <div className="flex-1 min-w-0">
           <p
             className={`font-bold text-base leading-tight truncate ${
@@ -199,8 +185,6 @@ export function ShortlistUserCard({
             {movies.length} of 3 picks
           </p>
         </div>
-
-        {/* Status badges — stacked if needed */}
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           {!participating ? (
             <span className="flex items-center gap-1 text-[11px] text-muted-foreground/70 bg-muted/60 rounded-full px-2.5 py-1 font-medium">
@@ -227,8 +211,6 @@ export function ShortlistUserCard({
           )}
         </div>
       </div>
-
-      {/* Movie rows */}
       <div className="flex flex-col py-1.5 flex-1">
         {Array.from({ length: 3 }).map((_, idx) => {
           const film = movies[idx] as Movie | undefined
@@ -244,6 +226,6 @@ export function ShortlistUserCard({
           )
         })}
       </div>
-    </motion.div>
+    </div>
   )
 }

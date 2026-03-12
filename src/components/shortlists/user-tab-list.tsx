@@ -1,6 +1,5 @@
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, Dices, Users, XCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '../ui/button'
@@ -146,64 +145,50 @@ export default function UserTabList({
 
       <TabsPanel variant="underlined" value="all">
         <div className="max-h-[calc(100vh-12rem)] sm:max-h-[100dvh] no-scrollbar px-1 sm:p-5 pb-24 sm:pb-5 fade-mask fade-y-5 dark:fade-y-5 fade-intensity-100">
-          <AnimatePresence mode="wait">
-            {raffleState === 'not-started' ? (
-              <motion.div
-                key="grid"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <MovieGrid columns={6}>
-                  {shortlists.flatMap((shortlist, shortlistIndex) =>
-                    shortlist.movies.map((movie, movieIndex) => {
-                      const isFirstMovieForUser = movieIndex === 0
-                      const delay =
-                        (shortlistIndex * shortlist.movies.length +
-                          movieIndex) *
-                        0.02
-                      return (
-                        <AnimatedMovieWrapper
-                          key={`${shortlist.user.id}-${movie.id}`}
-                          delay={delay}
-                        >
-                          {isFirstMovieForUser && (
-                            <UserBadge
-                              imageUrl={shortlist.user.image}
-                              name={shortlist.user.name}
-                            />
-                          )}
-                          <MovieColorBorder colorIndex={shortlistIndex} />
-                          <MoviePoster
-                            movie={movie}
-                            movieIndex={movieIndex}
-                            handleMovieClick={handleMovieClick}
-                            hoveredMovieId={hoveredMovieId}
-                            setHoveredMovieId={setHoveredMovieId}
+          {raffleState === 'not-started' ? (
+            <div className="animate-fade-in">
+              <MovieGrid columns={6}>
+                {shortlists.flatMap((shortlist, shortlistIndex) =>
+                  shortlist.movies.map((movie, movieIndex) => {
+                    const isFirstMovieForUser = movieIndex === 0
+                    const delay =
+                      (shortlistIndex * shortlist.movies.length + movieIndex) *
+                      0.02
+                    return (
+                      <AnimatedMovieWrapper
+                        key={`${shortlist.user.id}-${movie.id}`}
+                        delay={delay}
+                      >
+                        {isFirstMovieForUser && (
+                          <UserBadge
+                            imageUrl={shortlist.user.image}
+                            name={shortlist.user.name}
                           />
-                        </AnimatedMovieWrapper>
-                      )
-                    }),
-                  )}
-                </MovieGrid>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="raffle"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="w-full"
-              >
-                <RaffleCarousel
-                  raffleState={raffleState}
-                  movies={participatingMovies}
-                  winningMovie={winningMovie}
-                  onRaffleComplete={onRaffleComplete}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+                        )}
+                        <MovieColorBorder colorIndex={shortlistIndex} />
+                        <MoviePoster
+                          movie={movie}
+                          movieIndex={movieIndex}
+                          handleMovieClick={handleMovieClick}
+                          hoveredMovieId={hoveredMovieId}
+                          setHoveredMovieId={setHoveredMovieId}
+                        />
+                      </AnimatedMovieWrapper>
+                    )
+                  }),
+                )}
+              </MovieGrid>
+            </div>
+          ) : (
+            <div className="w-full animate-fade-in">
+              <RaffleCarousel
+                raffleState={raffleState}
+                movies={participatingMovies}
+                winningMovie={winningMovie}
+                onRaffleComplete={onRaffleComplete}
+              />
+            </div>
+          )}
         </div>
       </TabsPanel>
 

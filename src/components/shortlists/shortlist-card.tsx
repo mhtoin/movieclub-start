@@ -1,5 +1,4 @@
 import { Movie } from '@/db/schema/movies'
-import { motion } from 'framer-motion'
 import { Clapperboard } from 'lucide-react'
 import { useState } from 'react'
 import MoviePoster from './movie-poster'
@@ -58,31 +57,14 @@ export function ShortlistCard({
   const isCollapsed = raffleState !== 'not-started'
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-      }}
-      transition={{
-        layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-        opacity: { duration: 0.3 },
-        y: { duration: 0.5, delay: index * 0.05 },
-        borderRadius: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-      }}
-      className={`flex bg-card border border-border shadow-md hover:shadow-xl max-w-sm transition-shadow duration-300 relative overflow-hidden ${
+    <div
+      className={`flex bg-card border border-border shadow-md hover:shadow-xl max-w-sm transition-shadow duration-300 relative overflow-hidden animate-fade-in-up ${
         isCollapsed ? 'rounded-2xl p-4' : 'rounded-lg p-4 h-full flex flex-col'
       }`}
+      style={{ animationDelay: `${index * 0.05}s` }}
     >
       {isCollapsed ? (
-        <motion.div
-          layout
-          className="flex items-center gap-3"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="flex items-center gap-3 animate-fade-in">
           <div className="relative flex-shrink-0">
             <img
               src={shortlist.user.image}
@@ -100,15 +82,12 @@ export function ShortlistCard({
               <Clapperboard className="h-4 w-4 ml-1 text-muted-foreground" />
             </div>
           </div>
-        </motion.div>
+        </div>
       ) : (
         <>
           <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-transparent to-secondary/5 pointer-events-none" />
 
-          <motion.div
-            layout
-            className="flex items-center justify-between mb-4 relative z-10 border-b border-border pb-2"
-          >
+          <div className="flex items-center justify-between mb-4 relative z-10 border-b border-border pb-2">
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
                 <img
@@ -133,9 +112,9 @@ export function ShortlistCard({
             >
               {getStatusText()}
             </div>
-          </motion.div>
+          </div>
           {shortlist.movies.length > 0 ? (
-            <motion.div layout className="grid grid-cols-3 gap-2 relative z-10">
+            <div className="grid grid-cols-3 gap-2 relative z-10">
               {shortlist.movies.map((movie, movieIndex) => {
                 return (
                   <MoviePoster
@@ -148,18 +127,15 @@ export function ShortlistCard({
                   />
                 )
               })}
-            </motion.div>
+            </div>
           ) : (
-            <motion.div
-              layout
-              className="text-center py-8 text-muted-foreground relative z-10"
-            >
+            <div className="text-center py-8 text-muted-foreground relative z-10">
               <div className="text-3xl mb-2 opacity-50">📽️</div>
               <p className="text-sm">No movies yet</p>
-            </motion.div>
+            </div>
           )}
         </>
       )}
-    </motion.div>
+    </div>
   )
 }

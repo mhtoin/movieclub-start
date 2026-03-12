@@ -2,9 +2,14 @@ import type { Movie } from '@/db/schema/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
-import { useState } from 'react'
-import { MovieDetailsDialog } from './movie-details-dialog'
+import { Suspense, lazy, useState } from 'react'
 import { ShortlistUserCard } from './shortlist-user-card'
+
+const MovieDetailsDialog = lazy(() =>
+  import('./movie-details-dialog').then((m) => ({
+    default: m.MovieDetailsDialog,
+  })),
+)
 
 export function ShortlistOverviewGrid() {
   const { data: shortlists } = useSuspenseQuery(shortlistQueries.all())
@@ -51,7 +56,6 @@ export function ShortlistOverviewGrid() {
 
   return (
     <>
-      {/* Summary stats row */}
       <div className="flex items-center gap-3 mb-5 flex-wrap">
         <span className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">
@@ -70,8 +74,6 @@ export function ShortlistOverviewGrid() {
           to raffle
         </span>
       </div>
-
-      {/* Card grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {shortlists.map((shortlist, index) => (
           <ShortlistUserCard
@@ -83,13 +85,14 @@ export function ShortlistOverviewGrid() {
           />
         ))}
       </div>
-
-      <MovieDetailsDialog
-        movie={selectedMovie}
-        open={dialogOpen}
-        triggerRect={triggerRect}
-        onClose={handleDialogClose}
-      />
+      <Suspense fallback={null}>
+        <MovieDetailsDialog
+          movie={selectedMovie}
+          open={dialogOpen}
+          triggerRect={triggerRect}
+          onClose={handleDialogClose}
+        />
+      </Suspense>
     </>
   )
 }

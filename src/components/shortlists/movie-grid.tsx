@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { ReactNode } from 'react'
 
 interface MovieGridProps {
@@ -15,14 +14,11 @@ export function MovieGrid({ children, columns = 6 }: MovieGridProps) {
         : 'grid-cols-2'
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className={`grid ${gridClass} gap-3 sm:gap-4 auto-rows-max`}
+    <div
+      className={`grid ${gridClass} gap-3 sm:gap-4 auto-rows-max animate-fade-in`}
     >
       {children}
-    </motion.div>
+    </div>
   )
 }
 
@@ -36,16 +32,11 @@ export function AnimatedMovieWrapper({
   delay = 0,
 }: AnimatedMovieWrapperProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        duration: 0.3,
-        delay,
-      }}
-      className="relative"
+    <div
+      className="relative animate-scale-in"
+      style={{ animationDelay: `${delay}s` }}
     >
       {children}
-    </motion.div>
+    </div>
   )
 }
