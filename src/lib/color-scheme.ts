@@ -56,8 +56,8 @@ export const COLOR_SCHEMES = {
   mono: {
     label: 'Mono',
     colors: {
-      light: 'oklch(0.45 0 0)',
-      dark: 'oklch(0.70 0 0)',
+      light: 'oklch(0.35 0.005 30)',
+      dark: 'oklch(0.82 0.005 30)',
     },
   },
   teal: {
