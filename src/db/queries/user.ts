@@ -1,5 +1,6 @@
 import { eq, lt, and } from 'drizzle-orm'
 import { db } from '../db'
+import { shortlist } from '../schema/shortlists'
 import {
   account,
   passwordResetToken,
@@ -51,19 +52,31 @@ export async function createUser(data: {
   name: string
 }): Promise<User> {
   try {
-    const createdUser = await db
-      .insert(user)
-      .values({
-        id: crypto.randomUUID(),
-        email: data.email,
-        password: data.password,
-        image: '',
-        name: data.name,
-      })
-      .returning()
-      .then((rows) => rows[0])
+    const result = await db.transaction(async (tx) => {
+      const createdUser = await tx
+        .insert(user)
+        .values({
+          id: crypto.randomUUID(),
+          email: data.email,
+          password: data.password,
+          image: '',
+          name: data.name,
+        })
+        .returning()
+        .then((rows) => rows[0])
 
-    return createdUser
+      await tx.insert(shortlist).values({
+        id: crypto.randomUUID(),
+        userId: createdUser.id,
+        isReady: false,
+        requiresSelection: false,
+        participating: true,
+      })
+
+      return createdUser
+    })
+
+    return result
   } catch (error) {
     console.error('Database error while creating user:', error)
     throw new Error(
@@ -162,19 +175,31 @@ export async function createUserFromOAuth(data: {
   image: string
 }): Promise<User> {
   try {
-    const createdUser = await db
-      .insert(user)
-      .values({
-        id: crypto.randomUUID(),
-        email: data.email,
-        password: null,
-        image: data.image,
-        name: data.name,
-      })
-      .returning()
-      .then((rows) => rows[0])
+    const result = await db.transaction(async (tx) => {
+      const createdUser = await tx
+        .insert(user)
+        .values({
+          id: crypto.randomUUID(),
+          email: data.email,
+          password: null,
+          image: data.image,
+          name: data.name,
+        })
+        .returning()
+        .then((rows) => rows[0])
 
-    return createdUser
+      await tx.insert(shortlist).values({
+        id: crypto.randomUUID(),
+        userId: createdUser.id,
+        isReady: false,
+        requiresSelection: false,
+        participating: true,
+      })
+
+      return createdUser
+    })
+
+    return result
   } catch (error) {
     console.error('Database error while creating OAuth user:', error)
     throw new Error(
