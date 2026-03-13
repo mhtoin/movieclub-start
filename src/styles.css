@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&display=swap');
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant light (&:is(.light *));
 @plugin "tailwindcss-fade";
@@ -685,6 +686,102 @@
 
 @theme {
   --text-xxs: 0.625rem;
+  --font-cinema: 'Oswald', 'Bebas Neue', sans-serif;
+  --font-cinema-caps: 'Bebas Neue', sans-serif;
+
+  --ticket-width: 100%;
+  --ticket-min-height: 180px;
+  --ticket-radius: 4px;
+  --ticket-notch-size: 12px;
+  --ticket-perforation-gap: 8px;
+  --ticket-stub-width: 72px;
+}
+
+@keyframes ticket-punch {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ticket-lift {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  100% {
+    transform: translateY(-6px) rotate(-0.5deg);
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.12),
+      0 12px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  }
+}
+
+@keyframes ticket-print {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scaleY(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scaleY(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@keyframes stamp-wiggle {
+  0% {
+    transform: rotate(0deg) scale(1.5);
+    opacity: 0;
+  }
+  50% {
+    transform: rotate(-15deg) scale(1.2);
+    opacity: 0.8;
+  }
+  70% {
+    transform: rotate(10deg) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-5deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-ticket-print {
+  animation: ticket-print 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-ticket-lift {
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s ease;
+}
+
+.animate-ticket-lift:hover {
+  transform: translateY(-6px) rotate(-0.5deg);
+  box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.15),
+    0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.animate-ticket-punch:active {
+  animation: ticket-punch 0.15s ease-out;
+}
+
+.animate-stamp {
+  animation: stamp-wiggle 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @theme inline {
@@ -908,6 +1005,502 @@
   .parallax__layer {
     transition: all 0.3s ease-out;
     will-change: transform, opacity, filter;
+  }
+
+  .ticket-card {
+    position: relative;
+    background: linear-gradient(
+      135deg,
+      oklch(0.12 0.02 260) 0%,
+      oklch(0.08 0.01 260) 100%
+    );
+    border-radius: 4px;
+    overflow: hidden;
+    transition:
+      transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.25s ease;
+  }
+
+  .ticket-card:hover {
+    transform: translateY(-6px) rotate(-0.3deg);
+    box-shadow:
+      0 12px 24px rgba(0, 0, 0, 0.25),
+      0 24px 48px rgba(0, 0, 0, 0.15);
+  }
+
+  .ticket-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 255, 255, 0.03) 45%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.03) 55%,
+      transparent 60%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .ticket-card__notch-left,
+  .ticket-card__notch-right {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    background: var(--background);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+  }
+
+  .ticket-card__notch-left {
+    left: -8px;
+  }
+
+  .ticket-card__notch-right {
+    right: -8px;
+  }
+
+  .ticket-card__perforation {
+    position: absolute;
+    left: var(--ticket-stub-width);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 6px,
+      oklch(0.4 0.02 260) 6px,
+      oklch(0.4 0.02 260) 8px
+    );
+    opacity: 0.4;
+  }
+
+  .ticket-card__stub {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--ticket-stub-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 8px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 215, 0, 0.15) 0%,
+      rgba(255, 215, 0, 0.08) 100%
+    );
+    border-right: 1px solid rgba(255, 215, 0, 0.2);
+  }
+
+  .ticket-card__stub--ready {
+    background: linear-gradient(
+      180deg,
+      oklch(0.65 0.15 85 / 0.2) 0%,
+      oklch(0.55 0.12 70 / 0.15) 100%
+    );
+    border-right-color: oklch(0.65 0.15 85 / 0.4);
+  }
+
+  .ticket-card__stub--empty {
+    background: linear-gradient(
+      180deg,
+      oklch(0.25 0.02 260 / 0.2) 0%,
+      oklch(0.15 0.01 260 / 0.1) 100%
+    );
+    border-right-color: oklch(0.35 0.02 260 / 0.3);
+  }
+
+  .ticket-card__content {
+    position: relative;
+    margin-left: var(--ticket-stub-width);
+    padding: 16px;
+    min-height: 160px;
+  }
+
+  .ticket-card__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid oklch(0.3 0.02 260 / 0.3);
+  }
+
+  .ticket-card__movies {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ticket-movie {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    background: oklch(0.15 0.01 260 / 0.3);
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .ticket-movie:hover {
+    background: oklch(0.18 0.02 260 / 0.5);
+    border-color: oklch(0.4 0.05 260 / 0.3);
+    transform: translateX(4px);
+  }
+
+  .ticket-movie__poster {
+    position: relative;
+    width: 40px;
+    height: 56px;
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: oklch(0.2 0.02 260);
+  }
+
+  .ticket-movie__poster::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  .ticket-movie__number {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    background: oklch(0.7 0.1 50);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: oklch(0.1 0.02 50);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .ticket-movie__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ticket-movie__title {
+    font-weight: 600;
+    font-size: 14px;
+    color: oklch(0.95 0.01 260);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+    font-family: var(--font-cinema);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .ticket-movie__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: oklch(0.6 0.02 260);
+  }
+
+  .ticket-movie__rating {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    color: oklch(0.75 0.15 50);
+    font-weight: 500;
+  }
+
+  .ticket-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: oklch(0.1 0.01 260 / 0.2);
+    border-radius: 6px;
+    border: 1px dashed oklch(0.3 0.02 260 / 0.3);
+  }
+
+  .ticket-empty__icon {
+    width: 40px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: oklch(0.15 0.01 260 / 0.3);
+    border-radius: 3px;
+    color: oklch(0.4 0.02 260);
+  }
+
+  .ticket-stub__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid oklch(0.7 0.12 50);
+    margin-bottom: 8px;
+  }
+
+  .ticket-stub__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: oklch(0.3 0.05 260);
+    color: oklch(0.8 0.02 260);
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .ticket-stub__status {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: oklch(0.7 0.12 50);
+    padding: 6px 0;
+    font-family: var(--font-cinema);
+  }
+
+  .ticket-stub__status--ready {
+    color: oklch(0.8 0.15 85);
+    text-shadow: 0 0 12px oklch(0.6 0.15 85 / 0.5);
+  }
+
+  .ticket-stub__status--sitting-out {
+    color: oklch(0.5 0.02 260 / 0.6);
+  }
+
+  .ticket-stub__label {
+    font-size: 8px;
+    color: oklch(0.5 0.02 260 / 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: var(--font-cinema);
+  }
+
+  .ticket-stub__name {
+    font-size: 11px;
+    font-weight: 600;
+    color: oklch(0.9 0.01 260);
+    text-align: center;
+    word-break: break-word;
+    line-height: 1.3;
+    margin-top: 4px;
+    max-width: 60px;
+  }
+
+  .ticket-stub__count {
+    font-size: 10px;
+    color: oklch(0.5 0.02 260 / 0.7);
+    margin-top: auto;
+    font-family: var(--font-cinema);
+    letter-spacing: 1px;
+  }
+
+  .ticket-barcode {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 20px;
+    margin-top: 12px;
+    padding: 0 4px;
+  }
+
+  .ticket-barcode__bar {
+    width: 2px;
+    background: oklch(0.6 0.02 260 / 0.5);
+    border-radius: 1px;
+  }
+
+  .ticket-stamp {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 10px;
+    border: 2px solid;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(12deg);
+    font-family: var(--font-cinema);
+  }
+
+  .ticket-stamp--ready {
+    color: oklch(0.75 0.15 85);
+    border-color: oklch(0.75 0.15 85);
+    background: oklch(0.65 0.12 85 / 0.15);
+    text-shadow: 0 0 8px oklch(0.6 0.15 85 / 0.4);
+    box-shadow:
+      0 0 0 1px oklch(0.75 0.15 85 / 0.3),
+      0 0 12px oklch(0.6 0.15 85 / 0.2) inset;
+  }
+
+  .ticket-stamp--not-ready {
+    color: oklch(0.5 0.03 260 / 0.7);
+    border-color: oklch(0.4 0.02 260 / 0.4);
+    background: oklch(0.15 0.01 260 / 0.3);
+  }
+
+  .ticket-stamp--sitting-out {
+    color: oklch(0.4 0.02 260 / 0.5);
+    border-color: oklch(0.35 0.02 260 / 0.3);
+    background: oklch(0.12 0.01 260 / 0.2);
+  }
+
+  .light .ticket-card {
+    background: linear-gradient(
+      135deg,
+      oklch(0.98 0.01 50) 0%,
+      oklch(0.96 0.015 50) 100%
+    );
+  }
+
+  .light .ticket-card__notch-left,
+  .light .ticket-card__notch-right {
+    background: oklch(0.95 0.01 50);
+  }
+
+  .light .ticket-card__perforation {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 6px,
+      oklch(0.6 0.02 50) 6px,
+      oklch(0.6 0.02 50) 8px
+    );
+    opacity: 0.5;
+  }
+
+  .light .ticket-card__stub {
+    background: linear-gradient(
+      180deg,
+      oklch(0.85 0.02 45 / 0.4) 0%,
+      oklch(0.9 0.015 50 / 0.25) 100%
+    );
+    border-right-color: oklch(0.7 0.03 45 / 0.3);
+  }
+
+  .light .ticket-card__stub--ready {
+    background: linear-gradient(
+      180deg,
+      oklch(0.85 0.03 50 / 0.5) 0%,
+      oklch(0.92 0.02 55 / 0.35) 100%
+    );
+    border-right-color: oklch(0.7 0.05 50 / 0.5);
+  }
+
+  .light .ticket-card__content {
+    padding: 14px 16px;
+  }
+
+  .light .ticket-card__header {
+    border-bottom-color: oklch(0.85 0.01 50 / 0.6);
+  }
+
+  .light .ticket-movie {
+    background: oklch(0.92 0.01 50 / 0.4);
+  }
+
+  .light .ticket-movie:hover {
+    background: oklch(0.88 0.015 50 / 0.6);
+    border-color: oklch(0.8 0.02 50 / 0.4);
+  }
+
+  .light .ticket-movie__poster {
+    background: oklch(0.8 0.02 50);
+  }
+
+  .light .ticket-movie__title {
+    color: oklch(0.2 0.02 260);
+  }
+
+  .light .ticket-movie__meta {
+    color: oklch(0.5 0.02 260 / 0.8);
+  }
+
+  .light .ticket-movie__rating {
+    color: oklch(0.65 0.12 45);
+  }
+
+  .light .ticket-empty {
+    background: oklch(0.94 0.005 50 / 0.3);
+    border-color: oklch(0.75 0.01 50 / 0.4);
+  }
+
+  .light .ticket-empty__icon {
+    background: oklch(0.85 0.015 50 / 0.5);
+    color: oklch(0.6 0.02 260 / 0.5);
+  }
+
+  .light .ticket-stub__avatar {
+    border-color: oklch(0.55 0.08 45);
+  }
+
+  .light .ticket-stub__avatar--placeholder {
+    background: oklch(0.65 0.04 50);
+    color: oklch(0.3 0.02 260);
+  }
+
+  .light .ticket-stub__status {
+    color: oklch(0.45 0.05 45);
+  }
+
+  .light .ticket-stub__status--ready {
+    color: oklch(0.55 0.1 45);
+    text-shadow: none;
+  }
+
+  .light .ticket-stub__name {
+    color: oklch(0.25 0.02 260);
+  }
+
+  .light .ticket-stub__count {
+    color: oklch(0.5 0.02 260 / 0.7);
+  }
+
+  .light .ticket-barcode__bar {
+    background: oklch(0.4 0.02 260 / 0.4);
+  }
+
+  .light .ticket-stamp--ready {
+    color: oklch(0.55 0.1 45);
+    border-color: oklch(0.55 0.1 45);
+    background: oklch(0.9 0.02 50 / 0.4);
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  .light .ticket-stamp--not-ready {
+    color: oklch(0.5 0.02 260 / 0.5);
+    border-color: oklch(0.7 0.01 50 / 0.4);
+    background: oklch(0.95 0.005 50 / 0.5);
+  }
+
+  .light .ticket-stamp--sitting-out {
+    color: oklch(0.55 0.015 260 / 0.5);
+    border-color: oklch(0.75 0.01 50 / 0.3);
+    background: oklch(0.96 0.005 50 / 0.4);
   }
 
   .spotlight-glow {

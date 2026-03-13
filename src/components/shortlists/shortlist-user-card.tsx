@@ -1,16 +1,7 @@
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import type { Movie } from '@/db/schema/movies'
 import { getResponsiveImageProps } from '@/lib/tmdb-api'
-import { CheckCircle2, Film, Plus, Star, XCircle } from 'lucide-react'
-
-function getCardColor(index: number) {
-  const hue = (index * 137.5) % 360
-  return {
-    color: `hsl(${hue}, 70%, 50%)`,
-    faint: `hsl(${hue}, 70%, 50%, 0.12)`,
-    strip: `hsl(${hue}, 65%, 45%)`,
-  }
-}
+import { Film, Plus, Star } from 'lucide-react'
 
 interface Props {
   shortlist: ShortlistWithUserMovies
@@ -19,23 +10,20 @@ interface Props {
   delay?: number
 }
 
-function MovieRow({
+function TicketMovieRow({
   movie,
   position,
   onMovieClick,
-  cardIndex = 0,
 }: {
   movie: Movie
   position: number
   onMovieClick: (movie: Movie, e: React.MouseEvent<HTMLDivElement>) => void
-  cardIndex?: number
 }) {
   const posterPath = movie.images?.posters?.[0]?.file_path
   const posterImage = getResponsiveImageProps(posterPath, 'poster', 'w154')
   const year = movie.releaseDate
     ? new Date(movie.releaseDate).getFullYear()
     : null
-  const genres = movie.genres?.slice(0, 2) ?? []
   const rating = movie.voteAverage
     ? Math.round(movie.voteAverage * 10) / 10
     : null
@@ -44,84 +32,75 @@ function MovieRow({
     : null
 
   return (
-    <div
-      className="flex gap-3 p-3 cursor-pointer group hover:bg-accent/40 transition-colors duration-150 rounded-xl mx-1"
-      onClick={(e) => onMovieClick(movie, e)}
-    >
-      <div className="relative w-12 flex-shrink-0 rounded-md overflow-hidden border border-border/50 shadow-sm bg-muted">
-        <div className="aspect-[2/3]">
-          {posterImage ? (
-            <img
-              src={posterImage.src}
-              srcSet={posterImage.srcSet}
-              sizes="48px"
-              alt={movie.title}
-              width={48}
-              height={72}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading={cardIndex === 0 && position === 1 ? 'eager' : 'lazy'}
-              decoding="async"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Film className="w-4 h-4 text-muted-foreground/40" />
-            </div>
-          )}
-        </div>
-        <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-black/60 flex items-center justify-center">
-          <span className="text-[9px] font-bold text-white leading-none">
-            {position}
-          </span>
-        </div>
+    <div className="ticket-movie group" onClick={(e) => onMovieClick(movie, e)}>
+      <div className="ticket-movie__poster">
+        {posterImage ? (
+          <img
+            src={posterImage.src}
+            srcSet={posterImage.srcSet}
+            sizes="40px"
+            alt={movie.title}
+            width={40}
+            height={56}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Film className="w-4 h-4 opacity-40" />
+          </div>
+        )}
+        <div className="ticket-movie__number">{position}</div>
       </div>
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
-        <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-          {movie.title}
-        </p>
-        <div className="flex items-center gap-2 flex-wrap">
-          {year && (
-            <span className="text-xs text-muted-foreground">{year}</span>
-          )}
-          {runtime && (
-            <span className="text-xs text-muted-foreground/70">{runtime}</span>
-          )}
+      <div className="ticket-movie__info">
+        <p className="ticket-movie__title">{movie.title}</p>
+        <div className="ticket-movie__meta">
+          {year && <span>{year}</span>}
+          {runtime && <span>{runtime}</span>}
           {rating !== null && (
-            <span className="flex items-center gap-0.5 text-xs text-amber-500 font-medium">
-              <Star className="w-3 h-3 fill-amber-500" />
+            <span className="ticket-movie__rating">
+              <Star className="w-3 h-3 fill-current" />
               {rating.toFixed(1)}
             </span>
           )}
         </div>
-        {genres.length > 0 && (
-          <div className="flex gap-1 flex-wrap">
-            {genres.map((g) => (
-              <span
-                key={g}
-                className="text-[10px] bg-muted/70 text-muted-foreground rounded-full px-2 py-0.5 leading-none"
-              >
-                {g}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
 }
 
-function EmptyMovieRow({ position }: { position: number }) {
+function TicketEmptyRow({ position }: { position: number }) {
   return (
-    <div className="flex gap-3 px-3 py-3 mx-1">
-      <div className="w-12 flex-shrink-0 rounded-md border-2 border-dashed border-border/30 bg-muted/10 flex items-center justify-center">
-        <div className="aspect-[2/3] w-full flex items-center justify-center">
-          <Plus className="w-4 h-4 text-muted-foreground/25" />
+    <div className="ticket-empty">
+      <div className="ticket-empty__icon">
+        <Plus className="w-4 h-4" />
+      </div>
+      <div className="ticket-movie__info">
+        <p className="ticket-movie__title opacity-40">Available</p>
+        <div className="ticket-movie__meta opacity-40">
+          <span>Slot {position}</span>
         </div>
       </div>
-      <div className="flex-1 flex items-center">
-        <p className="text-xs text-muted-foreground/40 italic">
-          Empty slot {position}
-        </p>
-      </div>
+    </div>
+  )
+}
+
+function TicketBarcode({ seed }: { seed: string }) {
+  const bars = Array.from({ length: 20 }, (_, i) => {
+    const hash = seed.charCodeAt(i % seed.length) + i * 7
+    return 2 + (hash % 5)
+  })
+
+  return (
+    <div className="ticket-barcode">
+      {bars.map((height, i) => (
+        <div
+          key={i}
+          className="ticket-barcode__bar"
+          style={{ height: `${height}px` }}
+        />
+      ))}
     </div>
   )
 }
@@ -133,7 +112,6 @@ export function ShortlistUserCard({
   delay = 0,
 }: Props) {
   const { user, movies, isReady, participating } = shortlist
-  const { color, faint, strip } = getCardColor(colorIndex)
 
   const handleMovieClick = (
     movie: Movie,
@@ -142,97 +120,95 @@ export function ShortlistUserCard({
     onMovieClick(movie, e.currentTarget.getBoundingClientRect())
   }
 
+  const getStubClass = () => {
+    if (!participating) return 'ticket-card__stub ticket-card__stub--empty'
+    if (isReady) return 'ticket-card__stub ticket-card__stub--ready'
+    return 'ticket-card__stub'
+  }
+
+  const getStatusClass = () => {
+    if (!participating)
+      return 'ticket-stub__status ticket-stub__status--sitting-out'
+    if (isReady) return 'ticket-stub__status ticket-stub__status--ready'
+    return 'ticket-stub__status'
+  }
+
+  const getStampClass = () => {
+    if (!participating) return 'ticket-stamp ticket-stamp--sitting-out'
+    if (isReady) return 'ticket-stamp ticket-stamp--ready'
+    return 'ticket-stamp ticket-stamp--not-ready'
+  }
+
+  const getStampText = () => {
+    if (!participating) return 'Out'
+    if (isReady) return 'Ready'
+    return 'Wait'
+  }
+
   return (
     <div
-      className={`rounded-2xl bg-card border overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col animate-fade-in ${
-        !participating ? 'opacity-55' : ''
-      }`}
-      style={{ borderColor: `${color}45`, animationDelay: `${delay}s` }}
+      className="ticket-card animate-ticket-print group cursor-pointer"
+      style={{ animationDelay: `${delay}s` }}
     >
-      <div
-        className="h-1 w-full"
-        style={{ background: `linear-gradient(90deg, ${strip}, ${color}60)` }}
-      />
-      <div
-        className="flex items-center gap-3 px-4 pt-3.5 pb-3"
-        style={{ borderBottom: `1px solid ${color}20`, background: faint }}
-      >
+      <div className="ticket-card__notch-left" />
+      <div className="ticket-card__notch-right" />
+      <div className="ticket-card__perforation" />
+
+      <div className={getStubClass()}>
         {user.image ? (
           <img
             src={user.image}
             alt={user.name}
             width={44}
             height={44}
-            className={`w-11 h-11 rounded-full border-2 flex-shrink-0 ${
-              !participating ? 'grayscale' : ''
+            className={`ticket-stub__avatar ${
+              !participating ? 'grayscale opacity-50' : ''
             }`}
-            style={{ borderColor: color }}
             loading={colorIndex < 6 ? 'eager' : 'lazy'}
             decoding="async"
           />
         ) : (
           <div
-            className="w-11 h-11 rounded-full flex items-center justify-center text-base font-bold text-white flex-shrink-0"
-            style={{ background: color }}
+            className={`ticket-stub__avatar ticket-stub__avatar--placeholder ${
+              !participating ? 'grayscale opacity-50' : ''
+            }`}
           >
             {user.name.charAt(0).toUpperCase()}
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <p
-            className={`font-bold text-base leading-tight truncate ${
-              !participating
-                ? 'text-muted-foreground line-through'
-                : 'text-foreground'
-            }`}
-          >
-            {user.name}
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {movies.length} of 3 picks
-          </p>
+        <span className="ticket-stub__label">Member</span>
+        <p
+          className={`ticket-stub__name ${
+            !participating ? 'line-through opacity-50' : ''
+          }`}
+        >
+          {user.name}
+        </p>
+        <span className="ticket-stub__count">{movies.length}/3 picks</span>
+        <div className={getStatusClass()}>
+          {!participating ? 'Sitting Out' : isReady ? 'Ready' : 'Pending'}
         </div>
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          {!participating ? (
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground/70 bg-muted/60 rounded-full px-2.5 py-1 font-medium">
-              <XCircle className="w-3 h-3" />
-              Sitting out
-            </span>
-          ) : (
-            <span
-              className={`flex items-center gap-1 text-[11px] rounded-full px-2.5 py-1 font-semibold border ${
-                isReady
-                  ? 'text-success bg-success/10 border-success/30'
-                  : 'text-muted-foreground bg-muted/50 border-transparent'
-              }`}
-            >
-              {isReady ? (
-                <>
-                  <CheckCircle2 className="w-3 h-3" />
-                  Ready
-                </>
-              ) : (
-                'Not ready'
-              )}
-            </span>
-          )}
-        </div>
+        <TicketBarcode seed={`${user.id}-${colorIndex}`} />
       </div>
-      <div className="flex flex-col py-1.5 flex-1">
-        {Array.from({ length: 3 }).map((_, idx) => {
-          const film = movies[idx] as Movie | undefined
-          return film ? (
-            <MovieRow
-              key={film.id}
-              movie={film}
-              position={idx + 1}
-              cardIndex={colorIndex}
-              onMovieClick={handleMovieClick}
-            />
-          ) : (
-            <EmptyMovieRow key={`empty-${idx}`} position={idx + 1} />
-          )
-        })}
+
+      <div className="ticket-card__content">
+        <div className={getStampClass()}>{getStampText()}</div>
+
+        <div className="ticket-card__movies">
+          {Array.from({ length: 3 }).map((_, idx) => {
+            const film = movies[idx] as Movie | undefined
+            return film ? (
+              <TicketMovieRow
+                key={film.id}
+                movie={film}
+                position={idx + 1}
+                onMovieClick={handleMovieClick}
+              />
+            ) : (
+              <TicketEmptyRow key={`empty-${idx}`} position={idx + 1} />
+            )
+          })}
+        </div>
       </div>
     </div>
   )
