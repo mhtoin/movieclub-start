@@ -1,8 +1,10 @@
-import { eq, lt } from 'drizzle-orm'
+import { eq, lt, and } from 'drizzle-orm'
 import { db } from '../db'
 import {
+  account,
   passwordResetToken,
   PasswordResetToken,
+  SelectAccount,
   User,
   user,
 } from '../schema/users'
@@ -147,6 +149,158 @@ export async function deletePasswordResetToken(tokenId: string): Promise<void> {
       .where(eq(passwordResetToken.id, tokenId))
   } catch (error) {
     console.error('Database error while deleting password reset token:', error)
+    throw new Error(
+      'Failed to connect to the database. Please ensure the database is running.',
+      { cause: error },
+    )
+  }
+}
+
+export async function createUserFromOAuth(data: {
+  email: string
+  name: string
+  image: string
+}): Promise<User> {
+  try {
+    const createdUser = await db
+      .insert(user)
+      .values({
+        id: crypto.randomUUID(),
+        email: data.email,
+        password: null,
+        image: data.image,
+        name: data.name,
+      })
+      .returning()
+      .then((rows) => rows[0])
+
+    return createdUser
+  } catch (error) {
+    console.error('Database error while creating OAuth user:', error)
+    throw new Error(
+      'Failed to connect to the database. Please ensure the database is running.',
+      { cause: error },
+    )
+  }
+}
+
+export async function getUserByProvider(
+  provider: string,
+  providerAccountId: string,
+): Promise<User | null> {
+  try {
+    const accountRecord = await db
+      .select()
+      .from(account)
+      .where(
+        and(
+          eq(account.provider, provider),
+          eq(account.providerAccountId, providerAccountId),
+        ),
+      )
+      .limit(1)
+      .then((rows) => rows[0] || null)
+
+    if (!accountRecord) {
+      return null
+    }
+
+    return getUserById(accountRecord.userId)
+  } catch (error) {
+    console.error('Database error while fetching user by provider:', error)
+    throw new Error(
+      'Failed to connect to the database. Please ensure the database is running.',
+      { cause: error },
+    )
+  }
+}
+
+export async function createAccount(data: {
+  userId: string
+  provider: string
+  providerAccountId: string
+  accessToken: string
+  refreshToken?: string
+  expiresAt?: number
+  scope?: string
+  tokenType?: string
+}): Promise<SelectAccount> {
+  try {
+    const createdAccount = await db
+      .insert(account)
+      .values({
+        id: crypto.randomUUID(),
+        userId: data.userId,
+        provider: data.provider,
+        providerAccountId: data.providerAccountId,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken ?? null,
+        expiresAt: data.expiresAt ?? null,
+        scope: data.scope ?? null,
+        tokenType: data.tokenType ?? null,
+        type: 'oauth',
+      })
+      .returning()
+      .then((rows) => rows[0])
+
+    return createdAccount
+  } catch (error) {
+    console.error('Database error while creating account:', error)
+    throw new Error(
+      'Failed to connect to the database. Please ensure the database is running.',
+      { cause: error },
+    )
+  }
+}
+
+export async function getAccountByUserId(
+  userId: string,
+  provider: string,
+): Promise<SelectAccount | null> {
+  try {
+    return db
+      .select()
+      .from(account)
+      .where(and(eq(account.userId, userId), eq(account.provider, provider)))
+      .limit(1)
+      .then((rows) => rows[0] || null)
+  } catch (error) {
+    console.error('Database error while fetching account by user id:', error)
+    throw new Error(
+      'Failed to connect to the database. Please ensure the database is running.',
+      { cause: error },
+    )
+  }
+}
+
+export async function updateAccount(
+  userId: string,
+  provider: string,
+  data: {
+    accessToken: string
+    refreshToken?: string
+    expiresAt?: number
+    scope?: string
+    tokenType?: string
+  },
+): Promise<SelectAccount | null> {
+  try {
+    const updatedAccount = await db
+      .update(account)
+      .set({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken ?? null,
+        expiresAt: data.expiresAt ?? null,
+        scope: data.scope ?? null,
+        tokenType: data.tokenType ?? null,
+      })
+      .where(and(eq(account.userId, userId), eq(account.provider, provider)))
+      .returning()
+      .then((rows) => rows[0] || null)
+
+    return updatedAccount
+  } catch (error) {
+    console.error('Database error while updating account:', error)
     throw new Error(
       'Failed to connect to the database. Please ensure the database is running.',
       { cause: error },
