@@ -1,9 +1,14 @@
 import { Discord, OAuth2Tokens, generateState } from 'arctic'
 
+const baseUrl = process.env.BASE_URL
+if (!baseUrl) {
+  throw new Error('BASE_URL environment variable is not set')
+}
+
 export const discord = new Discord(
   process.env.DISCORD_CLIENT_ID!,
   process.env.DISCORD_CLIENT_SECRET!,
-  `${process.env.BASE_URL}/login/discord/callback`,
+  `${baseUrl}/login/discord/callback`,
 )
 
 export const DISCORD_SCOPES = ['identify', 'email']
