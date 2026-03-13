@@ -1,3 +1,5 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { deleteCookie, getCookie } from '@tanstack/react-start/server'
 import {
   createAccount,
   createUserFromOAuth,
@@ -11,8 +13,7 @@ import {
   getDiscordUser,
   validateDiscordAuthorizationCode,
 } from '@/lib/oauth/discord'
-import { createFileRoute } from '@tanstack/react-router'
-import { deleteCookie, getCookie } from '@tanstack/react-start/server'
+import { setLastUsedLoginMethod } from '@/lib/auth/last-used-login'
 
 const DISCORD_OAUTH_STATE_COOKIE = 'discord_oauth_state'
 
@@ -96,6 +97,8 @@ export const Route = createFileRoute('/login/discord/callback')({
           image: user.image,
           sessionToken: session.token,
         })
+
+        await setLastUsedLoginMethod({ data: 'discord' })
 
         return new Response(null, {
           status: 302,

@@ -1,6 +1,9 @@
+import type { LoginMethod } from '@/lib/auth/last-used-login'
+import { getLastUsedLoginMethodFromClient } from '@/lib/auth/last-used-login'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl } from '@/lib/tmdb-api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import {
   DialogBackdrop,
@@ -48,6 +51,12 @@ export default function LoginDialog() {
 
 function LoginDialogContent() {
   const { data: movies } = useQuery(tmdbQueries.backgroundMovies(12))
+  const [lastUsedMethod, setLastUsedMethod] = useState<LoginMethod | null>(null)
+
+  useEffect(() => {
+    setLastUsedMethod(getLastUsedLoginMethodFromClient())
+  }, [])
+  console.log('Last used login method:', lastUsedMethod)
 
   const posters = movies
     ? movies.map((m) => getImageUrl(m.poster_path) || '').filter(Boolean)
@@ -186,7 +195,7 @@ function LoginDialogContent() {
         </DialogClose>
 
         <div className="w-full max-w-sm mx-auto">
-          <LoginForm />
+          <LoginForm lastUsedMethod={lastUsedMethod} />
         </div>
       </div>
     </div>

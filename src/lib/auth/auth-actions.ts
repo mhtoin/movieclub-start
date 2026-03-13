@@ -1,3 +1,10 @@
+import { redirect } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import bcrypt from 'bcryptjs'
+import { z } from 'zod'
+import { sendPasswordResetEmail } from '../email'
+import { createSession, useAppSession } from './auth'
+import { setLastUsedLoginMethod } from './last-used-login'
 import {
   createPasswordResetToken,
   createUser,
@@ -7,12 +14,6 @@ import {
   getUserById,
   updateUserPassword,
 } from '@/db/queries/user'
-import { redirect } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import bcrypt from 'bcryptjs'
-import { z } from 'zod'
-import { sendPasswordResetEmail } from '../email'
-import { createSession, useAppSession } from './auth'
 
 const passwordSchema = z
   .string()
@@ -186,6 +187,8 @@ export const registerFn = createServerFn({ method: 'POST' })
 
     clearRateLimit(`register:${email}`)
 
+    await setLastUsedLoginMethod({ data: 'password' })
+
     throw redirect({ to: '/home' })
   })
 export const loginFn = createServerFn({ method: 'POST' })
@@ -223,6 +226,8 @@ export const loginFn = createServerFn({ method: 'POST' })
     })
 
     clearRateLimit(`login:${email}`)
+
+    await setLastUsedLoginMethod({ data: 'password' })
 
     throw redirect({ to: '/home' })
   })

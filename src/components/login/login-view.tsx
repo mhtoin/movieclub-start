@@ -1,3 +1,4 @@
+import type { LoginMethod } from '@/lib/auth/last-used-login'
 import { useLoginMutation } from '@/lib/react-query/mutations/auth'
 import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
@@ -6,11 +7,13 @@ import Field from '../ui/field'
 import OAuthProviders from './oauth-providers'
 
 interface LoginViewProps {
+  lastUsedMethod?: LoginMethod | null
   onSwitch: () => void
   onForgotPassword: () => void
 }
 
 export default function LoginView({
+  lastUsedMethod,
   onSwitch,
   onForgotPassword,
 }: LoginViewProps) {
@@ -89,13 +92,19 @@ export default function LoginView({
           disabled={isLoggingIn}
           type="submit"
           variant={'primary'}
-          className="w-full mt-2"
+          className="w-full mt-2 relative"
         >
           {isLoggingIn ? 'Logging in...' : 'Sign In'}
+          {lastUsedMethod === 'password' && !isLoggingIn && (
+            <span className="absolute right-4 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-secondary backdrop-blur-sm border border-border/30 text-secondary-foreground">
+              <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              Last used
+            </span>
+          )}
         </Button>
       </Form>
 
-      <OAuthProviders />
+      <OAuthProviders lastUsedMethod={lastUsedMethod} />
 
       <p className="px-8 text-center text-sm text-muted-foreground mt-4">
         Don't have an account?{' '}

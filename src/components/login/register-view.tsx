@@ -1,9 +1,9 @@
-import { useRegisterMutation } from '@/lib/react-query/mutations/auth'
 import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
 import { Button } from '../ui/button'
 import Field from '../ui/field'
 import OAuthProviders from './oauth-providers'
+import { useRegisterMutation } from '@/lib/react-query/mutations/auth'
 
 interface RegisterViewProps {
   onSwitch: () => void
