@@ -83,7 +83,7 @@ export const review = pgTable(
   {
     id: text().primaryKey().notNull(),
     content: text().notNull(),
-    userId: text().notNull(),
+    userId: text(),
     movieId: text().notNull(),
     createdAt: timestamp({ precision: 3, mode: 'date' }).notNull().defaultNow(),
     rating: doublePrecision().notNull(),
@@ -95,7 +95,7 @@ export const review = pgTable(
       name: 'Review_userId_fkey',
     })
       .onUpdate('cascade')
-      .onDelete('restrict'),
+      .onDelete('set null'),
     foreignKey({
       columns: [table.movieId],
       foreignColumns: [movie.id],

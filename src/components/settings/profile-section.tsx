@@ -1,5 +1,6 @@
 import { UserSession } from '@/types/auth'
 import { Camera, Mail, Shield, User } from 'lucide-react'
+import { DeleteAccountDialog } from './delete-account-dialog'
 import Avatar from '../ui/avatar'
 
 interface ProfileSectionProps {
@@ -77,6 +78,31 @@ export function ProfileSection({ user }: ProfileSectionProps) {
               Email Address
             </label>
             <p className="font-medium mt-1">{user.email}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="pt-4 border-t border-border">
+        <div className="flex items-start gap-2 mb-4">
+          <div className="h-5 w-5 flex items-center justify-center">
+            <span className="text-destructive text-lg">⚠</span>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-destructive">Danger Zone</h3>
+            <p className="text-sm text-muted-foreground">
+              Irreversible actions that affect your account
+            </p>
+          </div>
+        </div>
+        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h4 className="font-medium text-foreground">Delete Account</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                Permanently delete your account and all associated data
+              </p>
+            </div>
+            <DeleteAccountDialog />
           </div>
         </div>
       </section>

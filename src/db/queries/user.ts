@@ -1,6 +1,10 @@
 import { eq, lt, and } from 'drizzle-orm'
 import { db } from '../db'
 import { shortlist } from '../schema/shortlists'
+import { tierlist } from '../schema/tierlists'
+import { session } from '../schema/sessions'
+import { review, recommendedMovie } from '../schema/movies'
+import { raffleToUser } from '../schema/raffles'
 import {
   account,
   passwordResetToken,
@@ -330,5 +334,50 @@ export async function updateAccount(
       'Failed to connect to the database. Please ensure the database is running.',
       { cause: error },
     )
+  }
+}
+
+export async function deleteUser(userId: string): Promise<void> {
+  try {
+    await db.transaction(async (tx) => {
+      // Delete user's sessions
+      await tx.delete(session).where(eq(session.userId, userId))
+
+      // Delete user's password reset tokens
+      await tx
+        .delete(passwordResetToken)
+        .where(eq(passwordResetToken.userId, userId))
+
+      // Delete user's raffle participations (raffleToUser has CASCADE, but explicit is clearer)
+      await tx.delete(raffleToUser).where(eq(raffleToUser.b, userId))
+
+      // Delete user's tierlists (tierlist has CASCADE, but let's be explicit)
+      await tx.delete(tierlist).where(eq(tierlist.userId, userId))
+
+      // Delete user's shortlist (shortlist has CASCADE)
+      await tx.delete(shortlist).where(eq(shortlist.userId, userId))
+
+      // Delete user's recommended movies
+      await tx
+        .delete(recommendedMovie)
+        .where(eq(recommendedMovie.userId, userId))
+
+      // Anonymize reviews by setting userId to null (reviews become anonymous)
+      await tx
+        .update(review)
+        .set({ userId: null })
+        .where(eq(review.userId, userId))
+
+      // Delete user's OAuth accounts
+      await tx.delete(account).where(eq(account.userId, userId))
+
+      // Finally, delete the user
+      await tx.delete(user).where(eq(user.id, userId))
+    })
+  } catch (error) {
+    console.error('Database error while deleting user:', error)
+    throw new Error('Failed to delete user account. Please try again later.', {
+      cause: error,
+    })
   }
 }
