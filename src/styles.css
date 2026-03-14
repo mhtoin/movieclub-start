@@ -88,7 +88,7 @@
 }
 
 .scheme-default.dark {
-  --scheme-hue: 50;
+  --scheme-hue: 60;
   --bg-scheme-hue: 260;
   --background: oklch(0.1797 0.0043 308.1928);
   --foreground: oklch(0.8109 0 0);
@@ -257,7 +257,7 @@
 }
 
 .scheme-sunset.dark {
-  --scheme-hue: 30;
+  --scheme-hue: 100;
   --background: oklch(0.15 0.015 25);
   --foreground: oklch(0.88 0.01 40);
 
@@ -692,14 +692,14 @@
   --ticket-width: 100%;
   --ticket-min-height: 180px;
   --ticket-radius: 4px;
-  --ticket-notch-size: 12px;
+  --ticket-notch-size: 40px;
   --ticket-perforation-gap: 8px;
   --ticket-stub-width: 72px;
 
   --animate-ticket-print: ticket-print 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 
-  --ticket-bg-start: oklch(0.25 0.015 var(--scheme-hue, 260));
-  --ticket-bg-end: oklch(0.2 0.01 var(--scheme-hue, 260));
+  --ticket-bg-start: oklch(0.35 0.035 var(--scheme-hue, 260));
+  --ticket-bg-end: oklch(0.25 0.01 var(--scheme-hue, 260));
   --ticket-movie-bg: oklch(0.18 0.02 var(--scheme-hue, 260) / 0.35);
   --ticket-movie-bg-hover: oklch(0.22 0.025 var(--scheme-hue, 260) / 0.5);
   --ticket-movie-border-hover: oklch(0.4 0.06 var(--scheme-hue, 260) / 0.4);
@@ -736,8 +736,8 @@
 }
 
 .light {
-  --ticket-bg-start: oklch(0.96 0.015 var(--scheme-hue, 50));
-  --ticket-bg-end: oklch(0.92 0.02 var(--scheme-hue, 50));
+  --ticket-bg-start: oklch(0.32 0.04 var(--scheme-hue, 50));
+  --ticket-bg-end: oklch(0.88 0.05 var(--scheme-hue, 150));
   --ticket-movie-bg: oklch(0.9 0.015 var(--scheme-hue, 50) / 0.5);
   --ticket-movie-bg-hover: oklch(0.85 0.02 var(--scheme-hue, 50) / 0.7);
   --ticket-movie-border-hover: oklch(0.75 0.025 var(--scheme-hue, 50) / 0.5);
@@ -1161,11 +1161,6 @@
 
   .ticket-card {
     position: relative;
-    background: linear-gradient(
-      135deg,
-      oklch(0.12 0.02 260) 0%,
-      oklch(0.08 0.01 260) 100%
-    );
     border-radius: 4px;
     overflow: hidden;
     transition:
@@ -1180,22 +1175,31 @@
       0 24px 48px rgba(0, 0, 0, 0.15);
   }
 
-  .ticket-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      115deg,
-      transparent 0%,
-      transparent 40%,
-      rgba(255, 255, 255, 0.03) 45%,
-      rgba(255, 255, 255, 0.06) 50%,
-      rgba(255, 255, 255, 0.03) 55%,
-      transparent 60%,
-      transparent 100%
-    );
-    pointer-events: none;
-    z-index: 10;
+  .ticket-card {
+    -webkit-mask-image:
+      radial-gradient(
+        circle at 0px 50%,
+        transparent calc(var(--ticket-notch-size) / 2),
+        black calc(var(--ticket-notch-size) / 2)
+      ),
+      radial-gradient(
+        circle at 100% 50%,
+        transparent calc(var(--ticket-notch-size) / 2),
+        black calc(var(--ticket-notch-size) / 2)
+      );
+    mask-image:
+      radial-gradient(
+        circle at 0px 50%,
+        transparent calc(var(--ticket-notch-size) / 2),
+        black calc(var(--ticket-notch-size) / 2)
+      ),
+      radial-gradient(
+        circle at 100% 50%,
+        transparent calc(var(--ticket-notch-size) / 2),
+        black calc(var(--ticket-notch-size) / 2)
+      );
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
   }
 
   .ticket-card__notch-left,

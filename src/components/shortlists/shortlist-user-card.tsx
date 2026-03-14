@@ -36,12 +36,6 @@ function TicketMovieRow({
       className="flex items-center gap-3 p-2 rounded-md border border-transparent hover:translate-x-1 transition-all duration-200 cursor-pointer group bg-[var(--ticket-movie-bg)] hover:bg-[var(--ticket-movie-bg-hover)] hover:border-[var(--ticket-movie-border-hover)]"
       onClick={(e) => onMovieClick(movie, e)}
     >
-      <div className="relative w-6 h-14 flex-shrink-0">
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-7 rounded-sm flex items-center justify-center text-[9px] font-bold bg-[var(--ticket-number-bg)] text-[var(--ticket-number-fg)]">
-          {position}
-        </div>
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-3 bg-background rounded-l-sm" />
-      </div>
       <div className="relative w-10 h-14 rounded-sm overflow-hidden flex-shrink-0 bg-[var(--ticket-poster-bg)]">
         {posterImage ? (
           <img
@@ -84,12 +78,6 @@ function TicketMovieRow({
 function TicketEmptyRow({ position }: { position: number }) {
   return (
     <div className="flex items-center gap-2.5 p-2 rounded-md border border-dashed bg-[var(--ticket-empty-bg)] border-[var(--ticket-empty-border)]">
-      <div className="relative w-6 h-14 flex-shrink-0">
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-7 rounded-sm flex items-center justify-center text-[9px] font-bold bg-[var(--ticket-number-bg)] text-[var(--ticket-number-fg)] opacity-40">
-          {position}
-        </div>
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-3 bg-background rounded-l-sm" />
-      </div>
       <div className="w-10 h-14 flex items-center justify-center bg-[var(--ticket-movie-bg)] rounded-sm text-[var(--ticket-empty-icon)]">
         <Plus className="w-4 h-4" />
       </div>
@@ -164,11 +152,9 @@ export function ShortlistUserCard({
 
   return (
     <div
-      className="relative rounded overflow-hidden transition-transform duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:rotate-[-0.3deg] hover:shadow-[0_12px_24px_rgba(0,0,0,0.25),0_24px_48px_rgba(0,0,0,0.15)] cursor-pointer animate-ticket-print bg-gradient-to-br from-[var(--ticket-bg-start)] to-[var(--ticket-bg-end)]"
+      className="ticket-card relative rounded overflow-hidden transition-transform duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:rotate-[-0.3deg] hover:shadow-[0_12px_24px_rgba(0,0,0,0.25),0_24px_48px_rgba(0,0,0,0.15)] cursor-pointer animate-ticket-print bg-gradient-to-br from-[var(--ticket-bg-start)] to-[var(--ticket-bg-end)]"
       style={{ animationDelay: `${delay}s` }}
     >
-      <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-4 h-4 rounded-full bg-background z-[5] pointer-events-none" />
-      <div className="absolute top-1/2 -right-2 -translate-y-1/2 w-4 h-4 rounded-full bg-background z-[5] pointer-events-none" />
       <div
         className="absolute top-0 bottom-0 left-[88px] w-px opacity-50"
         style={{
@@ -176,10 +162,6 @@ export function ShortlistUserCard({
             'repeating-linear-gradient(to bottom, transparent 0px, transparent 10px, var(--ticket-perforation) 10px, var(--ticket-perforation) 14px)',
         }}
       />
-      {/*<div className="absolute -top-3 left-[86px] -translate-x-1/2 w-10 h-8 rounded-full bg-background z-[5] pointer-events-none" />
-      <div className="absolute -bottom-3 left-[86px] -translate-x-1/2 w-10 h-8 rounded-full bg-background z-[5] pointer-events-none" />*/}
-      {/*<div className="absolute top-1/2 left-[80px] -translate-y-1/2 w-4 h-4 rounded-full bg-background z-[5] pointer-events-none" />*/}
-
       <div className={getStubClass(participating, isReady)}>
         <div className="flex flex-col items-center">
           {user.image ? (
@@ -214,12 +196,6 @@ export function ShortlistUserCard({
             {user.name}
           </p>
         </div>
-        {/*<div
-          className={getStatusClass(participating, isReady)}
-          style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
-        >
-          {!participating ? 'Sitting Out' : isReady ? 'Ready' : 'Pending'}
-        </div>*/}
         <TicketBarcode seed={`${user.id}-${colorIndex}`} />
       </div>
 
