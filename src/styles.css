@@ -695,6 +695,8 @@
   --ticket-notch-size: 12px;
   --ticket-perforation-gap: 8px;
   --ticket-stub-width: 72px;
+
+  --animate-ticket-print: ticket-print 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes ticket-punch {
