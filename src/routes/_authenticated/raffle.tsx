@@ -1,7 +1,7 @@
 import { PageTitleBar } from '@/components/page-titlebar'
-import { RaffleControls } from '@/components/raffle/raffle-controls'
+import { ParticipantTicket } from '@/components/raffle/participant-ticket'
+import { RaffleControlBar } from '@/components/raffle/raffle-control-bar'
 import { RaffleCountdown } from '@/components/raffle/raffle-countdown'
-import { RaffleHistory } from '@/components/raffle/raffle-history'
 import { RaffleSpinner } from '@/components/raffle/raffle-spinner'
 import { RaffleWinner } from '@/components/raffle/raffle-winner'
 import { ShortlistsSkeleton } from '@/components/shortlists/shortlists-skeleton'
@@ -10,7 +10,7 @@ import {
   useFinalizeRaffleMutation,
   useStartRaffleMutation,
 } from '@/lib/react-query/mutations/raffle'
-import { raffleQueries } from '@/lib/react-query/queries/raffle'
+import { useUpdateUserShortlistStatusMutation } from '@/lib/react-query/mutations/shortlist'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -21,7 +21,6 @@ import { Suspense, useMemo, useRef, useState } from 'react'
 export const Route = createFileRoute('/_authenticated/raffle')({
   loader: ({ context }) => {
     context.queryClient.prefetchQuery(shortlistQueries.all())
-    context.queryClient.prefetchQuery(raffleQueries.history())
   },
   component: RafflePage,
 })
@@ -41,6 +40,7 @@ function RafflePage() {
 
   const startMutation = useStartRaffleMutation()
   const finalizeMutation = useFinalizeRaffleMutation()
+  const updateStatusMutation = useUpdateUserShortlistStatusMutation()
 
   const pendingDraw = useRef<Promise<{
     movie: Movie
@@ -61,6 +61,30 @@ function RafflePage() {
         : null,
     [shortlists, winningUserId],
   )
+
+  const participating = useMemo(
+    () => shortlists.filter((s) => s.participating),
+    [shortlists],
+  )
+  const readyCount = useMemo(
+    () => shortlists.filter((s) => s.isReady && s.participating).length,
+    [shortlists],
+  )
+  const canStart = useMemo(
+    () =>
+      !!watchDate &&
+      readyCount === participating.length &&
+      participating.length > 0,
+    [watchDate, readyCount, participating.length],
+  )
+
+  const handleToggleReady = (userId: string, current: boolean) => {
+    updateStatusMutation.mutate({ userId, isReady: !current })
+  }
+
+  const handleToggleParticipating = (userId: string, current: boolean) => {
+    updateStatusMutation.mutate({ userId, participating: !current })
+  }
 
   const handleStartRaffle = () => {
     pendingDraw.current = startMutation.mutateAsync()
@@ -112,7 +136,7 @@ function RafflePage() {
   }
 
   return (
-    <div className="min-h-full flex flex-col px-2 sm:px-4 py-2 relative container mx-auto">
+    <div className="min-h-full flex flex-col px-2 sm:px-4 py-2 relative container mx-auto pb-24">
       <Link
         to="/shortlists"
         className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"
@@ -122,19 +146,38 @@ function RafflePage() {
       </Link>
       <PageTitleBar title="Raffle" description="Draw next time's movie" />
       {phase === 'setup' && (
-        <div className="flex-1 flex items-center justify-center py-6">
-          <div className="w-full max-w-5xl grid lg:grid-cols-[1fr_400px] gap-6">
-            <Suspense fallback={<ShortlistsSkeleton />}>
-              <RaffleControls
-                watchDate={watchDate}
-                onDateSelect={setWatchDate}
-                dryRun={dryRun}
-                onDryRunChange={setDryRun}
-                onStartRaffle={handleStartRaffle}
-              />
-            </Suspense>
-            <RaffleHistory />
-          </div>
+        <div className="flex-1 py-6">
+          <Suspense fallback={<ShortlistsSkeleton />}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {shortlists.map((shortlist, index) => (
+                <ParticipantTicket
+                  key={shortlist.id}
+                  shortlist={shortlist}
+                  colorIndex={index}
+                  onToggleReady={() =>
+                    handleToggleReady(shortlist.user.id, shortlist.isReady)
+                  }
+                  onToggleParticipating={() =>
+                    handleToggleParticipating(
+                      shortlist.user.id,
+                      shortlist.participating,
+                    )
+                  }
+                  delay={index * 0.06}
+                />
+              ))}
+            </div>
+          </Suspense>
+          <RaffleControlBar
+            watchDate={watchDate}
+            onDateSelect={setWatchDate}
+            dryRun={dryRun}
+            onDryRunChange={setDryRun}
+            onStartRaffle={handleStartRaffle}
+            canStart={canStart}
+            readyCount={readyCount}
+            totalCount={participating.length}
+          />
         </div>
       )}
       <AnimatePresence>
