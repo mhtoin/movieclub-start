@@ -43,6 +43,50 @@
   --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
   --tracking-normal: 0rem;
   --spacing: 0.25rem;
+
+  --ticket-width: 100%;
+  --ticket-min-height: 180px;
+  --ticket-radius: 4px;
+  --ticket-notch-size: 40px;
+  --ticket-perforation-gap: 8px;
+  --ticket-stub-width: 72px;
+  --ticket-bg-start: oklch(0.35 0.035 var(--scheme-hue, 260));
+  --ticket-bg-end: oklch(0.25 0.01 var(--scheme-hue, 260));
+  --ticket-movie-bg: oklch(0.18 0.02 var(--scheme-hue, 260) / 0.35);
+  --ticket-movie-bg-hover: oklch(0.22 0.025 var(--scheme-hue, 260) / 0.5);
+  --ticket-movie-border-hover: oklch(0.4 0.06 var(--scheme-hue, 260) / 0.4);
+  --ticket-poster-bg: oklch(0.22 0.02 var(--scheme-hue, 260));
+  --ticket-title: oklch(0.95 0.01 var(--scheme-hue, 260));
+  --ticket-meta: oklch(0.6 0.02 var(--scheme-hue, 260));
+  --ticket-rating: oklch(0.75 0.15 var(--scheme-hue, 50));
+  --ticket-empty-bg: oklch(0.12 0.01 var(--scheme-hue, 260) / 0.25);
+  --ticket-empty-border: oklch(0.35 0.025 var(--scheme-hue, 260) / 0.35);
+  --ticket-empty-icon: oklch(0.45 0.02 var(--scheme-hue, 260));
+  --ticket-number-bg: oklch(0.7 0.12 var(--scheme-hue, 50));
+  --ticket-number-fg: oklch(0.1 0.02 var(--scheme-hue, 50));
+  --ticket-stub-bg-start: oklch(0.7 0.14 var(--scheme-hue, 50) / 0.25);
+  --ticket-stub-bg-end: oklch(0.6 0.12 var(--scheme-hue, 50) / 0.15);
+  --ticket-stub-border: oklch(0.7 0.14 var(--scheme-hue, 50) / 0.35);
+  --ticket-stub-avatar-border: oklch(0.7 0.12 var(--scheme-hue, 50));
+  --ticket-stub-label: oklch(0.55 0.02 var(--scheme-hue, 260) / 0.7);
+  --ticket-stub-name: oklch(0.9 0.01 var(--scheme-hue, 260));
+  --ticket-stub-count: oklch(0.55 0.02 var(--scheme-hue, 260) / 0.75);
+  --ticket-stub-status: oklch(0.7 0.12 var(--scheme-hue, 50));
+  --ticket-barcode: oklch(0.6 0.02 var(--scheme-hue, 260) / 0.6);
+  --ticket-perforation: oklch(0.45 0.02 var(--scheme-hue, 260));
+  --ticket-stamp-ready: oklch(0.75 0.15 var(--scheme-hue, 85));
+  --ticket-stamp-not-ready: oklch(0.55 0.03 var(--scheme-hue, 260) / 0.75);
+  --ticket-stamp-sitting-out: oklch(0.45 0.02 var(--scheme-hue, 260) / 0.55);
+  --ticket-stamp-selected: oklch(0.7 0.2 145);
+  --ticket-stamp-selected-bg: oklch(0.95 0.05 145);
+  --ticket-stub-ready-bg-start: oklch(0.68 0.16 var(--scheme-hue, 85) / 0.25);
+  --ticket-stub-ready-bg-end: oklch(0.58 0.14 var(--scheme-hue, 70) / 0.18);
+  --ticket-stub-ready-border: oklch(0.68 0.16 var(--scheme-hue, 85) / 0.45);
+  --ticket-stub-empty-bg-start: oklch(0.28 0.025 var(--scheme-hue, 260) / 0.25);
+  --ticket-stub-empty-bg-end: oklch(0.18 0.015 var(--scheme-hue, 260) / 0.15);
+  --ticket-stub-empty-border: oklch(0.38 0.025 var(--scheme-hue, 260) / 0.35);
+  --ticket-placeholder-bg: oklch(0.32 0.05 var(--scheme-hue, 260));
+  --ticket-placeholder-fg: oklch(0.8 0.02 var(--scheme-hue, 260));
 }
 
 .scheme-default.light {
@@ -689,50 +733,7 @@
   --font-cinema: 'Oswald', 'Bebas Neue', sans-serif;
   --font-cinema-caps: 'Bebas Neue', sans-serif;
 
-  --ticket-width: 100%;
-  --ticket-min-height: 180px;
-  --ticket-radius: 4px;
-  --ticket-notch-size: 40px;
-  --ticket-perforation-gap: 8px;
-  --ticket-stub-width: 72px;
-
   --animate-ticket-print: ticket-print 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-
-  --ticket-bg-start: oklch(0.35 0.035 var(--scheme-hue, 260));
-  --ticket-bg-end: oklch(0.25 0.01 var(--scheme-hue, 260));
-  --ticket-movie-bg: oklch(0.18 0.02 var(--scheme-hue, 260) / 0.35);
-  --ticket-movie-bg-hover: oklch(0.22 0.025 var(--scheme-hue, 260) / 0.5);
-  --ticket-movie-border-hover: oklch(0.4 0.06 var(--scheme-hue, 260) / 0.4);
-  --ticket-poster-bg: oklch(0.22 0.02 var(--scheme-hue, 260));
-  --ticket-title: oklch(0.95 0.01 var(--scheme-hue, 260));
-  --ticket-meta: oklch(0.6 0.02 var(--scheme-hue, 260));
-  --ticket-rating: oklch(0.75 0.15 var(--scheme-hue, 50));
-  --ticket-empty-bg: oklch(0.12 0.01 var(--scheme-hue, 260) / 0.25);
-  --ticket-empty-border: oklch(0.35 0.025 var(--scheme-hue, 260) / 0.35);
-  --ticket-empty-icon: oklch(0.45 0.02 var(--scheme-hue, 260));
-  --ticket-number-bg: oklch(0.7 0.12 var(--scheme-hue, 50));
-  --ticket-number-fg: oklch(0.1 0.02 var(--scheme-hue, 50));
-  --ticket-stub-bg-start: oklch(0.7 0.14 var(--scheme-hue, 50) / 0.25);
-  --ticket-stub-bg-end: oklch(0.6 0.12 var(--scheme-hue, 50) / 0.15);
-  --ticket-stub-border: oklch(0.7 0.14 var(--scheme-hue, 50) / 0.35);
-  --ticket-stub-avatar-border: oklch(0.7 0.12 var(--scheme-hue, 50));
-  --ticket-stub-label: oklch(0.55 0.02 var(--scheme-hue, 260) / 0.7);
-  --ticket-stub-name: oklch(0.9 0.01 var(--scheme-hue, 260));
-  --ticket-stub-count: oklch(0.55 0.02 var(--scheme-hue, 260) / 0.75);
-  --ticket-stub-status: oklch(0.7 0.12 var(--scheme-hue, 50));
-  --ticket-barcode: oklch(0.6 0.02 var(--scheme-hue, 260) / 0.6);
-  --ticket-perforation: oklch(0.45 0.02 var(--scheme-hue, 260));
-  --ticket-stamp-ready: oklch(0.75 0.15 var(--scheme-hue, 85));
-  --ticket-stamp-not-ready: oklch(0.55 0.03 var(--scheme-hue, 260) / 0.75);
-  --ticket-stamp-sitting-out: oklch(0.45 0.02 var(--scheme-hue, 260) / 0.55);
-  --ticket-stub-ready-bg-start: oklch(0.68 0.16 var(--scheme-hue, 85) / 0.25);
-  --ticket-stub-ready-bg-end: oklch(0.58 0.14 var(--scheme-hue, 70) / 0.18);
-  --ticket-stub-ready-border: oklch(0.68 0.16 var(--scheme-hue, 85) / 0.45);
-  --ticket-stub-empty-bg-start: oklch(0.28 0.025 var(--scheme-hue, 260) / 0.25);
-  --ticket-stub-empty-bg-end: oklch(0.18 0.015 var(--scheme-hue, 260) / 0.15);
-  --ticket-stub-empty-border: oklch(0.38 0.025 var(--scheme-hue, 260) / 0.35);
-  --ticket-placeholder-bg: oklch(0.32 0.05 var(--scheme-hue, 260));
-  --ticket-placeholder-fg: oklch(0.8 0.02 var(--scheme-hue, 260));
 }
 
 .light {
@@ -763,6 +764,8 @@
   --ticket-stamp-ready: oklch(0.55 0.1 var(--scheme-hue, 45));
   --ticket-stamp-not-ready: oklch(0.5 0.02 var(--scheme-hue, 260) / 0.55);
   --ticket-stamp-sitting-out: oklch(0.55 0.015 var(--scheme-hue, 260) / 0.55);
+  --ticket-stamp-selected: oklch(0.6 0.15 145);
+  --ticket-stamp-selected-bg: oklch(0.95 0.03 145);
   --ticket-stub-ready-bg-start: oklch(0.82 0.035 var(--scheme-hue, 50) / 0.55);
   --ticket-stub-ready-bg-end: oklch(0.9 0.025 var(--scheme-hue, 55) / 0.4);
   --ticket-stub-ready-border: oklch(0.65 0.05 var(--scheme-hue, 50) / 0.55);
@@ -801,6 +804,8 @@
   --ticket-stamp-ready: oklch(0.8 0.005 30);
   --ticket-stamp-not-ready: oklch(0.55 0.004 30 / 0.75);
   --ticket-stamp-sitting-out: oklch(0.45 0.004 30 / 0.55);
+  --ticket-stamp-selected: oklch(0.75 0.005 30);
+  --ticket-stamp-selected-bg: oklch(0.85 0.005 30);
   --ticket-stub-ready-bg-start: oklch(0.68 0.005 30 / 0.25);
   --ticket-stub-ready-bg-end: oklch(0.58 0.005 30 / 0.18);
   --ticket-stub-ready-border: oklch(0.68 0.005 30 / 0.45);
@@ -839,6 +844,8 @@
   --ticket-stamp-ready: oklch(0.55 0.005 30);
   --ticket-stamp-not-ready: oklch(0.5 0.004 30 / 0.55);
   --ticket-stamp-sitting-out: oklch(0.55 0.004 30 / 0.55);
+  --ticket-stamp-selected: oklch(0.6 0.005 30);
+  --ticket-stamp-selected-bg: oklch(0.95 0.005 30);
   --ticket-stub-ready-bg-start: oklch(0.8 0.005 30 / 0.55);
   --ticket-stub-ready-bg-end: oklch(0.88 0.005 30 / 0.4);
   --ticket-stub-ready-border: oklch(0.6 0.005 30 / 0.55);
