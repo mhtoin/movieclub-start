@@ -11,6 +11,7 @@ interface Props {
   colorIndex: number
   onToggleReady: () => void
   onToggleParticipating: () => void
+  isUpdating?: boolean
   delay?: number
 }
 
@@ -19,6 +20,7 @@ export function ParticipantTicket({
   colorIndex,
   onToggleReady,
   onToggleParticipating,
+  isUpdating = false,
   delay = 0,
 }: Props) {
   const { movies, isReady, participating, selectedIndex } = shortlist
@@ -49,13 +51,13 @@ export function ParticipantTicket({
         <XCircle className="w-4 h-4" />
       </button>
       <div
-        className={`relative ${participating ? '' : 'opacity-60'}`}
+        className={`relative ${participating ? '' : 'opacity-60'} ${isUpdating ? 'opacity-80' : ''}`}
         onClick={participating && !isReady ? onToggleReady : undefined}
       >
         <TicketCard
           delay={delay}
           participating={participating}
-          className="animate-ticket-print"
+          className={`animate-ticket-print ${isUpdating ? 'animate-pulse' : ''}`}
         >
           <TicketStub
             shortlist={shortlist}

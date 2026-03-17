@@ -1,4 +1,5 @@
 import { db } from '@/db/db'
+import type { ShortlistWithUserMovies } from '@/db/schema'
 import { movie, movieCredits, movieToShortlist, shortlist } from '@/db/schema'
 import { user } from '@/db/schema/users'
 import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
@@ -343,13 +344,70 @@ export const useToggleIsReadyMutation = () => {
       }
       return response.shortlist
     },
-    onError: (error) => {
+    onMutate: async (isReady: boolean) => {
+      const previousUserShortlist = queryClient.getQueryData(['shortlist']) as
+        | ShortlistWithUserMovies
+        | undefined
+      const previousAllShortlists = queryClient.getQueryData([
+        'shortlists',
+        'all',
+      ]) as ShortlistWithUserMovies[] | undefined
+
+      const userId = previousUserShortlist?.userId
+
+      if (userId) {
+        queryClient.setQueryData(
+          ['shortlist', userId],
+          (old: ShortlistWithUserMovies | undefined) => {
+            if (!old) return old
+            return { ...old, isReady }
+          },
+        )
+      }
+
+      if (previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          (old: ShortlistWithUserMovies[] | undefined) => {
+            if (!old) return old
+            return old.map((shortlist) =>
+              shortlist.userId === userId
+                ? { ...shortlist, isReady }
+                : shortlist,
+            )
+          },
+        )
+      }
+
+      return { previousUserShortlist, previousAllShortlists }
+    },
+    onError: (error, _isReady, context) => {
+      if (context?.previousUserShortlist?.userId) {
+        queryClient.setQueryData(
+          ['shortlist', context.previousUserShortlist.userId],
+          context.previousUserShortlist,
+        )
+      }
+      if (context?.previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          context.previousAllShortlists,
+        )
+      }
       console.error('Error updating ready status:', error)
       toastManager.add({
         title: 'Error',
         description: 'Failed to update ready status',
         type: 'error',
       })
+    },
+    onSettled: (shortlist) => {
+      if (shortlist?.userId) {
+        queryClient.invalidateQueries({
+          queryKey: ['shortlist', shortlist.userId],
+        })
+        queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
+      }
     },
     onSuccess: (shortlist) => {
       queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
@@ -376,13 +434,70 @@ export const useToggleParticipatingMutation = () => {
       }
       return response.shortlist
     },
-    onError: (error) => {
+    onMutate: async (participating: boolean) => {
+      const previousUserShortlist = queryClient.getQueryData(['shortlist']) as
+        | ShortlistWithUserMovies
+        | undefined
+      const previousAllShortlists = queryClient.getQueryData([
+        'shortlists',
+        'all',
+      ]) as ShortlistWithUserMovies[] | undefined
+
+      const userId = previousUserShortlist?.userId
+
+      if (userId) {
+        queryClient.setQueryData(
+          ['shortlist', userId],
+          (old: ShortlistWithUserMovies | undefined) => {
+            if (!old) return old
+            return { ...old, participating }
+          },
+        )
+      }
+
+      if (previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          (old: ShortlistWithUserMovies[] | undefined) => {
+            if (!old) return old
+            return old.map((shortlist) =>
+              shortlist.userId === userId
+                ? { ...shortlist, participating }
+                : shortlist,
+            )
+          },
+        )
+      }
+
+      return { previousUserShortlist, previousAllShortlists }
+    },
+    onError: (error, _participating, context) => {
+      if (context?.previousUserShortlist?.userId) {
+        queryClient.setQueryData(
+          ['shortlist', context.previousUserShortlist.userId],
+          context.previousUserShortlist,
+        )
+      }
+      if (context?.previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          context.previousAllShortlists,
+        )
+      }
       console.error('Error updating participation status:', error)
       toastManager.add({
         title: 'Error',
         description: 'Failed to update participation status',
         type: 'error',
       })
+    },
+    onSettled: (shortlist) => {
+      if (shortlist?.userId) {
+        queryClient.invalidateQueries({
+          queryKey: ['shortlist', shortlist.userId],
+        })
+        queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
+      }
     },
     onSuccess: (shortlist) => {
       queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
@@ -475,7 +590,65 @@ export const useUpdateUserShortlistStatusMutation = () => {
       }
       return response.shortlist
     },
-    onError: (error) => {
+    onMutate: async ({
+      userId,
+      isReady,
+      participating,
+    }: {
+      userId: string
+      isReady?: boolean
+      participating?: boolean
+    }) => {
+      const previousAllShortlists = queryClient.getQueryData([
+        'shortlists',
+        'all',
+      ]) as ShortlistWithUserMovies[] | undefined
+      const previousUserShortlist = queryClient.getQueryData([
+        'shortlist',
+        userId,
+      ]) as ShortlistWithUserMovies | undefined
+
+      if (previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          (old: ShortlistWithUserMovies[] | undefined) => {
+            if (!old) return old
+            return old.map((shortlist) =>
+              shortlist.userId === userId
+                ? {
+                    ...shortlist,
+                    ...(isReady !== undefined && { isReady }),
+                    ...(participating !== undefined && { participating }),
+                  }
+                : shortlist,
+            )
+          },
+        )
+      }
+
+      if (previousUserShortlist) {
+        queryClient.setQueryData(['shortlist', userId], {
+          ...previousUserShortlist,
+          ...(isReady !== undefined && { isReady }),
+          ...(participating !== undefined && { participating }),
+        })
+      }
+
+      return { previousAllShortlists, previousUserShortlist }
+    },
+    onError: (error, { userId }, context) => {
+      if (context?.previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          context.previousAllShortlists,
+        )
+      }
+      if (context?.previousUserShortlist) {
+        queryClient.setQueryData(
+          ['shortlist', userId],
+          context.previousUserShortlist,
+        )
+      }
       console.error('Error updating user shortlist status:', error)
       toastManager.add({
         title: 'Error',
@@ -483,8 +656,23 @@ export const useUpdateUserShortlistStatusMutation = () => {
         type: 'error',
       })
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shortlists'] })
+    onSettled: (shortlist) => {
+      if (shortlist?.userId) {
+        queryClient.invalidateQueries({
+          queryKey: ['shortlist', shortlist.userId],
+        })
+      }
+      queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
+    },
+    onSuccess: (shortlist) => {
+      queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+      queryClient.setQueryData(
+        ['shortlists', 'all'],
+        (old: ShortlistWithUserMovies[] | undefined) => {
+          if (!old) return old
+          return old.map((s) => (s.userId === shortlist.userId ? shortlist : s))
+        },
+      )
     },
   })
 }
@@ -548,13 +736,70 @@ export const useUpdateSelectedIndexMutation = () => {
       }
       return response.shortlist
     },
-    onError: (error) => {
+    onMutate: async (selectedIndex: number | null) => {
+      const previousUserShortlist = queryClient.getQueryData(['shortlist']) as
+        | ShortlistWithUserMovies
+        | undefined
+      const previousAllShortlists = queryClient.getQueryData([
+        'shortlists',
+        'all',
+      ]) as ShortlistWithUserMovies[] | undefined
+
+      const userId = previousUserShortlist?.userId
+
+      if (userId) {
+        queryClient.setQueryData(
+          ['shortlist', userId],
+          (old: ShortlistWithUserMovies | undefined) => {
+            if (!old) return old
+            return { ...old, selectedIndex }
+          },
+        )
+      }
+
+      if (previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          (old: ShortlistWithUserMovies[] | undefined) => {
+            if (!old) return old
+            return old.map((shortlist) =>
+              shortlist.userId === userId
+                ? { ...shortlist, selectedIndex }
+                : shortlist,
+            )
+          },
+        )
+      }
+
+      return { previousUserShortlist, previousAllShortlists }
+    },
+    onError: (error, _selectedIndex, context) => {
+      if (context?.previousUserShortlist?.userId) {
+        queryClient.setQueryData(
+          ['shortlist', context.previousUserShortlist.userId],
+          context.previousUserShortlist,
+        )
+      }
+      if (context?.previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          context.previousAllShortlists,
+        )
+      }
       console.error('Error updating selected movie:', error)
       toastManager.add({
         title: 'Error',
         description: 'Failed to update selection',
         type: 'error',
       })
+    },
+    onSettled: (shortlist) => {
+      if (shortlist?.userId) {
+        queryClient.invalidateQueries({
+          queryKey: ['shortlist', shortlist.userId],
+        })
+        queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
+      }
     },
     onSuccess: (shortlist) => {
       queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
@@ -622,7 +867,58 @@ export const useUpdateUserSelectedIndexMutation = () => {
       }
       return response
     },
-    onError: (error) => {
+    onMutate: async ({
+      userId,
+      selectedIndex,
+    }: {
+      userId: string
+      selectedIndex: number | null
+    }) => {
+      const previousAllShortlists = queryClient.getQueryData([
+        'shortlists',
+        'all',
+      ]) as ShortlistWithUserMovies[] | undefined
+      const previousUserShortlist = queryClient.getQueryData([
+        'shortlist',
+        userId,
+      ]) as ShortlistWithUserMovies | undefined
+
+      if (previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          (old: ShortlistWithUserMovies[] | undefined) => {
+            if (!old) return old
+            return old.map((shortlist) =>
+              shortlist.userId === userId
+                ? { ...shortlist, selectedIndex }
+                : shortlist,
+            )
+          },
+        )
+      }
+
+      if (previousUserShortlist) {
+        queryClient.setQueryData(['shortlist', userId], {
+          ...previousUserShortlist,
+          selectedIndex,
+        })
+      }
+
+      return { previousAllShortlists, previousUserShortlist }
+    },
+    onError: (error, { userId }, context) => {
+      if (context?.previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          context.previousAllShortlists,
+        )
+      }
+      if (context?.previousUserShortlist) {
+        queryClient.setQueryData(
+          ['shortlist', userId],
+          context.previousUserShortlist,
+        )
+      }
       console.error('Error updating selected movie:', error)
       toastManager.add({
         title: 'Error',
@@ -630,8 +926,11 @@ export const useUpdateUserSelectedIndexMutation = () => {
         type: 'error',
       })
     },
+    onSettled: (_data, _error, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: ['shortlist', userId] })
+      queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shortlists'] })
       toastManager.add({
         title: 'Success',
         description: 'Movie selection updated',

@@ -246,6 +246,10 @@ function RafflePage() {
                       shortlist.participating,
                     )
                   }
+                  isUpdating={
+                    updateStatusMutation.isPending &&
+                    updateStatusMutation.variables?.userId === shortlist.user.id
+                  }
                   delay={index * 0.06}
                 />
               ))}
