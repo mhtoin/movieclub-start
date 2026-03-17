@@ -1,13 +1,16 @@
+import { Suspense, useMemo, useRef, useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
+import { ArrowLeft } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import type { Movie } from '@/db/schema/movies'
 import { PageTitleBar } from '@/components/page-titlebar'
-import { MovieSelectionModal } from '@/components/raffle/movie-selection-modal'
 import { ParticipantTicket } from '@/components/raffle/participant-ticket'
 import { RaffleControlBar } from '@/components/raffle/raffle-control-bar'
 import { RaffleCountdown } from '@/components/raffle/raffle-countdown'
 import { RaffleSpinner } from '@/components/raffle/raffle-spinner'
 import { RaffleWinner } from '@/components/raffle/raffle-winner'
 import { ShortlistsSkeleton } from '@/components/shortlists/shortlists-skeleton'
-import type { ShortlistWithUserMovies } from '@/db/schema'
-import type { Movie } from '@/db/schema/movies'
 import {
   useFinalizeRaffleMutation,
   useStartRaffleMutation,
@@ -17,11 +20,6 @@ import {
   useUpdateUserShortlistStatusMutation,
 } from '@/lib/react-query/mutations/shortlist'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
-import { useQuery } from '@tanstack/react-query'
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { AnimatePresence, motion } from 'framer-motion'
-import { AlertCircle, ArrowLeft } from 'lucide-react'
-import { Suspense, useMemo, useRef, useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/raffle')({
   loader: ({ context }) => {
@@ -42,9 +40,6 @@ function RafflePage() {
     cast: Array<any> | null
     crew: Array<any> | null
   } | null>(null)
-  const [selectedShortlist, setSelectedShortlist] =
-    useState<ShortlistWithUserMovies | null>(null)
-  const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false)
 
   const startMutation = useStartRaffleMutation()
   const finalizeMutation = useFinalizeRaffleMutation()
@@ -154,22 +149,8 @@ function RafflePage() {
     setWinningCredits(null)
   }
 
-  const handleOpenSelectionModal = (shortlist: ShortlistWithUserMovies) => {
-    setSelectedShortlist(shortlist)
-    setIsSelectionModalOpen(true)
-  }
-
-  const handleSelectMovie = (index: number) => {
-    if (!selectedShortlist) return
-    updateSelectedIndexMutation.mutate(
-      { userId: selectedShortlist.user.id, selectedIndex: index },
-      {
-        onSuccess: () => {
-          setIsSelectionModalOpen(false)
-          setSelectedShortlist(null)
-        },
-      },
-    )
+  const handleSelectMovie = (userId: string, index: number) => {
+    updateSelectedIndexMutation.mutate({ userId, selectedIndex: index })
   }
 
   return (
@@ -184,52 +165,6 @@ function RafflePage() {
       <PageTitleBar title="Raffle" description="Draw next time's movie" />
       {phase === 'setup' && (
         <div className="flex-1 py-6 space-y-6">
-          {pendingSelections.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-warning/15 border border-warning/30 rounded-xl p-4"
-            >
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground mb-1">
-                    Selection Required Before Raffle
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    The following participants won last time and need to select
-                    1 movie for the raffle:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {pendingSelections.map((s) => (
-                      <button
-                        key={s.user.id}
-                        onClick={() => handleOpenSelectionModal(s)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border hover:border-primary/50 hover:bg-accent transition-all text-sm"
-                      >
-                        {s.user.image ? (
-                          <img
-                            src={s.user.image}
-                            alt={s.user.name}
-                            className="w-5 h-5 rounded-full"
-                          />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                            {s.user.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <span className="font-medium">{s.user.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          Select movie
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
           <Suspense fallback={<ShortlistsSkeleton />}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {shortlists.map((shortlist, index) => (
@@ -246,9 +181,17 @@ function RafflePage() {
                       shortlist.participating,
                     )
                   }
+                  onSelectMovie={(movieIndex: number) =>
+                    handleSelectMovie(shortlist.user.id, movieIndex)
+                  }
                   isUpdating={
                     updateStatusMutation.isPending &&
-                    updateStatusMutation.variables?.userId === shortlist.user.id
+                    updateStatusMutation.variables.userId === shortlist.user.id
+                  }
+                  isSelecting={
+                    updateSelectedIndexMutation.isPending &&
+                    updateSelectedIndexMutation.variables.userId ===
+                      shortlist.user.id
                   }
                   delay={index * 0.06}
                 />
@@ -298,13 +241,6 @@ function RafflePage() {
           />
         )}
       </AnimatePresence>
-      <MovieSelectionModal
-        shortlist={selectedShortlist}
-        open={isSelectionModalOpen}
-        onOpenChange={setIsSelectionModalOpen}
-        onSelect={handleSelectMovie}
-        isLoading={updateSelectedIndexMutation.isPending}
-      />
     </div>
   )
 }

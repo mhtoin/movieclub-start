@@ -11,7 +11,9 @@ interface Props {
   colorIndex: number
   onToggleReady: () => void
   onToggleParticipating: () => void
+  onSelectMovie?: (movieIndex: number) => void
   isUpdating?: boolean
+  isSelecting?: boolean
   delay?: number
 }
 
@@ -20,7 +22,9 @@ export function ParticipantTicket({
   colorIndex,
   onToggleReady,
   onToggleParticipating,
+  onSelectMovie,
   isUpdating = false,
+  isSelecting = false,
   delay = 0,
 }: Props) {
   const { movies, isReady, participating, selectedIndex } = shortlist
@@ -77,6 +81,11 @@ export function ParticipantTicket({
                     movie={film}
                     isSelected={isMovieSelected}
                     showSelection={requiresSelection}
+                    onSelect={
+                      onSelectMovie ? () => onSelectMovie(idx) : undefined
+                    }
+                    isLoading={isSelecting}
+                    interactive={!!onSelectMovie && requiresSelection}
                   />
                 ) : (
                   <TicketEmptyRow key={`empty-${idx}`} position={idx + 1} />

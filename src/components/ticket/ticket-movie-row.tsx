@@ -1,6 +1,6 @@
+import { Check, Film, Star } from 'lucide-react'
 import type { Movie } from '@/db/schema/movies'
 import { getResponsiveImageProps } from '@/lib/tmdb-api'
-import { Check, Film, Star } from 'lucide-react'
 
 interface TicketMovieRowProps {
   movie: Movie
@@ -37,6 +37,11 @@ export function TicketMovieRow({
     ? 'flex items-center gap-3 p-2 rounded-md border border-transparent hover:translate-x-1 transition-all duration-200 cursor-pointer group bg-[var(--ticket-movie-bg)] hover:bg-[var(--ticket-movie-bg-hover)] hover:border-[var(--ticket-movie-border-hover)]'
     : 'flex items-center gap-3 p-2 rounded-md bg-[var(--ticket-movie-bg)]'
 
+  const selectedClass =
+    showSelection && isSelected
+      ? 'border-primary/50 bg-primary/5 shadow-sm'
+      : ''
+
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (showSelection && onSelect && !isLoading) {
       onSelect()
@@ -46,7 +51,10 @@ export function TicketMovieRow({
   }
 
   return (
-    <div className={`${baseClass} relative`} onClick={handleClick}>
+    <div
+      className={`${baseClass} ${selectedClass} relative`}
+      onClick={handleClick}
+    >
       {showSelection && (
         <button
           type="button"
@@ -55,17 +63,17 @@ export function TicketMovieRow({
             onSelect?.()
           }}
           disabled={isLoading}
-          className={`absolute top-1.5 left-1.5 z-10 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+          className={`absolute top-2 left-2 z-10 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
             isSelected
               ? 'bg-primary border-primary text-primary-foreground shadow-sm'
-              : 'bg-card/80 border-border/60 text-transparent hover:border-primary/50'
+              : 'bg-card/80 border-border/60 text-transparent hover:border-primary/50 hover:bg-accent'
           }`}
           aria-label={isSelected ? 'Selected for raffle' : 'Select for raffle'}
           title={
             isSelected ? 'Selected for raffle' : 'Click to select for raffle'
           }
         >
-          <Check className="w-3 h-3" />
+          <Check className="w-3.5 h-3.5" />
         </button>
       )}
       <div
