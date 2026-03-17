@@ -1,5 +1,5 @@
 # Dockerfile
-FROM node:20-alpine AS base
+FROM node:23-alpine AS base
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
@@ -19,6 +19,7 @@ ARG VITE_TMDB_IMAGE_BASE_URL
 ENV VITE_TMDB_API_KEY=$VITE_TMDB_API_KEY
 ENV VITE_TMDB_BASE_URL=$VITE_TMDB_BASE_URL
 ENV VITE_TMDB_IMAGE_BASE_URL=$VITE_TMDB_IMAGE_BASE_URL
+ENV NODE_ENV=production
 RUN pnpm build
 
 # Production runner stage
