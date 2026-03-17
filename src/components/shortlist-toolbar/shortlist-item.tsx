@@ -1,7 +1,10 @@
-import { Movie } from '@/db/schema/movies'
-import { useRemoveFromShortlistMutation } from '@/lib/react-query/mutations/shortlist'
+import type { Movie } from '@/db/schema/movies'
+import {
+  useRemoveFromShortlistMutation,
+  useUpdateSelectedIndexMutation,
+} from '@/lib/react-query/mutations/shortlist'
 import { motion } from 'framer-motion'
-import { Clock, Film, Maximize2, Star, X } from 'lucide-react'
+import { Check, Clock, Film, Maximize2, Star, X } from 'lucide-react'
 import { useState } from 'react'
 import { ShortlistItemDialog } from './shortlist-item-dialog'
 
@@ -18,7 +21,14 @@ export default function ShortlistItem({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const removeFromShortlistMutation = useRemoveFromShortlistMutation()
+  const updateSelectedIndexMutation = useUpdateSelectedIndexMutation()
   const isSelected = requiresSelection && selectedIndex === index
+
+  const handleToggleSelection = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!requiresSelection) return
+    updateSelectedIndexMutation.mutate(isSelected ? null : index)
+  }
   const year = movie.releaseDate
     ? new Date(movie.releaseDate).getFullYear()
     : null
@@ -53,7 +63,27 @@ export default function ShortlistItem({
             : 'border-border/60 bg-card/50'
         }`}
       >
-        {/* Remove button */}
+        {requiresSelection && (
+          <button
+            type="button"
+            onClick={handleToggleSelection}
+            disabled={updateSelectedIndexMutation.isPending}
+            className={`absolute top-2 left-2 z-10 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
+              isSelected
+                ? 'bg-primary border-primary text-primary-foreground shadow-sm'
+                : 'bg-card/80 border-border/60 text-transparent hover:border-primary/50 hover:bg-accent'
+            }`}
+            aria-label={
+              isSelected ? 'Selected for raffle' : 'Select for raffle'
+            }
+            title={
+              isSelected ? 'Selected for raffle' : 'Click to select for raffle'
+            }
+          >
+            <Check className="w-3.5 h-3.5" />
+          </button>
+        )}
+
         <button
           type="button"
           onClick={handleRemove}
@@ -110,7 +140,6 @@ export default function ShortlistItem({
                 </span>
               ))}
             </div>
-            {/* Expand button */}
             <button
               type="button"
               onClick={handleExpand}
@@ -121,9 +150,6 @@ export default function ShortlistItem({
             </button>
           </div>
         </div>
-        {isSelected && (
-          <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-primary shadow-sm" />
-        )}
       </motion.div>
 
       <ShortlistItemDialog

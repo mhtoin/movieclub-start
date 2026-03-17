@@ -1,17 +1,25 @@
 import type { Movie } from '@/db/schema/movies'
 import { getResponsiveImageProps } from '@/lib/tmdb-api'
-import { Film, Star } from 'lucide-react'
+import { Check, Film, Star } from 'lucide-react'
 
 interface TicketMovieRowProps {
   movie: Movie
   onMovieClick?: (movie: Movie, e: React.MouseEvent<HTMLDivElement>) => void
   interactive?: boolean
+  isSelected?: boolean
+  showSelection?: boolean
+  onSelect?: () => void
+  isLoading?: boolean
 }
 
 export function TicketMovieRow({
   movie,
   onMovieClick,
   interactive = false,
+  isSelected = false,
+  showSelection = false,
+  onSelect,
+  isLoading = false,
 }: TicketMovieRowProps) {
   const posterPath = movie.images?.posters?.[0]?.file_path
   const posterImage = getResponsiveImageProps(posterPath, 'poster', 'w154')
@@ -29,9 +37,40 @@ export function TicketMovieRow({
     ? 'flex items-center gap-3 p-2 rounded-md border border-transparent hover:translate-x-1 transition-all duration-200 cursor-pointer group bg-[var(--ticket-movie-bg)] hover:bg-[var(--ticket-movie-bg-hover)] hover:border-[var(--ticket-movie-border-hover)]'
     : 'flex items-center gap-3 p-2 rounded-md bg-[var(--ticket-movie-bg)]'
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (showSelection && onSelect && !isLoading) {
+      onSelect()
+    } else if (onMovieClick) {
+      onMovieClick(movie, e)
+    }
+  }
+
   return (
-    <div className={baseClass} onClick={(e) => onMovieClick?.(movie, e)}>
-      <div className="relative w-10 h-14 rounded-sm overflow-hidden flex-shrink-0 bg-[var(--ticket-poster-bg)]">
+    <div className={`${baseClass} relative`} onClick={handleClick}>
+      {showSelection && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onSelect?.()
+          }}
+          disabled={isLoading}
+          className={`absolute top-1.5 left-1.5 z-10 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+            isSelected
+              ? 'bg-primary border-primary text-primary-foreground shadow-sm'
+              : 'bg-card/80 border-border/60 text-transparent hover:border-primary/50'
+          }`}
+          aria-label={isSelected ? 'Selected for raffle' : 'Select for raffle'}
+          title={
+            isSelected ? 'Selected for raffle' : 'Click to select for raffle'
+          }
+        >
+          <Check className="w-3 h-3" />
+        </button>
+      )}
+      <div
+        className={`relative flex-shrink-0 w-10 h-14 rounded-sm overflow-hidden bg-[var(--ticket-poster-bg)] ${showSelection ? 'ml-7' : ''}`}
+      >
         {posterImage ? (
           <img
             src={posterImage.src}

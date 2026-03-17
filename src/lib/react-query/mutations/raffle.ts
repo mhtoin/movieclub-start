@@ -30,6 +30,16 @@ export const startRaffle = createServerFn({ method: 'POST' })
         throw new Error('No shortlists are ready and participating')
       }
 
+      const pendingSelections = eligibleShortlists.filter(
+        (s) => s.requiresSelection && s.selectedIndex === null,
+      )
+
+      if (pendingSelections.length > 0) {
+        throw new Error(
+          `Cannot start raffle: ${pendingSelections.length} participant(s) still need to select a movie`,
+        )
+      }
+
       const eligibleMovies = await db
         .select({
           movie: movie,

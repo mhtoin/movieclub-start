@@ -569,3 +569,74 @@ export const useUpdateSelectedIndexMutation = () => {
     },
   })
 }
+
+export const updateUserSelectedIndex = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
+  .inputValidator(
+    (data: { userId: string; selectedIndex: number | null }) => data,
+  )
+  .handler(async ({ context, data }) => {
+    const { userId, selectedIndex } = data
+
+    if (!context.user) {
+      throw new Error('Unauthorized')
+    }
+
+    const targetShortlist = await db
+      .select()
+      .from(shortlist)
+      .where(eq(shortlist.userId, userId))
+      .limit(1)
+      .then((res) => res[0])
+
+    if (!targetShortlist) {
+      throw new Error('Shortlist not found')
+    }
+
+    await db
+      .update(shortlist)
+      .set({ selectedIndex })
+      .where(eq(shortlist.id, targetShortlist.id))
+
+    return { success: true }
+  })
+
+export const useUpdateUserSelectedIndexMutation = () => {
+  const queryClient = useQueryClient()
+  const toastManager = Toast.useToastManager()
+
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      selectedIndex,
+    }: {
+      userId: string
+      selectedIndex: number | null
+    }) => {
+      const response = await updateUserSelectedIndex({
+        data: { userId, selectedIndex },
+      })
+
+      if (!response.success) {
+        throw new Error('Failed to update selected movie')
+      }
+      return response
+    },
+    onError: (error) => {
+      console.error('Error updating selected movie:', error)
+      toastManager.add({
+        title: 'Error',
+        description: 'Failed to update selection',
+        type: 'error',
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shortlists'] })
+      toastManager.add({
+        title: 'Success',
+        description: 'Movie selection updated',
+        type: 'success',
+      })
+    },
+  })
+}

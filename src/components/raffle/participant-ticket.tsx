@@ -1,10 +1,10 @@
+import { XCircle } from 'lucide-react'
+import type { ShortlistWithUserMovies } from '@/db/schema'
+import type { Movie } from '@/db/schema/movies'
 import { TicketCard } from '@/components/ticket/ticket-card'
 import { TicketEmptyRow } from '@/components/ticket/ticket-empty-row'
 import { TicketMovieRow } from '@/components/ticket/ticket-movie-row'
 import { TicketStub } from '@/components/ticket/ticket-stub'
-import type { ShortlistWithUserMovies } from '@/db/schema'
-import type { Movie } from '@/db/schema/movies'
-import { XCircle } from 'lucide-react'
 
 interface Props {
   shortlist: ShortlistWithUserMovies
@@ -21,7 +21,8 @@ export function ParticipantTicket({
   onToggleParticipating,
   delay = 0,
 }: Props) {
-  const { movies, isReady, participating } = shortlist
+  const { movies, isReady, participating, selectedIndex } = shortlist
+  const requiresSelection = shortlist.requiresSelection ?? false
 
   const handleStampClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -66,8 +67,15 @@ export function ParticipantTicket({
             <div className="flex flex-col gap-2.5">
               {Array.from({ length: 3 }).map((_, idx) => {
                 const film = movies[idx] as Movie | undefined
+                const isMovieSelected =
+                  requiresSelection && selectedIndex === idx
                 return film ? (
-                  <TicketMovieRow key={film.id} movie={film} />
+                  <TicketMovieRow
+                    key={film.id}
+                    movie={film}
+                    isSelected={isMovieSelected}
+                    showSelection={requiresSelection}
+                  />
                 ) : (
                   <TicketEmptyRow key={`empty-${idx}`} position={idx + 1} />
                 )
