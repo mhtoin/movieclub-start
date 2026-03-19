@@ -207,6 +207,7 @@ function RafflePage() {
             canStart={canStart}
             readyCount={readyCount}
             totalCount={participating.length}
+            pendingSelectionsCount={pendingSelections.length}
           />
         </div>
       )}
