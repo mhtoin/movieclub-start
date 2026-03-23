@@ -15,19 +15,20 @@ import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import {
+  Compass,
   Dices,
   Film,
   Home,
   ImageIcon,
   LayoutDashboard,
-  List,
   LogOut,
   Moon,
   MoreHorizontal,
   Palette,
-  Search,
+  Sparkles,
   Star,
   Sun,
+  Ticket,
   User,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -55,13 +56,33 @@ const backgrounds = Object.entries(BACKGROUND_OPTIONS).map(
 )
 
 const navItems = [
-  { icon: Home, label: 'Home', path: '/' },
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-  { icon: Film, label: 'Watched', path: '/watched' },
-  { icon: Search, label: 'Discover', path: '/discover' },
-  { icon: List, label: 'Shortlists', path: '/shortlists' },
-  { icon: Dices, label: 'Raffle', path: '/raffle' },
-  { icon: Star, label: 'Tierlists', path: '/tierlist' },
+  { icon: Home, label: 'Home', tagline: 'Now showing', path: '/' },
+  {
+    icon: LayoutDashboard,
+    label: 'Dashboard',
+    tagline: 'Your stats',
+    path: '/dashboard',
+  },
+  {
+    icon: Film,
+    label: 'Watched',
+    tagline: 'Past selections',
+    path: '/watched',
+  },
+  {
+    icon: Compass,
+    label: 'Discover',
+    tagline: 'Find your next pick',
+    path: '/discover',
+  },
+  {
+    icon: Ticket,
+    label: 'Shortlists',
+    tagline: 'Queue up',
+    path: '/shortlists',
+  },
+  { icon: Dices, label: 'Raffle', tagline: 'Pick a winner', path: '/raffle' },
+  { icon: Star, label: 'Tierlists', tagline: 'Hot takes', path: '/tierlist' },
 ]
 
 // Show first 4 items in mobile bottom bar, rest go in "more" menu
@@ -155,22 +176,29 @@ export default function Sidebar() {
   return (
     <>
       <div className="hidden md:flex fixed left-0 top-0 h-full z-50 items-center py-4 pl-2">
-        <nav className="group/sidebar flex flex-col bg-sidebar/90 backdrop-blur-xl border border-sidebar-border/40 rounded-2xl shadow-xl transition-all duration-300 ease-out w-12 hover:w-44 overflow-hidden">
+        <nav className="group/sidebar relative flex flex-col bg-sidebar/90 backdrop-blur-xl border border-sidebar-border/40 rounded-2xl shadow-xl shadow-black/10 transition-all duration-300 ease-out w-12 hover:w-48 overflow-hidden">
+          <div className="absolute left-0.5 top-6 bottom-6 w-px bg-gradient-to-b from-transparent via-sidebar-border/40 to-transparent opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300" />
+
           <Link
             to="/settings"
-            className={`flex items-center gap-3 px-3 py-3 border-b border-sidebar-border/30 transition-colors ${
+            className={`group/profile flex items-center gap-3 px-3 py-2 border-b border-sidebar-border/20 transition-all duration-200 ${
               isActive('/settings')
-                ? 'text-primary bg-primary/10'
-                : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                ? 'text-primary'
+                : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40'
             }`}
             viewTransition
           >
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center ring-1 ring-primary/30">
-              <User size={14} className="text-primary" />
+            <div className="relative flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center group-hover/profile:scale-110 group-hover/profile:rotate-12 transition-all duration-200">
+              <User size={12} className="text-primary" />
             </div>
-            <span className="text-xs font-medium whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-              Profile
-            </span>
+            <div className="flex flex-col opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 delay-75">
+              <span className="text-xs font-medium whitespace-nowrap">
+                Profile
+              </span>
+              <span className="text-[10px] text-sidebar-foreground/50 whitespace-nowrap">
+                Your settings
+              </span>
+            </div>
           </Link>
 
           <div className="flex-1 flex flex-col py-2 gap-0.5">
@@ -181,34 +209,60 @@ export default function Sidebar() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-3 py-2 mx-1 rounded-lg transition-all duration-150 ${
+                  className={`group/nav group/item relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 ${
                     active
-                      ? 'text-primary bg-primary/20 font-medium border-l-2 border-primary'
-                      : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/90 hover:bg-sidebar-accent/40'
+                      ? 'text-primary bg-gradient-to-r from-primary/10 to-transparent font-medium'
+                      : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/90 hover:bg-sidebar-accent/40 hover:translate-x-0.5'
                   }`}
                   viewTransition
                 >
-                  <Icon size={17} className="flex-shrink-0" />
-                  <span className="text-xs font-medium whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-                    {item.label}
-                  </span>
+                  <div
+                    className={`relative flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                      active
+                        ? 'bg-primary/15'
+                        : 'bg-sidebar-accent/40 group-hover/item:bg-sidebar-accent/60'
+                    }`}
+                  >
+                    <Icon
+                      size={14}
+                      className={`transition-transform duration-200 ${active ? '' : 'group-hover/item:rotate-12 group-hover/item:scale-110'}`}
+                    />
+                  </div>
+                  <div className="flex flex-col opacity-0 group-hover/sidebar:opacity-100 transition-all duration-200 delay-75 translate-x-[-4px] group-hover/sidebar:translate-x-0">
+                    <span className="text-xs font-medium whitespace-nowrap">
+                      {item.label}
+                    </span>
+                    <span className="text-[10px] text-sidebar-foreground/50 whitespace-nowrap">
+                      {item.tagline}
+                    </span>
+                  </div>
                 </Link>
               )
             })}
           </div>
-          <div className="border-t border-sidebar-border/30 py-2">
+
+          <div className="border-t border-sidebar-border/20 py-2 px-1">
             <PopoverRoot open={schemeOpen} onOpenChange={setSchemeOpen}>
-              <PopoverTrigger className="flex items-center gap-3 px-3 py-2.5 mx-1 rounded-xl w-[calc(100%-0.5rem)] text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200">
-                <Palette size={18} className="flex-shrink-0" />
+              <PopoverTrigger className="group/theme flex items-center gap-3 px-2 py-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-all duration-200 hover:translate-x-0.5">
+                <div className="relative flex-shrink-0 w-6 h-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/theme:scale-110 group-hover/theme:rotate-12 transition-all duration-200">
+                  <Palette
+                    size={14}
+                    className="text-sidebar-foreground/60 group-hover/theme:text-sidebar-foreground transition-colors"
+                  />
+                </div>
                 <span className="text-xs font-medium whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-                  Color theme
+                  Colors
                 </span>
               </PopoverTrigger>
               <PopoverPortal>
                 <PopoverPositioner side="right" align="end" sideOffset={12}>
-                  <PopoverPopup size="sm">
+                  <PopoverPopup
+                    size="sm"
+                    className="animate-in fade-in slide-in-from-left-2 duration-200"
+                  >
                     <div className="space-y-1">
-                      <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
+                      <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <Sparkles size={10} className="text-primary" />
                         Color Scheme
                       </h3>
                       {schemes.map((scheme) => (
@@ -220,11 +274,11 @@ export default function Sidebar() {
                         >
                           <div className="flex gap-1">
                             <div
-                              className="w-5 h-5 rounded-full border border-border"
+                              className="w-5 h-5 rounded-full border border-border shadow-sm"
                               style={{ backgroundColor: scheme.colors.light }}
                             />
                             <div
-                              className="w-5 h-5 rounded-full border border-border"
+                              className="w-5 h-5 rounded-full border border-border shadow-sm"
                               style={{ backgroundColor: scheme.colors.dark }}
                             />
                           </div>
@@ -236,18 +290,28 @@ export default function Sidebar() {
                 </PopoverPositioner>
               </PopoverPortal>
             </PopoverRoot>
+
             <PopoverRoot open={backgroundOpen} onOpenChange={setBackgroundOpen}>
-              <PopoverTrigger className="flex items-center gap-3 px-3 py-2.5 mx-1 rounded-xl w-[calc(100%-0.5rem)] text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200">
-                <ImageIcon size={18} className="flex-shrink-0" />
+              <PopoverTrigger className="group/bg flex items-center gap-3 px-2 py-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-all duration-200 hover:translate-x-0.5">
+                <div className="relative flex-shrink-0 w-6 h-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/bg:scale-110 group-hover/bg:rotate-12 transition-all duration-200">
+                  <ImageIcon
+                    size={14}
+                    className="text-sidebar-foreground/60 group-hover/bg:text-sidebar-foreground transition-colors"
+                  />
+                </div>
                 <span className="text-xs font-medium whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-                  Background
+                  Backdrop
                 </span>
               </PopoverTrigger>
               <PopoverPortal>
                 <PopoverPositioner side="right" align="end" sideOffset={12}>
-                  <PopoverPopup size="default">
+                  <PopoverPopup
+                    size="default"
+                    className="animate-in fade-in slide-in-from-left-2 duration-200"
+                  >
                     <div className="space-y-1">
-                      <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
+                      <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <Film size={10} className="text-primary" />
                         Background Style
                       </h3>
                       {backgrounds.map((bg) => (
@@ -272,26 +336,41 @@ export default function Sidebar() {
                 </PopoverPositioner>
               </PopoverPortal>
             </PopoverRoot>
+
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="flex items-center gap-3 px-3 py-2.5 mx-1 rounded-xl w-[calc(100%-0.5rem)] text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
+              className="group/mode flex items-center gap-3 px-2 py-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-all duration-200 hover:translate-x-0.5"
             >
-              {theme === 'dark' ? (
-                <Sun size={18} className="flex-shrink-0" />
-              ) : (
-                <Moon size={18} className="flex-shrink-0" />
-              )}
+              <div className="relative flex-shrink-0 w-6 h-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/mode:scale-110 group-hover/mode:rotate-12 transition-all duration-200 overflow-hidden">
+                {theme === 'dark' ? (
+                  <Sun
+                    size={14}
+                    className="text-sidebar-foreground/60 group-hover/mode:text-sidebar-foreground group-hover/mode:rotate-180 transition-all duration-500"
+                  />
+                ) : (
+                  <Moon
+                    size={14}
+                    className="text-sidebar-foreground/60 group-hover/mode:text-sidebar-foreground group-hover/mode:-rotate-180 transition-all duration-500"
+                  />
+                )}
+              </div>
               <span className="text-xs font-medium whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                {theme === 'dark' ? 'Day mode' : 'Night mode'}
               </span>
             </button>
+
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-3 py-2.5 mx-1 rounded-xl w-[calc(100%-0.5rem)] text-sidebar-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+              className="group/logout flex items-center gap-3 px-2 py-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hover:translate-x-0.5"
             >
-              <LogOut size={18} className="flex-shrink-0" />
+              <div className="relative flex-shrink-0 w-6 h-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/logout:scale-110 group-hover/logout:rotate-12 transition-all duration-200">
+                <LogOut
+                  size={14}
+                  className="text-sidebar-foreground/60 group-hover/logout:text-destructive group-hover/logout:-rotate-12 transition-transform"
+                />
+              </div>
               <span className="text-xs font-medium whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-                Sign out
+                Exit theater
               </span>
             </button>
           </div>
@@ -299,7 +378,10 @@ export default function Sidebar() {
       </div>
 
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pt-2">
-        <nav className="flex items-center justify-around bg-sidebar/95 backdrop-blur-xl border border-sidebar-border/40 rounded-2xl shadow-xl px-2 py-2">
+        <nav className="relative flex items-center justify-around bg-sidebar/95 backdrop-blur-xl border border-sidebar-border/40 rounded-2xl shadow-xl shadow-black/10 px-2 py-2">
+          <div className="absolute left-2 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-sidebar-border/50 to-transparent" />
+          <div className="absolute right-2 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-sidebar-border/50 to-transparent" />
+
           {mobileNavItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.path)
@@ -307,35 +389,65 @@ export default function Sidebar() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-150 ${
+                className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-150 ${
                   active
-                    ? 'text-primary bg-primary/15'
+                    ? 'text-primary'
                     : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/80 active:bg-sidebar-accent/40'
                 }`}
                 viewTransition
               >
-                <Icon size={20} />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <div
+                  className={`relative transition-transform duration-200 ${active ? 'scale-110' : 'active:scale-95'}`}
+                >
+                  <Icon size={20} className={active ? 'drop-shadow-lg' : ''} />
+                  {active && (
+                    <Sparkles
+                      size={8}
+                      className="absolute -top-1 -right-1 text-primary animate-pulse"
+                    />
+                  )}
+                </div>
+                <span
+                  className={`text-[9px] font-medium transition-colors ${active ? 'text-primary' : ''}`}
+                >
+                  {item.label}
+                </span>
+                {active && (
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-lg shadow-primary/50" />
+                )}
               </Link>
             )
           })}
           <PopoverRoot open={mobileMoreOpen} onOpenChange={setMobileMoreOpen}>
             <PopoverTrigger
-              className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 ${
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
                 isMoreActive
                   ? 'text-primary'
                   : 'text-sidebar-foreground/60 active:text-sidebar-foreground'
               }`}
             >
-              <MoreHorizontal size={20} />
-              <span className="text-[10px] font-medium">More</span>
+              <div
+                className={`relative transition-transform duration-200 ${isMoreActive ? 'scale-110' : 'active:scale-95'}`}
+              >
+                <MoreHorizontal size={20} />
+                {isMoreActive && (
+                  <Sparkles
+                    size={8}
+                    className="absolute -top-1 -right-1 text-primary animate-pulse"
+                  />
+                )}
+              </div>
+              <span className="text-[9px] font-medium">More</span>
               {isMoreActive && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-lg shadow-primary/50" />
               )}
             </PopoverTrigger>
             <PopoverPortal>
-              <PopoverPositioner side="top" align="end" sideOffset={12}>
-                <PopoverPopup size="sm">
+              <PopoverPositioner side="top" align="end" sideOffset={8}>
+                <PopoverPopup
+                  size="sm"
+                  className="animate-in fade-in slide-in-from-bottom-2 duration-200"
+                >
                   <div className="space-y-1 min-w-[160px]">
                     {mobileMoreItems.map((item) => {
                       const Icon = item.icon
@@ -356,6 +468,9 @@ export default function Sidebar() {
                           <span className="text-sm font-medium">
                             {item.label}
                           </span>
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {item.tagline}
+                          </span>
                         </Link>
                       )
                     })}
@@ -371,14 +486,18 @@ export default function Sidebar() {
                     >
                       <User size={18} />
                       <span className="text-sm font-medium">Profile</span>
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        Settings
+                      </span>
                     </Link>
 
                     <div className="h-px bg-border my-1" />
                     <div className="flex items-center justify-between p-2">
-                      <span className="text-xs text-muted-foreground">
-                        Theme
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Film size={10} className="text-primary" />
+                        Customize
                       </span>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-0.5">
                         <PopoverRoot
                           open={schemeOpen}
                           onOpenChange={setSchemeOpen}
@@ -394,7 +513,11 @@ export default function Sidebar() {
                             >
                               <PopoverPopup size="sm">
                                 <div className="space-y-1">
-                                  <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
+                                  <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                    <Sparkles
+                                      size={10}
+                                      className="text-primary"
+                                    />
                                     Color Scheme
                                   </h3>
                                   {schemes.map((scheme) => (
@@ -408,14 +531,14 @@ export default function Sidebar() {
                                     >
                                       <div className="flex gap-1">
                                         <div
-                                          className="w-4 h-4 rounded-full border border-border"
+                                          className="w-4 h-4 rounded-full border border-border shadow-sm"
                                           style={{
                                             backgroundColor:
                                               scheme.colors.light,
                                           }}
                                         />
                                         <div
-                                          className="w-4 h-4 rounded-full border border-border"
+                                          className="w-4 h-4 rounded-full border border-border shadow-sm"
                                           style={{
                                             backgroundColor: scheme.colors.dark,
                                           }}
@@ -446,7 +569,8 @@ export default function Sidebar() {
                             >
                               <PopoverPopup size="default">
                                 <div className="space-y-1 max-h-64 overflow-y-auto">
-                                  <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
+                                  <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                    <Film size={10} className="text-primary" />
                                     Background
                                   </h3>
                                   {backgrounds.map((bg) => (
@@ -494,7 +618,7 @@ export default function Sidebar() {
                       className="w-full flex items-center gap-3 p-2.5 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
                     >
                       <LogOut size={18} />
-                      <span className="text-sm font-medium">Sign out</span>
+                      <span className="text-sm font-medium">Exit theater</span>
                     </button>
                   </div>
                 </PopoverPopup>
