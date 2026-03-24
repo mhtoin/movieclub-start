@@ -2,7 +2,6 @@ import { EmptyState } from '@/components/home/empty-state'
 import { HeroSection } from '@/components/home/hero-section'
 import { MovieReelSkeleton } from '@/components/home/movie-reel-skeleton'
 import { RecommendationsSection } from '@/components/home/recommendations-section'
-import { TrendingSection } from '@/components/home/trending-section'
 import { homeQueries } from '@/lib/react-query/queries/home'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
@@ -13,9 +12,7 @@ import { Suspense } from 'react'
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
     const userId = context.user?.userId
-    // Secondary sections — fire-and-forget, stream in while hero is visible
     context.queryClient.prefetchQuery(movieQueries.latest())
-    context.queryClient.prefetchQuery(homeQueries.trending())
     context.queryClient.prefetchQuery(tmdbQueries.genres())
     if (userId) {
       context.queryClient.prefetchQuery(homeQueries.recommendations(userId))
@@ -34,12 +31,9 @@ function Home() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground">
-      <HeroSection movie={latestMovie.movie} movieUser={latestMovie.user} />
+      <HeroSection movie={latestMovie.movie} />
 
-      <div className="relative space-y-0">
-        <Suspense fallback={<MovieReelSkeleton />}>
-          <TrendingSection />
-        </Suspense>
+      <div className="relative">
         <Suspense fallback={<MovieReelSkeleton />}>
           <RecommendationsSection userId={user?.userId || ''} />
         </Suspense>

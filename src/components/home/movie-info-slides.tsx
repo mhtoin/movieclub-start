@@ -94,33 +94,33 @@ function OverviewSlide({
         {releaseYear && (
           <motion.span
             variants={fadeInUp}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/60 px-3 py-1.5 text-xs font-medium backdrop-blur-sm transition-colors hover:bg-background/80"
+            className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1.5 text-xs font-medium text-secondary-foreground backdrop-blur-sm transition-colors hover:bg-secondary/20"
           >
-            <Calendar className="h-3.5 w-3.5 text-primary" />
+            <Calendar className="h-3.5 w-3.5" />
             {releaseYear}
           </motion.span>
         )}
         {formattedRuntime && (
           <motion.span
             variants={fadeInUp}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/60 px-3 py-1.5 text-xs font-medium backdrop-blur-sm transition-colors hover:bg-background/80"
+            className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1.5 text-xs font-medium text-secondary-foreground backdrop-blur-sm transition-colors hover:bg-secondary/20"
           >
-            <Clock className="h-3.5 w-3.5 text-primary" />
+            <Clock className="h-3.5 w-3.5" />
             {formattedRuntime}
           </motion.span>
         )}
         <motion.span
           variants={fadeInUp}
-          className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/60 px-3 py-1.5 text-xs font-medium backdrop-blur-sm transition-colors hover:bg-background/80"
+          className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-3 py-1.5 text-xs font-semibold backdrop-blur-sm transition-colors hover:bg-warning/20"
         >
-          <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-          {voteAverage.toFixed(1)}
+          <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+          <span className="text-warning">{voteAverage.toFixed(1)}</span>
         </motion.span>
         {genres?.slice(0, 2).map((genre) => (
           <motion.span
             key={genre}
             variants={fadeInUp}
-            className="rounded-full border border-border/50 bg-background/60 px-3 py-1.5 text-xs font-medium backdrop-blur-sm"
+            className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary backdrop-blur-sm"
           >
             {genre}
           </motion.span>

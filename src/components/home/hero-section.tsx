@@ -1,41 +1,48 @@
-import type { MovieWithCredits } from '@/db/schema/movies'
-import { motion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
-import { useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import {
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  ExternalLink,
+  Film,
+  Play,
+  Star,
+  Users,
+} from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { fadeInUp, staggerContainer } from './animation-variants'
-import { HeroActions } from './hero-actions'
-import { HeroBackdrop, ScrollIndicator } from './hero-backdrop'
-import { useMovieInfoSlides } from './movie-info-slides'
-import { MoviePosterCard } from './movie-poster-card'
-import { SlideTabs } from './slide-tabs'
-
-interface MovieUser {
-  name: string | null
-  email: string | null
-}
+import { HeroBackdrop } from './hero-backdrop'
+import type { MovieWithCredits } from '@/db/schema/movies'
+import { Button } from '@/components/ui/button'
 
 interface HeroSectionProps {
   movie: MovieWithCredits
-  movieUser: MovieUser
 }
 
-export function HeroSection({ movie, movieUser }: HeroSectionProps) {
-  const [activeSlide, setActiveSlide] = useState(0)
-  const [slideDirection, setSlideDirection] = useState(0)
+export function HeroSection({ movie }: HeroSectionProps) {
+  const shouldReduceMotion = useReducedMotion()
+  const [showFullOverview, setShowFullOverview] = useState(false)
+  const [hasScrolled, setHasScrolled] = useState(false)
 
-  // Extract image URLs
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setHasScrolled(true)
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const backdropPath = movie.images?.backdrops?.[0]?.file_path
-  const posterPath = movie.images?.posters?.[0]?.file_path
   const logoPath = movie.images?.logos?.[0]?.file_path
   const backdropUrl = backdropPath
     ? `https://image.tmdb.org/t/p/w1280${backdropPath}`
     : ''
-  const posterUrl = posterPath
-    ? `https://image.tmdb.org/t/p/w500${posterPath}`
-    : ''
   const logoUrl = logoPath ? `https://image.tmdb.org/t/p/w500${logoPath}` : ''
 
-  // Format dates and metadata
   const formattedWatchDate = movie.watchDate
     ? new Date(movie.watchDate).toLocaleDateString('en-US', {
         month: 'short',
@@ -44,8 +51,7 @@ export function HeroSection({ movie, movieUser }: HeroSectionProps) {
       })
     : null
 
-  // Extract links
-  const trailerKey = Array.isArray(movie.videos) ? movie.videos?.[0]?.key : null
+  const trailerKey = Array.isArray(movie.videos) ? movie.videos[0]?.key : null
   const trailerLink = trailerKey
     ? `https://www.youtube.com/watch?v=${trailerKey}`
     : null
@@ -57,86 +63,266 @@ export function HeroSection({ movie, movieUser }: HeroSectionProps) {
     ? `https://www.themoviedb.org/movie/${movie.tmdbId}`
     : null
 
-  // Get slides for movie info
-  const slides = useMovieInfoSlides({ movie })
-
-  const handleSlideChange = (newIndex: number) => {
-    setSlideDirection(newIndex > activeSlide ? 1 : -1)
-    setActiveSlide(newIndex)
-  }
+  const releaseYear = movie.releaseDate
+    ? new Date(movie.releaseDate).getFullYear()
+    : null
+  const formattedRuntime = movie.runtime
+    ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
+    : null
+  const cast = Array.isArray(movie.cast) ? movie.cast.slice(0, 8) : []
+  const crew = Array.isArray(movie.crew)
+    ? movie.crew.filter((c) => c.job === 'Director').slice(0, 2)
+    : []
+  const genres = movie.genres?.slice(0, 3) || []
 
   return (
     <section className="relative min-h-[100svh] w-full overflow-hidden">
       <HeroBackdrop backdropUrl={backdropUrl} title={movie.title} />
-      <div className="relative flex min-h-[100svh] items-end pb-8 md:items-center md:pb-0">
-        <div className="w-full px-4 pt-20 sm:px-6 md:px-12 lg:px-16">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid gap-8 lg:grid-cols-[1fr_300px] lg:items-center lg:gap-12 xl:grid-cols-[1fr_340px]">
-              <motion.div
-                className="flex flex-col gap-4"
-                variants={staggerContainer}
-                initial="initial"
-                animate="animate"
-              >
-                <motion.div
-                  variants={fadeInUp}
-                  className="inline-flex items-center gap-2 self-start rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary backdrop-blur-sm"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Latest Watch
-                </motion.div>
 
-                <motion.div variants={fadeInUp}>
-                  {logoUrl ? (
-                    <img
-                      src={logoUrl}
-                      alt={movie.title}
-                      className="h-12 w-auto max-w-[280px] object-contain drop-shadow-lg dark:drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] dark:brightness-110 sm:h-14 lg:h-16"
-                    />
-                  ) : (
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground drop-shadow-lg sm:text-4xl lg:text-5xl">
-                      {movie.title}
-                    </h1>
-                  )}
-                </motion.div>
+      <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background" />
 
-                {movie.tagline && (
-                  <motion.p
-                    variants={fadeInUp}
-                    className="text-sm italic text-foreground/70"
-                  >
-                    "{movie.tagline}"
-                  </motion.p>
-                )}
-                <motion.div variants={fadeInUp}>
-                  <SlideTabs
-                    slides={slides}
-                    activeSlide={activeSlide}
-                    slideDirection={slideDirection}
-                    onSlideChange={handleSlideChange}
-                  />
-                </motion.div>
-
-                <HeroActions
-                  trailerLink={trailerLink}
-                  providerLink={providerLink}
-                  formattedWatchDate={formattedWatchDate}
-                  tmdbLink={tmdbLink}
-                  imdbLink={imdbLink}
+      <div className="relative flex min-h-[100svh] flex-col justify-end pb-16">
+        <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16">
+          <motion.div
+            className="mx-auto max-w-5xl"
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+          >
+            <motion.div variants={fadeInUp} className="mb-8">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={movie.title}
+                  className="h-24 w-auto max-w-[400px] object-contain drop-shadow-2xl sm:h-28 md:h-32 lg:h-36"
                 />
-              </motion.div>
+              ) : (
+                <h1 className="font-cinema-caps text-5xl font-bold tracking-wide text-foreground drop-shadow-2xl sm:text-6xl md:text-7xl lg:text-8xl uppercase">
+                  {movie.title}
+                </h1>
+              )}
+            </motion.div>
 
-              <MoviePosterCard
-                title={movie.title}
-                posterUrl={posterUrl}
-                movieUser={movieUser}
-              />
-            </div>
-          </div>
+            {movie.tagline && (
+              <motion.p
+                variants={fadeInUp}
+                className="mb-6 text-lg italic text-foreground/70 sm:text-xl"
+              >
+                "{movie.tagline}"
+              </motion.p>
+            )}
+
+            <motion.div
+              variants={fadeInUp}
+              className="mb-8 flex flex-wrap items-center gap-3"
+            >
+              {releaseYear && (
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground/80">
+                  <Calendar className="h-4 w-4 text-secondary" />
+                  {releaseYear}
+                </span>
+              )}
+              {formattedRuntime && (
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground/80">
+                  <Clock className="h-4 w-4 text-secondary" />
+                  {formattedRuntime}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-warning">
+                <Star className="h-4 w-4 fill-warning text-warning" />
+                {movie.voteAverage.toFixed(1)}
+              </span>
+              {genres.map((genre) => (
+                <span
+                  key={genre}
+                  className="rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-medium text-primary"
+                >
+                  {genre}
+                </span>
+              ))}
+            </motion.div>
+
+            <motion.div variants={fadeInUp} className="mb-8 max-w-2xl">
+              <p
+                className={`text-sm leading-relaxed text-foreground/80 ${
+                  showFullOverview ? '' : 'line-clamp-2'
+                }`}
+              >
+                {movie.overview}
+              </p>
+              {movie.overview && movie.overview.length > 150 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowFullOverview(!showFullOverview)}
+                  className="mt-2 h-auto min-h-[24px] gap-1.5 px-0 text-xs font-medium text-primary hover:text-primary/80 hover:bg-transparent"
+                >
+                  {showFullOverview ? (
+                    <>
+                      <span>Show less</span>
+                      <ChevronUp className="h-3 w-3" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Read more</span>
+                      <ChevronDown className="h-3 w-3" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </motion.div>
+
+            <motion.div
+              variants={fadeInUp}
+              className="mb-10 flex flex-wrap items-center gap-3"
+            >
+              {trailerLink && (
+                <a
+                  href={trailerLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <Play className="h-4 w-4 fill-current" />
+                  Watch Trailer
+                </a>
+              )}
+              {providerLink && (
+                <a
+                  href={providerLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur-sm transition-all hover:bg-background hover:border-foreground/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <Film className="h-4 w-4" />
+                  Stream Now
+                </a>
+              )}
+              <Link
+                to="/discover"
+                className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                Explore more
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </Link>
+            </motion.div>
+
+            {cast.length > 0 && (
+              <motion.div variants={fadeInUp} className="mb-8">
+                <div className="mb-3 flex items-center gap-2">
+                  <Users className="h-4 w-4 text-foreground/50" />
+                  <span className="text-xs font-medium uppercase tracking-wider text-foreground/50">
+                    Cast
+                  </span>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+                  {cast.map((member) => (
+                    <div
+                      key={member.id ?? member.name}
+                      className="flex flex-col items-center gap-1.5 flex-shrink-0"
+                    >
+                      <div className="relative h-14 w-14 overflow-hidden rounded-full border-2 border-foreground/20 bg-muted">
+                        {member.profile_path ? (
+                          <img
+                            src={`https://image.tmdb.org/t/p/w185${member.profile_path}`}
+                            alt={member.name}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs font-medium text-foreground/50">
+                            {member.name?.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <span className="max-w-[70px] truncate text-center text-[10px] font-medium text-foreground/70">
+                        {member.name?.split(' ')[0]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            <motion.div
+              variants={fadeInUp}
+              className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-foreground/50"
+            >
+              {formattedWatchDate && (
+                <span className="flex items-center gap-1">
+                  <Film className="h-3 w-3" />
+                  Watched {formattedWatchDate}
+                </span>
+              )}
+              {crew.length > 0 && (
+                <span>Directed by {crew.map((c) => c.name).join(', ')}</span>
+              )}
+              <div className="flex items-center gap-3">
+                {tmdbLink && (
+                  <a
+                    href={tmdbLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    TMDB
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+                {imdbLink && (
+                  <a
+                    href={imdbLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    IMDb
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
 
-      <ScrollIndicator />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: hasScrolled ? 0 : 1 }}
+        transition={{ delay: 0.8, duration: 0.3 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
+      >
+        <motion.div
+          animate={
+            shouldReduceMotion || hasScrolled
+              ? {}
+              : {
+                  y: [0, 6, 0],
+                }
+          }
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="flex flex-col items-center gap-1 text-foreground/40"
+        >
+          <span className="text-[9px] uppercase tracking-[0.2em]">Scroll</span>
+          <ChevronDown className="h-4 w-4" />
+        </motion.div>
+      </motion.div>
     </section>
   )
 }
