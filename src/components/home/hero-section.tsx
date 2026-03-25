@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/button'
+import type { MovieWithCredits } from '@/db/schema/movies'
+import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   Calendar,
@@ -11,11 +14,8 @@ import {
   Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link } from '@tanstack/react-router'
 import { fadeInUp, staggerContainer } from './animation-variants'
 import { HeroBackdrop } from './hero-backdrop'
-import type { MovieWithCredits } from '@/db/schema/movies'
-import { Button } from '@/components/ui/button'
 
 interface HeroSectionProps {
   movie: MovieWithCredits
@@ -84,7 +84,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
       <div className="relative flex min-h-[100svh] flex-col justify-end pb-16">
         <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16">
           <motion.div
-            className="mx-auto max-w-5xl"
+            className="mx-auto max-w-7xl px-5"
             variants={staggerContainer}
             initial="initial"
             animate="animate"

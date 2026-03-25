@@ -122,7 +122,7 @@ function AuthenticatedLayout() {
         <div
           className={
             isHomePage
-              ? 'flex-1 overflow-auto relative z-10 isolate'
+              ? 'md:pl-16 flex-1 overflow-auto relative z-10 isolate'
               : 'pt-4 pb-24 md:pb-4 md:pl-16 px-4 flex-1 overflow-auto relative z-10 isolate'
           }
         >

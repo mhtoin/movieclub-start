@@ -1,10 +1,20 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Star, Ticket, Users } from 'lucide-react'
-import { useRef, useState } from 'react'
-import type { TMDBMovie } from '@/lib/react-query/queries/home'
 import { Button } from '@/components/ui/button'
+import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
+import type { TMDBMovie } from '@/lib/react-query/queries/home'
 import { homeQueries } from '@/lib/react-query/queries/home'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
+import {
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Play,
+  Star,
+  Ticket,
+  Users,
+} from 'lucide-react'
+import { useRef, useState } from 'react'
 
 interface RecommendationsSectionProps {
   userId: string
@@ -19,13 +29,17 @@ export function RecommendationsSection({
     homeQueries.recommendations(userId),
   )
 
-  if (!recommendations.length) return null
-
-  const movies = recommendations as unknown as Array<TMDBMovie>
   const [featuredIndex, setFeaturedIndex] = useState(0)
   const [page, setPage] = useState(0)
 
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  const { mutate: addToShortlist, isPending: isAddingToShortlist } =
+    useAddToShortlistMutation()
+
+  if (!recommendations.length) return null
+
+  const movies = recommendations as unknown as Array<TMDBMovie>
 
   const featured = movies[featuredIndex]
   const rest = movies.slice(1)
@@ -53,6 +67,10 @@ export function RecommendationsSection({
     setFeaturedIndex(index)
   }
 
+  const handleAddToShortlist = (movieId: number) => {
+    addToShortlist(movieId)
+  }
+
   return (
     <section className="relative py-12 md:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
@@ -63,18 +81,13 @@ export function RecommendationsSection({
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/30 bg-primary/10">
-              <Ticket className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="font-cinema-caps text-2xl font-bold tracking-wide text-foreground uppercase md:text-3xl">
-                Shortlist Picks
-              </h2>
-              <p className="text-sm text-foreground/60">
-                Based on your top ranked films
-              </p>
-            </div>
+          <div>
+            <h2 className="font-cinema-caps text-2xl font-bold tracking-wide text-foreground uppercase md:text-3xl">
+              Shortlist Picks
+            </h2>
+            <p className="text-sm text-foreground/60">
+              Based on your top ranked films
+            </p>
           </div>
         </motion.div>
 
@@ -85,7 +98,11 @@ export function RecommendationsSection({
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <FeaturedCard movie={featured} />
+            <FeaturedCard
+              movie={featured}
+              onAddToShortlist={handleAddToShortlist}
+              isAddingToShortlist={isAddingToShortlist}
+            />
           </motion.div>
 
           <div className="relative">
@@ -183,7 +200,22 @@ export function RecommendationsSection({
   )
 }
 
-function FeaturedCard({ movie }: { movie: TMDBMovie }) {
+function FeaturedCard({
+  movie,
+  onAddToShortlist,
+  isAddingToShortlist,
+}: {
+  movie: TMDBMovie
+  onAddToShortlist: (movieId: number) => void
+  isAddingToShortlist: boolean
+}) {
+  const [showFullOverview, setShowFullOverview] = useState(false)
+
+  const { data: movieDetails } = useQuery({
+    ...tmdbQueries.movieDetails(movie.id),
+    enabled: true,
+  })
+
   const backdropUrl = movie.backdrop_path
     ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
     : null
@@ -193,6 +225,11 @@ function FeaturedCard({ movie }: { movie: TMDBMovie }) {
   const year = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : null
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const trailer = movieDetails?.videos?.results?.find(
+    (v) => v.site === 'YouTube' && v.type === 'Trailer',
+  )
 
   return (
     <div className="group relative overflow-hidden rounded-2xl">
@@ -219,7 +256,7 @@ function FeaturedCard({ movie }: { movie: TMDBMovie }) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
 
       <div className="absolute bottom-0 left-0 right-0 p-6">
-        <div className="mb-3 flex items-center gap-3">
+        <div className="mb-3 flex flex-wrap items-center gap-3">
           <span className="rounded-full border border-warning/40 bg-warning/20 px-2.5 py-1 text-xs font-semibold text-warning">
             <span className="flex items-center gap-1">
               <Star className="h-3 w-3 fill-warning text-warning" />
@@ -241,26 +278,67 @@ function FeaturedCard({ movie }: { movie: TMDBMovie }) {
         </h3>
 
         {movie.overview && (
-          <p className="line-clamp-2 text-sm leading-relaxed text-white/70">
-            {movie.overview}
-          </p>
+          <div>
+            <p
+              className={`text-sm leading-relaxed text-white/70 ${
+                showFullOverview ? '' : 'line-clamp-2'
+              }`}
+            >
+              {movie.overview}
+            </p>
+            <button
+              onClick={() => setShowFullOverview(!showFullOverview)}
+              className="mt-1 text-xs font-medium text-white/60 hover:text-white/80 transition-colors"
+            >
+              {showFullOverview ? 'Show less' : 'Read more'}
+            </button>
+          </div>
         )}
 
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <Button
             variant="primary"
             size="sm"
             className="shadow-lg shadow-primary/30"
+            onClick={() => onAddToShortlist(movie.id)}
+            loading={isAddingToShortlist}
           >
             Add to Watch
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+          <a
+            href={`https://www.themoviedb.org/movie/${movie.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-md bg-[#01b4e4] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#01b4e4]/90"
+            title="View on TMDb"
           >
-            Details
-          </Button>
+            <span>TMDb</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+          {movieDetails?.imdb_id && (
+            <a
+              href={`https://www.imdb.com/title/${movieDetails.imdb_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-md bg-[#F5C518] px-3 py-1.5 text-xs font-semibold text-black transition-colors hover:bg-[#F5C518]/90"
+              title="View on IMDb"
+            >
+              <span>IMDb</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+          {trailer && (
+            <a
+              href={`https://www.youtube.com/watch?v=${trailer.key}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              title="Watch Trailer"
+            >
+              <Play className="h-3 w-3 fill-current" />
+              <span>Trailer</span>
+            </a>
+          )}
         </div>
       </div>
 

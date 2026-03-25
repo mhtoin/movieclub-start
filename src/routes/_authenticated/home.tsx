@@ -30,7 +30,7 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-background text-foreground">
+    <div className="min-h-screen w-full bg-background text-foreground pb-24 md:pb-0">
       <HeroSection movie={latestMovie.movie} />
 
       <div className="relative">
