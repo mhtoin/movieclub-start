@@ -18,7 +18,6 @@ import {
   Outlet,
   redirect,
   useMatches,
-  useRouterState,
 } from '@tanstack/react-router'
 import { createIsomorphicFn, createServerFn } from '@tanstack/react-start'
 import { lazy, Suspense } from 'react'
@@ -103,7 +102,6 @@ function AuthenticatedLayout() {
   const isHomePage = matches.some(
     (match) => match.routeId === '/_authenticated/home',
   )
-  const isPending = useRouterState({ select: (s) => s.status === 'pending' })
 
   const BackgroundComponent =
     BACKGROUND_OPTIONS[backgroundPreference as BackgroundOptionKey]
@@ -112,11 +110,6 @@ function AuthenticatedLayout() {
   return (
     <DeviceCapabilityProvider>
       <div className="h-screen flex flex-col overflow-hidden relative">
-        {isPending && (
-          <div className="fixed inset-x-0 top-0 z-[9999] h-[2px]">
-            <div className="h-full bg-primary animate-[progress_1.2s_ease-in-out_infinite] origin-left" />
-          </div>
-        )}
         <Sidebar />
         <BackgroundComponent />
         <div
