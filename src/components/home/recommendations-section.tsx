@@ -14,34 +14,118 @@ import {
   Ticket,
   Users,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 interface RecommendationsSectionProps {
   userId: string
 }
 
 const ITEMS_PER_PAGE = 6
+const EMPTY: TMDBMovie[] = []
 
 export function RecommendationsSection({
   userId,
 }: RecommendationsSectionProps) {
-  const { data: recommendations } = useSuspenseQuery(
-    homeQueries.recommendations(userId),
-  )
-
-  const [featuredIndex, setFeaturedIndex] = useState(0)
-  const [page, setPage] = useState(0)
-
-  const scrollRef = useRef<HTMLDivElement>(null)
-
+  const { data: seeds } = useSuspenseQuery(homeQueries.seeds(userId))
   const { mutate: addToShortlist, isPending: isAddingToShortlist } =
     useAddToShortlistMutation()
 
-  if (!recommendations.length) return null
+  // Fire a query per seed in parallel — results arrive progressively
+  const seed0 = useQuery(homeQueries.forSeed(seeds[0]!, []))
+  const seed1 = useQuery(
+    homeQueries.forSeed(
+      seeds[1] ?? { tmdbId: 0, title: '', posterPath: null },
+      [],
+    ),
+  )
+  const seed2 = useQuery(
+    homeQueries.forSeed(
+      seeds[2] ?? { tmdbId: 0, title: '', posterPath: null },
+      [],
+    ),
+  )
 
-  const movies = recommendations as unknown as Array<TMDBMovie>
+  const movies = useMemo(() => {
+    const all = [
+      ...(seed0.data ?? EMPTY),
+      ...(seed1.data ?? EMPTY),
+      ...(seed2.data ?? EMPTY),
+    ]
+    const seen = new Set<number>()
+    const unique: TMDBMovie[] = []
+    for (const m of all) {
+      if (!seen.has(m.id)) {
+        seen.add(m.id)
+        unique.push(m)
+      }
+    }
+    return unique.toSorted((a, b) => b.vote_average - a.vote_average)
+  }, [seed0.data, seed1.data, seed2.data])
 
-  const featured = movies[featuredIndex]
+  const isLoading =
+    movies.length === 0 &&
+    (seed0.isFetching || seed1.isFetching || seed2.isFetching)
+
+  if (isLoading) {
+    return (
+      <section className="relative py-12 md:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+          <div className="mb-8">
+            <h2 className="font-cinema-caps text-2xl font-bold tracking-wide text-foreground uppercase md:text-3xl">
+              Shortlist Picks
+            </h2>
+            <p className="text-sm text-foreground/60">
+              Based on your top ranked films
+            </p>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:gap-8">
+            <div className="aspect-[16/10] animate-pulse rounded-2xl bg-muted" />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex gap-4 rounded-xl border border-border/50 bg-background/60 p-2"
+                >
+                  <div className="h-24 w-16 animate-pulse rounded-lg bg-muted" />
+                  <div className="flex flex-1 flex-col justify-center gap-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (movies.length === 0) return null
+
+  return (
+    <RecommendationsLoaded
+      movies={movies}
+      addToShortlist={addToShortlist}
+      isAddingToShortlist={isAddingToShortlist}
+    />
+  )
+}
+
+function RecommendationsLoaded({
+  movies,
+  addToShortlist,
+  isAddingToShortlist,
+}: {
+  movies: TMDBMovie[]
+  addToShortlist: (movieId: number) => void
+  isAddingToShortlist: boolean
+}) {
+  const [featuredIndex, setFeaturedIndex] = useState(0)
+  const [page, setPage] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const safeIndex = featuredIndex < movies.length ? featuredIndex : 0
+  const featured = movies[safeIndex]
   const rest = movies.slice(1)
   const totalPages = Math.ceil(rest.length / ITEMS_PER_PAGE)
   const visibleRest = rest.slice(
@@ -119,9 +203,7 @@ export function RecommendationsSection({
                 >
                   <CompactCard
                     movie={movie}
-                    isSelected={
-                      featuredIndex === index + 1 + page * ITEMS_PER_PAGE
-                    }
+                    isSelected={safeIndex === index + 1 + page * ITEMS_PER_PAGE}
                     onSelect={() =>
                       handleSelect(index + 1 + page * ITEMS_PER_PAGE)
                     }

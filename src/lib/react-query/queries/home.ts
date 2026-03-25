@@ -89,31 +89,32 @@ export const getTrendingMovies = createServerFn({ method: 'GET' })
     }
   })
 
+export interface RecommendationSeed {
+  tmdbId: number
+  title: string
+  posterPath: string | null
+}
+
 /**
- * Get movie recommendations based on user's highly ranked tierlist movies
+ * Pick up to 3 random seed movies from the user's top tiers
  */
-export const getRecommendations = createServerFn({ method: 'GET' })
+export const getRecommendationSeeds = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .inputValidator((userId: string) => userId)
-  .handler(async ({ context, data: userId }): Promise<TMDBMovie[]> => {
+  .handler(async ({ context, data: userId }): Promise<RecommendationSeed[]> => {
     if (!context.user || context.user.userId !== userId)
       throw new Error('Forbidden')
 
-    if (!TMDB_CONFIG.API_KEY || !userId) {
-      return []
-    }
+    if (!TMDB_CONFIG.API_KEY || !userId) return []
 
     try {
-      // Get user's tierlists
       const userTierlists = (await (db as any).query.tierlist.findMany({
         where: (tierlist: any, { eq }: any) => eq(tierlist.userId, userId),
         with: {
           tiers: {
             with: {
               moviesOnTiers: {
-                with: {
-                  movie: true,
-                },
+                with: { movie: true },
               },
             },
             orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
@@ -121,26 +122,14 @@ export const getRecommendations = createServerFn({ method: 'GET' })
         },
       })) as TierlistWithDetails[]
 
-      if (userTierlists.length === 0) {
-        return []
-      }
-
-      // Get movies from top tiers (value <= 2, which are typically S, A tiers)
-      const highlyRatedMovies: Array<{
-        tmdbId: number
-        genres: string[] | null
-        title: string
-      }> = []
-
+      const topMovies: Array<{ tmdbId: number; title: string }> = []
       for (const tl of userTierlists) {
         for (const t of tl.tiers) {
-          // Lower value = higher tier (S=0, A=1, B=2, etc.)
           if (t.value <= 2) {
             for (const mot of t.moviesOnTiers) {
               if (mot.movie) {
-                highlyRatedMovies.push({
+                topMovies.push({
                   tmdbId: mot.movie.tmdbId,
-                  genres: mot.movie.genres,
                   title: mot.movie.title,
                 })
               }
@@ -149,77 +138,123 @@ export const getRecommendations = createServerFn({ method: 'GET' })
         }
       }
 
-      if (highlyRatedMovies.length === 0) {
-        return []
-      }
+      if (topMovies.length === 0) return []
 
-      // Pick up to 3 random highly rated movies to get recommendations from
-      const shuffled = highlyRatedMovies.sort(() => Math.random() - 0.5)
-      const seedMovies = shuffled.slice(0, 3)
+      const shuffled = topMovies.sort(() => Math.random() - 0.5)
+      const picks = shuffled.slice(0, 3)
 
-      // Fetch TMDB details for each seed movie to get poster_path
-      const seedDetailsPromises = seedMovies.map(async (seed) => {
-        const url = `${TMDB_CONFIG.BASE_URL}/movie/${seed.tmdbId}?api_key=${TMDB_CONFIG.API_KEY}&language=en-US`
-        try {
-          const response = await fetch(url)
-          if (!response.ok)
-            return { ...seed, posterPath: null as string | null }
-          const data = await response.json()
-          return {
-            ...seed,
-            posterPath: data.poster_path as string | null,
+      // Fetch poster paths from TMDB in parallel
+      const seeds = await Promise.all(
+        picks.map(async (pick) => {
+          const url = `${TMDB_CONFIG.BASE_URL}/movie/${pick.tmdbId}?api_key=${TMDB_CONFIG.API_KEY}&language=en-US`
+          try {
+            const res = await fetch(url)
+            if (!res.ok) return { ...pick, posterPath: null as string | null }
+            const data = await res.json()
+            return {
+              ...pick,
+              posterPath: data.poster_path as string | null,
+            }
+          } catch {
+            return { ...pick, posterPath: null as string | null }
           }
-        } catch {
-          return { ...seed, posterPath: null as string | null }
-        }
-      })
+        }),
+      )
 
-      const seedDetails = await Promise.all(seedDetailsPromises)
-
-      // Fetch recommendations from TMDB for each seed movie, tagging each with its source
-      const recommendationPromises = seedDetails.map(async (seed) => {
-        const url = `${TMDB_CONFIG.BASE_URL}/movie/${seed.tmdbId}/recommendations?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&page=1`
-
-        try {
-          const response = await fetch(url)
-          if (!response.ok) return []
-
-          const data: TMDBResponse = await response.json()
-          return data.results.slice(0, 10).map((movie) => ({
-            ...movie,
-            becauseYouLiked: {
-              title: seed.title,
-              posterPath: seed.posterPath,
-            },
-          }))
-        } catch {
-          return []
-        }
-      })
-
-      const allRecommendations = await Promise.all(recommendationPromises)
-      const flatRecommendations = allRecommendations.flat()
-
-      // Remove duplicates and movies already in user's tierlists
-      const userMovieTmdbIds = new Set(highlyRatedMovies.map((m) => m.tmdbId))
-      const seenIds = new Set<number>()
-      const uniqueRecommendations: TMDBMovie[] = []
-
-      for (const rec of flatRecommendations) {
-        if (!seenIds.has(rec.id) && !userMovieTmdbIds.has(rec.id)) {
-          seenIds.add(rec.id)
-          uniqueRecommendations.push(rec)
-        }
-      }
-
-      // Sort by popularity and return top 20
-      return uniqueRecommendations
-        .sort((a, b) => b.vote_average - a.vote_average)
-        .slice(0, 20)
+      return seeds
     } catch (error) {
-      console.error('Error fetching recommendations:', error)
+      console.error('Error fetching recommendation seeds:', error)
       return []
     }
+  })
+
+const TARGET_PROVIDERS = '8|323|463|496'
+const WATCH_REGION = 'FI'
+
+async function isAvailableInTargetProviders(movieId: number): Promise<boolean> {
+  const url = `${TMDB_CONFIG.BASE_URL}/movie/${movieId}/watch/providers?api_key=${TMDB_CONFIG.API_KEY}`
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return false
+    const data = await response.json()
+    const regionData = data.results?.[WATCH_REGION]
+    if (!regionData) return false
+    const providerIds = new Set<number>()
+    for (const provider of regionData.flatrate ?? [])
+      providerIds.add(provider.provider_id)
+    for (const provider of regionData.ads ?? [])
+      providerIds.add(provider.provider_id)
+    for (const provider of regionData.free ?? [])
+      providerIds.add(provider.provider_id)
+    const targetIds = TARGET_PROVIDERS.split('|').map(Number)
+    return targetIds.some((id) => providerIds.has(id))
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Fetch provider-filtered TMDB recommendations for a single seed movie.
+ * Paginates until it finds enough movies available on target providers.
+ */
+export const getRecommendationsForSeed = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .inputValidator(
+    (input: {
+      seedTmdbId: number
+      seedTitle: string
+      seedPosterPath: string | null
+      excludeTmdbIds: number[]
+    }) => input,
+  )
+  .handler(async ({ context, data }): Promise<TMDBMovie[]> => {
+    if (!context.user) throw new Error('Unauthorized')
+    if (!TMDB_CONFIG.API_KEY) return []
+
+    const { seedTmdbId, seedTitle, seedPosterPath, excludeTmdbIds } = data
+    const excludeSet = new Set(excludeTmdbIds)
+    const results: TMDBMovie[] = []
+    const perSeedTarget = 10
+    let page = 1
+    const maxPages = 5
+
+    while (results.length < perSeedTarget && page <= maxPages) {
+      const url = `${TMDB_CONFIG.BASE_URL}/movie/${seedTmdbId}/recommendations?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&page=${page}`
+      try {
+        const response = await fetch(url)
+        if (!response.ok) break
+        const recData: TMDBResponse = await response.json()
+        if (recData.results.length === 0) break
+
+        const providerChecks = await Promise.all(
+          recData.results.map(async (movie) => {
+            if (excludeSet.has(movie.id)) return null
+            excludeSet.add(movie.id)
+            const ok = await isAvailableInTargetProviders(movie.id)
+            if (!ok) return null
+            return {
+              ...movie,
+              becauseYouLiked: {
+                title: seedTitle,
+                posterPath: seedPosterPath,
+              },
+            }
+          }),
+        )
+
+        for (const rec of providerChecks) {
+          if (rec) {
+            results.push(rec)
+            if (results.length >= perSeedTarget) break
+          }
+        }
+      } catch {
+        break
+      }
+      page++
+    }
+
+    return results
   })
 
 export const homeQueries = {
@@ -227,13 +262,33 @@ export const homeQueries = {
     queryOptions({
       queryKey: ['home', 'trending'],
       queryFn: getTrendingMovies,
-      staleTime: 1000 * 60 * 30, // 30 minutes
+      staleTime: 1000 * 60 * 30,
     }),
-  recommendations: (userId: string) =>
+  seeds: (userId: string) =>
     queryOptions({
-      queryKey: ['home', 'recommendations', userId],
-      queryFn: () => getRecommendations({ data: userId }),
-      staleTime: 1000 * 60 * 30, // 30 minutes
+      queryKey: ['home', 'recommendation-seeds', userId],
+      queryFn: () => getRecommendationSeeds({ data: userId }),
+      staleTime: 1000 * 60 * 30,
       enabled: !!userId,
+    }),
+  forSeed: (seed: RecommendationSeed, excludeTmdbIds: number[]) =>
+    queryOptions({
+      queryKey: [
+        'home',
+        'recommendations-for-seed',
+        seed.tmdbId,
+        excludeTmdbIds,
+      ],
+      queryFn: () =>
+        getRecommendationsForSeed({
+          data: {
+            seedTmdbId: seed.tmdbId,
+            seedTitle: seed.title,
+            seedPosterPath: seed.posterPath,
+            excludeTmdbIds,
+          },
+        }),
+      staleTime: 1000 * 60 * 30,
+      enabled: seed.tmdbId > 0,
     }),
 }

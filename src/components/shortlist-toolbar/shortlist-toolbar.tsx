@@ -6,7 +6,7 @@ import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { Film, Plus, Sparkles, X } from 'lucide-react'
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { AddMovieDialog } from './add-movie-dialog'
 import ShortlistItem from './shortlist-item'
 
@@ -76,9 +76,12 @@ function AddMovieButton({ movieCount }: { movieCount: number }) {
 
 export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { data, isLoading } = useQuery(shortlistQueries.byUser(userId))
   const toggleIsReadyMutation = useToggleIsReadyMutation()
   const toggleParticipatingMutation = useToggleParticipatingMutation()
+
+  useEffect(() => setMounted(true), [])
 
   const movieCount = data?.movies?.length || 0
   const canAddMoreMovies = movieCount < 3
@@ -325,19 +328,21 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
               </motion.div>
             )}
           </AnimatePresence>
-          <AnimatePresence>
-            {!isExpanded && movieCount > 0 && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                transition={{ type: 'spring', damping: 15, stiffness: 400 }}
-                className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-background"
-              >
-                {movieCount}
-              </motion.span>
-            )}
-          </AnimatePresence>
+          {mounted && (
+            <AnimatePresence>
+              {!isExpanded && movieCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={{ type: 'spring', damping: 15, stiffness: 400 }}
+                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-background"
+                >
+                  {movieCount}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          )}
         </motion.button>
       </div>
     </>

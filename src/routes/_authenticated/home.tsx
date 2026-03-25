@@ -15,7 +15,7 @@ export const Route = createFileRoute('/_authenticated/home')({
     context.queryClient.prefetchQuery(movieQueries.latest())
     context.queryClient.prefetchQuery(tmdbQueries.genres())
     if (userId) {
-      context.queryClient.prefetchQuery(homeQueries.recommendations(userId))
+      context.queryClient.prefetchQuery(homeQueries.seeds(userId))
     }
   },
   component: Home,
