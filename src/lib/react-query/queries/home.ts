@@ -257,18 +257,20 @@ export const getRecommendationsForSeed = createServerFn({ method: 'GET' })
     return results
   })
 
+const ONE_WEEK = 1000 * 60 * 60 * 24 * 7
+
 export const homeQueries = {
   trending: () =>
     queryOptions({
       queryKey: ['home', 'trending'],
       queryFn: getTrendingMovies,
-      staleTime: 1000 * 60 * 30,
+      staleTime: ONE_WEEK,
     }),
   seeds: (userId: string) =>
     queryOptions({
       queryKey: ['home', 'recommendation-seeds', userId],
       queryFn: () => getRecommendationSeeds({ data: userId }),
-      staleTime: 1000 * 60 * 30,
+      staleTime: ONE_WEEK,
       enabled: !!userId,
     }),
   forSeed: (seed: RecommendationSeed, excludeTmdbIds: number[]) =>
@@ -288,7 +290,7 @@ export const homeQueries = {
             excludeTmdbIds,
           },
         }),
-      staleTime: 1000 * 60 * 30,
+      staleTime: ONE_WEEK,
       enabled: seed.tmdbId > 0,
     }),
 }
