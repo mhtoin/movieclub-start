@@ -28,12 +28,19 @@ export function HeroSection({ movie }: HeroSectionProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
+      const scrollContainer = document.querySelector(
+        '[class*=\"overflow-auto\"]',
+      )
+      const scrolled = scrollContainer
+        ? scrollContainer.scrollTop
+        : window.scrollY
+      if (scrolled > 10) {
         setHasScrolled(true)
       }
     }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    const scrollContainer = document.querySelector('[class*=\"overflow-auto\"]')
+    scrollContainer?.addEventListener('scroll', handleScroll, { passive: true })
+    return () => scrollContainer?.removeEventListener('scroll', handleScroll)
   }, [])
 
   const backdropPath = movie.images?.backdrops?.[0]?.file_path
@@ -247,8 +254,13 @@ export function HeroSection({ movie }: HeroSectionProps) {
                           </div>
                         )}
                       </div>
-                      <span className="max-w-[70px] truncate text-center text-[10px] font-medium text-foreground/70">
-                        {member.name?.split(' ')[0]}
+                      <span className="flex flex-col items-center text-center">
+                        <span className="text-[10px] font-medium text-foreground/70">
+                          {member.name?.split(' ')[0]}
+                        </span>
+                        <span className="text-[10px] font-medium text-foreground/70">
+                          {member.name?.split(' ').slice(1).join(' ')}
+                        </span>
                       </span>
                     </div>
                   ))}
@@ -269,13 +281,13 @@ export function HeroSection({ movie }: HeroSectionProps) {
               {crew.length > 0 && (
                 <span>Directed by {crew.map((c) => c.name).join(', ')}</span>
               )}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {tmdbLink && (
                   <a
                     href={tmdbLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-secondary/20 px-3 py-1.5 text-xs font-medium text-foreground/80 backdrop-blur-sm transition-all hover:bg-secondary/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
                     TMDB
                     <ExternalLink className="h-3 w-3" />
@@ -286,7 +298,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
                     href={imdbLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-secondary/20 px-3 py-1.5 text-xs font-medium text-foreground/80 backdrop-blur-sm transition-all hover:bg-secondary/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
                     IMDb
                     <ExternalLink className="h-3 w-3" />
@@ -302,7 +314,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: hasScrolled ? 0 : 1 }}
         transition={{ delay: 0.8, duration: 0.3 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none"
       >
         <motion.div
           animate={
