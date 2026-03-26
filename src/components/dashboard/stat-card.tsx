@@ -1,5 +1,27 @@
 import { LucideIcon } from 'lucide-react'
 
+interface CompactStatProps {
+  label: string
+  value: string | number
+  icon: LucideIcon
+}
+
+export function CompactStat({ label, value, icon: Icon }: CompactStatProps) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="rounded-md bg-primary/10 p-2">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div>
+        <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+          {label}
+        </p>
+        <p className="text-xl font-bold tracking-tight">{value}</p>
+      </div>
+    </div>
+  )
+}
+
 interface StatCardProps {
   title: string
   value: string | number

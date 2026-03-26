@@ -26,39 +26,51 @@ export function GenresTabContent({
     : stats.totalWatchedMovies
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <DashboardSection
+            title="Genre Distribution"
+            icon={BarChart3}
+            description="Number of watched movies per genre"
+          >
+            <DashboardChart
+              type="horizontal-bar"
+              data={insights.genreDistribution}
+              categoryKey="genre"
+              valueKey="count"
+              xAxisLabel="Number of movies"
+              valueSuffix=" movies"
+              height="auto"
+              emptyMessage="No genre data yet"
+              barGap={5}
+              maxBarSize={24}
+              barCategoryGap="20%"
+            />
+          </DashboardSection>
+        </div>
         <DashboardSection
-          title="Genre Distribution"
-          icon={BarChart3}
-          description="Number of watched movies per genre"
+          title="Top Rated"
+          icon={Trophy}
+          description="Your highest scoring movies"
         >
-          <DashboardChart
-            type="horizontal-bar"
-            data={insights.genreDistribution}
-            categoryKey="genre"
-            valueKey="count"
-            xAxisLabel="Number of movies"
-            valueSuffix=" movies"
-            height="auto"
-            emptyMessage="No genre data yet"
-            barGap={5}
-            maxBarSize={24}
-            barCategoryGap="20%"
-          />
+          <HighestRatedList data={insights.highestRated} />
         </DashboardSection>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DashboardSection
-          title="TMDB Rating Distribution"
+          title="Rating Distribution"
           icon={Star}
-          description="How watched movies score on TMDB (0–10 scale)"
+          description="How your movies score on TMDB"
         >
           <DashboardChart
-            type="horizontal-bar"
+            type="bar"
             data={insights.ratingDistribution}
             categoryKey="range"
             valueKey="count"
-            xAxisLabel="Movies"
-            yAxisLabel="Rating"
+            xAxisLabel="Rating"
+            yAxisLabel="Movies"
             valueSuffix=" movies"
             height="auto"
             emptyMessage="No rating data yet"
@@ -67,26 +79,20 @@ export function GenresTabContent({
             barCategoryGap="15%"
           />
         </DashboardSection>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <DashboardSection
-          title="Highest Rated"
-          icon={Trophy}
-          description="Top 5 movies by TMDB audience score"
-        >
-          <HighestRatedList data={insights.highestRated} />
-        </DashboardSection>
         <DashboardSection
           title="Longest Movies"
           icon={Clock}
-          description="Top 5 longest runtimes in the collection"
+          description="Marathon-worthy runtimes"
         >
           <LongestMoviesList data={insights.longestMovies} />
         </DashboardSection>
+      </div>
+
+      <div>
         <DashboardSection
           title="Movies by Member"
           icon={Users}
-          description="Contributions per club member"
+          description="Who's been adding what"
         >
           <MoviesByUserList
             data={insights.moviesByUser}
