@@ -1,13 +1,19 @@
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { Movie } from '@/lib/tmdb-api'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
-import { Loader2 } from 'lucide-react'
+import { Film, Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { MovieCard } from './movie-card'
 import { MovieDetailsDialog } from './movie-details-dialog'
+import type { Movie } from '@/lib/tmdb-api'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
-export default function DiscoverMoviesList() {
+interface DiscoverMoviesListProps {
+  onTotalResults?: (count: number) => void
+}
+
+export default function DiscoverMoviesList({
+  onTotalResults,
+}: DiscoverMoviesListProps) {
   const routeApi = getRouteApi('/_authenticated/discover')
   const search = routeApi.useSearch()
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
@@ -26,6 +32,15 @@ export default function DiscoverMoviesList() {
     )
 
   const observerTarget = useRef<HTMLDivElement>(null)
+
+  const movies = data.pages.flatMap((page) => page.results)
+  const totalCount = data.pages[0]?.total_results ?? 0
+
+  useEffect(() => {
+    if (onTotalResults && totalCount > 0) {
+      onTotalResults(totalCount)
+    }
+  }, [totalCount, onTotalResults])
 
   const handleMovieClick = (movie: Movie, rect: DOMRect) => {
     setSelectedMovie(movie)
@@ -65,11 +80,9 @@ export default function DiscoverMoviesList() {
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
-  const movies = data.pages.flatMap((page) => page.results)
-
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {movies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} onClick={handleMovieClick} />
         ))}
@@ -91,16 +104,23 @@ export default function DiscoverMoviesList() {
       </div>
 
       {!hasNextPage && movies.length > 0 && (
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          No more movies to load
+        <div className="py-10 text-center">
+          <p className="text-sm text-muted-foreground/60">
+            {totalCount.toLocaleString()} movies matched your filters
+          </p>
         </div>
       )}
 
       {movies.length === 0 && (
-        <div className="py-12 text-center">
-          <p className="text-lg text-muted-foreground">No movies found</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Try adjusting your filters
+        <div className="py-16 flex flex-col items-center text-center">
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+            <Film size={20} className="text-muted-foreground/50" />
+          </div>
+          <p className="text-base font-medium text-foreground/80">
+            No movies match your filters
+          </p>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            Try removing some filters or adjusting the rating range.
           </p>
         </div>
       )}

@@ -1,3 +1,8 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Check, ChevronDown, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import MobileFilter from './mobile-filter'
+import type { WatchProvider  } from '@/lib/tmdb-api';
 import {
   ComboboxInput,
   ComboboxItem,
@@ -5,16 +10,12 @@ import {
   ComboboxRoot,
   ComboboxTrigger,
 } from '@/components/ui/combobox'
+import { getImageUrl  } from '@/lib/tmdb-api'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { WatchProvider } from '@/lib/tmdb-api'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Check, ChevronDown, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import MobileFilter from './mobile-filter'
 
 interface ProviderFilterProps {
-  selectedProviders: string[]
-  onProvidersChange: (providers: string[]) => void
+  selectedProviders: Array<string>
+  onProvidersChange: (providers: Array<string>) => void
   variant?: 'default' | 'mobile' | 'chip'
   chipContent?: React.ReactNode
 }
@@ -95,27 +96,36 @@ export function ProviderFilter({
         <ComboboxPopup className="w-72">
           <div className="p-2">
             <ComboboxInput
-              placeholder="Search providers..."
+              placeholder="Filter providers..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               className="w-full"
             />
           </div>
           <div className="max-h-60 overflow-y-auto">
-            {filteredProviders.map((provider: WatchProvider) => (
-              <ComboboxItem
-                key={provider.provider_id}
-                value={provider.provider_id.toString()}
-                onClick={() => handleToggle(provider.provider_id.toString())}
-              >
-                <div className="flex flex-1 items-center justify-between">
-                  <span>{provider.provider_name}</span>
-                  {selectedProviders.includes(
-                    provider.provider_id.toString(),
-                  ) && <Check className="h-4 w-4" />}
-                </div>
-              </ComboboxItem>
-            ))}
+            {filteredProviders.map((provider: WatchProvider) => {
+              const logoUrl = getImageUrl(provider.logo_path, 'w92')
+              return (
+                <ComboboxItem
+                  key={provider.provider_id}
+                  value={provider.provider_id.toString()}
+                  onClick={() => handleToggle(provider.provider_id.toString())}
+                >
+                  <div className="flex flex-1 items-center gap-2.5">
+                    {logoUrl ? (
+                      <img
+                        src={logoUrl}
+                        alt=""
+                        className="h-6 w-6 rounded shrink-0"
+                      />
+                    ) : (
+                      <div className="h-6 w-6 rounded bg-muted shrink-0" />
+                    )}
+                    <span className="text-sm">{provider.provider_name}</span>
+                  </div>
+                </ComboboxItem>
+              )
+            })}
             {filteredProviders.length === 0 && (
               <div className="px-2 py-6 text-center text-sm text-muted-foreground">
                 No providers found

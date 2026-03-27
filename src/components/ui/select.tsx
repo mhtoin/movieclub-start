@@ -1,17 +1,18 @@
-import { cn } from '@/lib/utils'
 import { Select as BaseSelect } from '@base-ui/react/select'
-import { cva, type VariantProps } from 'class-variance-authority'
+import {  cva } from 'class-variance-authority'
 import { Check, ChevronDown } from 'lucide-react'
 import * as React from 'react'
+import type {VariantProps} from 'class-variance-authority';
+import { cn } from '@/lib/utils'
 
 const selectTriggerVariants = cva(
-  'inline-flex items-center justify-between gap-2 rounded-md border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 data-[popup-open]:outline data-[popup-open]:outline-primary',
+  'inline-flex items-center justify-between gap-2 rounded-md border border-border/60 bg-background text-foreground transition-colors hover:bg-foreground/5 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 data-[popup-open]:outline data-[popup-open]:outline-primary',
   {
     variants: {
       size: {
         sm: 'h-8 px-3 text-sm',
-        default: 'h-10 px-3.5 text-base',
-        lg: 'h-12 px-4 text-lg',
+        default: 'h-10 px-3.5 text-sm',
+        lg: 'h-12 px-4 text-base',
       },
     },
     defaultVariants: {
@@ -21,13 +22,13 @@ const selectTriggerVariants = cva(
 )
 
 const selectPopupVariants = cva(
-  'overflow-y-auto rounded-md border border-border bg-background shadow-lg outline-none transition-all duration-300 ease-out data-[ending-style]:scale-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-80 data-[starting-style]:opacity-0 z-[9999]',
+  'overflow-y-auto rounded-lg border border-border/60 bg-background shadow-lg outline-none transition-all duration-200 ease-out data-[ending-style]:scale-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 z-50',
   {
     variants: {
       size: {
         sm: 'min-w-[8rem] max-h-[15rem] p-1 text-sm',
-        default: 'min-w-[10rem] max-h-[20rem] p-1.5 text-base',
-        lg: 'min-w-[12rem] max-h-[24rem] p-2 text-lg',
+        default: 'min-w-[10rem] max-h-[20rem] p-1 text-sm',
+        lg: 'min-w-[12rem] max-h-[24rem] p-1.5 text-base',
       },
     },
     defaultVariants: {
@@ -37,13 +38,13 @@ const selectPopupVariants = cva(
 )
 
 const selectItemVariants = cva(
-  'relative flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 outline-none transition-colors hover:bg-secondary focus-visible:bg-secondary data-[selected]:bg-primary/20 data-[highlighted]:bg-accent data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
+  'relative flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 outline-none transition-colors hover:bg-foreground/5 focus-visible:bg-foreground/5 data-[selected]:bg-primary/10 data-[highlighted]:bg-foreground/5 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
   {
     variants: {
       size: {
-        sm: 'text-sm py-1',
-        default: 'text-base py-1.5',
-        lg: 'text-lg py-2',
+        sm: 'text-sm py-1.5',
+        default: 'text-sm py-2',
+        lg: 'text-base py-2.5',
       },
     },
     defaultVariants: {
@@ -114,7 +115,7 @@ const SelectPopup = React.forwardRef<
     <BaseSelect.Positioner
       sideOffset={4}
       alignItemWithTrigger={false}
-      className="z-[9999]"
+      className="z-50"
     >
       <BaseSelect.Popup
         ref={ref}

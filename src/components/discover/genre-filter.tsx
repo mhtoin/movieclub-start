@@ -1,3 +1,8 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { ChevronDown, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import MobileFilter from './mobile-filter'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import {
   ComboboxInput,
   ComboboxItem,
@@ -5,15 +10,10 @@ import {
   ComboboxRoot,
   ComboboxTrigger,
 } from '@/components/ui/combobox'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { ChevronDown, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import MobileFilter from './mobile-filter'
 
 interface GenreFilterProps {
-  selectedGenres: string[]
-  onGenresChange: (genres: string[]) => void
+  selectedGenres: Array<string>
+  onGenresChange: (genres: Array<string>) => void
   variant?: 'default' | 'mobile' | 'chip'
   chipContent?: React.ReactNode
 }
@@ -87,10 +87,10 @@ export function GenreFilter({
         <ComboboxTrigger className="outline-none">
           {chipContent}
         </ComboboxTrigger>
-        <ComboboxPopup className="w-64">
+        <ComboboxPopup className="w-56">
           <div className="p-2">
             <ComboboxInput
-              placeholder="Search genres..."
+              placeholder="Filter genres..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               className="w-full"
@@ -103,9 +103,7 @@ export function GenreFilter({
                 value={genre.value}
                 onClick={() => handleToggle(genre.value)}
               >
-                <div className="flex flex-1 items-center justify-between">
-                  <span>{genre.label}</span>
-                </div>
+                <span className="text-sm">{genre.label}</span>
               </ComboboxItem>
             ))}
             {filteredGenres.length === 0 && (

@@ -1,36 +1,29 @@
-import {
-  ArrowDownWideNarrow,
-  Film,
-  RotateCcw,
-  SlidersHorizontal,
-  Star,
-  Tv,
-} from 'lucide-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { ArrowDownWideNarrow, Film, RotateCcw, Star, Tv, X } from 'lucide-react'
 import { GenreFilter } from './genre-filter'
 import { ProviderFilter } from './provider-filter'
 import { RatingFilter } from './rating-filter'
 import { SortByFilter } from './sort-by-filter'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
 interface DiscoverFiltersProps {
-  selectedGenres: string[]
-  onGenresChange: (genres: string[]) => void
-  selectedProviders: string[]
-  onProvidersChange: (providers: string[]) => void
+  selectedGenres: Array<string>
+  onGenresChange: (genres: Array<string>) => void
+  selectedProviders: Array<string>
+  onProvidersChange: (providers: Array<string>) => void
   voteRange: [number, number]
   onVoteRangeChange: (range: [number, number]) => void
   sortBy: string
   onSortByChange: (value: string) => void
+  totalResults?: number | null
 }
 
 const sortOptions = [
-  { value: 'popularity.desc', label: 'Popularity (High to Low)' },
-  { value: 'popularity.asc', label: 'Popularity (Low to High)' },
+  { value: 'popularity.desc', label: 'Popularity' },
   { value: 'vote_average.desc', label: 'Rating (High to Low)' },
-  { value: 'vote_average.asc', label: 'Rating (Low to High)' },
-  { value: 'release_date.desc', label: 'Release Date (Newest)' },
-  { value: 'release_date.asc', label: 'Release Date (Oldest)' },
-  { value: 'title.asc', label: 'Title (A-Z)' },
-  { value: 'title.desc', label: 'Title (Z-A)' },
+  { value: 'release_date.desc', label: 'Newest First' },
+  { value: 'release_date.asc', label: 'Oldest First' },
+  { value: 'title.asc', label: 'Title (A–Z)' },
 ]
 
 export function DiscoverFilters({
@@ -42,6 +35,7 @@ export function DiscoverFilters({
   onVoteRangeChange,
   sortBy,
   onSortByChange,
+  totalResults,
 }: DiscoverFiltersProps) {
   const hasActiveFilters =
     selectedGenres.length > 0 ||
@@ -62,135 +56,212 @@ export function DiscoverFilters({
   const isRatingModified = voteRange[0] !== 0 || voteRange[1] !== 10
 
   return (
-    <div className="w-full space-y-3">
-      <div className="bg-sidebar/90 backdrop-blur-xl border border-sidebar-border/40 rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center p-2 gap-1 flex-wrap">
-          <div className="flex items-center gap-2 px-3 py-2 border-r border-sidebar-border/30 mr-1">
-            <SlidersHorizontal
-              size={16}
-              className="text-sidebar-foreground/60"
-            />
-            <span className="text-xs font-semibold text-sidebar-foreground/80 uppercase tracking-wider hidden sm:inline">
-              Filters
-            </span>
-          </div>
-
-          <div className="relative">
-            <SortByFilter
-              value={sortBy}
-              onValueChange={onSortByChange}
-              variant="chip"
-              chipContent={
-                <div
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                    sortBy !== 'popularity.desc'
-                      ? 'text-primary bg-primary/15'
-                      : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                  }`}
-                >
-                  <ArrowDownWideNarrow size={16} className="flex-shrink-0" />
-                  <span className="text-xs font-medium whitespace-nowrap hidden lg:inline">
-                    {currentSortLabel}
-                  </span>
-                  <span className="text-xs font-medium whitespace-nowrap lg:hidden">
-                    Sort
-                  </span>
-                </div>
-              }
-            />
-          </div>
-          <div className="w-px h-6 bg-sidebar-border/30 mx-1" />
-          <div className="relative">
-            <GenreFilter
-              selectedGenres={selectedGenres}
-              onGenresChange={onGenresChange}
-              variant="chip"
-              chipContent={
-                <div
-                  className={`flex items-center gap-2 px-2 py-1 rounded-xl cursor-pointer transition-all duration-200 ${
-                    selectedGenres.length > 0
-                      ? 'text-primary bg-primary/15'
-                      : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                  }`}
-                >
-                  <Film size={16} className="flex-shrink-0" />
-                  <span className="text-xs font-medium whitespace-nowrap">
-                    Genres
-                  </span>
-                  {selectedGenres.length > 0 && (
-                    <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold bg-primary text-primary-foreground rounded-full">
-                      {selectedGenres.length}
-                    </span>
-                  )}
-                </div>
-              }
-            />
-          </div>
-          <div className="relative">
-            <ProviderFilter
-              selectedProviders={selectedProviders}
-              onProvidersChange={onProvidersChange}
-              variant="chip"
-              chipContent={
-                <div
-                  className={`flex items-center gap-2 px-2 py-1 rounded-xl cursor-pointer transition-all duration-200 ${
-                    selectedProviders.length > 0
-                      ? 'text-primary bg-primary/15'
-                      : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                  }`}
-                >
-                  <Tv size={16} className="flex-shrink-0" />
-                  <span className="text-xs font-medium whitespace-nowrap">
-                    Streaming
-                  </span>
-                  {selectedProviders.length > 0 && (
-                    <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold bg-primary text-primary-foreground rounded-full">
-                      {selectedProviders.length}
-                    </span>
-                  )}
-                </div>
-              }
-            />
-          </div>
-          <div className="relative">
-            <RatingFilter
-              voteRange={voteRange}
-              onVoteRangeChange={onVoteRangeChange}
-              variant="chip"
-              chipContent={
-                <div
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                    isRatingModified
-                      ? 'text-primary bg-primary/15'
-                      : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                  }`}
-                >
-                  <Star size={16} className="flex-shrink-0" />
-                  <span className="text-xs font-medium whitespace-nowrap">
-                    {isRatingModified
-                      ? `${voteRange[0].toFixed(0)}-${voteRange[1].toFixed(0)}`
-                      : 'Rating'}
-                  </span>
-                </div>
-              }
-            />
-          </div>
-          {hasActiveFilters && (
-            <>
-              <div className="w-px h-6 bg-sidebar-border/30 mx-1" />
-              <button
-                onClick={clearAllFilters}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sidebar-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+    <div className="w-full space-y-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative">
+          <SortByFilter
+            value={sortBy}
+            onValueChange={onSortByChange}
+            variant="chip"
+            chipContent={
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
+                  sortBy !== 'popularity.desc'
+                    ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
               >
-                <RotateCcw size={14} className="flex-shrink-0" />
-                <span className="text-xs font-medium whitespace-nowrap hidden sm:inline">
-                  Reset
-                </span>
-              </button>
-            </>
-          )}
+                <ArrowDownWideNarrow size={14} className="flex-shrink-0" />
+                <span className="hidden lg:inline">{currentSortLabel}</span>
+                <span className="lg:hidden">Sort</span>
+              </div>
+            }
+          />
         </div>
+
+        <div className="relative">
+          <GenreFilter
+            selectedGenres={selectedGenres}
+            onGenresChange={onGenresChange}
+            variant="chip"
+            chipContent={
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
+                  selectedGenres.length > 0
+                    ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                <Film size={14} className="flex-shrink-0" />
+                <span>
+                  {selectedGenres.length > 0
+                    ? `${selectedGenres.length} genre${selectedGenres.length > 1 ? 's' : ''}`
+                    : 'Genres'}
+                </span>
+              </div>
+            }
+          />
+        </div>
+
+        <div className="relative">
+          <ProviderFilter
+            selectedProviders={selectedProviders}
+            onProvidersChange={onProvidersChange}
+            variant="chip"
+            chipContent={
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
+                  selectedProviders.length > 0
+                    ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                <Tv size={14} className="flex-shrink-0" />
+                <span>
+                  {selectedProviders.length > 0
+                    ? `${selectedProviders.length} service${selectedProviders.length > 1 ? 's' : ''}`
+                    : 'Streaming'}
+                </span>
+              </div>
+            }
+          />
+        </div>
+
+        <div className="relative">
+          <RatingFilter
+            voteRange={voteRange}
+            onVoteRangeChange={onVoteRangeChange}
+            variant="chip"
+            chipContent={
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
+                  isRatingModified
+                    ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                <Star size={14} className="flex-shrink-0" />
+                <span>
+                  {isRatingModified
+                    ? `${voteRange[0].toFixed(0)}–${voteRange[1].toFixed(0)}`
+                    : 'Rating'}
+                </span>
+              </div>
+            }
+          />
+        </div>
+
+        {hasActiveFilters && (
+          <>
+            <div className="h-4 w-px bg-border/40 shrink-0" />
+            <button
+              onClick={clearAllFilters}
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+            >
+              <RotateCcw size={12} className="flex-shrink-0" />
+              Clear all
+            </button>
+          </>
+        )}
+
+        {totalResults !== null && totalResults !== undefined && (
+          <div className="ml-auto text-xs text-muted-foreground/70 font-medium tabular-nums shrink-0">
+            {totalResults.toLocaleString()} movies
+          </div>
+        )}
       </div>
+
+      {hasActiveFilters && (
+        <ActiveFilterPills
+          selectedGenres={selectedGenres}
+          onGenresChange={onGenresChange}
+          selectedProviders={selectedProviders}
+          onProvidersChange={onProvidersChange}
+          voteRange={voteRange}
+          onVoteRangeChange={onVoteRangeChange}
+          isRatingModified={isRatingModified}
+        />
+      )}
     </div>
+  )
+}
+
+function ActiveFilterPills({
+  selectedGenres,
+  onGenresChange,
+  selectedProviders,
+  onProvidersChange,
+  voteRange,
+  onVoteRangeChange,
+  isRatingModified,
+}: {
+  selectedGenres: Array<string>
+  onGenresChange: (genres: Array<string>) => void
+  selectedProviders: Array<string>
+  onProvidersChange: (providers: Array<string>) => void
+  voteRange: [number, number]
+  onVoteRangeChange: (range: [number, number]) => void
+  isRatingModified: boolean
+}) {
+  const { data: genres = [] } = useSuspenseQuery(tmdbQueries.genres())
+  const { data: providers = [] } = useSuspenseQuery(
+    tmdbQueries.watchProviders(),
+  )
+
+  const genreMap = new Map(genres.map((g) => [g.value, g.label]))
+  const providerMap = new Map(
+    providers.map((p) => [p.provider_id.toString(), p.provider_name]),
+  )
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      {selectedGenres.map((genreId) => (
+        <FilterPill
+          key={`genre-${genreId}`}
+          label={genreMap.get(genreId) ?? genreId}
+          onRemove={() =>
+            onGenresChange(selectedGenres.filter((id) => id !== genreId))
+          }
+        />
+      ))}
+      {selectedProviders.map((providerId) => (
+        <FilterPill
+          key={`provider-${providerId}`}
+          label={providerMap.get(providerId) ?? providerId}
+          onRemove={() =>
+            onProvidersChange(
+              selectedProviders.filter((id) => id !== providerId),
+            )
+          }
+        />
+      ))}
+      {isRatingModified ? (
+        <FilterPill
+          label={`Rating ${voteRange[0].toFixed(0)}–${voteRange[1].toFixed(0)}`}
+          onRemove={() => onVoteRangeChange([0, 10])}
+        />
+      ) : null}
+    </div>
+  )
+}
+
+function FilterPill({
+  label,
+  onRemove,
+}: {
+  label: string
+  onRemove: () => void
+}) {
+  return (
+    <button
+      onClick={onRemove}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors group"
+    >
+      <span className="max-w-[180px] truncate">{label}</span>
+      <X
+        size={12}
+        className="flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity"
+      />
+    </button>
   )
 }

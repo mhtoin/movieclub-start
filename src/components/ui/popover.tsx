@@ -1,10 +1,11 @@
-import { cn } from '@/lib/utils'
 import { Popover as BasePopover } from '@base-ui/react/popover'
-import { cva, type VariantProps } from 'class-variance-authority'
+import {  cva } from 'class-variance-authority'
 import * as React from 'react'
+import type {VariantProps} from 'class-variance-authority';
+import { cn } from '@/lib/utils'
 
 const popoverBackdropVariants = cva(
-  'fixed inset-0 min-h-dvh transition-all duration-200 ease-out data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute z-[9998]',
+  'fixed inset-0 min-h-dvh transition-all duration-200 ease-out data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute z-40',
   {
     variants: {
       opacity: {
@@ -20,7 +21,7 @@ const popoverBackdropVariants = cva(
 )
 
 const popoverPopupVariants = cva(
-  'rounded-lg bg-popover text-popover-foreground border border-border shadow-lg transition-all duration-200 ease-out data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 z-[9999] no-scrollbar',
+  'rounded-lg bg-popover text-popover-foreground border border-border/60 shadow-lg transition-all duration-200 ease-out data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 z-50 no-scrollbar',
   {
     variants: {
       size: {
@@ -90,7 +91,7 @@ const PopoverPositioner = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BasePopover.Positioner
     ref={ref}
-    className={cn('z-[9999]', className)}
+    className={cn('z-50', className)}
     {...props}
   />
 ))
@@ -228,7 +229,7 @@ const PopoverContent = ({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
-        className="isolate z-[120]"
+        className="isolate z-50"
       >
         <BasePopover.Popup
           data-slot="popover-content"

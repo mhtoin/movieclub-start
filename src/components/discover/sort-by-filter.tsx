@@ -1,11 +1,11 @@
+import { ChartLine } from 'lucide-react'
+import MobileFilter from './mobile-filter'
 import {
   SelectItem,
   SelectPopup,
   SelectRoot,
   SelectTrigger,
 } from '@/components/ui/select'
-import { ChartLine } from 'lucide-react'
-import MobileFilter from './mobile-filter'
 
 interface SortByFilterProps {
   value: string
@@ -15,14 +15,11 @@ interface SortByFilterProps {
 }
 
 const sortOptions = [
-  { value: 'popularity.desc', label: 'Popularity (High to Low)' },
-  { value: 'popularity.asc', label: 'Popularity (Low to High)' },
+  { value: 'popularity.desc', label: 'Popularity' },
   { value: 'vote_average.desc', label: 'Rating (High to Low)' },
-  { value: 'vote_average.asc', label: 'Rating (Low to High)' },
-  { value: 'release_date.desc', label: 'Release Date (Newest)' },
-  { value: 'release_date.asc', label: 'Release Date (Oldest)' },
-  { value: 'title.asc', label: 'Title (A-Z)' },
-  { value: 'title.desc', label: 'Title (Z-A)' },
+  { value: 'release_date.desc', label: 'Newest First' },
+  { value: 'release_date.asc', label: 'Oldest First' },
+  { value: 'title.asc', label: 'Title (A\u2013Z)' },
 ]
 
 export function SortByFilter({

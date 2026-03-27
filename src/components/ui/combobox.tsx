@@ -1,11 +1,12 @@
-import { cn } from '@/lib/utils'
 import { Combobox as BaseCombobox } from '@base-ui/react/combobox'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 import { Check, ChevronDown } from 'lucide-react'
 import * as React from 'react'
+import type { VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
 
 const comboboxTriggerVariants = cva(
-  'inline-flex items-center justify-between gap-2 rounded-md border border-border bg-background text-foreground transition-colors hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 data-[popup-open]:bg-accent',
+  'inline-flex items-center justify-between gap-2 text-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       size: {
@@ -21,7 +22,7 @@ const comboboxTriggerVariants = cva(
 )
 
 const comboboxInputVariants = cva(
-  'w-full rounded-md border border-border bg-background text-foreground transition-colors placeholder:text-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50',
+  'w-full rounded-md border border-border/60 bg-background text-foreground text-sm transition-colors placeholder:text-muted-foreground/60 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       inputSize: {
@@ -37,13 +38,13 @@ const comboboxInputVariants = cva(
 )
 
 const comboboxPopupVariants = cva(
-  'overflow-y-auto rounded-md border border-border bg-background shadow-lg outline-none transition-all duration-300 ease-out data-[ending-style]:scale-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-80 data-[starting-style]:opacity-0 z-[9999]',
+  'overflow-y-auto rounded-lg border border-border/60 bg-background shadow-lg outline-none transition-all duration-200 ease-out data-[ending-style]:scale-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 z-50',
   {
     variants: {
       size: {
         sm: 'min-w-[8rem] max-h-[15rem] p-1 text-sm',
-        default: 'min-w-[10rem] max-h-[20rem] p-1.5 text-base',
-        lg: 'min-w-[14rem] max-h-[24rem] p-2 text-lg',
+        default: 'min-w-[10rem] max-h-[20rem] p-1 text-sm',
+        lg: 'min-w-[14rem] max-h-[24rem] p-1.5 text-base',
       },
     },
     defaultVariants: {
@@ -53,13 +54,13 @@ const comboboxPopupVariants = cva(
 )
 
 const comboboxItemVariants = cva(
-  'relative flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 my-2 outline-none transition-colors hover:bg-accent focus-visible:bg-accent data-[selected]:bg-primary/20 data-[highlighted]:bg-accent data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
+  'relative flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 outline-none transition-colors hover:bg-foreground/5 focus-visible:bg-foreground/5 data-[selected]:bg-primary/10 data-[highlighted]:bg-foreground/5 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
   {
     variants: {
       size: {
-        sm: 'text-sm py-1',
-        default: 'text-base py-1.5',
-        lg: 'text-lg py-2',
+        sm: 'text-sm py-1.5',
+        default: 'text-sm py-2',
+        lg: 'text-base py-2.5',
       },
     },
     defaultVariants: {
@@ -139,7 +140,7 @@ const ComboboxPopup = React.forwardRef<
   ComboboxPopupProps
 >(({ className, size, children, ...props }, ref) => (
   <BaseCombobox.Portal>
-    <BaseCombobox.Positioner sideOffset={4} className="z-[9999]">
+    <BaseCombobox.Positioner sideOffset={4} className="z-50">
       <BaseCombobox.Popup
         ref={ref}
         className={cn(comboboxPopupVariants({ size, className }))}
@@ -162,7 +163,7 @@ const ComboboxItem = React.forwardRef<
     {...props}
   >
     {children}
-    <BaseCombobox.ItemIndicator className="ml-auto">
+    <BaseCombobox.ItemIndicator className="ml-auto data-[selected]:opacity-100 opacity-0">
       <Check className="h-4 w-4" />
     </BaseCombobox.ItemIndicator>
   </BaseCombobox.Item>

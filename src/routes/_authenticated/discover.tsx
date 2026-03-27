@@ -6,7 +6,6 @@ import { z } from 'zod'
 
 import DiscoverMoviesList from '@/components/discover/discover-movie-list'
 import { DiscoverFilters } from '@/components/discover/filters'
-import { PageTitleBar } from '@/components/page-titlebar'
 import { Button } from '@/components/ui/button'
 import {
   DrawerClose,
@@ -53,6 +52,7 @@ function RouteComponent() {
   const navigate = Route.useNavigate()
   const search = Route.useSearch()
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [totalResults, setTotalResults] = useState<number | null>(null)
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
   const selectedGenres = search.genres ? search.genres.split(',') : []
@@ -114,6 +114,7 @@ function RouteComponent() {
         onVoteRangeChange={handleVoteRangeChange}
         sortBy={sortBy}
         onSortByChange={handleSortByChange}
+        totalResults={totalResults}
       />
     </Suspense>
   )
@@ -144,27 +145,43 @@ function RouteComponent() {
       <main className="flex-1 overflow-hidden">
         <div className="h-full flex flex-col">
           {!isDesktop && (
-            <div className="px-4 py-3 border-b border-border  backdrop-blur-sm">
+            <div className="px-4 py-2.5 flex items-center gap-3 border-b border-border">
               <Button
                 variant="outline"
-                size="default"
+                size="sm"
                 onClick={() => setFiltersOpen(true)}
-                className="w-full"
+                className="relative"
               >
-                <SlidersHorizontal className="mr-2 h-4 w-4" />
+                <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
                 Filters
+                {(selectedGenres.length > 0 ||
+                  selectedProviders.length > 0 ||
+                  voteRange[0] !== 0 ||
+                  voteRange[1] !== 10) && (
+                  <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold bg-primary text-primary-foreground rounded-full">
+                    {selectedGenres.length +
+                      selectedProviders.length +
+                      (voteRange[0] !== 0 || voteRange[1] !== 10 ? 1 : 0)}
+                  </span>
+                )}
               </Button>
+              {totalResults !== null && (
+                <span className="text-xs text-muted-foreground/70 font-medium tabular-nums">
+                  {totalResults.toLocaleString()} movies
+                </span>
+              )}
             </div>
           )}
           <div className="relative flex-1 flex flex-col overflow-hidden isolate">
-            <PageTitleBar
-              title="Discover"
-              description="Browse movies and refine results with filters"
-            />
-            <div className="flex-shrink-0 px-4">
+            <div className="flex-shrink-0 px-4 pt-3 pb-1">
+              {isDesktop && (
+                <h1 className="text-lg font-semibold text-foreground/90 mb-2">
+                  Discover
+                </h1>
+              )}
               {isDesktop && filtersContent}
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-24 pt-4 fade-mask fade-y-10 fade-intensity-75  dark:fade-y-16 dark:fade-intensity-100">
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-24 pt-1 fade-mask fade-y-10 fade-intensity-75 dark:fade-y-16 dark:fade-intensity-100">
               <Suspense
                 fallback={
                   <div className="flex items-center justify-center py-12">
@@ -172,7 +189,7 @@ function RouteComponent() {
                   </div>
                 }
               >
-                <DiscoverMoviesList />
+                <DiscoverMoviesList onTotalResults={setTotalResults} />
               </Suspense>
             </div>
           </div>
