@@ -1,7 +1,7 @@
-import { Movie } from '@/db/schema/movies'
 import { Clapperboard } from 'lucide-react'
 import { useState } from 'react'
 import MoviePoster from './movie-poster'
+import type { Movie } from '@/db/schema/movies'
 
 interface ShortlistCardProps {
   shortlist: {
@@ -58,7 +58,7 @@ export function ShortlistCard({
 
   return (
     <div
-      className={`flex bg-card border border-border shadow-md hover:shadow-xl max-w-sm transition-shadow duration-300 relative overflow-hidden animate-fade-in-up ${
+      className={`flex bg-card border border-border shadow-md hover:-translate-y-1 hover:shadow-lg max-w-sm transition-all duration-300 relative overflow-hidden animate-fade-in-up ${
         isCollapsed ? 'rounded-2xl p-4' : 'rounded-lg p-4 h-full flex flex-col'
       }`}
       style={{ animationDelay: `${index * 0.05}s` }}
@@ -85,8 +85,6 @@ export function ShortlistCard({
         </div>
       ) : (
         <>
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-transparent to-secondary/5 pointer-events-none" />
-
           <div className="flex items-center justify-between mb-4 relative z-10 border-b border-border pb-2">
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">

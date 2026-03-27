@@ -1,9 +1,9 @@
-import type { Movie } from '@/db/schema/movies'
-import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 import { Suspense, lazy, useState } from 'react'
 import { ShortlistUserCard } from './shortlist-user-card'
+import type { Movie } from '@/db/schema/movies'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 
 const MovieDetailsDialog = lazy(() =>
   import('./movie-details-dialog').then((m) => ({
@@ -56,23 +56,28 @@ export function ShortlistOverviewGrid() {
 
   return (
     <>
-      <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <span className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">
-            {shortlists.length}
-          </span>{' '}
-          {shortlists.length === 1 ? 'member' : 'members'}
-        </span>
-        <span className="text-muted-foreground/40">·</span>
+      <div className="flex items-center gap-4 mb-5 flex-wrap">
+        <div className="flex items-center gap-1.5">
+          <Users className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {shortlists.length}
+            </span>{' '}
+            {shortlists.length === 1 ? 'member' : 'members'}
+          </span>
+        </div>
+        <span className="text-muted-foreground/30">·</span>
         <span className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">{totalMovies}</span>{' '}
-          movies total
+          movies
         </span>
-        <span className="text-muted-foreground/40">·</span>
-        <span className="text-sm text-muted-foreground">
-          <span className="font-semibold text-success">{readyCount}</span> ready
-          to raffle
-        </span>
+        <span className="text-muted-foreground/30">·</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-success/10 rounded-full">
+          <span className="text-sm font-semibold text-success">
+            {readyCount}
+          </span>
+          <span className="text-sm text-success/80">ready</span>
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {shortlists.map((shortlist, index) => (

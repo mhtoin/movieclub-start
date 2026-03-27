@@ -1,4 +1,3 @@
-import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { CheckCircle2, Dices, Users, XCircle } from 'lucide-react'
 import { useState } from 'react'
@@ -10,6 +9,7 @@ import { AnimatedMovieWrapper, MovieGrid } from './movie-grid'
 import MoviePoster from './movie-poster'
 import RaffleCarousel from './raffle-carousel'
 import { UserBadge } from './user-badge'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 
 export default function UserTabList({
   onMovieClick,
@@ -43,8 +43,38 @@ export default function UserTabList({
     <TabsRoot variant="underlined" defaultValue="all" className="w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
         <div className="relative -mx-4 sm:mx-0 sm:flex-1">
-          <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none sm:hidden" />
-          <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none sm:hidden" />
+          <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none sm:hidden" />
+          <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none sm:hidden" />
+          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none sm:hidden">
+            <svg
+              className="w-4 h-4 text-muted-foreground/40"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </div>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none sm:hidden">
+            <svg
+              className="w-4 h-4 text-muted-foreground/40"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </div>
 
           <TabsList
             variant="underlined"
