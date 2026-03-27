@@ -1,3 +1,4 @@
+import { PageTitleBar } from '@/components/page-titlebar'
 import { Button } from '@/components/ui/button'
 import {
   DrawerClose,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/drawer'
 import Input from '@/components/ui/input'
 import Filters from '@/components/watched/filters'
+import { WatchedEmptyState } from '@/components/watched/watched-empty-state'
 import { WatchedItem } from '@/components/watched/watched-item'
 import WatchedSkeleton from '@/components/watched/watched-skeleton'
 import { useDebouncedCallback, useMediaQuery } from '@/lib/hooks'
@@ -25,7 +27,7 @@ import {
 } from '@tanstack/react-router'
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
 import { format } from 'date-fns'
-import { Calendar, Filter, Search, X } from 'lucide-react'
+import { Filter, Search, X } from 'lucide-react'
 import { Suspense, useState } from 'react'
 import { z } from 'zod'
 
@@ -86,28 +88,65 @@ function WatchedMoviesList({
 
   const entries = Object.entries(data || {})
 
+  if (entries.length === 0) {
+    return <WatchedEmptyState />
+  }
+
   if (isMobile) {
     return (
       <div className="relative space-y-8 pl-8">
-        <div className="absolute left-3 top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/20 to-transparent" />
+        <div className="absolute left-3 top-0 bottom-0 w-px bg-primary/20" />
         {entries.map(([yearMonth, movies]) => {
           return (
             <div id={`${yearMonth}`} key={yearMonth} className="space-y-3">
               <div className="sticky top-0 z-10 -ml-8 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative flex-shrink-0 w-6 flex justify-center">
-                    <div className="w-3 h-3 rounded-full bg-gradient-to-br from-primary to-primary/60 ring-2 ring-background shadow-sm" />
+                <div className="flex items-center gap-2">
+                  <div
+                    className="relative flex-shrink-0 w-12 h-10 rounded overflow-hidden"
+                    style={{
+                      background: `linear-gradient(135deg, oklch(0.35 0.035 var(--scheme-hue, 260)) 0%, oklch(0.25 0.01 var(--scheme-hue, 260)) 100%)`,
+                      maskImage: `radial-gradient(circle at 0px 50%, transparent 14px, black 14px)`,
+                      WebkitMaskImage: `radial-gradient(circle at 0px 50%, transparent 14px, black 14px)`,
+                    }}
+                  >
+                    <div
+                      className="absolute left-[42px] top-0 bottom-0 w-px opacity-50"
+                      style={{
+                        background: `repeating-linear-gradient(to bottom, transparent 0px, transparent 4px, oklch(0.45 0.02 var(--scheme-hue, 260)) 4px, oklch(0.45 0.02 var(--scheme-hue, 260)) 7px)`,
+                      }}
+                    />
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <span
+                        className="text-[8px] uppercase tracking-wider leading-none"
+                        style={{
+                          color: `oklch(0.6 0.02 var(--scheme-hue, 260))`,
+                          fontFamily: 'var(--font-cinema)',
+                        }}
+                      >
+                        {new Date(
+                          parseInt(yearMonth.split('-')[0], 10),
+                          parseInt(yearMonth.split('-')[1], 10) - 1,
+                        ).toLocaleString('en-US', { month: 'short' })}
+                      </span>
+                      <span
+                        className="text-sm font-bold leading-none"
+                        style={{
+                          color: `oklch(0.95 0.01 var(--scheme-hue, 260))`,
+                          fontFamily: 'var(--font-cinema)',
+                        }}
+                      >
+                        {new Date(
+                          parseInt(yearMonth.split('-')[0], 10),
+                          parseInt(yearMonth.split('-')[1], 10) - 1,
+                        ).toLocaleString('en-US', { year: 'numeric' })}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex-1 bg-gradient-to-r from-background via-background to-background/80 backdrop-blur-md rounded-lg px-4 py-2.5 shadow-sm border border-border/50">
-                    <h2 className="text-base font-bold text-foreground">
-                      {new Date(
-                        parseInt(yearMonth.split('-')[0], 10),
-                        parseInt(yearMonth.split('-')[1], 10) - 1,
-                      ).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                      })}
-                    </h2>
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">
+                      {movies?.length}{' '}
+                      {movies?.length === 1 ? 'movie' : 'movies'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -146,7 +185,7 @@ function WatchedMoviesList({
 
   return (
     <div className="relative">
-      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-primary/20" />
+      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-primary/30" />
       {entries.map(([yearMonth, movies]) => {
         return (
           <div
@@ -154,23 +193,49 @@ function WatchedMoviesList({
             key={yearMonth}
             className="relative mb-12 last:mb-0"
           >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="relative flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 ring-4 ring-background relative">
-                  <Calendar className="h-5 w-5 text-primary-foreground" />
+            <div className="sticky top-0 z-10  py-4 -mx-4 px-4 mb-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="relative flex-shrink-0 w-[76px] h-14 rounded overflow-hidden"
+                  style={{
+                    background: `linear-gradient(135deg, oklch(0.35 0.035 var(--scheme-hue, 260)) 0%, oklch(0.25 0.01 var(--scheme-hue, 260)) 100%)`,
+                    maskImage: `radial-gradient(circle at 0% 50%, transparent 10px, black 10px)`,
+                    WebkitMaskImage: `radial-gradient(circle at 0% 50%, transparent 10px, black 10px)`,
+                  }}
+                >
+                  <div
+                    className="absolute left-[62px] top-0 bottom-0 w-px opacity-50"
+                    style={{
+                      background: `repeating-linear-gradient(to bottom, transparent 0px, transparent 6px, oklch(0.45 0.02 var(--scheme-hue, 260)) 6px, oklch(0.45 0.02 var(--scheme-hue, 260)) 10px)`,
+                    }}
+                  />
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <span
+                      className="text-[10px] uppercase tracking-wider"
+                      style={{
+                        color: `oklch(0.6 0.02 var(--scheme-hue, 260))`,
+                        fontFamily: 'var(--font-cinema)',
+                      }}
+                    >
+                      {new Date(
+                        parseInt(yearMonth.split('-')[0], 10),
+                        parseInt(yearMonth.split('-')[1], 10) - 1,
+                      ).toLocaleString('en-US', { month: 'short' })}
+                    </span>
+                    <span
+                      className="text-lg font-bold leading-none"
+                      style={{
+                        color: `oklch(0.95 0.01 var(--scheme-hue, 260))`,
+                        fontFamily: 'var(--font-cinema)',
+                      }}
+                    >
+                      {new Date(
+                        parseInt(yearMonth.split('-')[0], 10),
+                        parseInt(yearMonth.split('-')[1], 10) - 1,
+                      ).toLocaleString('en-US', { year: 'numeric' })}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
-                  {new Date(
-                    parseInt(yearMonth.split('-')[0], 10),
-                    parseInt(yearMonth.split('-')[1], 10) - 1,
-                  ).toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                  })}
-                </h2>
-                <div className="h-0.5 w-24 bg-gradient-to-r from-primary to-transparent mt-1" />
               </div>
             </div>
             <div className="ml-20 space-y-4">
@@ -180,16 +245,16 @@ function WatchedMoviesList({
                   : null
                 return (
                   <div key={movieData?.movie?.id} className="relative">
-                    <div className="absolute -left-[4.5rem] top-1/2 -translate-y-1/2">
+                    <div className="absolute -left-[5.5rem] top-1/2 -translate-y-1/2">
                       <div className="flex flex-col items-center">
-                        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-primary to-primary/60 ring-2 ring-background shadow-md" />
+                        <div className="w-4 h-4 rounded-full bg-primary ring-2 ring-background" />
                         {watchDate && (
                           <span className="text-[10px] font-semibold text-primary mt-1 whitespace-nowrap">
                             {format(watchDate, 'd')}
                           </span>
                         )}
                       </div>
-                      <div className="absolute left-6 top-[7px] w-8 h-0.5 bg-gradient-to-r from-primary/40 to-transparent" />
+                      <div className="absolute left-8 top-[7px] w-14 h-0.5 bg-primary/30" />
                     </div>
                     <WatchedItem
                       movie={movieData.movie}
@@ -241,22 +306,20 @@ function RouteComponent() {
 
   return (
     <div className="h-full container mx-auto px-4 md:px-4 py-4 md:py-8 flex flex-col overflow-hidden">
-      <div className="flex-shrink-0 relative mb-4 md:mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
-          Watch History
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">
-          {isMobile ? 'Movies watched' : 'A timeline of all the movies watched'}
-        </p>
+      <PageTitleBar
+        title="Watch History"
+        description="A timeline of all the movies watched"
+      />
+      <div className="flex-shrink-0">
         {isMobile ? (
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search movies..."
                 value={localSearch}
                 onChange={handleSearchChange}
-                className="pl-10 h-11"
+                className="pl-10 h-10"
               />
             </div>
             <DrawerRoot
@@ -267,21 +330,16 @@ function RouteComponent() {
             >
               <DrawerTrigger asChild>
                 <Button
-                  variant="outline"
-                  className="w-full h-11 justify-between group"
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 shrink-0"
                 >
-                  <span className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 group-hover:text-primary transition-colors" />
-                    <span>Filters</span>
-                    {activeFiltersCount > 0 && (
-                      <span className="ml-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold animate-in fade-in-0 zoom-in-95">
-                        {activeFiltersCount}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {activeFiltersCount > 0 ? 'Active' : 'Tap to filter'}
-                  </span>
+                  <Filter className="h-4 w-4" />
+                  {activeFiltersCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
+                      {activeFiltersCount}
+                    </span>
+                  )}
                 </Button>
               </DrawerTrigger>
               <DrawerPortal>
