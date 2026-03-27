@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button'
-import { TMDBMovieResponse } from '@/types/tmdb'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { MovieMetadata } from './movie-metadata'
 import { WatchProvidersList } from './watch-providers'
+import type { TMDBMovieResponse } from '@/types/tmdb'
+import { Button } from '@/components/ui/button'
 
 interface MovieOverviewViewProps {
   title: string
@@ -82,7 +82,7 @@ export function MovieOverviewView({
 
       <div className={`flex gap-3 pt-4 ${compact ? 'flex-col' : ''}`}>
         <Button
-          className={`gap-2 ${compact ? 'w-full' : ''}`}
+          className={`gap-2 ${compact ? 'w-full' : 'flex-1'}`}
           variant={'primary'}
           loading={isPending}
           onClick={onAddToShortlist}
@@ -91,9 +91,9 @@ export function MovieOverviewView({
           Add to Shortlist
         </Button>
         <Button
-          variant="secondary"
+          variant={compact ? 'secondary' : 'ghost'}
           onClick={onShowMoreInfo}
-          className={compact ? 'w-full' : ''}
+          className={compact ? 'w-full' : 'text-muted-foreground'}
         >
           More Info
         </Button>

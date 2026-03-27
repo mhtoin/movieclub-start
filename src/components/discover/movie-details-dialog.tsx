@@ -1,15 +1,3 @@
-import {
-  DrawerClose,
-  DrawerContent,
-  DrawerHandle,
-  DrawerOverlay,
-  DrawerPortal,
-  DrawerRoot,
-} from '@/components/ui/drawer'
-import { useMediaQuery } from '@/lib/hooks'
-import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { getImageUrl, Movie } from '@/lib/tmdb-api'
 import { useQuery } from '@tanstack/react-query'
 import { X } from 'lucide-react'
 import { useRef, useState } from 'react'
@@ -19,6 +7,19 @@ import { DialogHeader } from './dialog-header'
 import { MovieDetailsView } from './movie-details-view'
 import { MovieOverviewView } from './movie-overview-view'
 import { useDialogAnimation } from './use-dialog-animation'
+import type { Movie } from '@/lib/tmdb-api';
+import { getImageUrl } from '@/lib/tmdb-api'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
+import { useMediaQuery } from '@/lib/hooks'
+import {
+  DrawerClose,
+  DrawerContent,
+  DrawerHandle,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerRoot,
+} from '@/components/ui/drawer'
 
 interface MovieDetailsDialogProps {
   movie: Movie | null
@@ -223,7 +224,7 @@ export function MovieDetailsDialog({
       />
       <div
         ref={containerRef}
-        className="bg-dialog-background text-foreground border border-dialog-border shadow-2xl max-h-[90vh] 2xl:max-h-[55vh]"
+        className="bg-dialog-background text-foreground border border-dialog-border shadow-xl max-h-[90vh] 2xl:max-h-[55vh]"
         style={getContainerStyle()}
       >
         <DialogHeader
@@ -240,7 +241,7 @@ export function MovieDetailsDialog({
                 </div>
               )}
               <div
-                className="flex-1 space-y-4"
+                className="flex-1 space-y-4 pl-4 border-l-2 border-primary/20"
                 style={{
                   opacity: isTransitioning ? 0 : 1,
                   transform: isTransitioning

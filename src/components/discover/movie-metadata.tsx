@@ -16,28 +16,32 @@ export function MovieMetadata({
   tmdbId,
 }: MovieMetadataProps) {
   return (
-    <div className="flex items-center gap-4 text-sm">
-      {releaseDate && (
-        <div className="flex items-center gap-1">
-          <Calendar className="h-4 w-4" />
-          <span>{new Date(releaseDate).getFullYear()}</span>
+    <div className="flex items-center justify-between gap-4 text-sm">
+      <div className="flex items-center gap-3">
+        {releaseDate && (
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-4 w-4 text-muted-foreground/60" />
+            <span className="text-muted-foreground/80">
+              {new Date(releaseDate).getFullYear()}
+            </span>
+          </div>
+        )}
+        <div className="flex items-center gap-1.5">
+          <Star className="h-4 w-4 text-yellow-500/80" />
+          <span className="font-medium">{voteAverage.toFixed(1)}</span>
+          <span className="text-muted-foreground/50 text-xs">
+            ({voteCount.toLocaleString()})
+          </span>
         </div>
-      )}
-      <div className="flex items-center gap-1">
-        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-        <span>{voteAverage.toFixed(1)}</span>
-        <span className="text-muted-foreground">
-          ({voteCount.toLocaleString()} votes)
-        </span>
       </div>
       {(imdbId || tmdbId) && (
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-1.5">
           {imdbId && (
             <a
               href={`https://www.imdb.com/title/${imdbId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 rounded px-2 py-1 bg-[#F5C518] text-black hover:bg-[#F5C518]/90 transition-colors text-xs font-semibold"
+              className="flex items-center gap-1 rounded px-2 py-0.5 bg-[--imdb] text-[--imdb-foreground] hover:opacity-90 transition-opacity text-xs font-semibold"
               title="View on IMDb"
             >
               <span>IMDb</span>
@@ -49,7 +53,7 @@ export function MovieMetadata({
               href={`https://www.themoviedb.org/movie/${tmdbId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 rounded px-2 py-1 bg-[#01b4e4] text-white hover:bg-[#01b4e4]/90 transition-colors text-xs font-semibold"
+              className="flex items-center gap-1 rounded px-2 py-0.5 bg-[--tmdb] text-[--tmdb-foreground] hover:opacity-90 transition-opacity text-xs font-semibold"
               title="View on TMDb"
             >
               <span>TMDb</span>

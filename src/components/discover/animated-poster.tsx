@@ -74,7 +74,7 @@ export function AnimatedPoster({
         zIndex: 200,
         borderRadius: '0.5rem',
         opacity: 0,
-        transition: 'all 0.35s cubic-bezier(0.4, 0, 0.6, 1)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 1, 1)',
         boxShadow: 'none',
       }
     }
@@ -88,7 +88,7 @@ export function AnimatedPoster({
       zIndex: 200,
       borderRadius: '0.5rem',
       opacity: 1,
-      transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      transition: 'all 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
       boxShadow:
         '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
     }
