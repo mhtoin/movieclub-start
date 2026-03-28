@@ -1,7 +1,3 @@
-import { Button } from '@/components/ui/button'
-import { DatePicker } from '@/components/ui/date-picker'
-import { Switch } from '@/components/ui/switch'
-import { cn } from '@/lib/utils'
 import {
   AlertTriangle,
   CalendarDays,
@@ -11,6 +7,10 @@ import {
   Users,
 } from 'lucide-react'
 import { useMemo } from 'react'
+import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/ui/date-picker'
+import { Switch } from '@/components/ui/switch'
+import { cn } from '@/lib/utils'
 
 interface BlockersProps {
   watchDate: Date | undefined
@@ -32,7 +32,7 @@ function RaffleBlockers({
   totalCount,
   pendingSelectionsCount,
 }: BlockersProps) {
-  const blockers: Blocker[] = []
+  const blockers: Array<Blocker> = []
 
   if (!watchDate) {
     blockers.push({

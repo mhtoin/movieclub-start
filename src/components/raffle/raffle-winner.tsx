@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button'
 import type { Movie } from '@/db/schema/movies'
 import { getImageUrl } from '@/lib/tmdb-api'
 import { cn, getMovieBackdropUrl, getMoviePosterUrl } from '@/lib/utils'
-import confetti from 'canvas-confetti'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -13,11 +12,11 @@ import {
   RefreshCw,
   Sparkles,
   Star,
-  Trophy,
+  Ticket,
   Tv,
   Users,
 } from 'lucide-react'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 
 interface WinnerUser {
   id: string
@@ -27,7 +26,7 @@ interface WinnerUser {
 
 interface Props {
   movie: Movie
-  credits: { cast: any[] | null; crew: any[] | null } | null
+  credits: { cast: Array<any> | null; crew: Array<any> | null } | null
   winnerUser: WinnerUser | null
   watchDate: Date | undefined
   dryRun: boolean
@@ -42,12 +41,12 @@ function formatRuntime(mins: number) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`
 }
 
-function getDirector(crew: any[] | null | undefined): string | null {
+function getDirector(crew: Array<any> | null | undefined): string | null {
   if (!crew) return null
   return crew.find((c) => c.job === 'Director')?.name ?? null
 }
 
-function getTopCast(cast: any[] | null | undefined, n = 6): any[] {
+function getTopCast(cast: Array<any> | null | undefined, n = 6): Array<any> {
   if (!cast) return []
   return [...cast].sort((a, b) => a.order - b.order).slice(0, n)
 }
@@ -55,13 +54,13 @@ function getTopCast(cast: any[] | null | undefined, n = 6): any[] {
 function getProviders(watchProviders: Record<string, any> | null | undefined) {
   if (!watchProviders) return []
   if (Array.isArray(watchProviders.providers)) {
-    return watchProviders.providers as any[]
+    return watchProviders.providers
   }
   const region =
     ['FI'].find((r) => watchProviders[r]) ?? Object.keys(watchProviders)[0]
   if (!region) return []
   const data = watchProviders[region]
-  return (data?.flatrate ?? data?.buy ?? data?.rent ?? []) as any[]
+  return (data?.flatrate ?? data?.buy ?? data?.rent ?? []) as Array<any>
 }
 
 function getProviderLink(
@@ -132,7 +131,7 @@ const VictoryPage = memo(function VictoryPage({
             stiffness: 250,
             damping: 20,
           }}
-          className="w-44 sm:w-52 lg:w-72 xl:w-80 rounded-2xl overflow-hidden shadow-2xl border border-border/40 ring-4 ring-primary/30 shrink-0"
+          className="w-44 sm:w-52 lg:w-72 xl:w-80 rounded-2xl overflow-hidden shadow-2xl border border-border/40 ring-4 ring-primary/30 shrink-0 relative"
         >
           {posterUrl ? (
             <img
@@ -145,6 +144,17 @@ const VictoryPage = memo(function VictoryPage({
               <Sparkles className="w-10 h-10 text-muted-foreground" />
             </div>
           )}
+          <div className="absolute -top-3 -right-3 w-20 h-20 flex items-center justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-md" />
+              <div className="relative w-14 h-14 rounded-full bg-primary flex items-center justify-center border-4 border-primary/30">
+                <Ticket
+                  className="w-7 h-7 text-primary-foreground"
+                  strokeWidth={2.5}
+                />
+              </div>
+            </div>
+          </div>
         </motion.div>
         <div className="flex flex-col items-center lg:items-start gap-5 text-center lg:text-left flex-1">
           <motion.div
@@ -158,7 +168,7 @@ const VictoryPage = memo(function VictoryPage({
             }}
             className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-primary/20 border-2 border-primary/50 flex items-center justify-center shadow-xl shadow-primary/20 shrink-0"
           >
-            <Trophy className="w-8 h-8 lg:w-10 lg:h-10 text-primary" />
+            <Ticket className="w-8 h-8 lg:w-10 lg:h-10 text-primary" />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -166,9 +176,9 @@ const VictoryPage = memo(function VictoryPage({
             transition={{ delay: 0.3 }}
           >
             <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 mb-1">
-              Tonight's pick
+              Next pick
             </p>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-foreground leading-tight">
+            <h1 className="text-2xl sm:text-4xl lg:text-3xl xl:text-4xl font-black text-foreground leading-tight">
               {movie.title}
             </h1>
             {movie.releaseDate && (
@@ -210,9 +220,12 @@ const VictoryPage = memo(function VictoryPage({
               </p>
             )}
             {dryRun && (
-              <span className="text-xs bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-full px-3 py-1 font-medium">
-                Dry run — result not saved
-              </span>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span className="text-sm text-amber-500 font-medium">
+                  Dry run — result not saved
+                </span>
+              </div>
             )}
           </motion.div>
         </div>
@@ -228,7 +241,7 @@ const DetailsPage = memo(function DetailsPage({
 }: {
   movie: Movie
   posterUrl: string | null
-  credits: { cast: any[] | null; crew: any[] | null } | null
+  credits: { cast: Array<any> | null; crew: Array<any> | null } | null
 }) {
   const year = useMemo(
     () =>
@@ -428,41 +441,6 @@ export function RaffleWinner({
   const [page, setPage] = useState(0)
   const [direction, setDirection] = useState(1)
 
-  useEffect(() => {
-    const colors = [
-      '#ff6b6b',
-      '#ffd93d',
-      '#6bcb77',
-      '#4d96ff',
-      '#f4a261',
-      '#e9c46a',
-    ]
-    confetti({
-      particleCount: 120,
-      spread: 70,
-      origin: { x: 0.25, y: 0.6 },
-      colors,
-      startVelocity: 45,
-    })
-    confetti({
-      particleCount: 120,
-      spread: 70,
-      origin: { x: 0.75, y: 0.6 },
-      colors,
-      startVelocity: 45,
-    })
-    const id = setTimeout(() => {
-      confetti({
-        particleCount: 80,
-        spread: 100,
-        origin: { x: 0.5, y: 0.4 },
-        colors,
-        gravity: 0.8,
-      })
-    }, 600)
-    return () => clearTimeout(id)
-  }, [])
-
   const posterUrl = useMemo(() => getMoviePosterUrl(movie, 'w500'), [movie])
   const backdropUrl = useMemo(
     () => getMovieBackdropUrl(movie, 'w1280'),
@@ -542,7 +520,7 @@ export function RaffleWinner({
         </AnimatePresence>
       </div>
 
-      <div className="relative z-10 shrink-0 border-t border-border/30 bg-background/80 backdrop-blur-md px-4 py-3">
+      <div className="relative z-10 shrink-0 border-t border-border/30 bg-background/80 backdrop-blur-xs px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <Button
             variant="ghost"
@@ -576,7 +554,7 @@ export function RaffleWinner({
                 loading={isLoading}
                 disabled={isLoading || (!dryRun && !watchDate)}
               >
-                <Trophy className="w-3.5 h-3.5" />
+                <Ticket className="w-3.5 h-3.5" />
                 {dryRun ? 'Done (dry run)' : 'Confirm & Finalize'}
               </Button>
             </div>

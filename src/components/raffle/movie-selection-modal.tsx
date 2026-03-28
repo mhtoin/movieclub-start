@@ -1,9 +1,9 @@
-import { TicketMovieRow } from '@/components/ticket/ticket-movie-row'
-import type { ShortlistWithUserMovies } from '@/db/schema'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertCircle, X } from 'lucide-react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import type { ShortlistWithUserMovies } from '@/db/schema'
+import { TicketMovieRow } from '@/components/ticket/ticket-movie-row'
 
 interface MovieSelectionModalProps {
   shortlist: ShortlistWithUserMovies | null
