@@ -1,7 +1,5 @@
-import { GenreFilter } from '@/components/discover/genre-filter'
 import { PageTitleBar } from '@/components/page-titlebar'
 import { Button } from '@/components/ui/button'
-import { DATE_PICKER_PRESETS, DatePicker } from '@/components/ui/date-picker'
 import {
   DialogBackdrop,
   DialogPopup,
@@ -31,12 +29,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import {
   Calendar,
+  ChevronRight,
   Film,
   Layers,
   Plus,
-  Star,
   Trash2,
-  TrendingUp,
   X,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -54,6 +51,323 @@ function RouteComponent() {
   const { data } = useSuspenseQuery(tierlistQueries.user(userId))
   const tierlists = data as TierlistWithDetails[]
   const isOwner = user?.userId === userId
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <PageTitleBar
+        title={isOwner ? 'Your Tierlists' : 'Tierlists'}
+        description={
+          isOwner
+            ? 'Manage and organize your movie rankings'
+            : `Browse ${user?.name || 'this user'}'s movie rankings`
+        }
+        actions={isOwner && <CreateTierlistDialog userId={userId} />}
+      />
+
+      <div className="max-w-6xl mx-auto">
+        {tierlists.length === 0 ? (
+          <EmptyState isOwner={isOwner} userId={userId} />
+        ) : (
+          <>
+            <FeaturedTierlist
+              tierlist={tierlists[0]}
+              userId={userId}
+              isOwner={isOwner}
+            />
+            {tierlists.length > 1 && (
+              <div className="mt-12">
+                <h2 className="text-lg font-semibold text-foreground mb-4">
+                  All Tierlists
+                </h2>
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                  {tierlists.slice(1).map((list) => (
+                    <TierlistCard
+                      key={list.id}
+                      tierlist={list}
+                      userId={userId}
+                      isOwner={isOwner}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function EmptyState({ isOwner, userId }: { isOwner: boolean; userId: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-border/50 p-16 text-center">
+      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-6">
+        <Layers className="w-8 h-8 text-muted-foreground" />
+      </div>
+      <h3 className="text-xl font-semibold mb-2">No tierlists yet</h3>
+      <p className="text-muted-foreground mb-6 max-w-sm">
+        {isOwner
+          ? 'Create your first tierlist to start ranking your favorite movies.'
+          : "This user hasn't created any tierlists yet."}
+      </p>
+      {isOwner && <CreateTierlistDialog userId={userId} />}
+    </div>
+  )
+}
+
+function FeaturedTierlist({
+  tierlist,
+  userId,
+  isOwner,
+}: {
+  tierlist: TierlistWithDetails
+  userId: string
+  isOwner: boolean
+}) {
+  const movieCount = tierlist.tiers.reduce(
+    (acc, tier) => acc + (tier.moviesOnTiers?.length || 0),
+    0,
+  )
+
+  const posterMovies = tierlist.tiers
+    .flatMap((tier) => (tier.moviesOnTiers || []).map((mot) => mot.movie))
+    .filter((movie): movie is NonNullable<typeof movie> & { images: any } =>
+      Boolean(movie && movie.images),
+    )
+    .slice(0, 6)
+
+  return (
+    <Link
+      to="/tierlist/$userId/$tierlistId"
+      params={{ userId, tierlistId: tierlist.id }}
+      className="group block"
+    >
+      <article className="relative rounded-2xl overflow-hidden border border-border/50 bg-card">
+        {posterMovies.length > 0 && (
+          <div className="grid grid-cols-3 md:grid-cols-6 h-48 md:h-64">
+            {posterMovies.map((movie, idx) => {
+              const posterUrl = getImageUrl(
+                movie.images?.posters?.[0]?.file_path,
+                'w342',
+              )
+              return (
+                <div
+                  key={movie.id || idx}
+                  className="aspect-[2/3] overflow-hidden bg-muted"
+                >
+                  {posterUrl ? (
+                    <img
+                      src={posterUrl}
+                      alt={movie.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center p-2">
+                      <p className="text-xs text-muted-foreground text-center line-clamp-3">
+                        {movie.title}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        <div className="p-6 md:p-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                {tierlist.watchDateFrom && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {new Date(tierlist.watchDateFrom).toLocaleDateString(
+                      'en-US',
+                      {
+                        month: 'short',
+                        year: 'numeric',
+                      },
+                    )}
+                  </span>
+                )}
+                {tierlist.watchDateTo && (
+                  <>
+                    <span>—</span>
+                    <span>
+                      {new Date(tierlist.watchDateTo).toLocaleDateString(
+                        'en-US',
+                        {
+                          month: 'short',
+                          year: 'numeric',
+                        },
+                      )}
+                    </span>
+                  </>
+                )}
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground group-hover:text-primary transition-colors">
+                {tierlist.title || 'Untitled'}
+              </h2>
+              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Layers className="w-4 h-4" />
+                  {tierlist.tiers.length} tiers
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Film className="w-4 h-4" />
+                  {movieCount} movies
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {isOwner && (
+                <DeleteButton tierlistId={tierlist.id} userId={userId} />
+              )}
+              <div className="flex items-center gap-1 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                <span>View</span>
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+
+          {tierlist.genres && tierlist.genres.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {tierlist.genres.map((genre) => (
+                <span
+                  key={genre}
+                  className="px-2.5 py-1 text-xs font-medium rounded-full bg-muted text-muted-foreground"
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {tierlist.tiers.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {tierlist.tiers.slice(0, 6).map((tier) => (
+                <span
+                  key={tier.id}
+                  className="text-xs px-2 py-1 rounded bg-primary/10 text-primary font-medium"
+                >
+                  {tier.label}
+                </span>
+              ))}
+              {tierlist.tiers.length > 6 && (
+                <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">
+                  +{tierlist.tiers.length - 6} more
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </article>
+    </Link>
+  )
+}
+
+function TierlistCard({
+  tierlist,
+  userId,
+  isOwner,
+}: {
+  tierlist: TierlistWithDetails
+  userId: string
+  isOwner: boolean
+}) {
+  const movieCount = tierlist.tiers.reduce(
+    (acc, tier) => acc + (tier.moviesOnTiers?.length || 0),
+    0,
+  )
+
+  const posterMovies = tierlist.tiers
+    .flatMap((tier) => (tier.moviesOnTiers || []).map((mot) => mot.movie))
+    .filter((movie): movie is NonNullable<typeof movie> & { images: any } =>
+      Boolean(movie && movie.images),
+    )
+    .slice(0, 4)
+
+  return (
+    <Link
+      to="/tierlist/$userId/$tierlistId"
+      params={{ userId, tierlistId: tierlist.id }}
+      className="group block"
+    >
+      <article className="relative rounded-xl overflow-hidden border border-border/50 bg-card p-4 hover:border-border transition-colors">
+        <div className="flex gap-4">
+          {posterMovies.length > 0 && (
+            <div className="flex gap-0.5 h-24 w-24 shrink-0 rounded-lg overflow-hidden bg-muted">
+              {posterMovies.map((movie, idx) => {
+                const posterUrl = getImageUrl(
+                  movie.images?.posters?.[0]?.file_path,
+                  'w92',
+                )
+                return (
+                  <div key={movie.id || idx} className="flex-1 overflow-hidden">
+                    {posterUrl ? (
+                      <img
+                        src={posterUrl}
+                        alt={movie.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+              {tierlist.title || 'Untitled'}
+            </h3>
+
+            <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Layers className="w-3 h-3" />
+                {tierlist.tiers.length}
+              </span>
+              <span className="flex items-center gap-1">
+                <Film className="w-3 h-3" />
+                {movieCount}
+              </span>
+            </div>
+
+            {tierlist.genres && tierlist.genres.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {tierlist.genres.slice(0, 2).map((genre) => (
+                  <span
+                    key={genre}
+                    className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 text-muted-foreground">
+            {isOwner && (
+              <DeleteButton tierlistId={tierlist.id} userId={userId} compact />
+            )}
+            <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        </div>
+      </article>
+    </Link>
+  )
+}
+
+function DeleteButton({
+  tierlistId,
+  userId,
+  compact = false,
+}: {
+  tierlistId: string
+  userId: string
+  compact?: boolean
+}) {
   const queryClient = useQueryClient()
   const toastManager = Toast.useToastManager()
 
@@ -61,8 +375,8 @@ function RouteComponent() {
     mutationFn: deleteTierlist,
     onSuccess: () => {
       toastManager.add({
-        title: 'Success',
-        description: 'Tierlist deleted',
+        title: 'Deleted',
+        description: 'Tierlist removed',
         type: 'success',
       })
       queryClient.invalidateQueries({
@@ -72,331 +386,54 @@ function RouteComponent() {
     onError: () => {
       toastManager.add({
         title: 'Error',
-        description: 'Failed to delete tierlist',
+        description: 'Failed to delete',
         type: 'error',
       })
     },
   })
 
-  const totalMovies = tierlists.reduce(
-    (acc, list) =>
-      acc +
-      list.tiers.reduce(
-        (tierAcc, tier) => tierAcc + (tier.moviesOnTiers?.length || 0),
-        0,
-      ),
-    0,
-  )
+  if (compact) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          if (confirm('Delete this tierlist?')) {
+            deleteMutation.mutate({ data: { id: tierlistId } })
+          }
+        }}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
+    )
+  }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-2 relative overflow-hidden">
-      <PageTitleBar
-        title="Tierlists"
-        description={`Browse tierlists created by ${
-          isOwner ? 'you' : 'this user'
-        }.`}
-      />
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {tierlists.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/50 p-16 text-center bg-muted/20 min-h-[400px]">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
-              <Layers className="w-10 h-10 text-primary/50" />
-            </div>
-            <h3 className="text-2xl font-bold mb-3">No tierlists yet</h3>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              {isOwner
-                ? 'Create your first tierlist to start ranking and organizing your favorite movies by genre, era, or any custom criteria.'
-                : "This user hasn't created any tierlists yet. Check back later!"}
-            </p>
-            {isOwner && <CreateTierlistDialog userId={userId} />}
-          </div>
-        ) : (
-          <>
-            {isOwner && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Total Tierlists
-                    </span>
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <Layers className="h-4 w-4 text-primary" />
-                    </div>
-                  </div>
-                  <div className="text-3xl font-bold">{tierlists.length}</div>
-                </div>
-                <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Total Movies Ranked
-                    </span>
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <Film className="h-4 w-4 text-primary" />
-                    </div>
-                  </div>
-                  <div className="text-3xl font-bold">{totalMovies}</div>
-                </div>
-                <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Avg Movies/List
-                    </span>
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <TrendingUp className="h-4 w-4 text-primary" />
-                    </div>
-                  </div>
-                  <div className="text-3xl font-bold">
-                    {tierlists.length > 0
-                      ? Math.round(totalMovies / tierlists.length)
-                      : 0}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {isOwner && (
-              <div className="flex justify-end mb-6">
-                <CreateTierlistDialog userId={userId} />
-              </div>
-            )}
-
-            <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-              {tierlists.map((list) => {
-                const movieCount = list.tiers.reduce(
-                  (acc, tier) => acc + (tier.moviesOnTiers?.length || 0),
-                  0,
-                )
-
-                // Get all movies from all tiers for poster display
-                const allMovies = list.tiers
-                  .flatMap((tier) =>
-                    (tier.moviesOnTiers || []).map((mot) => mot.movie),
-                  )
-                  .filter(Boolean)
-
-                // Get top 4 movies for poster display
-                const posterMovies = allMovies.slice(0, 4)
-
-                return (
-                  <Link
-                    key={list.id}
-                    to="/tierlist/$userId/$tierlistId"
-                    params={{ userId, tierlistId: list.id }}
-                    className="group block"
-                  >
-                    <div className="relative bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-primary/40 hover:shadow-primary/5 h-full">
-                      <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary via-primary/60 to-primary/20" />
-
-                      <div className="p-6 pl-8">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-xl font-bold truncate group-hover:text-primary transition-colors mb-1">
-                              {list.title}
-                            </h3>
-                            {(list.watchDateFrom || list.watchDateTo) && (
-                              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                                <Calendar className="w-3.5 h-3.5" />
-                                {list.watchDateFrom &&
-                                  new Date(
-                                    list.watchDateFrom,
-                                  ).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    year: 'numeric',
-                                  })}
-                                {list.watchDateFrom &&
-                                  list.watchDateTo &&
-                                  ' — '}
-                                {list.watchDateTo &&
-                                  new Date(list.watchDateTo).toLocaleDateString(
-                                    'en-US',
-                                    {
-                                      month: 'short',
-                                      year: 'numeric',
-                                    },
-                                  )}
-                              </p>
-                            )}
-                          </div>
-                          {isOwner && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm border border-border/50 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 ml-3 flex-shrink-0"
-                              onClick={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                if (
-                                  confirm(
-                                    'Are you sure you want to delete this tierlist?',
-                                  )
-                                ) {
-                                  deleteMutation.mutate({
-                                    data: { id: list.id },
-                                  })
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                        {posterMovies.length > 0 && (
-                          <div className="mb-4 rounded-lg overflow-hidden border border-border/30">
-                            <div
-                              className={`grid ${posterMovies.length === 1 ? 'grid-cols-1' : posterMovies.length === 2 ? 'grid-cols-2' : posterMovies.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} gap-0.5 bg-muted/20`}
-                            >
-                              {posterMovies.map((movie, idx) => {
-                                const posterUrl = getImageUrl(
-                                  movie.images?.posters?.[0]?.file_path,
-                                  'w185',
-                                )
-                                return (
-                                  <div
-                                    key={movie.id || idx}
-                                    className="aspect-[2/3] overflow-hidden bg-muted relative group/poster"
-                                  >
-                                    {posterUrl ? (
-                                      <>
-                                        <img
-                                          src={posterUrl}
-                                          alt={movie.title}
-                                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/poster:opacity-100 transition-opacity flex items-center justify-center">
-                                          <div className="text-white text-center px-2">
-                                            <p className="text-xs font-semibold line-clamp-2">
-                                              {movie.title}
-                                            </p>
-                                            {movie.voteAverage && (
-                                              <div className="flex items-center justify-center gap-1 mt-1">
-                                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                                <span className="text-xs">
-                                                  {movie.voteAverage.toFixed(1)}
-                                                </span>
-                                              </div>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </>
-                                    ) : (
-                                      <div className="h-full w-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center p-2">
-                                        <p className="text-[10px] text-muted-foreground text-center line-clamp-3">
-                                          {movie.title}
-                                        </p>
-                                      </div>
-                                    )}
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        )}
-                        {list.genres && list.genres.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mb-4">
-                            {list.genres.slice(0, 4).map((genre) => (
-                              <span
-                                key={genre}
-                                className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
-                              >
-                                {genre}
-                              </span>
-                            ))}
-                            {list.genres.length > 4 && (
-                              <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                                +{list.genres.length - 4}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-6 text-sm mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="rounded-md bg-primary/10 p-1.5">
-                              <Layers className="w-3.5 h-3.5 text-primary" />
-                            </div>
-                            <div>
-                              <div className="font-semibold">
-                                {list.tiers.length}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                tiers
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="rounded-md bg-primary/10 p-1.5">
-                              <Film className="w-3.5 h-3.5 text-primary" />
-                            </div>
-                            <div>
-                              <div className="font-semibold">{movieCount}</div>
-                              <div className="text-xs text-muted-foreground">
-                                movies
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {list.tiers.length > 0 && (
-                          <div className="space-y-2">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                              Tier Breakdown
-                            </p>
-                            <div className="space-y-2">
-                              {list.tiers.slice(0, 5).map((tier, index) => {
-                                const tierMovieCount =
-                                  tier.moviesOnTiers?.length || 0
-                                const percentage =
-                                  movieCount > 0
-                                    ? (tierMovieCount / movieCount) * 100
-                                    : 0
-                                return (
-                                  <div key={tier.id} className="space-y-1">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-2 min-w-0">
-                                        <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-primary/20 text-[9px] font-bold text-primary flex-shrink-0">
-                                          {index + 1}
-                                        </span>
-                                        <span className="text-xs font-medium text-foreground line-clamp-1">
-                                          {tier.label}
-                                        </span>
-                                      </div>
-                                      <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">
-                                        {tierMovieCount} ·{' '}
-                                        {percentage.toFixed(0)}%
-                                      </span>
-                                    </div>
-                                    <div className="h-1 bg-muted rounded-full overflow-hidden">
-                                      <div
-                                        className="h-full bg-primary/60 rounded-full transition-all"
-                                        style={{ width: `${percentage}%` }}
-                                      />
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                              {list.tiers.length > 5 && (
-                                <p className="text-xs text-muted-foreground italic pt-1">
-                                  +{list.tiers.length - 5} more tiers
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="text-muted-foreground hover:text-destructive"
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (confirm('Delete this tierlist?')) {
+          deleteMutation.mutate({ data: { id: tierlistId } })
+        }
+      }}
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
   )
 }
+
 function CreateTierlistDialog({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false)
+  const [step, setStep] = useState(1)
   const [title, setTitle] = useState('')
+  const [datePreset, setDatePreset] = useState<string | null>(null)
   const [watchDateFrom, setWatchDateFrom] = useState<Date | undefined>(
     undefined,
   )
@@ -426,22 +463,11 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
     mutationFn: createTierlist,
     onSuccess: () => {
       toastManager.add({
-        title: 'Success',
-        description: 'Tierlist created',
+        title: 'Created',
+        description: 'Tierlist is ready',
         type: 'success',
       })
-      setOpen(false)
-      setTitle('')
-      setWatchDateFrom(undefined)
-      setWatchDateTo(undefined)
-      setSelectedGenres([])
-      setTiers([
-        { label: 'S', value: 0 },
-        { label: 'A', value: 1 },
-        { label: 'B', value: 2 },
-        { label: 'C', value: 3 },
-        { label: 'D', value: 4 },
-      ])
+      handleClose()
       queryClient.invalidateQueries({
         queryKey: tierlistQueries.user(userId).queryKey,
       })
@@ -449,11 +475,46 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
     onError: () => {
       toastManager.add({
         title: 'Error',
-        description: 'Failed to create tierlist',
+        description: 'Failed to create',
         type: 'error',
       })
     },
   })
+
+  const handleClose = () => {
+    setOpen(false)
+    setStep(1)
+    setTitle('')
+    setDatePreset(null)
+    setWatchDateFrom(undefined)
+    setWatchDateTo(undefined)
+    setSelectedGenres([])
+    setTiers([
+      { label: 'S', value: 0 },
+      { label: 'A', value: 1 },
+      { label: 'B', value: 2 },
+      { label: 'C', value: 3 },
+      { label: 'D', value: 4 },
+    ])
+  }
+
+  const handleDatePreset = (preset: string) => {
+    setDatePreset(preset)
+    const now = new Date()
+    if (preset === 'this-year') {
+      setWatchDateFrom(new Date(now.getFullYear(), 0, 1))
+      setWatchDateTo(new Date(now.getFullYear(), 11, 31))
+    } else if (preset === '2020s') {
+      setWatchDateFrom(new Date(2020, 0, 1))
+      setWatchDateTo(new Date(2029, 11, 31))
+    } else if (preset === '2010s') {
+      setWatchDateFrom(new Date(2010, 0, 1))
+      setWatchDateTo(new Date(2019, 11, 31))
+    } else if (preset === 'all-time') {
+      setWatchDateFrom(undefined)
+      setWatchDateTo(undefined)
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -501,135 +562,199 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
         </Button>
       </DialogTrigger>
       <DialogPortal>
-        <DialogBackdrop />
-        <DialogPopup className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="h-10 w-1 rounded-full bg-gradient-to-b from-primary to-primary/50" />
-            <div>
-              <h2 className="text-lg font-semibold leading-none tracking-tight">
-                Create New Tierlist
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Set up your tierlist parameters
-              </p>
+        <DialogBackdrop className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPopup className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 sm:max-w-[440px]">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold">Create Tierlist</h2>
+              <button
+                onClick={handleClose}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Title</label>
-              <Input
-                required
-                value={title}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setTitle(e.target.value)
-                }
-                placeholder="e.g., Best Movies of 2025"
-                className="h-11"
+
+            <div className="flex gap-1 mb-6">
+              <div
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  step >= 1 ? 'bg-primary' : 'bg-muted'
+                }`}
+              />
+              <div
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  step >= 2 ? 'bg-primary' : 'bg-muted'
+                }`}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                  From Date
-                </label>
-                <DatePicker
-                  value={watchDateFrom}
-                  onChange={setWatchDateFrom}
-                  placeholder="From date"
-                  presets={[
-                    DATE_PICKER_PRESETS.startOfYear,
-                    DATE_PICKER_PRESETS.endOfYear,
-                  ]}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                  To Date
-                </label>
-                <DatePicker
-                  value={watchDateTo}
-                  onChange={setWatchDateTo}
-                  placeholder="To date"
-                  presets={[
-                    DATE_PICKER_PRESETS.startOfYear,
-                    DATE_PICKER_PRESETS.endOfYear,
-                  ]}
-                />
-              </div>
-            </div>
+            <form onSubmit={handleSubmit}>
+              <div
+                className="transition-all duration-300 ease-out"
+                style={{
+                  opacity: step === 1 ? 1 : 0,
+                  transform: step === 1 ? 'translateX(0)' : 'translateX(-16px)',
+                  display: step === 1 ? 'block' : 'none',
+                  position: step === 1 ? 'relative' : 'absolute',
+                }}
+              >
+                <p className="text-sm text-muted-foreground mb-5">
+                  Choose which movies to include
+                </p>
 
-            <div className="space-y-2">
-              <GenreFilter
-                selectedGenres={selectedGenres}
-                onGenresChange={setSelectedGenres}
-              />
-            </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Title</label>
+                    <Input
+                      required
+                      autoFocus
+                      value={title}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setTitle(e.target.value)
+                      }
+                      placeholder="My Movie Rankings"
+                      className="h-11"
+                    />
+                  </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Layers className="w-3.5 h-3.5 text-muted-foreground" />
-                  Tiers
-                </label>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Time Period</label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { value: 'this-year', label: 'This Year' },
+                        { value: '2020s', label: '2020s' },
+                        { value: '2010s', label: '2010s' },
+                        { value: 'all-time', label: 'All Time' },
+                      ].map((preset) => (
+                        <button
+                          key={preset.value}
+                          type="button"
+                          onClick={() => handleDatePreset(preset.value)}
+                          className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+                            datePreset === preset.value
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-muted/50 text-muted-foreground border-border hover:border-primary/50'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Genres</label>
+                    <div className="flex flex-wrap gap-2">
+                      {genresData.slice(0, 8).map((genre) => (
+                        <button
+                          key={genre.value}
+                          type="button"
+                          onClick={() => {
+                            if (selectedGenres.includes(genre.value)) {
+                              setSelectedGenres(
+                                selectedGenres.filter((g) => g !== genre.value),
+                              )
+                            } else {
+                              setSelectedGenres([
+                                ...selectedGenres,
+                                genre.value,
+                              ])
+                            }
+                          }}
+                          className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+                            selectedGenres.includes(genre.value)
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-muted/50 text-muted-foreground border-border hover:border-primary/50'
+                          }`}
+                        >
+                          {genre.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end mt-6">
+                  <Button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    disabled={!title.trim()}
+                    className="gap-2"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div
+                className="transition-all duration-300 ease-out"
+                style={{
+                  opacity: step === 2 ? 1 : 0,
+                  transform: step === 2 ? 'translateX(0)' : 'translateX(16px)',
+                  display: step === 2 ? 'block' : 'none',
+                  position: step === 2 ? 'relative' : 'absolute',
+                }}
+              >
+                <p className="text-sm text-muted-foreground mb-5">
+                  Customize your tier labels (optional)
+                </p>
+
+                <div className="space-y-3 max-h-[240px] overflow-y-auto pr-1">
+                  {tiers.map((tier, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <span className="w-6 text-sm font-medium text-muted-foreground text-center">
+                        {index + 1}
+                      </span>
+                      <Input
+                        value={tier.label}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          updateTierLabel(index, e.target.value)
+                        }
+                        className="h-9"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeTier(index)}
+                        disabled={tiers.length <= 1}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={addTier}
-                  className="h-8"
+                  className="mt-3 w-full h-8 text-xs"
                 >
-                  <Plus className="mr-1.5 h-3 w-3" />
-                  Add
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Tier
                 </Button>
-              </div>
-              <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-                {tiers.map((tier, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/50"
-                  >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary">
-                      {index + 1}
-                    </div>
-                    <Input
-                      value={tier.label}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        updateTierLabel(index, e.target.value)
-                      }
-                      placeholder="Tier Name"
-                      className="flex-1 h-9"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeTier(index)}
-                      disabled={tiers.length <= 1}
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Creating...' : 'Create Tierlist'}
-              </Button>
-            </div>
-          </form>
+                <div className="flex justify-between mt-6 pt-4 border-t border-border/50">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setStep(1)}
+                    className="gap-2"
+                  >
+                    <ChevronRight className="h-4 w-4 rotate-180" />
+                    Back
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isPending}>
+                    {createMutation.isPending ? 'Creating...' : 'Create'}
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </div>
         </DialogPopup>
       </DialogPortal>
     </DialogRoot>

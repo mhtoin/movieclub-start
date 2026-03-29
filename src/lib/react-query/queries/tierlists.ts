@@ -17,7 +17,9 @@ type User = InferSelectModel<typeof user>
 export type UserWithTierlists = User & {
   tierlists: Array<
     Tierlist & {
-      tiers: Array<Tier & { moviesOnTiers: MovieOnTier[] }>
+      tiers: Array<
+        Tier & { moviesOnTiers: Array<MovieOnTier & { movie: Movie }> }
+      >
     }
   >
 }
@@ -244,7 +246,11 @@ export const getTierlists = createServerFn({ method: 'GET' })
             with: {
               tiers: {
                 with: {
-                  moviesOnTiers: true,
+                  moviesOnTiers: {
+                    with: {
+                      movie: true,
+                    },
+                  },
                 },
               },
             },

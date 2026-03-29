@@ -7,17 +7,50 @@ import {
 } from '@/lib/react-query/queries/tierlists'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, Film, Layers, Sparkles } from 'lucide-react'
+import { ArrowRight, Film, Layers, Plus, Star } from 'lucide-react'
 import { Suspense } from 'react'
+
+const USER_COLORS = [
+  { hue: 48 },
+  { hue: 220 },
+  { hue: 145 },
+  { hue: 340 },
+  { hue: 30 },
+  { hue: 280 },
+  { hue: 180 },
+  { hue: 0 },
+]
+
+function getUserColor(userId: string): {
+  bg: string
+  border: string
+  accent: string
+} {
+  let hash = 0
+  for (let i = 0; i < userId.length; i++) {
+    hash = (hash << 5) - hash + userId.charCodeAt(i)
+  }
+  const index = Math.abs(hash) % USER_COLORS.length
+  const { hue } = USER_COLORS[index]
+
+  return {
+    bg: `oklch(0.95 0.04 ${hue} / 0.15)`,
+    border: `oklch(0.7 0.1 ${hue})`,
+    accent: `oklch(0.65 0.12 ${hue})`,
+  }
+}
 
 export const Route = createFileRoute('/_authenticated/tierlist/')({
   component: RouteComponent,
   loader: ({ context }) => {
     context.queryClient.prefetchQuery(tierlistQueries.all())
+    return { currentUserId: context.user?.userId }
   },
 })
 
 function RouteComponent() {
+  const { currentUserId } = Route.useLoaderData()
+
   return (
     <div className="min-h-screen">
       <div className="relative overflow-hidden">
@@ -25,6 +58,7 @@ function RouteComponent() {
           <PageTitleBar
             title="Community Tierlists"
             description="Explore and discover how the community ranks their favorite movies."
+            actions={<CreateTierlistButton currentUserId={currentUserId} />}
           />
         </div>
       </div>
@@ -39,129 +73,222 @@ function TierlistContent() {
   const { data: usersWithTierlists } = useSuspenseQuery(tierlistQueries.all())
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {(usersWithTierlists as UserWithTierlists[]).map(
-          (user, index: number) => (
-            <div
-              key={user.id}
-              className="group relative animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <div className="relative bg-gradient-to-br from-card via-card to-card/80 rounded-2xl border border-border/50 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:border-primary/40 hover:shadow-primary/10 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-purple-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                <Link
-                  to="/tierlist/$userId"
-                  params={{ userId: user.id }}
-                  className="relative block p-6 border-b border-border/40 hover:bg-muted/20 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="relative ring-2 ring-border/50 group-hover:ring-primary/30 rounded-full transition-all duration-300">
-                        <Avatar
-                          src={user.image}
-                          alt={user.name}
-                          name={user.name}
-                          size={56}
-                        />
-                      </div>
-                      <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/80 border-2 border-background flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
-                        <span className="text-[11px] font-bold text-primary-foreground">
-                          {user.tierlists.length}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h2 className="font-semibold text-lg truncate group-hover:text-primary transition-colors duration-300">
-                        {user.name}
-                      </h2>
-                      <p className="text-sm text-muted-foreground font-medium">
-                        {user.tierlists.length}{' '}
-                        {user.tierlists.length === 1 ? 'tierlist' : 'tierlists'}
-                      </p>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
-                  </div>
-                </Link>
-                <div className="p-4 space-y-2">
-                  {user.tierlists.slice(0, 3).map((tierlist) => {
-                    const movieCount = tierlist.tiers.reduce(
-                      (acc: number, tier) =>
-                        acc + (tier.moviesOnTiers?.length || 0),
-                      0,
-                    )
-                    const tierCount = tierlist.tiers.length
-
-                    return (
-                      <Link
-                        key={tierlist.id}
-                        to="/tierlist/$userId/$tierlistId"
-                        params={{ userId: user.id, tierlistId: tierlist.id }}
-                        className="group/item relative flex items-center gap-3 p-4 rounded-xl hover:bg-muted/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
-                      >
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-r-full bg-gradient-to-b from-primary/40 via-primary/60 to-purple-500/40 group-hover/item:from-primary group-hover/item:via-primary group-hover/item:to-purple-500 group-hover/item:h-14 transition-all duration-300" />
-
-                        <div className="flex-1 min-w-0 pl-3">
-                          <span className="font-semibold text-sm block truncate group-hover/item:text-primary transition-colors duration-200">
-                            {tierlist.title || 'Untitled'}
-                          </span>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1.5">
-                            <span className="flex items-center gap-1.5 font-medium">
-                              <Layers className="w-3.5 h-3.5" />
-                              <span>{tierCount} tiers</span>
-                            </span>
-                            <span className="flex items-center gap-1.5 font-medium">
-                              <Film className="w-3.5 h-3.5" />
-                              <span>{movieCount} movies</span>
-                            </span>
-                          </div>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover/item:opacity-100 -translate-x-1 group-hover/item:translate-x-0 transition-all duration-300" />
-                      </Link>
-                    )
-                  })}
-                  {user.tierlists.length > 3 && (
-                    <Link
-                      to="/tierlist/$userId"
-                      params={{ userId: user.id }}
-                      className="flex items-center justify-center gap-2 py-3 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 hover:scale-105"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>View {user.tierlists.length - 3} more</span>
-                    </Link>
-                  )}
-                  {user.tierlists.length === 0 && (
-                    <div className="text-center py-8">
-                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-muted/50 mb-3">
-                        <Layers className="w-6 h-6 text-muted-foreground/50" />
-                      </div>
-                      <p className="text-sm text-muted-foreground font-medium">
-                        No tierlists yet
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ),
-        )}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+        {(usersWithTierlists as UserWithTierlists[]).map((user) => (
+          <UserTierlistCard key={user.id} user={user} />
+        ))}
       </div>
+
       {usersWithTierlists.length === 0 && (
-        <div className="text-center py-24">
-          <div className="relative inline-block mb-6">
-            <div className="absolute inset-0 bg-primary/10 rounded-full blur-2xl" />
-            <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-muted to-muted/50 border border-border">
-              <Layers className="w-10 h-10 text-muted-foreground" />
-            </div>
-          </div>
-          <h3 className="text-xl font-semibold mb-2">No tierlists found</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Be the first to create a tierlist and share your movie rankings with
-            the community!
+        <div className="text-center py-16">
+          <p className="text-muted-foreground">
+            No tierlists yet. Create the first one!
           </p>
         </div>
       )}
     </div>
   )
+}
+
+function CreateTierlistButton({ currentUserId }: { currentUserId?: string }) {
+  const href = currentUserId ? `/tierlist/${currentUserId}` : '/dashboard'
+
+  return (
+    <Link
+      to={href}
+      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+    >
+      <Plus className="w-4 h-4" />
+      <span>New Tierlist</span>
+    </Link>
+  )
+}
+
+function UserTierlistCard({ user }: { user: UserWithTierlists }) {
+  const colors = getUserColor(user.id)
+  const hasMultipleTierlists = user.tierlists.length > 1
+
+  return (
+    <div
+      className="break-inside-avoid animate-in fade-in duration-500 fill-mode-both"
+      style={{
+        borderLeft: `3px solid ${colors.border}`,
+        paddingLeft: '0.75rem',
+      }}
+    >
+      <Link
+        to="/tierlist/$userId"
+        params={{ userId: user.id }}
+        className="block group"
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <Avatar src={user.image} alt={user.name} name={user.name} size={40} />
+          <div className="min-w-0">
+            <h2 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+              {user.name}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {user.tierlists.length}{' '}
+              {user.tierlists.length === 1 ? 'tierlist' : 'tierlists'}
+            </p>
+          </div>
+        </div>
+      </Link>
+
+      <div className="space-y-4">
+        {user.tierlists
+          .slice(0, hasMultipleTierlists ? 3 : 4)
+          .map((tierlist) => (
+            <TierlistCard
+              key={tierlist.id}
+              tierlist={tierlist}
+              userId={user.id}
+              userColor={colors}
+            />
+          ))}
+      </div>
+
+      {user.tierlists.length > 3 && (
+        <Link
+          to="/tierlist/$userId"
+          params={{ userId: user.id }}
+          className="flex items-center justify-center gap-2 py-3 mt-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+        >
+          <span>View {user.tierlists.length - 3} more</span>
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      )}
+    </div>
+  )
+}
+
+function TierlistCard({
+  tierlist,
+  userId,
+  userColor,
+}: {
+  tierlist: UserWithTierlists['tierlists'][0]
+  userId: string
+  userColor: { bg: string; border: string; accent: string }
+}) {
+  const movieCount = tierlist.tiers.reduce(
+    (acc, tier) => acc + (tier.moviesOnTiers?.length || 0),
+    0,
+  )
+
+  const allMovies = tierlist.tiers
+    .flatMap((tier) => tier.moviesOnTiers || [])
+    .sort((a, b) => a.position - b.position)
+
+  const topMovie = allMovies[0]?.movie
+  const previewPosters = allMovies
+    .slice(0, 4)
+    .map((mot) => (mot.movie.images as any)?.posters?.[0]?.file_path)
+    .filter(Boolean)
+
+  const tags = getTierlistTags(tierlist)
+
+  return (
+    <Link
+      to="/tierlist/$userId/$tierlistId"
+      params={{ userId, tierlistId: tierlist.id }}
+      className="block group/paper relative bg-card border border-border/60 rounded-xl overflow-hidden hover:border-border transition-colors"
+    >
+      {previewPosters.length > 0 && (
+        <div className="relative h-32 overflow-hidden">
+          <div className="flex h-full">
+            {previewPosters.slice(0, 4).map((path, i) => (
+              <div
+                key={i}
+                className="flex-1 overflow-hidden"
+                style={{ marginLeft: i > 0 ? '-10%' : 0 }}
+              >
+                <img
+                  src={`https://image.tmdb.org/t/p/w200${path}`}
+                  alt=""
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          {topMovie && (
+            <div className="absolute bottom-2 left-3 right-3 flex items-center gap-2">
+              <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 shrink-0" />
+              <span className="text-xs font-medium text-white truncate">
+                {topMovie.title}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="font-semibold text-sm text-foreground truncate group-hover/paper:text-primary transition-colors">
+            {tierlist.title || 'Untitled Tierlist'}
+          </h3>
+          <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover/paper:opacity-100 -translate-x-1 group-hover/paper:translate-x-0 transition-all shrink-0 mt-0.5" />
+        </div>
+
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full"
+                style={{
+                  backgroundColor: userColor.bg,
+                  color: userColor.accent,
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Layers className="w-3 h-3" />
+            <span>{tierlist.tiers.length} tiers</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Film className="w-3 h-3" />
+            <span>{movieCount} movies</span>
+          </span>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+function getTierlistTags(
+  tierlist: UserWithTierlists['tierlists'][0],
+): string[] {
+  const tags: string[] = []
+
+  if (tierlist.genres && tierlist.genres.length > 0) {
+    tags.push(...tierlist.genres.slice(0, 2))
+  }
+
+  if (tierlist.watchDateFrom || tierlist.watchDateTo) {
+    const fromYear = tierlist.watchDateFrom
+      ? new Date(tierlist.watchDateFrom).getFullYear()
+      : null
+    const toYear = tierlist.watchDateTo
+      ? new Date(tierlist.watchDateTo).getFullYear()
+      : null
+
+    if (fromYear && toYear && fromYear !== toYear) {
+      tags.push(`${fromYear}–${toYear}`)
+    } else if (fromYear) {
+      tags.push(`${fromYear}+`)
+    } else if (toYear) {
+      tags.push(`pre-${toYear}`)
+    }
+  }
+
+  return tags
 }

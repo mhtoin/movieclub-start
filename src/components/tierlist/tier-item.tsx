@@ -75,9 +75,9 @@ function TierItem({
         compact ? 'w-full h-full' : 'w-32'
       } ${
         isDragging
-          ? 'scale-105 rotate-3 cursor-grabbing z-50'
+          ? 'scale-105 -rotate-2 cursor-grabbing z-50'
           : isOwner
-            ? 'hover:scale-105 hover:-translate-y-1 cursor-grab'
+            ? 'cursor-grab active:cursor-grabbing'
             : 'cursor-default'
       }`}
       ref={setNodeRef}
@@ -87,10 +87,8 @@ function TierItem({
       style={style}
     >
       <div
-        className={`rounded-lg overflow-hidden h-full ${
-          isDragging
-            ? 'shadow-2xl ring-2 ring-primary'
-            : 'shadow-md hover:shadow-xl'
+        className={`rounded-lg overflow-hidden h-full transition-shadow duration-200 ${
+          isDragging ? 'shadow-2xl' : 'shadow-md'
         }`}
       >
         <MemoizedMovieCard

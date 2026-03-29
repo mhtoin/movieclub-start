@@ -16,7 +16,7 @@ function StickyUnrankedTier({
   isOwner = true,
   disabled = false,
 }: StickyUnrankedTierProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const { setNodeRef, isOver } = useDroppable({
     id: tier.id,
     disabled: !isOwner,
