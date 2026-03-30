@@ -7,7 +7,7 @@ import { DialogHeader } from './dialog-header'
 import { MovieDetailsView } from './movie-details-view'
 import { MovieOverviewView } from './movie-overview-view'
 import { useDialogAnimation } from './use-dialog-animation'
-import type { Movie } from '@/lib/tmdb-api';
+import type { Movie } from '@/lib/tmdb-api'
 import { getImageUrl } from '@/lib/tmdb-api'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
@@ -45,7 +45,7 @@ export function MovieDetailsDialog({
   const backdropUrl = movie ? getImageUrl(movie.backdrop_path, 'w1280') : null
 
   // Fetch detailed movie information including watch providers and external IDs
-  const { data: movieDetails } = useQuery({
+  const { data: movieDetails, isLoading } = useQuery({
     ...tmdbQueries.movieDetails(movie?.id ?? 0),
     enabled: open && !!movie,
   })
@@ -154,6 +154,7 @@ export function MovieDetailsDialog({
                     onAddToShortlist={() => addToShortlist(movie.id)}
                     onShowMoreInfo={() => handleViewTransition('details')}
                     isPending={isPending}
+                    isLoading={isLoading}
                     compact
                   />
                 ) : (
@@ -262,6 +263,7 @@ export function MovieDetailsDialog({
                     onAddToShortlist={() => addToShortlist(movie.id)}
                     onShowMoreInfo={() => handleViewTransition('details')}
                     isPending={isPending}
+                    isLoading={isLoading}
                   />
                 ) : (
                   <MovieDetailsView

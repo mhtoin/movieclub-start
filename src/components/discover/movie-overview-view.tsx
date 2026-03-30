@@ -4,6 +4,7 @@ import { MovieMetadata } from './movie-metadata'
 import { WatchProvidersList } from './watch-providers'
 import type { TMDBMovieResponse } from '@/types/tmdb'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface MovieOverviewViewProps {
   title: string
@@ -16,6 +17,7 @@ interface MovieOverviewViewProps {
   onAddToShortlist: () => void
   onShowMoreInfo: () => void
   isPending: boolean
+  isLoading?: boolean
   compact?: boolean
 }
 
@@ -30,6 +32,7 @@ export function MovieOverviewView({
   onAddToShortlist,
   onShowMoreInfo,
   isPending,
+  isLoading,
   compact = false,
 }: MovieOverviewViewProps) {
   const [showFullOverview, setShowFullOverview] = useState(false)
@@ -51,6 +54,7 @@ export function MovieOverviewView({
         voteCount={voteCount}
         imdbId={movieDetails?.imdb_id}
         tmdbId={movieDetails?.id}
+        isLoading={isLoading}
       />
 
       {overview && (
@@ -76,9 +80,17 @@ export function MovieOverviewView({
         </div>
       )}
 
-      {movieDetails?.['watch/providers'] && (
+      {isLoading ? (
+        <div>
+          <Skeleton className="h-5 w-28 mb-2" />
+          <div className="flex flex-wrap gap-2">
+            <Skeleton className="h-10 w-36" />
+            <Skeleton className="h-10 w-36" />
+          </div>
+        </div>
+      ) : movieDetails?.['watch/providers'] ? (
         <WatchProvidersList watchProviders={movieDetails['watch/providers']} />
-      )}
+      ) : null}
 
       <div className={`flex gap-3 pt-4 ${compact ? 'flex-col' : ''}`}>
         <Button
