@@ -1,20 +1,17 @@
+import { Toast } from '@base-ui/react/toast'
+import { useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
+import { Check, ImageIcon, Moon, Palette, Sun } from 'lucide-react'
+import { useState } from 'react'
 import type { BackgroundOptionKey } from '@/components/background-options'
+import type { ColorScheme } from '@/lib/color-scheme'
 import { useTheme } from '@/components/theme-provider'
 import {
   BackgroundPreview,
   getBackgroundOptions,
   useBackgroundMutation,
 } from '@/lib/background-utils'
-import {
-  COLOR_SCHEMES,
-  setSchemeServerFn,
-  type ColorScheme,
-} from '@/lib/color-scheme'
-import { Toast } from '@base-ui/react/toast'
-import { useMutation } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
-import { Check, ImageIcon, Moon, Palette, Sun } from 'lucide-react'
-import { useState } from 'react'
+import { COLOR_SCHEMES, setSchemeServerFn } from '@/lib/color-scheme'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   value: value as ColorScheme,
@@ -128,55 +125,59 @@ export function AppearanceSection({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Sun className="h-5 w-5 text-primary" />
           <div>
-            <h3 className="font-semibold">Theme Mode</h3>
+            <h3 className="font-semibold">Theme</h3>
             <p className="text-sm text-muted-foreground">
-              Choose between light and dark mode
+              Choose your preferred appearance
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex gap-3">
           <button
             onClick={() => handleThemeChange('light')}
-            className={`relative flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+            className={`flex-1 flex items-center gap-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
               theme === 'light'
                 ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                : 'border-border hover:border-primary/50'
             }`}
           >
-            <div className="rounded-full bg-amber-100 p-3 shrink-0">
+            <div className="rounded-full bg-amber-100 p-2.5">
               <Sun className="h-5 w-5 text-amber-500" />
             </div>
-            <div className="text-left flex-1">
-              <span className="font-medium">Light</span>
-              <p className="text-xs text-muted-foreground">Bright and clean</p>
+            <div className="text-left">
+              <span className="font-medium block">Light</span>
+              <span className="text-xs text-muted-foreground">
+                Bright and clean
+              </span>
             </div>
             {theme === 'light' && (
-              <Check className="h-5 w-5 text-primary shrink-0" />
+              <Check className="h-5 w-5 text-primary ml-auto" />
             )}
           </button>
 
           <button
             onClick={() => handleThemeChange('dark')}
-            className={`relative flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+            className={`flex-1 flex items-center gap-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
               theme === 'dark'
                 ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                : 'border-border hover:border-primary/50'
             }`}
           >
-            <div className="rounded-full bg-slate-800 p-3 shrink-0">
+            <div className="rounded-full bg-slate-800 p-2.5">
               <Moon className="h-5 w-5 text-slate-300" />
             </div>
-            <div className="text-left flex-1">
-              <span className="font-medium">Dark</span>
-              <p className="text-xs text-muted-foreground">Easy on the eyes</p>
+            <div className="text-left">
+              <span className="font-medium block">Dark</span>
+              <span className="text-xs text-muted-foreground">
+                Easy on the eyes
+              </span>
             </div>
             {theme === 'dark' && (
-              <Check className="h-5 w-5 text-primary shrink-0" />
+              <Check className="h-5 w-5 text-primary ml-auto" />
             )}
           </button>
         </div>
@@ -188,11 +189,11 @@ export function AppearanceSection({
           <div>
             <h3 className="font-semibold">Color Scheme</h3>
             <p className="text-sm text-muted-foreground">
-              Select your preferred accent colors
+              Pick an accent color palette
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="flex flex-wrap gap-3">
           {schemes.map((scheme) => {
             const isActive = currentColorScheme === scheme.value
             return (
@@ -200,28 +201,24 @@ export function AppearanceSection({
                 key={scheme.value}
                 onClick={() => schemeMutation.mutate(scheme.value)}
                 disabled={schemeMutation.isPending}
-                className={`relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                className={`flex items-center gap-2.5 px-4 py-3 rounded-lg border-2 transition-all cursor-pointer ${
                   isActive
                     ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                    : 'border-border hover:border-primary/50'
                 }`}
               >
-                <div className="flex gap-1.5 shrink-0">
+                <div className="flex gap-1">
                   <div
-                    className="w-5 h-5 rounded-full shadow-sm ring-1 ring-black/10"
+                    className="w-6 h-6 rounded-full shadow-sm ring-1 ring-black/10"
                     style={{ backgroundColor: scheme.colors.light }}
                   />
                   <div
-                    className="w-5 h-5 rounded-full shadow-sm ring-1 ring-black/10"
+                    className="w-6 h-6 rounded-full shadow-sm ring-1 ring-black/10 -ml-2"
                     style={{ backgroundColor: scheme.colors.dark }}
                   />
                 </div>
-                <span className="font-medium text-sm flex-1 text-left">
-                  {scheme.label}
-                </span>
-                {isActive && (
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                )}
+                <span className="font-medium text-sm">{scheme.label}</span>
+                {isActive && <Check className="h-4 w-4 text-primary ml-1" />}
               </button>
             )
           })}
@@ -232,9 +229,9 @@ export function AppearanceSection({
         <div className="flex items-center gap-2 mb-4">
           <ImageIcon className="h-5 w-5 text-primary" />
           <div>
-            <h3 className="font-semibold">Background Style</h3>
+            <h3 className="font-semibold">Background Effect</h3>
             <p className="text-sm text-muted-foreground">
-              Choose your preferred background effect
+              Optional visual effects for the app background
             </p>
           </div>
         </div>
@@ -246,23 +243,18 @@ export function AppearanceSection({
                 key={bg.value}
                 onClick={() => backgroundMutation.mutate(bg.value)}
                 disabled={backgroundMutation.isPending}
-                className={`relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                className={`relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all cursor-pointer ${
                   isActive
                     ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                    : 'border-border hover:border-primary/50'
                 }`}
               >
-                <BackgroundPreview type={bg.value} />
-                <div className="text-left flex-1 min-w-0">
-                  <span className="font-medium text-sm block truncate">
-                    {bg.label}
-                  </span>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {bg.description}
-                  </p>
+                <div className="h-12 w-full rounded-md overflow-hidden bg-muted/50">
+                  <BackgroundPreview type={bg.value} />
                 </div>
+                <span className="font-medium text-sm">{bg.label}</span>
                 {isActive && (
-                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  <Check className="absolute top-2 right-2 h-4 w-4 text-primary" />
                 )}
               </button>
             )
