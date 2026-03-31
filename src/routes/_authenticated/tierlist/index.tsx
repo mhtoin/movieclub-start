@@ -3,11 +3,12 @@ import { TierlistIndexSkeleton } from '@/components/tierlist/tierlist-index-skel
 import Avatar from '@/components/ui/avatar'
 import {
   tierlistQueries,
-  type UserWithTierlists,
+  type TierlistPreview,
+  type UserTierlistSummary,
 } from '@/lib/react-query/queries/tierlists'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, Film, Layers, Plus, Star } from 'lucide-react'
+import { ArrowRight, Film, Layers, Plus } from 'lucide-react'
 import { Suspense } from 'react'
 
 const USER_COLORS = [
@@ -43,7 +44,7 @@ function getUserColor(userId: string): {
 export const Route = createFileRoute('/_authenticated/tierlist/')({
   component: RouteComponent,
   loader: ({ context }) => {
-    context.queryClient.prefetchQuery(tierlistQueries.all())
+    context.queryClient.prefetchQuery(tierlistQueries.index())
     return { currentUserId: context.user?.userId }
   },
 })
@@ -70,12 +71,12 @@ function RouteComponent() {
 }
 
 function TierlistContent() {
-  const { data: usersWithTierlists } = useSuspenseQuery(tierlistQueries.all())
+  const { data: usersWithTierlists } = useSuspenseQuery(tierlistQueries.index())
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
       <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-        {(usersWithTierlists as UserWithTierlists[]).map((user) => (
+        {(usersWithTierlists as UserTierlistSummary[]).map((user) => (
           <UserTierlistCard key={user.id} user={user} />
         ))}
       </div>
@@ -105,7 +106,7 @@ function CreateTierlistButton({ currentUserId }: { currentUserId?: string }) {
   )
 }
 
-function UserTierlistCard({ user }: { user: UserWithTierlists }) {
+function UserTierlistCard({ user }: { user: UserTierlistSummary }) {
   const colors = getUserColor(user.id)
   const hasMultipleTierlists = user.tierlists.length > 1
 
@@ -123,10 +124,15 @@ function UserTierlistCard({ user }: { user: UserWithTierlists }) {
         className="block group"
       >
         <div className="flex items-center gap-3 mb-3">
-          <Avatar src={user.image} alt={user.name} name={user.name} size={40} />
+          <Avatar
+            src={user.image ?? ''}
+            alt={user.name ?? ''}
+            name={user.name ?? 'User'}
+            size={40}
+          />
           <div className="min-w-0">
             <h2 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-              {user.name}
+              {user.name ?? 'Unknown User'}
             </h2>
             <p className="text-xs text-muted-foreground">
               {user.tierlists.length}{' '}
@@ -168,24 +174,12 @@ function TierlistCard({
   userId,
   userColor,
 }: {
-  tierlist: UserWithTierlists['tierlists'][0]
+  tierlist: TierlistPreview
   userId: string
   userColor: { bg: string; border: string; accent: string }
 }) {
-  const movieCount = tierlist.tiers.reduce(
-    (acc, tier) => acc + (tier.moviesOnTiers?.length || 0),
-    0,
-  )
-
-  const allMovies = tierlist.tiers
-    .flatMap((tier) => tier.moviesOnTiers || [])
-    .sort((a, b) => a.position - b.position)
-
-  const topMovie = allMovies[0]?.movie
-  const previewPosters = allMovies
-    .slice(0, 4)
-    .map((mot) => (mot.movie.images as any)?.posters?.[0]?.file_path)
-    .filter(Boolean)
+  const movieCount = tierlist.movieCount
+  const previewPosters = tierlist.posterPaths
 
   const tags = getTierlistTags(tierlist)
 
@@ -213,14 +207,6 @@ function TierlistCard({
             ))}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          {topMovie && (
-            <div className="absolute bottom-2 left-3 right-3 flex items-center gap-2">
-              <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 shrink-0" />
-              <span className="text-xs font-medium text-white truncate">
-                {topMovie.title}
-              </span>
-            </div>
-          )}
         </div>
       )}
 
@@ -252,7 +238,7 @@ function TierlistCard({
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <Layers className="w-3 h-3" />
-            <span>{tierlist.tiers.length} tiers</span>
+            <span>{tierlist.tierCount} tiers</span>
           </span>
           <span className="flex items-center gap-1.5">
             <Film className="w-3 h-3" />
@@ -264,9 +250,7 @@ function TierlistCard({
   )
 }
 
-function getTierlistTags(
-  tierlist: UserWithTierlists['tierlists'][0],
-): string[] {
+function getTierlistTags(tierlist: TierlistPreview): string[] {
   const tags: string[] = []
 
   if (tierlist.genres && tierlist.genres.length > 0) {

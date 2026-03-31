@@ -3,7 +3,16 @@ import { movie, moviesOnTiers, tier, tierlist, user } from '@/db/schema'
 import { authMiddleware } from '@/middleware/auth'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { and, eq as dbEq, inArray, InferSelectModel, sql } from 'drizzle-orm'
+import {
+  and,
+  count,
+  countDistinct,
+  desc,
+  eq as dbEq,
+  inArray,
+  InferSelectModel,
+  sql,
+} from 'drizzle-orm'
 import { useMemo } from 'react'
 import { z } from 'zod'
 import { movieQueries } from './movies'
@@ -34,6 +43,24 @@ export interface TierWithMovies extends Tier {
 
 interface TierlistWithTiers extends Tierlist {
   tiers: TierWithMovies[]
+}
+
+export interface TierlistPreview {
+  id: string
+  title: string | null
+  genres: string[] | null
+  watchDateFrom: string | null
+  watchDateTo: string | null
+  tierCount: number
+  movieCount: number
+  posterPaths: string[]
+}
+
+export interface UserTierlistSummary {
+  id: string
+  name: string | null
+  image: string | null
+  tierlists: TierlistPreview[]
 }
 
 const updateTierMoviePositionSchema = z.object({
@@ -264,6 +291,90 @@ export const getTierlists = createServerFn({ method: 'GET' })
     }
   })
 
+export const getTierlistIndex = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async () => {
+    const users = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        image: user.image,
+        tierlistId: tierlist.id,
+        tierlistTitle: tierlist.title,
+        tierlistGenres: tierlist.genres,
+        tierlistWatchDateFrom: tierlist.watchDateFrom,
+        tierlistWatchDateTo: tierlist.watchDateTo,
+        tierCount: countDistinct(tier.id),
+        movieCount: count(moviesOnTiers.id),
+      })
+      .from(user)
+      .innerJoin(tierlist, dbEq(user.id, tierlist.userId))
+      .leftJoin(tier, dbEq(tierlist.id, tier.tierlistId))
+      .leftJoin(moviesOnTiers, dbEq(tier.id, moviesOnTiers.tierId))
+      .groupBy(user.id, tierlist.id)
+      .orderBy(desc(tierlist.createdAt))
+
+    const tierlistIds = [...new Set(users.map((u) => u.tierlistId))]
+    const posterMap: Record<string, string[]> = {}
+
+    if (tierlistIds.length > 0) {
+      const posterRows = await db
+        .select({
+          tierlistId: tierlist.id,
+          images: movie.images,
+        })
+        .from(moviesOnTiers)
+        .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
+        .innerJoin(tierlist, dbEq(tier.tierlistId, tierlist.id))
+        .innerJoin(movie, dbEq(moviesOnTiers.movieId, movie.id))
+        .where(inArray(tierlist.id, tierlistIds))
+        .orderBy(tierlist.id, moviesOnTiers.position)
+
+      for (const row of posterRows) {
+        const posterPath = (row.images as any)?.posters?.[0]?.file_path
+        if (posterPath) {
+          if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
+          if (posterMap[row.tierlistId].length < 4) {
+            posterMap[row.tierlistId].push(posterPath)
+          }
+        }
+      }
+    }
+
+    const userMap = new Map<string, UserTierlistSummary>()
+
+    for (const row of users) {
+      if (!userMap.has(row.id)) {
+        userMap.set(row.id, {
+          id: row.id,
+          name: row.name,
+          image: row.image,
+          tierlists: [],
+        })
+      }
+
+      const existing = userMap.get(row.id)!
+      const existingTierlist = existing.tierlists.find(
+        (t) => t.id === row.tierlistId,
+      )
+
+      if (!existingTierlist) {
+        existing.tierlists.push({
+          id: row.tierlistId,
+          title: row.tierlistTitle,
+          genres: row.tierlistGenres,
+          watchDateFrom: row.tierlistWatchDateFrom,
+          watchDateTo: row.tierlistWatchDateTo,
+          tierCount: row.tierCount,
+          movieCount: row.movieCount,
+          posterPaths: posterMap[row.tierlistId] ?? [],
+        })
+      }
+    }
+
+    return Array.from(userMap.values()).filter((u) => u.tierlists.length > 0)
+  })
+
 export const getUserTierlists = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .inputValidator((userId: string) => userId)
@@ -298,6 +409,11 @@ export const tierlistQueries = {
     queryOptions({
       queryKey: ['tierlists', 'all'],
       queryFn: getTierlists,
+    }),
+  index: () =>
+    queryOptions<UserTierlistSummary[]>({
+      queryKey: ['tierlists', 'index'],
+      queryFn: getTierlistIndex,
     }),
   user: (userId: string) =>
     queryOptions<TierlistWithDetails[]>({
