@@ -1,11 +1,6 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 
-import {
-  BACKGROUND_OPTIONS,
-  type BackgroundOptionKey,
-} from '@/components/background-options'
 import { logoutFn } from '@/lib/auth/logout-action'
-import { setBackgroundServerFn } from '@/lib/background-preference'
 import {
   COLOR_SCHEMES,
   setSchemeServerFn,
@@ -19,7 +14,6 @@ import {
   Dices,
   Film,
   Home,
-  ImageIcon,
   LayoutDashboard,
   LogOut,
   Moon,
@@ -46,14 +40,6 @@ const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   label: config.label,
   colors: config.colors,
 }))
-
-const backgrounds = Object.entries(BACKGROUND_OPTIONS).map(
-  ([value, config]) => ({
-    value: value as BackgroundOptionKey,
-    label: config.label,
-    description: config.description,
-  }),
-)
 
 const navItems = [
   { icon: Home, label: 'Home', tagline: 'Now showing', path: '/' },
@@ -95,7 +81,6 @@ export default function Sidebar() {
   const router = useRouter()
   const currentPath = routerState.location.pathname
   const [schemeOpen, setSchemeOpen] = useState(false)
-  const [backgroundOpen, setBackgroundOpen] = useState(false)
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false)
   const toastManager = Toast.useToastManager()
 
@@ -138,23 +123,6 @@ export default function Sidebar() {
       toastManager.add({
         title: 'Error',
         description: `Failed to update color scheme: ${error.message}`,
-        type: 'error',
-      })
-    },
-  })
-
-  const backgroundMutation = useMutation({
-    mutationFn: async (background: BackgroundOptionKey) => {
-      await setBackgroundServerFn({ data: background })
-    },
-    onSuccess: () => {
-      router.invalidate()
-      setBackgroundOpen(false)
-    },
-    onError: (error) => {
-      toastManager.add({
-        title: 'Error',
-        description: `Failed to update background: ${error.message}`,
         type: 'error',
       })
     },
@@ -283,52 +251,6 @@ export default function Sidebar() {
                             />
                           </div>
                           <span className="text-sm">{scheme.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </PopoverPopup>
-                </PopoverPositioner>
-              </PopoverPortal>
-            </PopoverRoot>
-
-            <PopoverRoot open={backgroundOpen} onOpenChange={setBackgroundOpen}>
-              <PopoverTrigger className="group/bg flex items-center gap-3 px-2 py-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-all duration-200 hover:translate-x-0.5">
-                <div className="relative flex-shrink-0 w-6 h-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/bg:scale-110 group-hover/bg:rotate-12 transition-all duration-200">
-                  <ImageIcon
-                    size={14}
-                    className="text-sidebar-foreground/60 group-hover/bg:text-sidebar-foreground transition-colors"
-                  />
-                </div>
-                <span className="text-xs font-medium whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-                  Backdrop
-                </span>
-              </PopoverTrigger>
-              <PopoverPortal>
-                <PopoverPositioner side="right" align="end" sideOffset={12}>
-                  <PopoverPopup
-                    size="default"
-                    className="animate-in fade-in slide-in-from-left-2 duration-200"
-                  >
-                    <div className="space-y-1">
-                      <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                        <Film size={10} className="text-primary" />
-                        Background Style
-                      </h3>
-                      {backgrounds.map((bg) => (
-                        <button
-                          key={bg.value}
-                          onClick={() => backgroundMutation.mutate(bg.value)}
-                          disabled={backgroundMutation.isPending}
-                          className="w-full flex items-start gap-3 p-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium">
-                              {bg.label}
-                            </div>
-                            <div className="text-xs text-muted-foreground truncate">
-                              {bg.description}
-                            </div>
-                          </div>
                         </button>
                       ))}
                     </div>
@@ -547,49 +469,6 @@ export default function Sidebar() {
                                       <span className="text-sm">
                                         {scheme.label}
                                       </span>
-                                    </button>
-                                  ))}
-                                </div>
-                              </PopoverPopup>
-                            </PopoverPositioner>
-                          </PopoverPortal>
-                        </PopoverRoot>
-                        <PopoverRoot
-                          open={backgroundOpen}
-                          onOpenChange={setBackgroundOpen}
-                        >
-                          <PopoverTrigger className="p-2 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-accent transition-colors">
-                            <ImageIcon size={16} />
-                          </PopoverTrigger>
-                          <PopoverPortal>
-                            <PopoverPositioner
-                              side="top"
-                              align="end"
-                              sideOffset={8}
-                            >
-                              <PopoverPopup size="default">
-                                <div className="space-y-1 max-h-64 overflow-y-auto">
-                                  <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                    <Film size={10} className="text-primary" />
-                                    Background
-                                  </h3>
-                                  {backgrounds.map((bg) => (
-                                    <button
-                                      key={bg.value}
-                                      onClick={() =>
-                                        backgroundMutation.mutate(bg.value)
-                                      }
-                                      disabled={backgroundMutation.isPending}
-                                      className="w-full flex items-start gap-2 p-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50 text-left"
-                                    >
-                                      <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium">
-                                          {bg.label}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground truncate">
-                                          {bg.description}
-                                        </div>
-                                      </div>
                                     </button>
                                   ))}
                                 </div>

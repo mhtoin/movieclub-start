@@ -1,16 +1,10 @@
 import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import { Check, ImageIcon, Moon, Palette, Sun } from 'lucide-react'
+import { Check, Moon, Palette, Sun } from 'lucide-react'
 import { useState } from 'react'
-import type { BackgroundOptionKey } from '@/components/background-options'
 import type { ColorScheme } from '@/lib/color-scheme'
 import { useTheme } from '@/components/theme-provider'
-import {
-  BackgroundPreview,
-  getBackgroundOptions,
-  useBackgroundMutation,
-} from '@/lib/background-utils'
 import { COLOR_SCHEMES, setSchemeServerFn } from '@/lib/color-scheme'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
@@ -19,22 +13,16 @@ const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   colors: config.colors,
 }))
 
-const backgrounds = getBackgroundOptions()
-
 interface AppearanceSectionProps {
-  initialBackground?: BackgroundOptionKey
   initialColorScheme?: ColorScheme
 }
 
 export function AppearanceSection({
-  initialBackground = 'none',
   initialColorScheme = 'default',
 }: AppearanceSectionProps) {
   const { theme, setTheme } = useTheme()
   const router = useRouter()
   const toastManager = Toast.useToastManager()
-  const [currentBackground, setCurrentBackground] =
-    useState<BackgroundOptionKey>(initialBackground)
   const [currentColorScheme, setCurrentColorScheme] =
     useState<ColorScheme>(initialColorScheme)
 
@@ -84,10 +72,6 @@ export function AppearanceSection({
         type: 'error',
       })
     },
-  })
-
-  const backgroundMutation = useBackgroundMutation((background) => {
-    setCurrentBackground(background)
   })
 
   function handleThemeChange(newTheme: 'light' | 'dark') {
@@ -219,43 +203,6 @@ export function AppearanceSection({
                 </div>
                 <span className="font-medium text-sm">{scheme.label}</span>
                 {isActive && <Check className="h-4 w-4 text-primary ml-1" />}
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      <section>
-        <div className="flex items-center gap-2 mb-4">
-          <ImageIcon className="h-5 w-5 text-primary" />
-          <div>
-            <h3 className="font-semibold">Background Effect</h3>
-            <p className="text-sm text-muted-foreground">
-              Optional visual effects for the app background
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {backgrounds.map((bg) => {
-            const isActive = currentBackground === bg.value
-            return (
-              <button
-                key={bg.value}
-                onClick={() => backgroundMutation.mutate(bg.value)}
-                disabled={backgroundMutation.isPending}
-                className={`relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                  isActive
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="h-12 w-full rounded-md overflow-hidden bg-muted/50">
-                  <BackgroundPreview type={bg.value} />
-                </div>
-                <span className="font-medium text-sm">{bg.label}</span>
-                {isActive && (
-                  <Check className="absolute top-2 right-2 h-4 w-4 text-primary" />
-                )}
               </button>
             )
           })}

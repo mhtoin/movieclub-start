@@ -1710,176 +1710,106 @@
     background: var(--background);
   }
 
-  .backdrop-veil {
-    position: absolute;
-    inset: 0;
-    isolation: isolate;
-  }
-
-  :is(.dark) .backdrop-veil {
-    background:
-      radial-gradient(
-        circle at 20% 25%,
-        rgba(255, 210, 170, 0.08),
-        transparent 55%
-      ),
-      radial-gradient(
-        circle at 75% 10%,
-        rgba(120, 190, 255, 0.08),
-        transparent 60%
-      ),
-      linear-gradient(140deg, rgba(5, 6, 14, 0.9), rgba(10, 12, 22, 0.75));
-  }
-
-  :is(.light) .backdrop-veil {
-    background:
-      radial-gradient(
-        circle at 20% 25%,
-        rgba(255, 235, 210, 0.4),
-        transparent 55%
-      ),
-      radial-gradient(
-        circle at 75% 10%,
-        rgba(200, 220, 255, 0.3),
-        transparent 60%
-      ),
-      linear-gradient(
-        140deg,
-        rgba(250, 248, 245, 0.92),
-        rgba(245, 243, 240, 0.85)
-      );
-  }
-
-  .backdrop-veil__image {
-    position: absolute;
-    inset: -15%;
-    width: 130%;
-    height: 130%;
-    object-fit: cover;
-    animation: backdropVeilPan 48s ease-in-out infinite alternate;
-  }
-
-  :is(.dark) .backdrop-veil__image {
-    opacity: 0.65;
-    filter: saturate(1.15) contrast(1.05) brightness(0.78);
-    mix-blend-mode: screen;
-    mask-image: radial-gradient(
-      circle at 32% 35%,
-      rgba(0, 0, 0, 0.95) 0%,
-      rgba(0, 0, 0, 0.65) 35%,
-      transparent 62%
-    );
-    -webkit-mask-image: radial-gradient(
-      circle at 32% 35%,
-      rgba(0, 0, 0, 0.95) 0%,
-      rgba(0, 0, 0, 0.65) 35%,
-      transparent 62%
-    );
-  }
-
-  :is(.light) .backdrop-veil__image {
-    opacity: 0.25;
-    filter: saturate(0.9) contrast(0.95) brightness(1.1);
-    mix-blend-mode: multiply;
-    mask-image: radial-gradient(
-      circle at 32% 35%,
-      rgba(0, 0, 0, 0.7) 0%,
-      rgba(0, 0, 0, 0.4) 35%,
-      transparent 58%
-    );
-    -webkit-mask-image: radial-gradient(
-      circle at 32% 35%,
-      rgba(0, 0, 0, 0.7) 0%,
-      rgba(0, 0, 0, 0.4) 35%,
-      transparent 58%
-    );
-  }
-
-  .backdrop-veil__wash {
-    position: absolute;
-    inset: 0;
-  }
-
-  :is(.dark) .backdrop-veil__wash {
-    background:
-      radial-gradient(
-        circle at 25% 30%,
-        rgba(255, 220, 180, 0.18),
-        transparent 48%
-      ),
-      radial-gradient(
-        circle at 80% 20%,
-        rgba(90, 160, 255, 0.12),
-        transparent 60%
-      ),
-      linear-gradient(120deg, rgba(4, 5, 12, 0.95), rgba(7, 9, 18, 0.7)),
-      linear-gradient(
-        180deg,
-        rgba(2, 3, 8, 0.85),
-        rgba(2, 3, 8, 0.4),
-        rgba(2, 3, 8, 0.92)
-      );
-    mix-blend-mode: multiply;
-  }
-
-  :is(.light) .backdrop-veil__wash {
-    background:
-      radial-gradient(
-        circle at 25% 30%,
-        rgba(255, 245, 230, 0.5),
-        transparent 48%
-      ),
-      radial-gradient(
-        circle at 80% 20%,
-        rgba(230, 240, 255, 0.4),
-        transparent 60%
-      ),
-      linear-gradient(
-        120deg,
-        rgba(252, 250, 248, 0.7),
-        rgba(248, 246, 244, 0.5)
-      ),
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.6),
-        rgba(255, 255, 255, 0.3),
-        rgba(255, 255, 255, 0.65)
-      );
-    mix-blend-mode: soft-light;
-  }
-
-  .app-background-none {
-    background: var(--background);
-  }
-
-  .bg-minimal {
-    position: absolute;
-    inset: 0;
-    background: var(--background);
-  }
-
-  :is(.light) .bg-minimal {
-    background: linear-gradient(
-      180deg,
-      var(--background) 0%,
-      oklch(0.95 0.01 var(--bg-scheme-hue, var(--scheme-hue, 240))) 50%,
-      var(--background) 100%
-    );
-  }
-
-  :is(.dark) .bg-minimal {
-    background: radial-gradient(
-      ellipse 120% 80% at 50% 0%,
-      oklch(0.22 0.02 var(--bg-scheme-hue, var(--scheme-hue, 240))) 0%,
-      var(--background) 70%
-    );
-  }
-
   .bg-projector {
     position: absolute;
     inset: 0;
     overflow: hidden;
-    background: var(--background);
+  }
+
+  :is(.light) .bg-projector {
+    background:
+      radial-gradient(
+        ellipse 45% 55% at 50% 11%,
+        oklch(0.94 0.06 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.8) 0%,
+        oklch(0.96 0.04 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.4) 35%,
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 70% 50% at 50% 11%,
+        oklch(0.97 0.03 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.5) 0%,
+        transparent 60%
+      ),
+      var(--background);
+  }
+
+  :is(.dark) .bg-projector {
+    background:
+      radial-gradient(
+        ellipse 65% 50% at 50% 11%,
+        oklch(0.4 0.08 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.55) 0%,
+        oklch(0.3 0.05 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.3) 40%,
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 50% 70% at 50% 11%,
+        oklch(0.35 0.06 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.25) 0%,
+        transparent 55%
+      ),
+      var(--background);
+  }
+
+  .bg-projector__vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  :is(.light) .bg-projector__vignette {
+    background: radial-gradient(
+      ellipse 70% 55% at 50% 55%,
+      transparent 25%,
+      oklch(0.93 0.01 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.3) 60%,
+      oklch(0.9 0.015 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.5) 80%,
+      oklch(0.88 0.015 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.6) 100%
+    );
+  }
+
+  :is(.dark) .bg-projector__vignette {
+    background: radial-gradient(
+      ellipse 70% 55% at 50% 55%,
+      transparent 35%,
+      oklch(0.15 0.01 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.4) 70%,
+      oklch(0.1 0.01 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.6) 100%
+    );
+  }
+
+  :is(.dark) .bg-projector__vignette {
+    background: radial-gradient(
+      ellipse 70% 60% at 50% 50%,
+      transparent 30%,
+      oklch(0.15 0.01 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.4) 70%,
+      oklch(0.1 0.01 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.6) 100%
+    );
+  }
+
+  .bg-projector__grain {
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    pointer-events: none;
+    opacity: 0.035;
+    animation: grainShift 8s steps(4) infinite;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
+
+  @keyframes grainShift {
+    0% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(-5%, -5%);
+    }
+    50% {
+      transform: translate(5%, 5%);
+    }
+    75% {
+      transform: translate(-2%, 3%);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
   }
 
   .bg-projector__svg {
@@ -1891,25 +1821,25 @@
 
   :is(.light) .bg-projector__beam-center {
     stop-color: oklch(
-      0.96 0.04 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.35
+      0.92 0.06 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.75
     );
   }
 
   :is(.light) .bg-projector__beam-mid {
     stop-color: oklch(
-      0.94 0.03 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.12
+      0.95 0.04 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.3
     );
   }
 
   :is(.dark) .bg-projector__beam-center {
     stop-color: oklch(
-      0.75 0.08 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.22
+      0.82 0.1 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.45
     );
   }
 
   :is(.dark) .bg-projector__beam-mid {
     stop-color: oklch(
-      0.55 0.06 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.07
+      0.6 0.08 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.18
     );
   }
 
@@ -1922,11 +1852,11 @@
   }
 
   :is(.light) .bg-projector__dust {
-    fill: oklch(0.6 0.04 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.35);
+    fill: oklch(0.65 0.08 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.55);
   }
 
   :is(.dark) .bg-projector__dust {
-    fill: oklch(0.75 0.06 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.5);
+    fill: oklch(0.8 0.1 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.6);
   }
 
   .bg-projector__dust--1 {
@@ -1951,107 +1881,18 @@
 
   :is(.light) .bg-projector__device {
     stroke: oklch(
-      0.65 0.04 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.25
+      0.55 0.06 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.35
     );
     fill: none;
   }
 
   :is(.dark) .bg-projector__device {
-    stroke: oklch(
-      0.55 0.08 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.35
-    );
+    stroke: oklch(0.6 0.08 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.4);
     fill: none;
-  }
-
-  .bg-dust {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    background: var(--background);
-  }
-
-  .bg-dust__svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  :is(.light) .bg-dust__mote {
-    fill: oklch(0.55 0.05 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.3);
-  }
-
-  :is(.dark) .bg-dust__mote {
-    fill: oklch(0.72 0.07 var(--bg-scheme-hue, var(--scheme-hue, 240)) / 0.38);
-  }
-
-  .bg-dust__mote--1 {
-    animation: dustWander1 28s ease-in-out infinite;
-    animation-delay: 0s;
-  }
-
-  .bg-dust__mote--2 {
-    animation: dustWander2 22s ease-in-out infinite;
-    animation-delay: -7s;
-  }
-
-  .bg-dust__mote--3 {
-    animation: dustWander3 35s ease-in-out infinite;
-    animation-delay: -14s;
-  }
-
-  .bg-dust__mote--4 {
-    animation: dustWander4 19s ease-in-out infinite;
-    animation-delay: -4s;
-  }
-
-  .bg-dust__mote--5 {
-    animation: dustWander1 32s ease-in-out infinite reverse;
-    animation-delay: -18s;
-  }
-
-  .bg-dust__mote--6 {
-    animation: dustWander2 26s ease-in-out infinite reverse;
-    animation-delay: -11s;
-  }
-
-  .bg-dust__mote--7 {
-    animation: dustWander3 24s ease-in-out infinite;
-    animation-delay: -21s;
-  }
-
-  .bg-dust__mote--8 {
-    animation: dustWander4 38s ease-in-out infinite reverse;
-    animation-delay: -9s;
   }
 }
 
 @layer utilities {
-  @keyframes backdropVeilPan {
-    0% {
-      transform: scale(1.04) translate3d(-2%, -1%, 0);
-    }
-    100% {
-      transform: scale(1.12) translate3d(2%, 2%, 0);
-    }
-  }
-
-  @keyframes dustFloat1 {
-    0%,
-    100% {
-      transform: translate(0, 0);
-    }
-    25% {
-      transform: translate(6px, -9px);
-    }
-    50% {
-      transform: translate(-5px, 6px);
-    }
-    75% {
-      transform: translate(8px, 4px);
-    }
-  }
-
   @keyframes dustFloat1 {
     0%,
     100% {
@@ -2114,94 +1955,6 @@
     50% {
       opacity: 1;
       transform: scale(1.12);
-    }
-  }
-
-  @keyframes dustWander1 {
-    0%,
-    100% {
-      transform: translate(0, 0);
-      opacity: 0.5;
-    }
-    20% {
-      transform: translate(22px, -28px);
-      opacity: 0.9;
-    }
-    45% {
-      transform: translate(-18px, -52px);
-      opacity: 0.6;
-    }
-    65% {
-      transform: translate(30px, -38px);
-      opacity: 0.85;
-    }
-    85% {
-      transform: translate(-10px, -18px);
-      opacity: 0.7;
-    }
-  }
-
-  @keyframes dustWander2 {
-    0%,
-    100% {
-      transform: translate(0, 0);
-      opacity: 0.55;
-    }
-    25% {
-      transform: translate(-26px, -20px);
-      opacity: 0.8;
-    }
-    55% {
-      transform: translate(18px, -44px);
-      opacity: 0.65;
-    }
-    80% {
-      transform: translate(-12px, -62px);
-      opacity: 0.9;
-    }
-  }
-
-  @keyframes dustWander3 {
-    0%,
-    100% {
-      transform: translate(0, 0) scale(1);
-      opacity: 0.5;
-    }
-    30% {
-      transform: translate(14px, -34px) scale(1.08);
-      opacity: 0.75;
-    }
-    60% {
-      transform: translate(-24px, -58px) scale(0.94);
-      opacity: 0.85;
-    }
-    80% {
-      transform: translate(20px, -24px) scale(1.04);
-      opacity: 0.6;
-    }
-  }
-
-  @keyframes dustWander4 {
-    0%,
-    100% {
-      transform: translate(0, 0);
-      opacity: 0.6;
-    }
-    15% {
-      transform: translate(-20px, -16px);
-      opacity: 0.9;
-    }
-    40% {
-      transform: translate(28px, -40px);
-      opacity: 0.55;
-    }
-    70% {
-      transform: translate(-16px, -64px);
-      opacity: 0.8;
-    }
-    90% {
-      transform: translate(10px, -32px);
-      opacity: 0.7;
     }
   }
 

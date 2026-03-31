@@ -11,7 +11,7 @@ import { Route as RootRoute } from '@/routes/__root'
 import { Route } from '@/routes/_authenticated/settings'
 
 export function SettingsContent() {
-  const { user, backgroundPreference } = Route.useRouteContext()
+  const { user } = Route.useRouteContext()
   const { colorScheme } = RootRoute.useLoaderData()
 
   return (
@@ -42,10 +42,7 @@ export function SettingsContent() {
               <ProfileSection user={user} />
             </TabsPanel>
             <TabsPanel value="appearance" variant="underlined">
-              <AppearanceSection
-                initialBackground={backgroundPreference}
-                initialColorScheme={colorScheme}
-              />
+              <AppearanceSection initialColorScheme={colorScheme} />
             </TabsPanel>
           </TabsRoot>
         </div>
