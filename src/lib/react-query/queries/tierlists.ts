@@ -315,28 +315,29 @@ export const getTierlistIndex = createServerFn({ method: 'GET' })
       .orderBy(desc(tierlist.createdAt))
 
     const tierlistIds = [...new Set(users.map((u) => u.tierlistId))]
+
+    const posterRows =
+      tierlistIds.length > 0
+        ? await db
+            .select({
+              tierlistId: tierlist.id,
+              images: movie.images,
+            })
+            .from(moviesOnTiers)
+            .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
+            .innerJoin(tierlist, dbEq(tier.tierlistId, tierlist.id))
+            .innerJoin(movie, dbEq(moviesOnTiers.movieId, movie.id))
+            .where(inArray(tierlist.id, tierlistIds))
+            .orderBy(tierlist.id, moviesOnTiers.position)
+        : []
+
     const posterMap: Record<string, string[]> = {}
-
-    if (tierlistIds.length > 0) {
-      const posterRows = await db
-        .select({
-          tierlistId: tierlist.id,
-          images: movie.images,
-        })
-        .from(moviesOnTiers)
-        .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
-        .innerJoin(tierlist, dbEq(tier.tierlistId, tierlist.id))
-        .innerJoin(movie, dbEq(moviesOnTiers.movieId, movie.id))
-        .where(inArray(tierlist.id, tierlistIds))
-        .orderBy(tierlist.id, moviesOnTiers.position)
-
-      for (const row of posterRows) {
-        const posterPath = (row.images as any)?.posters?.[0]?.file_path
-        if (posterPath) {
-          if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
-          if (posterMap[row.tierlistId].length < 4) {
-            posterMap[row.tierlistId].push(posterPath)
-          }
+    for (const row of posterRows) {
+      const posterPath = (row.images as any)?.posters?.[0]?.file_path
+      if (posterPath) {
+        if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
+        if (posterMap[row.tierlistId].length < 4) {
+          posterMap[row.tierlistId].push(posterPath)
         }
       }
     }
@@ -404,6 +405,97 @@ export const getUserTierlists = createServerFn({ method: 'GET' })
     }
   })
 
+export const getUserTierlistsSummary = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .inputValidator((userId: string) => userId)
+  .handler(async ({ context, data: userId }) => {
+    if (!context.user) throw new Error('Unauthorized')
+
+    try {
+      const userTierlists = await db
+        .select({
+          id: tierlist.id,
+          title: tierlist.title,
+          genres: tierlist.genres,
+          watchDateFrom: tierlist.watchDateFrom,
+          watchDateTo: tierlist.watchDateTo,
+          createdAt: tierlist.createdAt,
+        })
+        .from(tierlist)
+        .where(dbEq(tierlist.userId, userId))
+        .orderBy(desc(tierlist.createdAt))
+
+      if (userTierlists.length === 0) return []
+
+      const tierlistIds = userTierlists.map((t) => t.id)
+
+      const [tierCountsResult, posterRows] = await Promise.all([
+        db
+          .select({
+            tierlistId: tier.tierlistId,
+            count: count(tier.id),
+          })
+          .from(tier)
+          .where(inArray(tier.tierlistId, tierlistIds))
+          .groupBy(tier.tierlistId),
+        db
+          .select({
+            tierlistId: tierlist.id,
+            images: movie.images,
+          })
+          .from(moviesOnTiers)
+          .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
+          .innerJoin(tierlist, dbEq(tier.tierlistId, tierlist.id))
+          .innerJoin(movie, dbEq(moviesOnTiers.movieId, movie.id))
+          .where(inArray(tierlist.id, tierlistIds))
+          .orderBy(tierlist.id, moviesOnTiers.position),
+      ])
+
+      const tierCountMap = new Map<string, number>(
+        tierCountsResult.map((r) => [r.tierlistId, r.count]),
+      )
+
+      const movieCountResult = await db
+        .select({
+          tierlistId: tier.tierlistId,
+          count: count(moviesOnTiers.id),
+        })
+        .from(moviesOnTiers)
+        .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
+        .where(inArray(tier.tierlistId, tierlistIds))
+        .groupBy(tier.tierlistId)
+
+      const movieCountMap = new Map<string, number>(
+        movieCountResult.map((r) => [r.tierlistId, r.count]),
+      )
+
+      const posterMap: Record<string, string[]> = {}
+      for (const row of posterRows) {
+        const posterPath = (row.images as any)?.posters?.[0]?.file_path
+        if (posterPath) {
+          if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
+          if (posterMap[row.tierlistId].length < 6) {
+            posterMap[row.tierlistId].push(posterPath)
+          }
+        }
+      }
+
+      return userTierlists.map((tl) => ({
+        id: tl.id,
+        title: tl.title,
+        genres: tl.genres,
+        watchDateFrom: tl.watchDateFrom,
+        watchDateTo: tl.watchDateTo,
+        tierCount: tierCountMap.get(tl.id) ?? 0,
+        movieCount: movieCountMap.get(tl.id) ?? 0,
+        posterPaths: posterMap[tl.id] ?? [],
+      }))
+    } catch (error) {
+      console.error('Error fetching user tierlists summary:', error)
+      throw error
+    }
+  })
+
 export const tierlistQueries = {
   all: () =>
     queryOptions({
@@ -424,6 +516,11 @@ export const tierlistQueries = {
     queryOptions<TierlistWithDetails | null>({
       queryKey: ['tierlists', 'single', tierlistId],
       queryFn: () => getSingleTierlist({ data: tierlistId }),
+    }),
+  userSummary: (userId: string) =>
+    queryOptions<TierlistPreview[]>({
+      queryKey: ['tierlists', 'user', userId, 'summary'],
+      queryFn: () => getUserTierlistsSummary({ data: userId }),
     }),
 }
 

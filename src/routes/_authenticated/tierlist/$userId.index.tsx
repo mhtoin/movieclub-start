@@ -1,4 +1,5 @@
 import { PageTitleBar } from '@/components/page-titlebar'
+import { UserTierlistsSkeleton } from '@/components/tierlist/user-tierlists-skeleton'
 import { Button } from '@/components/ui/button'
 import {
   DialogBackdrop,
@@ -14,7 +15,7 @@ import {
 } from '@/lib/react-query/mutations/tierlists'
 import {
   tierlistQueries,
-  type TierlistWithDetails,
+  type TierlistPreview,
 } from '@/lib/react-query/queries/tierlists'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getImageUrl } from '@/lib/tmdb-api'
@@ -36,64 +37,76 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/tierlist/$userId/')({
   component: RouteComponent,
   loader: ({ context, params }) => {
-    context.queryClient.ensureQueryData(tierlistQueries.user(params.userId))
+    context.queryClient.ensureQueryData(
+      tierlistQueries.userSummary(params.userId),
+    )
   },
 })
 
 function RouteComponent() {
   const { userId } = Route.useParams()
   const { user } = Route.useRouteContext()
-  const { data } = useSuspenseQuery(tierlistQueries.user(userId))
-  const tierlists = data as TierlistWithDetails[]
-  const isOwner = user?.userId === userId
 
   return (
     <div className="container mx-auto px-4 py-6 md:pl-[72px]">
       <PageTitleBar
-        title={isOwner ? 'Your Tierlists' : 'Tierlists'}
+        title={user?.userId === userId ? 'Your Tierlists' : 'Tierlists'}
         description={
-          isOwner
+          user?.userId === userId
             ? 'Manage and organize your movie rankings'
             : `Browse ${user?.name || 'this user'}'s movie rankings`
         }
-        actions={isOwner && <CreateTierlistDialog userId={userId} />}
+        actions={
+          user?.userId === userId && <CreateTierlistDialog userId={userId} />
+        }
       />
 
-      <div className="max-w-6xl mx-auto">
-        {tierlists.length === 0 ? (
-          <EmptyState isOwner={isOwner} userId={userId} />
-        ) : (
-          <>
-            <FeaturedTierlist
-              tierlist={tierlists[0]}
-              userId={userId}
-              isOwner={isOwner}
-            />
-            {tierlists.length > 1 && (
-              <div className="mt-12">
-                <h2 className="text-lg font-semibold text-foreground mb-4">
-                  All Tierlists
-                </h2>
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                  {tierlists.slice(1).map((list) => (
-                    <TierlistCard
-                      key={list.id}
-                      tierlist={list}
-                      userId={userId}
-                      isOwner={isOwner}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      <Suspense fallback={<UserTierlistsSkeleton />}>
+        <UserTierlistsContent userId={userId} />
+      </Suspense>
+    </div>
+  )
+}
+
+function UserTierlistsContent({ userId }: { userId: string }) {
+  const { data: tierlists } = useSuspenseQuery(
+    tierlistQueries.userSummary(userId),
+  )
+  const isOwner = true
+
+  if (tierlists.length === 0) {
+    return <EmptyState isOwner={isOwner} userId={userId} />
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <FeaturedTierlist
+        tierlist={tierlists[0]}
+        userId={userId}
+        isOwner={isOwner}
+      />
+      {tierlists.length > 1 && (
+        <div className="mt-12">
+          <h2 className="text-lg font-semibold text-foreground mb-4">
+            All Tierlists
+          </h2>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            {tierlists.slice(1).map((list) => (
+              <TierlistCard
+                key={list.id}
+                tierlist={list}
+                userId={userId}
+                isOwner={isOwner}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -120,21 +133,11 @@ function FeaturedTierlist({
   userId,
   isOwner,
 }: {
-  tierlist: TierlistWithDetails
+  tierlist: TierlistPreview
   userId: string
   isOwner: boolean
 }) {
-  const movieCount = tierlist.tiers.reduce(
-    (acc, tier) => acc + (tier.moviesOnTiers?.length || 0),
-    0,
-  )
-
-  const posterMovies = tierlist.tiers
-    .flatMap((tier) => (tier.moviesOnTiers || []).map((mot) => mot.movie))
-    .filter((movie): movie is NonNullable<typeof movie> & { images: any } =>
-      Boolean(movie && movie.images),
-    )
-    .slice(0, 6)
+  const posterPaths = tierlist.posterPaths.slice(0, 6)
 
   return (
     <Link
@@ -143,31 +146,22 @@ function FeaturedTierlist({
       className="group block"
     >
       <article className="relative rounded-2xl overflow-hidden border border-border/50 bg-card">
-        {posterMovies.length > 0 && (
+        {posterPaths.length > 0 && (
           <div className="grid grid-cols-3 md:grid-cols-6 h-48 md:h-64">
-            {posterMovies.map((movie, idx) => {
-              const posterUrl = getImageUrl(
-                movie.images?.posters?.[0]?.file_path,
-                'w342',
-              )
+            {posterPaths.map((path, idx) => {
+              const posterUrl = getImageUrl(path, 'w342')
               return (
                 <div
-                  key={movie.id || idx}
+                  key={idx}
                   className="aspect-[2/3] overflow-hidden bg-muted"
                 >
                   {posterUrl ? (
                     <img
                       src={posterUrl}
-                      alt={movie.title}
+                      alt=""
                       className="w-full h-full object-cover"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center p-2">
-                      <p className="text-xs text-muted-foreground text-center line-clamp-3">
-                        {movie.title}
-                      </p>
-                    </div>
-                  )}
+                  ) : null}
                 </div>
               )
             })}
@@ -211,11 +205,11 @@ function FeaturedTierlist({
               <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Layers className="w-4 h-4" />
-                  {tierlist.tiers.length} tiers
+                  {tierlist.tierCount} tiers
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Film className="w-4 h-4" />
-                  {movieCount} movies
+                  {tierlist.movieCount} movies
                 </span>
               </div>
             </div>
@@ -242,24 +236,6 @@ function FeaturedTierlist({
               ))}
             </div>
           )}
-
-          {tierlist.tiers.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {tierlist.tiers.slice(0, 6).map((tier) => (
-                <span
-                  key={tier.id}
-                  className="text-xs px-2 py-1 rounded bg-primary/10 text-primary font-medium"
-                >
-                  {tier.label}
-                </span>
-              ))}
-              {tierlist.tiers.length > 6 && (
-                <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">
-                  +{tierlist.tiers.length - 6} more
-                </span>
-              )}
-            </div>
-          )}
         </div>
       </article>
     </Link>
@@ -271,21 +247,11 @@ function TierlistCard({
   userId,
   isOwner,
 }: {
-  tierlist: TierlistWithDetails
+  tierlist: TierlistPreview
   userId: string
   isOwner: boolean
 }) {
-  const movieCount = tierlist.tiers.reduce(
-    (acc, tier) => acc + (tier.moviesOnTiers?.length || 0),
-    0,
-  )
-
-  const posterMovies = tierlist.tiers
-    .flatMap((tier) => (tier.moviesOnTiers || []).map((mot) => mot.movie))
-    .filter((movie): movie is NonNullable<typeof movie> & { images: any } =>
-      Boolean(movie && movie.images),
-    )
-    .slice(0, 4)
+  const posterPaths = tierlist.posterPaths.slice(0, 4)
 
   return (
     <Link
@@ -295,19 +261,16 @@ function TierlistCard({
     >
       <article className="relative rounded-xl overflow-hidden border border-border/50 bg-card p-4 hover:border-border transition-colors">
         <div className="flex gap-4">
-          {posterMovies.length > 0 && (
+          {posterPaths.length > 0 && (
             <div className="flex gap-0.5 h-24 w-24 shrink-0 rounded-lg overflow-hidden bg-muted">
-              {posterMovies.map((movie, idx) => {
-                const posterUrl = getImageUrl(
-                  movie.images?.posters?.[0]?.file_path,
-                  'w92',
-                )
+              {posterPaths.map((path, idx) => {
+                const posterUrl = getImageUrl(path, 'w92')
                 return (
-                  <div key={movie.id || idx} className="flex-1 overflow-hidden">
+                  <div key={idx} className="flex-1 overflow-hidden">
                     {posterUrl ? (
                       <img
                         src={posterUrl}
-                        alt={movie.title}
+                        alt=""
                         className="w-full h-full object-cover"
                       />
                     ) : null}
@@ -325,11 +288,11 @@ function TierlistCard({
             <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Layers className="w-3 h-3" />
-                {tierlist.tiers.length}
+                {tierlist.tierCount}
               </span>
               <span className="flex items-center gap-1">
                 <Film className="w-3 h-3" />
-                {movieCount}
+                {tierlist.movieCount}
               </span>
             </div>
 
@@ -380,7 +343,7 @@ function DeleteButton({
         type: 'success',
       })
       queryClient.invalidateQueries({
-        queryKey: tierlistQueries.user(userId).queryKey,
+        queryKey: tierlistQueries.userSummary(userId).queryKey,
       })
     },
     onError: () => {
@@ -469,7 +432,7 @@ function CreateTierlistDialog({ userId }: { userId: string }) {
       })
       handleClose()
       queryClient.invalidateQueries({
-        queryKey: tierlistQueries.user(userId).queryKey,
+        queryKey: tierlistQueries.userSummary(userId).queryKey,
       })
     },
     onError: () => {
