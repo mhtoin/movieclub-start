@@ -53,7 +53,7 @@ function RouteComponent() {
   const isOwner = user?.userId === userId
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 md:pl-[72px]">
       <PageTitleBar
         title={isOwner ? 'Your Tierlists' : 'Tierlists'}
         description={

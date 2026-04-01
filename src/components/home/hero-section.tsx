@@ -89,7 +89,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
       <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background" />
 
       <div className="relative flex min-h-[100svh] flex-col justify-end pb-16">
-        <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16">
+        <div className="w-full px-6 sm:px-8 md:pl-[72px] md:pr-12 lg:pl-20 lg:pr-16">
           <motion.div
             className="mx-auto max-w-7xl px-5"
             variants={staggerContainer}

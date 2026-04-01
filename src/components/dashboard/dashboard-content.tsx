@@ -52,7 +52,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
   const { data: nextMovie } = useSuspenseQuery(dashboardQueries.nextMovie())
 
   return (
-    <div className="flex flex-col px-6 pb-12">
+    <div className="flex flex-col px-6 pb-12 md:pl-[72px] md:pr-6">
       <div className="flex flex-col gap-5 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <PageTitleBar

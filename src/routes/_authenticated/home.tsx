@@ -33,7 +33,7 @@ function Home() {
     <div className="min-h-screen w-full bg-background text-foreground pb-24 md:pb-0">
       <HeroSection movie={latestMovie.movie} />
 
-      <div className="relative">
+      <div className="relative md:pl-[72px] md:pr-12 lg:pl-20 lg:pr-16">
         <Suspense fallback={<MovieReelSkeleton />}>
           <RecommendationsSection userId={user?.userId || ''} />
         </Suspense>

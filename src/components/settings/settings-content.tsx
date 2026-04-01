@@ -16,7 +16,7 @@ export function SettingsContent() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="px-4 lg:px-8 pt-8 pb-6">
+      <div className="px-4 lg:px-8 pt-8 pb-6 md:pl-[72px]">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground mt-1">
@@ -25,7 +25,7 @@ export function SettingsContent() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto md:pl-14">
         <div className="max-w-4xl mx-auto px-4 lg:px-8 pb-8">
           <TabsRoot defaultValue="profile" variant="underlined">
             <TabsList variant="underlined" className="mb-8">

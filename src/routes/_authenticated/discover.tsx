@@ -142,7 +142,7 @@ function RouteComponent() {
           </DrawerPortal>
         </DrawerRoot>
       )}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden md:pl-14">
         <div className="h-full flex flex-col">
           {!isDesktop && (
             <div className="px-4 py-2.5 flex items-center gap-3 border-b border-border">

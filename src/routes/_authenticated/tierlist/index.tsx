@@ -55,7 +55,7 @@ function RouteComponent() {
   return (
     <div className="min-h-screen">
       <div className="relative overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pl-[72px]">
           <PageTitleBar
             title="Community Tierlists"
             description="Explore and discover how the community ranks their favorite movies."
@@ -74,7 +74,7 @@ function TierlistContent() {
   const { data: usersWithTierlists } = useSuspenseQuery(tierlistQueries.index())
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 md:pl-[72px]">
       <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
         {(usersWithTierlists as UserTierlistSummary[]).map((user) => (
           <UserTierlistCard key={user.id} user={user} />

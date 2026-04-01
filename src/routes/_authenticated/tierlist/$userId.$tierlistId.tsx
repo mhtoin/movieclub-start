@@ -404,7 +404,7 @@ function TierlistContent() {
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-2 relative overflow-hidden">
+    <div className="container mx-auto px-2 sm:px-4 py-2 relative overflow-hidden md:pl-[72px]">
       <PageTitleBar
         title={tierlist.title || 'Untitled Tierlist'}
         kicker={`${rankedTiers.length} ${

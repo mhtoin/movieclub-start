@@ -305,131 +305,135 @@ function RouteComponent() {
   const activeFiltersCount = [user, genre].filter(Boolean).length
 
   return (
-    <div className="h-full container mx-auto px-4 md:px-4 py-4 md:py-8 flex flex-col overflow-hidden">
-      <PageTitleBar
-        title="Watch History"
-        description="A timeline of all the movies watched"
-      />
-      <div className="flex-shrink-0">
-        {isMobile ? (
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search movies..."
-                value={localSearch}
-                onChange={handleSearchChange}
-                className="pl-10 h-10"
-              />
-            </div>
-            <DrawerRoot
-              direction="bottom"
-              open={filtersOpen}
-              onOpenChange={setFiltersOpen}
-              modal
-            >
-              <DrawerTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 shrink-0"
-                >
-                  <Filter className="h-4 w-4" />
-                  {activeFiltersCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
-                      {activeFiltersCount}
-                    </span>
-                  )}
-                </Button>
-              </DrawerTrigger>
-              <DrawerPortal>
-                <DrawerOverlay opacity="heavy" />
-                <DrawerContent
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="md:pl-14">
+        <div className="container mx-auto px-4 py-4 md:py-8">
+          <PageTitleBar
+            title="Watch History"
+            description="A timeline of all the movies watched"
+          />
+          <div className="flex-shrink-0">
+            {isMobile ? (
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search movies..."
+                    value={localSearch}
+                    onChange={handleSearchChange}
+                    className="pl-10 h-10"
+                  />
+                </div>
+                <DrawerRoot
                   direction="bottom"
-                  size="xl"
-                  className="rounded-t-2xl"
+                  open={filtersOpen}
+                  onOpenChange={setFiltersOpen}
+                  modal
                 >
-                  <div className="flex justify-center pt-4 pb-2">
-                    <DrawerHandle
+                  <DrawerTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 shrink-0"
+                    >
+                      <Filter className="h-4 w-4" />
+                      {activeFiltersCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
+                          {activeFiltersCount}
+                        </span>
+                      )}
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerPortal>
+                    <DrawerOverlay opacity="heavy" />
+                    <DrawerContent
                       direction="bottom"
-                      className="bg-muted-foreground/30"
-                    />
-                  </div>
-                  <div className="px-6 pb-6 overflow-y-auto">
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <DrawerTitle className="text-xl font-bold">
-                          Filters
-                        </DrawerTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Refine your watch history
-                        </p>
+                      size="xl"
+                      className="rounded-t-2xl"
+                    >
+                      <div className="flex justify-center pt-4 pb-2">
+                        <DrawerHandle
+                          direction="bottom"
+                          className="bg-muted-foreground/30"
+                        />
                       </div>
-                      <DrawerClose asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-9 w-9 rounded-full hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </DrawerClose>
-                    </div>
+                      <div className="px-6 pb-6 overflow-y-auto">
+                        <div className="flex items-center justify-between mb-6">
+                          <div>
+                            <DrawerTitle className="text-xl font-bold">
+                              Filters
+                            </DrawerTitle>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Refine your watch history
+                            </p>
+                          </div>
+                          <DrawerClose asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </DrawerClose>
+                        </div>
 
-                    <Filters
-                      variant="mobile"
-                      onFilterApply={() => setFiltersOpen(false)}
-                    />
+                        <Filters
+                          variant="mobile"
+                          onFilterApply={() => setFiltersOpen(false)}
+                        />
 
-                    {activeFiltersCount > 0 && (
-                      <div className="mt-6 pt-4 border-t border-border">
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => {
-                            navigate({
-                              search: { search: localSearch || undefined },
-                            })
-                            setFiltersOpen(false)
-                          }}
-                        >
-                          Clear all filters
-                        </Button>
+                        {activeFiltersCount > 0 && (
+                          <div className="mt-6 pt-4 border-t border-border">
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => {
+                                navigate({
+                                  search: { search: localSearch || undefined },
+                                })
+                                setFiltersOpen(false)
+                              }}
+                            >
+                              Clear all filters
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </DrawerContent>
-              </DrawerPortal>
-            </DrawerRoot>
-          </div>
-        ) : (
-          <div className="flex items-center gap-4">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search movies..."
-                value={localSearch}
-                onChange={handleSearchChange}
-                className="pl-10"
-              />
-            </div>
-            <Filters />
-          </div>
-        )}
+                    </DrawerContent>
+                  </DrawerPortal>
+                </DrawerRoot>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search movies..."
+                    value={localSearch}
+                    onChange={handleSearchChange}
+                    className="pl-10"
+                  />
+                </div>
+                <Filters />
+              </div>
+            )}
 
-        {localSearch.trim() && (
-          <div className="border-l-4 border-primary pl-4 my-4 md:my-6 ml-0 md:ml-4">
-            <h2 className="text-base md:text-lg font-semibold">
-              Search Results
-            </h2>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              Showing results for &ldquo;{localSearch}&rdquo;
-            </p>
+            {localSearch.trim() && (
+              <div className="border-l-4 border-primary pl-4 my-4 md:my-6 ml-0 md:ml-4">
+                <h2 className="text-base md:text-lg font-semibold">
+                  Search Results
+                </h2>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Showing results for &ldquo;{localSearch}&rdquo;
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
-      <div className="relative flex-1 overflow-hidden isolate">
+      <div className="relative flex-1 overflow-hidden isolate md:pl-14">
         <div className="h-full overflow-y-auto -mx-4 px-4 md:px-10 pt-2 md:pt-6 fade-mask fade-y-16 dark:fade-y-10 fade-intensity-100">
           <Suspense fallback={<WatchedSkeleton />}>
             <WatchedMoviesList

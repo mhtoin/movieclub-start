@@ -154,7 +154,7 @@ function RafflePage() {
   }
 
   return (
-    <div className="min-h-full flex flex-col px-2 sm:px-4 py-2 relative container mx-auto pb-24">
+    <div className="min-h-full flex flex-col px-2 sm:px-4 py-2 relative container mx-auto pb-24 md:pl-[72px]">
       <Link
         to="/shortlists"
         className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"

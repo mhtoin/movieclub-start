@@ -18,7 +18,7 @@ export const Route = createFileRoute('/_authenticated/shortlists')({
 
 function ShortlistsPage() {
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-2">
+    <div className="container mx-auto px-2 sm:px-4 py-2 md:pl-[72px]">
       <PageTitleBar
         title="Shortlists"
         description="See what movies your friends have shortlisted for the next raffle."
