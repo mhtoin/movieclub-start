@@ -21,7 +21,7 @@ export function FeaturedTierlist({
       params={{ userId, tierlistId: tierlist.id }}
       className="group block"
     >
-      <article className="relative rounded-2xl overflow-hidden border border-border/50 bg-card">
+      <article className="relative rounded-2xl overflow-hidden border border-border/50 bg-card hover:border-border transition-colors">
         {posterPaths.length > 0 && (
           <div className="grid grid-cols-3 md:grid-cols-6 h-48 md:h-64">
             {posterPaths.map((path, idx) => {
@@ -46,7 +46,7 @@ export function FeaturedTierlist({
         <div className="p-6 md:p-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground my-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-3 mb-2">
                 {tierlist.watchDateFrom && (
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
@@ -60,8 +60,8 @@ export function FeaturedTierlist({
                   </span>
                 )}
                 {tierlist.watchDateTo && (
-                  <>
-                    <span>—</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-border">—</span>
                     <span>
                       {new Date(tierlist.watchDateTo).toLocaleDateString(
                         'en-US',
@@ -71,13 +71,13 @@ export function FeaturedTierlist({
                         },
                       )}
                     </span>
-                  </>
+                  </span>
                 )}
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-foreground group-hover:text-primary transition-colors">
                 {tierlist.title || 'Untitled'}
               </h2>
-              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Layers className="w-4 h-4" />
                   {tierlist.tierCount} tiers
@@ -92,7 +92,7 @@ export function FeaturedTierlist({
               {isOwner && (
                 <DeleteButton tierlistId={tierlist.id} userId={userId} />
               )}
-              <div className="flex items-center gap-1 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
                 <span>View</span>
                 <ChevronRight className="w-4 h-4" />
               </div>

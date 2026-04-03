@@ -21,33 +21,37 @@ export const Route = createFileRoute('/_authenticated/tierlist/$userId/')({
 function RouteComponent() {
   const { userId } = Route.useParams()
   const { user } = Route.useRouteContext()
+  const isOwner = user?.userId === userId
 
   return (
-    <div className="container mx-auto px-4 py-6 md:pl-[72px]">
+    <div className="container mx-auto py-5 md:pl-[72px]">
       <PageTitleBar
-        title={user?.userId === userId ? 'Your Tierlists' : 'Tierlists'}
+        title={isOwner ? 'Your Tierlists' : 'Tierlists'}
         description={
-          user?.userId === userId
+          isOwner
             ? 'Manage and organize your movie rankings'
             : `Browse ${user?.name || 'this user'}'s movie rankings`
         }
-        actions={
-          user?.userId === userId && <CreateTierlistDialog userId={userId} />
-        }
+        actions={isOwner && <CreateTierlistDialog userId={userId} />}
       />
 
       <Suspense fallback={<UserTierlistsSkeleton />}>
-        <UserTierlistsContent userId={userId} />
+        <UserTierlistsContent userId={userId} isOwner={isOwner} />
       </Suspense>
     </div>
   )
 }
 
-function UserTierlistsContent({ userId }: { userId: string }) {
+function UserTierlistsContent({
+  userId,
+  isOwner,
+}: {
+  userId: string
+  isOwner: boolean
+}) {
   const { data: tierlists } = useSuspenseQuery(
     tierlistQueries.userSummary(userId),
   )
-  const isOwner = true
 
   if (tierlists.length === 0) {
     return <UserTierlistsEmptyState isOwner={isOwner} userId={userId} />
@@ -61,11 +65,11 @@ function UserTierlistsContent({ userId }: { userId: string }) {
         isOwner={isOwner}
       />
       {tierlists.length > 1 && (
-        <div className="mt-12">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
+        <div className="mt-10">
+          <h2 className="text-lg font-semibold text-foreground mb-5">
             All Tierlists
           </h2>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
             {tierlists.slice(1).map((list) => (
               <TierlistCard
                 key={list.id}

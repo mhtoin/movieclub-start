@@ -9,29 +9,29 @@ export function UserTierlistsSkeleton() {
             <Skeleton key={i} className="aspect-[2/3]" />
           ))}
         </div>
-        <div className="p-6 md:p-8 space-y-3">
-          <div className="flex items-center gap-2">
+        <div className="p-6 md:p-8">
+          <div className="flex items-center gap-2 mt-3 mb-2">
             <Skeleton className="h-3 w-20" />
             <Skeleton className="h-3 w-16" />
           </div>
           <Skeleton className="h-8 w-64" />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mt-4">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-4 w-24" />
           </div>
         </div>
       </div>
 
-      <div className="mt-12 space-y-4">
+      <div className="mt-10 space-y-5">
         <Skeleton className="h-6 w-32" />
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-xl overflow-hidden border border-border/50 bg-card p-4"
+              className="rounded-xl overflow-hidden border border-border/50 bg-card p-5"
             >
               <div className="flex gap-4">
-                <div className="flex gap-0.5 h-24 w-24 shrink-0 rounded-lg overflow-hidden">
+                <div className="flex gap-1 h-24 w-24 shrink-0 rounded-lg overflow-hidden">
                   {Array.from({ length: 4 }).map((_, j) => (
                     <Skeleton key={j} className="flex-1" />
                   ))}
@@ -41,8 +41,8 @@ export function UserTierlistsSkeleton() {
                   <Skeleton className="h-3 w-16" />
                   <Skeleton className="h-3 w-20" />
                   <div className="flex gap-1 pt-1">
-                    <Skeleton className="h-5 w-12 rounded-full" />
-                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-12 rounded" />
+                    <Skeleton className="h-5 w-16 rounded" />
                   </div>
                 </div>
               </div>

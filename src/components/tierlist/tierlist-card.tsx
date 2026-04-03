@@ -21,10 +21,10 @@ export function TierlistCard({
       params={{ userId, tierlistId: tierlist.id }}
       className="group block"
     >
-      <article className="relative rounded-xl overflow-hidden border border-border/50 bg-card p-4 hover:border-border transition-colors">
+      <article className="relative rounded-xl overflow-hidden border border-border/50 bg-card p-5 hover:border-border transition-colors">
         <div className="flex gap-4">
           {posterPaths.length > 0 && (
-            <div className="flex gap-0.5 h-24 w-24 shrink-0 rounded-lg overflow-hidden bg-muted">
+            <div className="flex gap-1 h-24 w-24 shrink-0 rounded-lg overflow-hidden bg-muted">
               {posterPaths.map((path, idx) => {
                 const posterUrl = getImageUrl(path, 'w92')
                 return (
@@ -63,7 +63,7 @@ export function TierlistCard({
                 {tierlist.genres.slice(0, 2).map((genre) => (
                   <span
                     key={genre}
-                    className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                    className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground"
                   >
                     {genre}
                   </span>
@@ -76,7 +76,7 @@ export function TierlistCard({
             {isOwner && (
               <DeleteButton tierlistId={tierlist.id} userId={userId} compact />
             )}
-            <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity" />
           </div>
         </div>
       </article>

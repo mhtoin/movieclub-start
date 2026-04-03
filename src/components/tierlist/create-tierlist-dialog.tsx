@@ -194,9 +194,10 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
               <h2 className="text-lg font-semibold">Create Tierlist</h2>
               <button
                 onClick={handleClose}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center justify-center h-9 w-9 rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
               </button>
             </div>
 
