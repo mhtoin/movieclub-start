@@ -43,6 +43,25 @@ export interface LanguageCount {
   count: number
 }
 
+export interface RatingTrendBucket {
+  month: string
+  avgRating: number
+  count: number
+}
+
+export interface GenrePair {
+  pair: string
+  count: number
+}
+
+export interface DirectorActorCollab {
+  director: string
+  actor: string
+  count: number
+  directorProfile: string | null
+  actorProfile: string | null
+}
+
 export interface MoviesByUser {
   userName: string
   userImage: string
@@ -68,6 +87,9 @@ export interface DashboardInsights {
     runtime: number
     posterPath: string | null
   }[]
+  ratingTrend: RatingTrendBucket[]
+  genrePairs: GenrePair[]
+  directorActorCollabs: DirectorActorCollab[]
 }
 
 export interface NextMovieToWatch {
@@ -428,6 +450,80 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
         }
       })
 
+      // Rating trend - average rating by month
+      const ratingByMonth = new Map<string, { total: number; count: number }>()
+      watchedMovies.forEach((m) => {
+        if (m.releaseDate) {
+          const month = m.releaseDate.substring(0, 7)
+          const existing = ratingByMonth.get(month) || { total: 0, count: 0 }
+          ratingByMonth.set(month, {
+            total: existing.total + m.voteAverage,
+            count: existing.count + 1,
+          })
+        }
+      })
+      const ratingTrend = Array.from(ratingByMonth.entries())
+        .map(([month, { total, count }]) => ({
+          month,
+          avgRating: Number((total / count).toFixed(1)),
+          count,
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month))
+        .slice(-12)
+
+      // Genre pairs - all 2-genre combinations
+      const genrePairMap = new Map<string, number>()
+      watchedMovies.forEach((m) => {
+        if (m.genres && m.genres.length >= 2) {
+          const sortedGenres = [...m.genres].sort()
+          for (let i = 0; i < sortedGenres.length - 1; i++) {
+            for (let j = i + 1; j < sortedGenres.length; j++) {
+              const pair = `${sortedGenres[i]} + ${sortedGenres[j]}`
+              genrePairMap.set(pair, (genrePairMap.get(pair) || 0) + 1)
+            }
+          }
+        }
+      })
+      const genrePairs = Array.from(genrePairMap.entries())
+        .map(([pair, count]) => ({ pair, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+
+      // Director-actor collaborations
+      const collabMap = new Map<
+        string,
+        {
+          count: number
+          directorProfile: string | null
+          actorProfile: string | null
+        }
+      >()
+      watchedMovies.forEach((m) => {
+        if (Array.isArray(m.crew) && Array.isArray(m.cast)) {
+          const directors = m.crew.filter((c: any) => c.job === 'Director')
+          const topCastMembers = m.cast.slice(0, 5)
+          directors.forEach((d: any) => {
+            topCastMembers.forEach((c: any) => {
+              const key = `${d.name}|||${c.name}`
+              const existing = collabMap.get(key)
+              collabMap.set(key, {
+                count: (existing?.count || 0) + 1,
+                directorProfile: d.profile_path || null,
+                actorProfile: c.profile_path || null,
+              })
+            })
+          })
+        }
+      })
+      const directorActorCollabs = Array.from(collabMap.entries())
+        .map(([key, { count, directorProfile, actorProfile }]) => {
+          const [director, actor] = key.split('|||')
+          return { director, actor, count, directorProfile, actorProfile }
+        })
+        .filter((c) => c.count >= 2)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+
       return {
         genreDistribution,
         ratingDistribution,
@@ -438,6 +534,9 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
         moviesByUser,
         highestRated,
         longestMovies,
+        ratingTrend,
+        genrePairs,
+        directorActorCollabs,
       }
     } catch (error) {
       console.error('Error fetching dashboard insights:', error)
@@ -451,6 +550,9 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
         moviesByUser: [],
         highestRated: [],
         longestMovies: [],
+        ratingTrend: [],
+        genrePairs: [],
+        directorActorCollabs: [],
       }
     }
   })

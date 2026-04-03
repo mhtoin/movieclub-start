@@ -1,8 +1,10 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Flame, Lightbulb, Timer, TrendingUp, Users } from 'lucide-react'
 import type { FilterScope } from '@/components/dashboard/scope-toggle'
+import { DashboardChart } from '@/components/dashboard/dashboard-chart'
+import { DashboardSection } from '@/components/dashboard/dashboard-section'
 import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 import { getImageUrl } from '@/lib/tmdb-api'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Flame, Lightbulb, Timer, Users } from 'lucide-react'
 
 interface OverviewInsightsProps {
   userId: string
@@ -16,6 +18,7 @@ export function OverviewInsights({ userId, scope }: OverviewInsightsProps) {
   )
 
   const topGenres = insights.genreDistribution.slice(0, 6)
+  const topUsers = insights.moviesByUser.slice(0, 6)
   const topMovie = insights.highestRated[0]
   const totalMovies = insights.ratingDistribution.reduce(
     (sum, r) => sum + r.count,
@@ -33,6 +36,7 @@ export function OverviewInsights({ userId, scope }: OverviewInsightsProps) {
   const ratingPercent =
     totalMovies > 0 ? Math.round((highRatings / totalMovies) * 100) : 0
   const maxGenreCount = topGenres[0]?.count || 1
+  const maxUserCount = topUsers[0]?.count || 1
 
   if (totalMovies === 0) {
     return null
@@ -40,6 +44,55 @@ export function OverviewInsights({ userId, scope }: OverviewInsightsProps) {
 
   return (
     <div className="space-y-8">
+      {!isMine && topUsers.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
+            Movies by User
+          </p>
+          <div className="space-y-2">
+            {topUsers.map((user, i) => (
+              <div key={user.userName} className="flex items-center gap-3">
+                <span className="text-sm w-28 truncate text-muted-foreground">
+                  {user.userName}
+                </span>
+                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${(user.count / maxUserCount) * 100}%`,
+                      backgroundColor: `oklch(0.67 0.14 ${i * 30 + 30})`,
+                    }}
+                  />
+                </div>
+                <span className="text-xs font-medium w-8 text-right">
+                  {user.count}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {insights.ratingTrend.length > 1 && (
+        <DashboardSection
+          title="Rating Trend"
+          icon={TrendingUp}
+          description="Average rating over time"
+        >
+          <DashboardChart
+            type="area"
+            data={insights.ratingTrend}
+            categoryKey="month"
+            valueKey="avgRating"
+            xAxisLabel="Month"
+            yAxisLabel="Avg Rating"
+            valueSuffix=""
+            height={200}
+            emptyMessage="Not enough data"
+          />
+        </DashboardSection>
+      )}
+
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
           Top Genres

@@ -9,7 +9,7 @@ import {
 import { useInsights } from '@/components/dashboard/use-insights'
 import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { BarChart3, Clock, Star, Trophy, Users } from 'lucide-react'
+import { BarChart3, Clock, GitFork, Star, Trophy, Users } from 'lucide-react'
 
 export function GenresTabContent({
   userId,
@@ -57,6 +57,28 @@ export function GenresTabContent({
           <HighestRatedList data={insights.highestRated} />
         </DashboardSection>
       </div>
+
+      {insights.genrePairs.length > 0 && (
+        <DashboardSection
+          title="Genre Combinations"
+          icon={GitFork}
+          description="Most frequent 2-genre pairings"
+        >
+          <DashboardChart
+            type="horizontal-bar"
+            data={insights.genrePairs}
+            categoryKey="pair"
+            valueKey="count"
+            xAxisLabel="Movies"
+            valueSuffix=" movies"
+            height="auto"
+            emptyMessage="No genre combinations yet"
+            barGap={5}
+            maxBarSize={24}
+            barCategoryGap="20%"
+          />
+        </DashboardSection>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DashboardSection
