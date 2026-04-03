@@ -1,8 +1,8 @@
 import { Select as BaseSelect } from '@base-ui/react/select'
-import {  cva } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 import { Check, ChevronDown } from 'lucide-react'
 import * as React from 'react'
-import type {VariantProps} from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const selectTriggerVariants = cva(
@@ -61,7 +61,9 @@ interface SelectTriggerProps
 
 interface SelectPopupProps
   extends React.ComponentProps<typeof BaseSelect.Popup>,
-    VariantProps<typeof selectPopupVariants> {}
+    VariantProps<typeof selectPopupVariants> {
+  positionerClassName?: string
+}
 
 interface SelectItemProps
   extends React.ComponentProps<typeof BaseSelect.Item>,
@@ -110,12 +112,12 @@ SelectTrigger.displayName = 'SelectTrigger'
 const SelectPopup = React.forwardRef<
   React.ComponentRef<typeof BaseSelect.Popup>,
   SelectPopupProps
->(({ className, size, children, ...props }, ref) => (
+>(({ className, size, positionerClassName, children, ...props }, ref) => (
   <BaseSelect.Portal>
     <BaseSelect.Positioner
       sideOffset={4}
       alignItemWithTrigger={false}
-      className="z-50"
+      className={cn('z-50', positionerClassName)}
     >
       <BaseSelect.Popup
         ref={ref}

@@ -5,6 +5,7 @@ import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import {
   and,
+  asc,
   count,
   countDistinct,
   desc,
@@ -429,41 +430,41 @@ export const getUserTierlistsSummary = createServerFn({ method: 'GET' })
 
       const tierlistIds = userTierlists.map((t) => t.id)
 
-      const [tierCountsResult, posterRows] = await Promise.all([
-        db
-          .select({
-            tierlistId: tier.tierlistId,
-            count: count(tier.id),
-          })
-          .from(tier)
-          .where(inArray(tier.tierlistId, tierlistIds))
-          .groupBy(tier.tierlistId),
-        db
-          .select({
-            tierlistId: tierlist.id,
-            images: movie.images,
-          })
-          .from(moviesOnTiers)
-          .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
-          .innerJoin(tierlist, dbEq(tier.tierlistId, tierlist.id))
-          .innerJoin(movie, dbEq(moviesOnTiers.movieId, movie.id))
-          .where(inArray(tierlist.id, tierlistIds))
-          .orderBy(tierlist.id, moviesOnTiers.position),
-      ])
+      const [tierCountsResult, posterRows, movieCountResult] =
+        await Promise.all([
+          db
+            .select({
+              tierlistId: tier.tierlistId,
+              count: count(tier.id),
+            })
+            .from(tier)
+            .where(inArray(tier.tierlistId, tierlistIds))
+            .groupBy(tier.tierlistId),
+          db
+            .select({
+              tierlistId: tierlist.id,
+              images: movie.images,
+            })
+            .from(moviesOnTiers)
+            .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
+            .innerJoin(tierlist, dbEq(tier.tierlistId, tierlist.id))
+            .innerJoin(movie, dbEq(moviesOnTiers.movieId, movie.id))
+            .where(inArray(tierlist.id, tierlistIds))
+            .orderBy(tierlist.id, asc(tier.value), moviesOnTiers.position),
+          db
+            .select({
+              tierlistId: tier.tierlistId,
+              count: count(moviesOnTiers.id),
+            })
+            .from(moviesOnTiers)
+            .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
+            .where(inArray(tier.tierlistId, tierlistIds))
+            .groupBy(tier.tierlistId),
+        ])
 
       const tierCountMap = new Map<string, number>(
         tierCountsResult.map((r) => [r.tierlistId, r.count]),
       )
-
-      const movieCountResult = await db
-        .select({
-          tierlistId: tier.tierlistId,
-          count: count(moviesOnTiers.id),
-        })
-        .from(moviesOnTiers)
-        .innerJoin(tier, dbEq(moviesOnTiers.tierId, tier.id))
-        .where(inArray(tier.tierlistId, tierlistIds))
-        .groupBy(tier.tierlistId)
 
       const movieCountMap = new Map<string, number>(
         movieCountResult.map((r) => [r.tierlistId, r.count]),
