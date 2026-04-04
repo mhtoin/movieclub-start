@@ -4,6 +4,8 @@ interface AvatarProps {
   name: string
   size?: number
   className?: string
+  loading?: 'lazy' | 'eager'
+  decoding?: 'sync' | 'async' | 'auto'
 }
 
 export default function Avatar({
@@ -12,6 +14,8 @@ export default function Avatar({
   name,
   size = 32,
   className = '',
+  loading,
+  decoding,
 }: AvatarProps) {
   const initials = name
     .split(' ')
@@ -44,6 +48,8 @@ export default function Avatar({
           width: '100%',
           height: '100%',
         }}
+        loading={loading}
+        decoding={decoding}
         onError={(e) => {
           // Hide the image on error to reveal the fallback
           e.currentTarget.style.display = 'none'

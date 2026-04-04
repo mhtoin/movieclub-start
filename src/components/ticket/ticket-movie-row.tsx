@@ -34,8 +34,8 @@ export function TicketMovieRow({
     : null
 
   const baseClass = interactive
-    ? 'flex items-center gap-3 p-2 rounded-md border border-transparent hover:translate-x-1 transition-all duration-200 cursor-pointer group bg-[var(--ticket-movie-bg)] hover:bg-[var(--ticket-movie-bg-hover)] hover:border-[var(--ticket-movie-border-hover)]'
-    : 'flex items-center gap-3 p-2 rounded-md bg-[var(--ticket-movie-bg)]'
+    ? 'flex items-center gap-3 p-2 rounded-md border border-transparent hover:translate-x-1 transition-all duration-200 cursor-pointer group bg-muted/50 hover:bg-muted hover:border-border'
+    : 'flex items-center gap-3 p-2 rounded-md bg-muted/50'
 
   const selectedClass =
     showSelection && isSelected
@@ -77,7 +77,7 @@ export function TicketMovieRow({
         </button>
       )}
       <div
-        className={`relative flex-shrink-0 w-10 h-14 rounded-sm overflow-hidden bg-[var(--ticket-poster-bg)] ${showSelection ? 'ml-7' : ''}`}
+        className={`relative flex-shrink-0 w-10 h-14 rounded-sm overflow-hidden bg-muted ${showSelection ? 'ml-7' : ''}`}
       >
         {posterImage ? (
           <img
@@ -99,14 +99,14 @@ export function TicketMovieRow({
         <div className="absolute inset-0 rounded-sm shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] pointer-events-none" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm whitespace-nowrap overflow-hidden text-ellipsis mb-0.5 tracking-wide uppercase font-[var(--font-cinema)] text-[var(--ticket-title)]">
+        <p className="text-sm whitespace-nowrap overflow-hidden text-ellipsis mb-0.5 font-medium text-foreground">
           {movie.title}
         </p>
-        <div className="flex items-center gap-2 text-[11px] text-[var(--ticket-meta)]">
+        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
           {year && <span>{year}</span>}
           {runtime && <span>{runtime}</span>}
           {rating !== null && (
-            <span className="flex items-center gap-0.5 font-medium text-[var(--ticket-rating)]">
+            <span className="flex items-center gap-0.5 font-medium text-warning">
               <Star className="w-3 h-3 fill-current" />
               {rating.toFixed(1)}
             </span>
