@@ -17,22 +17,22 @@ export function DialogHeader({
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-4 top-4 z-10 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+        className="absolute right-3 top-3 z-10 h-9 w-9 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 hover:text-white transition-all border border-white/10"
         onClick={onClose}
       >
-        <X className="h-5 w-5" />
+        <X className="h-4 w-4" />
       </Button>
       {backdropUrl ? (
-        <div className="relative h-56 w-full overflow-hidden flex-shrink-0">
+        <div className="relative h-44 w-full overflow-hidden flex-shrink-0">
           <img
             src={backdropUrl}
             alt={movieTitle}
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-dialog-background via-dialog-background/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-dialog-background via-dialog-background/70 to-dialog-background/30" />
         </div>
       ) : (
-        <div className="h-1 w-full shrink-0 bg-gradient-to-r from-primary/30 via-primary/10 to-transparent" />
+        <div className="h-2 w-full shrink-0 bg-gradient-to-r from-primary/20 via-primary/5 to-transparent" />
       )}
     </>
   )

@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatedPoster } from '../discover/animated-poster'
 import { useDialogAnimation } from '../discover/use-dialog-animation'
+import { X } from 'lucide-react'
 
 interface MovieDetailsDialogProps {
   movie: any
@@ -48,11 +49,11 @@ export function MovieDetailsDialog({
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
-      width: '90vw',
-      maxWidth: '48rem',
-      maxHeight: '90vh',
+      width: '92vw',
+      maxWidth: '52rem',
+      maxHeight: '86vh',
       zIndex: 110,
-      borderRadius: '0.5rem',
+      borderRadius: '0.75rem',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
@@ -69,14 +70,17 @@ export function MovieDetailsDialog({
     return {
       ...baseStyle,
       opacity: 1,
-      transition: 'opacity 0.5s ease-out 0.2s',
+      transition: 'opacity 0.5s ease-out 0.15s',
     }
   }
+
+  const posterWidth = 160
+  const contentGap = 28
 
   return createPortal(
     <>
       <div
-        className="fixed inset-0 bg-black/80 z-[100]"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
         style={backdropStyle}
         onClick={handleBackdropClick}
       />
@@ -93,107 +97,112 @@ export function MovieDetailsDialog({
         className="bg-dialog-background text-foreground border border-dialog-border shadow-2xl"
         style={getContainerStyle()}
       >
-        <div className="relative h-64 flex-shrink-0">
-          {backdropImage ? (
+        {backdropImage ? (
+          <div className="relative h-56 w-full overflow-hidden flex-shrink-0">
             <img
               src={backdropImage.src}
               srcSet={backdropImage.srcSet}
-              sizes="(min-width: 1024px) 48rem, 90vw"
+              sizes="(min-width: 1024px) 52rem, 92vw"
               alt={movie.title}
               className="w-full h-full object-cover"
               decoding="async"
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-dialog-background via-dialog-background/60 to-transparent" />
-          <button
-            onClick={handleClose}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors z-10"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-dialog-background via-dialog-background/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-dialog-background/50 via-transparent to-dialog-background/30" />
+            <button
+              onClick={handleClose}
+              className="absolute top-3 right-3 h-9 w-9 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 hover:text-white transition-all border border-white/10 flex items-center justify-center z-10"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="h-1 w-full shrink-0 bg-gradient-to-r from-primary/30 via-primary/10 to-transparent" />
+        )}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="p-6">
-            <div className="flex gap-6">
-              {posterImage && (
-                <div className="flex-shrink-0 w-48 invisible">
-                  <div className="aspect-[2/3]" />
-                </div>
-              )}
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h2 className="text-3xl font-bold mb-2">{movie.title}</h2>
-                  {movie.originalTitle !== movie.title && (
-                    <p className="text-muted-foreground italic mb-2">
-                      {movie.originalTitle}
-                    </p>
-                  )}
-                  {movie.tagline && (
-                    <p className="text-lg text-muted-foreground italic">
-                      "{movie.tagline}"
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  {movie.releaseDate && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">📅</span>
-                      <span>
-                        {new Date(movie.releaseDate).toLocaleDateString(
-                          'en-US',
-                          {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          },
-                        )}
-                      </span>
-                    </div>
-                  )}
-                  {movie.runtime && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">⏱️</span>
-                      <span>{movie.runtime} min</span>
-                    </div>
-                  )}
-                  {movie.voteAverage > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">⭐</span>
-                      <span>
-                        {movie.voteAverage.toFixed(1)} / 10
-                        {movie.voteCount > 0 && (
-                          <span className="text-muted-foreground ml-1">
-                            ({movie.voteCount.toLocaleString()} votes)
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                {movie.genres && movie.genres.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {movie.genres.map((genre: string) => (
-                      <span
-                        key={genre}
-                        className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
-                      >
-                        {genre}
-                      </span>
-                    ))}
+          <div className="flex gap-7 p-8">
+            <div
+              className="flex-shrink-0"
+              style={{ width: posterWidth, visibility: 'hidden' }}
+            >
+              <div className="aspect-[2/3] rounded-lg" />
+            </div>
+            <div
+              className="flex-1 min-w-0 space-y-5"
+              style={{ maxWidth: `calc(100% - ${posterWidth + contentGap}px)` }}
+            >
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight leading-tight">
+                  {movie.title}
+                </h2>
+                {movie.originalTitle !== movie.title && (
+                  <p className="text-sm text-muted-foreground mt-0.5 italic">
+                    {movie.originalTitle}
+                  </p>
+                )}
+                {movie.tagline && (
+                  <p className="text-base text-muted-foreground/70 italic mt-1.5">
+                    "{movie.tagline}"
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+                {movie.releaseDate && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Released</span>
+                    <span className="font-medium">
+                      {new Date(movie.releaseDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </span>
                   </div>
                 )}
-                {movie.overview && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Overview</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {movie.overview}
-                    </p>
+                {movie.runtime && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Runtime</span>
+                    <span className="font-medium">{movie.runtime} min</span>
+                  </div>
+                )}
+                {movie.voteAverage > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-yellow-500/90">★</span>
+                    <span className="font-semibold">
+                      {movie.voteAverage.toFixed(1)}
+                    </span>
+                    <span className="text-muted-foreground/60 text-xs">
+                      ({movie.voteCount.toLocaleString()})
+                    </span>
                   </div>
                 )}
               </div>
+              {movie.genres && movie.genres.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {movie.genres.slice(0, 4).map((genre: string) => (
+                    <span
+                      key={genre}
+                      className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                  {movie.genres.length > 4 && (
+                    <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground">
+                      +{movie.genres.length - 4}
+                    </span>
+                  )}
+                </div>
+              )}
+              {movie.overview && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-1.5">Overview</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {movie.overview}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -19,20 +19,20 @@ export function MovieMetadata({
   isLoading,
 }: MovieMetadataProps) {
   return (
-    <div className="flex items-center justify-between gap-4 text-sm">
-      <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+      <div className="flex items-center gap-5">
         {releaseDate && (
           <div className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4 text-muted-foreground/60" />
+            <Calendar className="h-3.5 w-3.5 text-muted-foreground/60" />
             <span className="text-muted-foreground/80">
               {new Date(releaseDate).getFullYear()}
             </span>
           </div>
         )}
         <div className="flex items-center gap-1.5">
-          <Star className="h-4 w-4 text-yellow-500/80" />
-          <span className="font-medium">{voteAverage.toFixed(1)}</span>
-          <span className="text-muted-foreground/50 text-xs">
+          <Star className="h-3.5 w-3.5 text-yellow-500/90" />
+          <span className="font-semibold">{voteAverage.toFixed(1)}</span>
+          <span className="text-muted-foreground/60 text-xs">
             ({voteCount.toLocaleString()})
           </span>
         </div>

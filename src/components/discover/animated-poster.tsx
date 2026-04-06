@@ -28,13 +28,15 @@ export function AnimatedPoster({
       }
     }
 
-    const dialogWidth = Math.min(window.innerWidth * 0.9, 768)
-    const contentPadding = 24
-    const finalImageWidth = 192
+    const dialogWidth = Math.min(window.innerWidth * 0.92, 832)
+    const contentPadding = 32
+    const finalImageWidth = 160
+    const dialogTop =
+      (window.innerHeight - Math.min(window.innerHeight * 0.86, 576)) / 2
 
     const dialogLeft = (window.innerWidth - dialogWidth) / 2
     const imageLeft = dialogLeft + contentPadding
-    const imageTop = (window.innerHeight - 600) / 2 + 264 + contentPadding
+    const imageTop = dialogTop + 180
 
     if (!showImage) {
       return {
@@ -44,7 +46,7 @@ export function AnimatedPoster({
         width: `${triggerRect.width}px`,
         height: `${triggerRect.height}px`,
         zIndex: 200,
-        borderRadius: '0.5rem',
+        borderRadius: '0.75rem',
         opacity: 0,
         transition: 'none',
       }
@@ -58,7 +60,7 @@ export function AnimatedPoster({
         width: `${triggerRect.width}px`,
         height: `${triggerRect.height}px`,
         zIndex: 200,
-        borderRadius: '0.5rem',
+        borderRadius: '0.75rem',
         opacity: 1,
         transition: 'opacity 0.15s ease-in',
       }
@@ -72,9 +74,9 @@ export function AnimatedPoster({
         width: `${triggerRect.width}px`,
         height: `${triggerRect.height}px`,
         zIndex: 200,
-        borderRadius: '0.5rem',
+        borderRadius: '0.75rem',
         opacity: 0,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 1, 1)',
+        transition: 'all 0.35s cubic-bezier(0.4, 0, 1, 1)',
         boxShadow: 'none',
       }
     }
@@ -86,11 +88,11 @@ export function AnimatedPoster({
       width: `${finalImageWidth}px`,
       height: 'auto',
       zIndex: 200,
-      borderRadius: '0.5rem',
+      borderRadius: '0.75rem',
       opacity: 1,
-      transition: 'all 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
+      transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
       boxShadow:
-        '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+        '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1), 0 0 0 1px rgb(255 255 255 / 0.05)',
     }
   }
 

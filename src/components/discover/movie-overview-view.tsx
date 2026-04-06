@@ -39,27 +39,46 @@ export function MovieOverviewView({
 
   return (
     <>
-      {!compact && (
+      <div className="space-y-4">
         <div>
-          <h2 className="text-3xl font-bold">{title}</h2>
+          <h2 className="text-2xl font-bold tracking-tight leading-tight">
+            {title}
+          </h2>
           {originalTitle !== title && (
-            <p className="text-sm text-muted-foreground">{originalTitle}</p>
+            <p className="text-sm text-muted-foreground mt-0.5 italic">
+              {originalTitle}
+            </p>
           )}
         </div>
-      )}
 
-      <MovieMetadata
-        releaseDate={releaseDate}
-        voteAverage={voteAverage}
-        voteCount={voteCount}
-        imdbId={movieDetails?.imdb_id}
-        tmdbId={movieDetails?.id}
-        isLoading={isLoading}
-      />
+        <MovieMetadata
+          releaseDate={releaseDate}
+          voteAverage={voteAverage}
+          voteCount={voteCount}
+          imdbId={movieDetails?.imdb_id}
+          tmdbId={movieDetails?.id}
+          isLoading={isLoading}
+        />
 
-      {overview && (
-        <div>
-          <h3 className="mb-2 font-semibold">Overview</h3>
+        {movieDetails?.genres && movieDetails.genres.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {movieDetails.genres.slice(0, 4).map((genre) => (
+              <span
+                key={genre.id}
+                className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground"
+              >
+                {genre.name}
+              </span>
+            ))}
+            {movieDetails.genres.length > 4 && (
+              <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground">
+                +{movieDetails.genres.length - 4}
+              </span>
+            )}
+          </div>
+        )}
+
+        {overview && (
           <div>
             <p
               className={`text-sm leading-relaxed text-muted-foreground ${
@@ -71,44 +90,46 @@ export function MovieOverviewView({
             {overview.length > 200 && (
               <button
                 onClick={() => setShowFullOverview(!showFullOverview)}
-                className="text-xs text-primary hover:underline mt-1"
+                className="text-xs text-primary hover:underline mt-1.5"
               >
                 {showFullOverview ? 'Show less' : 'Read more'}
               </button>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {isLoading ? (
-        <div>
-          <Skeleton className="h-5 w-28 mb-2" />
-          <div className="flex flex-wrap gap-2">
-            <Skeleton className="h-10 w-36" />
-            <Skeleton className="h-10 w-36" />
+        {isLoading ? (
+          <div>
+            <Skeleton className="h-5 w-28 mb-2" />
+            <div className="flex flex-wrap gap-2">
+              <Skeleton className="h-10 w-36" />
+              <Skeleton className="h-10 w-36" />
+            </div>
           </div>
-        </div>
-      ) : movieDetails?.['watch/providers'] ? (
-        <WatchProvidersList watchProviders={movieDetails['watch/providers']} />
-      ) : null}
+        ) : movieDetails?.['watch/providers'] ? (
+          <WatchProvidersList
+            watchProviders={movieDetails['watch/providers']}
+          />
+        ) : null}
 
-      <div className={`flex gap-3 pt-4 ${compact ? 'flex-col' : ''}`}>
-        <Button
-          className={`gap-2 ${compact ? 'w-full' : 'flex-1'}`}
-          variant={'primary'}
-          loading={isPending}
-          onClick={onAddToShortlist}
-        >
-          <Plus className="h-4 w-4" />
-          Add to Shortlist
-        </Button>
-        <Button
-          variant={compact ? 'secondary' : 'ghost'}
-          onClick={onShowMoreInfo}
-          className={compact ? 'w-full' : 'text-muted-foreground'}
-        >
-          More Info
-        </Button>
+        <div className={`flex gap-2.5 pt-3 ${compact ? 'flex-col' : ''}`}>
+          <Button
+            className={`gap-2 ${compact ? 'w-full' : 'flex-1'}`}
+            variant={'primary'}
+            loading={isPending}
+            onClick={onAddToShortlist}
+          >
+            <Plus className="h-4 w-4" />
+            Add to Shortlist
+          </Button>
+          <Button
+            variant={compact ? 'secondary' : 'ghost'}
+            onClick={onShowMoreInfo}
+            className={compact ? 'w-full' : 'text-muted-foreground'}
+          >
+            More Info
+          </Button>
+        </div>
       </div>
     </>
   )

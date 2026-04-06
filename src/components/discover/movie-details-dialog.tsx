@@ -1,9 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatedPoster } from './animated-poster'
-import { DialogHeader } from './dialog-header'
 import { MovieDetailsView } from './movie-details-view'
 import { MovieOverviewView } from './movie-overview-view'
 import { useDialogAnimation } from './use-dialog-animation'
@@ -20,6 +18,7 @@ import {
   DrawerPortal,
   DrawerRoot,
 } from '@/components/ui/drawer'
+import { X } from 'lucide-react'
 
 interface MovieDetailsDialogProps {
   movie: Movie | null
@@ -44,7 +43,6 @@ export function MovieDetailsDialog({
   const posterUrl = movie ? getImageUrl(movie.poster_path, 'w500') : null
   const backdropUrl = movie ? getImageUrl(movie.backdrop_path, 'w1280') : null
 
-  // Fetch detailed movie information including watch providers and external IDs
   const { data: movieDetails, isLoading } = useQuery({
     ...tmdbQueries.movieDetails(movie?.id ?? 0),
     enabled: open && !!movie,
@@ -72,7 +70,6 @@ export function MovieDetailsDialog({
     setTimeout(() => {
       setCurrentView(view)
       setIsTransitioning(false)
-      // Scroll to top when changing views
       if (containerRef.current) {
         const scrollContainer =
           containerRef.current.querySelector('.overflow-y-auto')
@@ -183,11 +180,11 @@ export function MovieDetailsDialog({
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
-      width: '90vw',
-      maxWidth: '48rem',
-      height: '90vh',
+      width: '92vw',
+      maxWidth: '52rem',
+      maxHeight: '86vh',
       zIndex: 110,
-      borderRadius: '0.5rem',
+      borderRadius: '0.75rem',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
@@ -204,14 +201,21 @@ export function MovieDetailsDialog({
     return {
       ...baseStyle,
       opacity: 1,
-      transition: 'opacity 0.5s ease-out 0.2s',
+      transition: 'opacity 0.5s ease-out 0.15s',
     }
   }
+
+  const contentPadding = 32
+  const dialogWidth = Math.min(window.innerWidth * 0.92, 832)
+  const posterWidth = 160
+  const contentGap = 28
+  const contentWidth =
+    dialogWidth - contentPadding * 2 - posterWidth - contentGap
 
   return createPortal(
     <>
       <div
-        className="fixed inset-0 bg-black/80 z-[100]"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
         style={backdropStyle}
         onClick={handleBackdropClick}
       />
@@ -225,28 +229,50 @@ export function MovieDetailsDialog({
       />
       <div
         ref={containerRef}
-        className="bg-dialog-background text-foreground border border-dialog-border shadow-xl max-h-[90vh] 2xl:max-h-[55vh]"
+        className="bg-dialog-background text-foreground border border-dialog-border shadow-2xl"
         style={getContainerStyle()}
       >
-        <DialogHeader
-          backdropUrl={backdropUrl}
-          movieTitle={movie.title}
-          onClose={handleClose}
-        />
+        {backdropUrl && (
+          <div className="relative h-56 w-full overflow-hidden flex-shrink-0">
+            <img
+              src={backdropUrl}
+              alt={movie.title}
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-dialog-background via-dialog-background/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-dialog-background/50 via-transparent to-dialog-background/30" />
+            <button
+              onClick={handleClose}
+              className="absolute top-3 right-3 h-9 w-9 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 hover:text-white transition-all border border-white/10 flex items-center justify-center z-10"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        {!backdropUrl && (
+          <div className="h-1 w-full shrink-0 bg-gradient-to-r from-primary/30 via-primary/10 to-transparent" />
+        )}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="p-6">
-            <div className="flex gap-6">
-              {posterUrl && (
-                <div className="flex-shrink-0 w-48 invisible">
-                  <div className="aspect-[2/3]" />
-                </div>
-              )}
+          <div className="flex gap-7 p-8">
+            <div
+              className="flex-shrink-0"
+              style={{
+                width: posterWidth,
+                visibility: mounted && showImage ? 'hidden' : 'hidden',
+              }}
+            >
+              <div className="aspect-[2/3] rounded-lg" />
+            </div>
+            <div
+              className="flex-1 min-w-0 space-y-5"
+              style={{ width: contentWidth, maxWidth: 'calc(100% - 188px)' }}
+            >
               <div
-                className="flex-1 space-y-4 pl-4 border-l-2 border-primary/20"
                 style={{
                   opacity: isTransitioning ? 0 : 1,
                   transform: isTransitioning
-                    ? 'translateX(20px)'
+                    ? 'translateX(12px)'
                     : 'translateX(0)',
                   transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
                 }}
