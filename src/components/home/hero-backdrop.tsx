@@ -35,7 +35,7 @@ export function HeroBackdrop({ backdropUrl, title }: HeroBackdropProps) {
 
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_0%,var(--background)_70%)]" />
+      <div className="absolute inset-0 hero-vignette" />
     </>
   )
 }

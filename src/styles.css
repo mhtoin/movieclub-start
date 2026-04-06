@@ -53,7 +53,7 @@
   --foreground: oklch(0.2101 0.0318 264.6645);
   --dialog-background: oklch(0.99 0 0);
   --dialog-border: oklch(0.85 0.01 240);
-  --dialog-shadow: oklch(0.2 0.1 240 / 0.15);
+  --dialog-shadow: oklch(0.2 0.04 240 / 0.08);
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.2101 0.0318 264.6645);
@@ -148,7 +148,7 @@
   --foreground: oklch(0.25 0.04 240);
   --dialog-background: oklch(0.99 0.005 220);
   --dialog-border: oklch(0.88 0.03 220);
-  --dialog-shadow: oklch(0.2 0.08 220 / 0.15);
+  --dialog-shadow: oklch(0.2 0.04 220 / 0.08);
 
   --card: oklch(0.995 0.005 220);
   --card-foreground: oklch(0.25 0.04 240);
@@ -232,7 +232,7 @@
   --foreground: oklch(0.25 0.02 30);
   --dialog-background: oklch(0.99 0.002 50);
   --dialog-border: oklch(0.88 0.015 40);
-  --dialog-shadow: oklch(0.2 0.08 30 / 0.15);
+  --dialog-shadow: oklch(0.2 0.04 30 / 0.08);
 
   --card: oklch(0.995 0.003 50);
   --card-foreground: oklch(0.25 0.02 30);
@@ -316,7 +316,7 @@
   --foreground: oklch(0.25 0.02 150);
   --dialog-background: oklch(0.99 0.002 145);
   --dialog-border: oklch(0.88 0.015 145);
-  --dialog-shadow: oklch(0.2 0.08 145 / 0.15);
+  --dialog-shadow: oklch(0.2 0.04 145 / 0.08);
 
   --card: oklch(0.995 0.003 145);
   --card-foreground: oklch(0.25 0.02 150);
@@ -400,7 +400,7 @@
   --foreground: oklch(0.25 0.02 340);
   --dialog-background: oklch(0.99 0.002 340);
   --dialog-border: oklch(0.88 0.015 340);
-  --dialog-shadow: oklch(0.2 0.08 340 / 0.15);
+  --dialog-shadow: oklch(0.2 0.04 340 / 0.08);
 
   --card: oklch(0.995 0.003 340);
   --card-foreground: oklch(0.25 0.02 340);
@@ -649,7 +649,7 @@
   --icon: oklch(0.62 0.08 220);
   --dialog-background: oklch(1 0 0);
   --dialog-border: oklch(0.88 0.01 260);
-  --dialog-shadow: oklch(0.15 0.08 260 / 0.1);
+  --dialog-shadow: oklch(0.15 0.04 260 / 0.06);
 }
 
 .scheme-teal.dark {
@@ -1056,6 +1056,42 @@
       0 0 120px rgba(var(--primary-rgb, 234, 179, 8), 0.4),
       0 0 180px rgba(var(--primary-rgb, 234, 179, 8), 0.2),
       inset 0 0 80px rgba(var(--primary-rgb, 234, 179, 8), 0.3);
+  }
+
+  :is(.light) .spotlight-glow {
+    box-shadow:
+      0 0 60px rgba(var(--primary-rgb, 234, 179, 8), 0.2),
+      0 0 120px rgba(var(--primary-rgb, 234, 179, 8), 0.12),
+      0 0 180px rgba(var(--primary-rgb, 234, 179, 8), 0.06),
+      inset 0 0 80px rgba(var(--primary-rgb, 234, 179, 8), 0.1);
+  }
+
+  .hero-vignette {
+    background: radial-gradient(
+      ellipse at top right,
+      transparent 0%,
+      var(--background) 70%
+    );
+  }
+
+  :is(.light) .hero-vignette {
+    background: radial-gradient(
+      ellipse at top right,
+      transparent 0%,
+      color-mix(in oklch, var(--background) 50%, transparent) 70%
+    );
+  }
+
+  :is(.light) .shadow-primary\/30 {
+    --tw-shadow-color: color-mix(in oklch, var(--primary) 15%, transparent);
+  }
+
+  :is(.light) .shadow-primary\/25 {
+    --tw-shadow-color: color-mix(in oklch, var(--primary) 12%, transparent);
+  }
+
+  :is(.light) .shadow-primary\/20 {
+    --tw-shadow-color: color-mix(in oklch, var(--primary) 10%, transparent);
   }
 
   @keyframes fade-in {
