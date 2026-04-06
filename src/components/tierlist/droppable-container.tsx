@@ -14,24 +14,20 @@ export default function DroppableContainer({
   label,
   items,
   style,
-  ...props
 }: {
   children: React.ReactNode
   id: UniqueIdentifier
+  label?: string
   items: UniqueIdentifier[]
   style?: React.CSSProperties
-  [key: string]: any
 }) {
   const {
-    active,
     attributes,
     isDragging,
     listeners,
-    over,
     setNodeRef,
     transition,
     transform,
-    isOver,
   } = useSortable({
     id,
     data: {

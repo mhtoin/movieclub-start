@@ -43,11 +43,13 @@ const dialogPopupVariants = cva(
 )
 
 interface DialogBackdropProps
-  extends React.ComponentProps<typeof BaseDialog.Backdrop>,
+  extends
+    React.ComponentProps<typeof BaseDialog.Backdrop>,
     VariantProps<typeof dialogBackdropVariants> {}
 
 interface DialogPopupProps
-  extends React.ComponentProps<typeof BaseDialog.Popup>,
+  extends
+    React.ComponentProps<typeof BaseDialog.Popup>,
     VariantProps<typeof dialogPopupVariants> {}
 
 const DialogRoot = BaseDialog.Root
@@ -80,7 +82,7 @@ const DialogClose = React.forwardRef<
 DialogClose.displayName = 'DialogClose'
 
 const DialogTrigger = React.forwardRef<
-  React.ComponentRef<typeof BaseDialog.Trigger>,
+  HTMLButtonElement,
   React.ComponentProps<typeof BaseDialog.Trigger> & { asChild?: boolean }
 >(({ children, asChild, ...props }, ref) => {
   if (typeof children === 'function') {

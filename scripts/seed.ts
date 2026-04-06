@@ -88,7 +88,7 @@ function generateId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 }
 
-function getWatchDate(weeksAgo: number): string {
+function getWatchDate(weeksAgo: number): Date {
   const now = new Date()
   const dayOfWeek = now.getDay()
   const daysUntilWednesday = (3 - dayOfWeek + 7) % 7
@@ -99,7 +99,7 @@ function getWatchDate(weeksAgo: number): string {
   const targetDate = new Date(thisWednesday)
   targetDate.setDate(thisWednesday.getDate() - weeksAgo * 7)
 
-  return targetDate.toISOString().split('T')[0]
+  return targetDate
 }
 
 async function seed() {

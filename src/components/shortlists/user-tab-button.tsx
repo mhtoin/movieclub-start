@@ -3,7 +3,6 @@ import { Clapperboard, Users } from 'lucide-react'
 
 interface UserTabButtonProps {
   value: string
-  index?: number
   movieCount: number
   name: string
   imageUrl?: string
@@ -12,7 +11,6 @@ interface UserTabButtonProps {
 
 export function UserTabButton({
   value,
-  index = 0,
   movieCount,
   name,
   imageUrl,

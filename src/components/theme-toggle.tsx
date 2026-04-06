@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
 
-  function toggleTheme(event: React.MouseEvent<HTMLButtonElement>) {
+  function toggleTheme(_event: React.MouseEvent<HTMLButtonElement>) {
     const newTheme = theme === 'light' ? 'dark' : 'light'
 
     if (document.startViewTransition) {
