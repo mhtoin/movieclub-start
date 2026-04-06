@@ -14,3 +14,4 @@ todos.json
 src/routeTree.gen.ts
 data/*
 *.md
+*/package-lock.json
