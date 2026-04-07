@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
-import type { ReactNode } from 'react'
 import { slideVariants } from './animation-variants'
+import type { ReactNode } from 'react'
+import { cn } from '@/lib/utils'
 
 interface Slide {
   id: string
@@ -11,7 +11,7 @@ interface Slide {
 }
 
 interface SlideTabsProps {
-  slides: Slide[]
+  slides: Array<Slide>
   activeSlide: number
   slideDirection: number
   onSlideChange: (index: number) => void
@@ -25,10 +25,15 @@ export function SlideTabs({
 }: SlideTabsProps) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-1 rounded-full border border-border/40 bg-background/60 p-1 backdrop-blur-sm w-fit">
+      <div
+        role="tablist"
+        className="flex items-center gap-1 rounded-full border border-border/40 bg-background/60 p-1 backdrop-blur-sm w-fit"
+      >
         {slides.map((slide, index) => (
           <button
             key={slide.id}
+            role="tab"
+            aria-selected={index === activeSlide}
             onClick={() => onSlideChange(index)}
             className={cn(
               'relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
@@ -57,7 +62,10 @@ export function SlideTabs({
         ))}
       </div>
 
-      <div className="relative min-h-[100px] overflow-hidden rounded-2xl border border-border/40 bg-background/70 px-4 py-5 backdrop-blur-md sm:min-h-[90px]">
+      <div
+        role="tabpanel"
+        className="relative min-h-[100px] overflow-hidden rounded-2xl border border-border/40 bg-background/70 px-4 py-5 backdrop-blur-md sm:min-h-[90px]"
+      >
         <AnimatePresence mode="wait" custom={slideDirection}>
           <motion.div
             key={activeSlide}

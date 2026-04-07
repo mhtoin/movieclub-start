@@ -14,7 +14,7 @@ export function ProfileSection({ user }: ProfileSectionProps) {
     <div className="space-y-10">
       <section>
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          <div className="relative shrink-0">
+          <div className="group relative shrink-0">
             <Avatar
               src={user.image}
               alt={user.name}
@@ -59,7 +59,9 @@ export function ProfileSection({ user }: ProfileSectionProps) {
 
       <section className="pt-6 border-t border-border">
         <div className="flex items-start gap-3 mb-4">
-          <span className="text-destructive text-lg mt-0.5">⚠</span>
+          <span className="text-destructive text-lg mt-0.5" aria-hidden="true">
+            ⚠
+          </span>
           <div className="flex-1">
             <h3 className="font-semibold text-destructive">Danger Zone</h3>
             <p className="text-sm text-muted-foreground">

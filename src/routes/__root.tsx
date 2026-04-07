@@ -1,8 +1,8 @@
 import { Toast } from '@base-ui/react/toast'
 import {
-  createRootRouteWithContext,
   HeadContent,
   Scripts,
+  createRootRouteWithContext,
 } from '@tanstack/react-router'
 
 import { ErrorComponent } from '@/components/error-component'
@@ -11,7 +11,7 @@ import ToastList from '@/components/ui/toast-list'
 import { getThemeAndSchemeServerFn } from '@/lib/color-scheme'
 import type { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { lazy, Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 import { persister, queryClient } from '../router'
 import appCss from '../styles.css?url'
 
@@ -53,9 +53,10 @@ export const Route = createRootRouteWithContext<{
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'TanStack Start Starter' },
+      { title: 'leffaseura' },
     ],
     links: [
+      { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
       { rel: 'preconnect', href: 'https://image.tmdb.org' },
       { rel: 'dns-prefetch', href: 'https://image.tmdb.org' },
       { rel: 'preload', href: appCss, as: 'style' },

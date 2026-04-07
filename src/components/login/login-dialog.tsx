@@ -1,7 +1,3 @@
-import type { LoginMethod } from '@/lib/auth/last-used-login'
-import { getLastUsedLoginMethodFromClient } from '@/lib/auth/last-used-login'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { getImageUrl } from '@/lib/tmdb-api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
@@ -14,6 +10,10 @@ import {
   DialogTrigger,
 } from '../ui/dialog'
 import LoginForm from './login-form'
+import type { LoginMethod } from '@/lib/auth/last-used-login'
+import { getImageUrl } from '@/lib/tmdb-api'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import { getLastUsedLoginMethodFromClient } from '@/lib/auth/last-used-login'
 
 const POSTERS = [
   'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg', // The Dark Knight
@@ -56,7 +56,6 @@ function LoginDialogContent() {
   useEffect(() => {
     setLastUsedMethod(getLastUsedLoginMethodFromClient())
   }, [])
-  console.log('Last used login method:', lastUsedMethod)
 
   const posters = movies
     ? movies.map((m) => getImageUrl(m.poster_path) || '').filter(Boolean)

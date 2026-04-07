@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button'
+import { Form } from '@base-ui/react/form'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { Button, buttonVariants } from '@/components/ui/button'
 import Field from '@/components/ui/field'
 import { useResetPasswordMutation } from '@/lib/react-query/mutations/auth'
-import { Form } from '@base-ui/react/form'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
 
 export const Route = createFileRoute('/reset-password')({
   component: ResetPasswordPage,
@@ -29,9 +29,9 @@ function ResetPasswordPage() {
           <p className="text-muted-foreground">
             This password reset link is invalid or missing a token.
           </p>
-          <Button variant="primary">
-            <Link to="/">Go to Home</Link>
-          </Button>
+          <Link to="/" className={buttonVariants({ variant: 'primary' })}>
+            Go to Home
+          </Link>
         </div>
       </div>
     )
@@ -52,7 +52,6 @@ function ResetPasswordPage() {
           setIsResetting(false)
         },
         onError: (error) => {
-          console.error('Password reset failed:', error)
           setErrors({ form: error.message })
           setIsResetting(false)
         },
@@ -69,9 +68,9 @@ function ResetPasswordPage() {
             Your password has been successfully reset. You can now sign in with
             your new password.
           </p>
-          <Button variant="primary">
-            <Link to="/">Go to Login</Link>
-          </Button>
+          <Link to="/" className={buttonVariants({ variant: 'primary' })}>
+            Go to Login
+          </Link>
         </div>
       </div>
     )

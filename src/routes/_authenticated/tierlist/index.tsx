@@ -1,15 +1,16 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowRight, Film, Layers, Plus } from 'lucide-react'
+import { Suspense } from 'react'
+import type {TierlistPreview, UserTierlistSummary} from '@/lib/react-query/queries/tierlists';
 import { PageTitleBar } from '@/components/page-titlebar'
 import { TierlistIndexSkeleton } from '@/components/tierlist/tierlist-index-skeleton'
 import Avatar from '@/components/ui/avatar'
 import {
-  tierlistQueries,
-  type TierlistPreview,
-  type UserTierlistSummary,
+  
+  
+  tierlistQueries
 } from '@/lib/react-query/queries/tierlists'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, Film, Layers, Plus } from 'lucide-react'
-import { Suspense } from 'react'
 
 const USER_COLORS = [
   { hue: 48 },
@@ -76,7 +77,7 @@ function TierlistContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 md:pl-[72px]">
       <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-        {(usersWithTierlists as UserTierlistSummary[]).map((user) => (
+        {(usersWithTierlists).map((user) => (
           <UserTierlistCard key={user.id} user={user} />
         ))}
       </div>
@@ -200,7 +201,7 @@ function TierlistCard({
               >
                 <img
                   src={`https://image.tmdb.org/t/p/w200${path}`}
-                  alt=""
+                  alt={tierlist.title || 'Tierlist preview'}
                   className="w-full h-full object-cover object-top"
                 />
               </div>
@@ -250,8 +251,8 @@ function TierlistCard({
   )
 }
 
-function getTierlistTags(tierlist: TierlistPreview): string[] {
-  const tags: string[] = []
+function getTierlistTags(tierlist: TierlistPreview): Array<string> {
+  const tags: Array<string> = []
 
   if (tierlist.genres && tierlist.genres.length > 0) {
     tags.push(...tierlist.genres.slice(0, 2))

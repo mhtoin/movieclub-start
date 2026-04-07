@@ -1,14 +1,15 @@
-import { cn } from '@/lib/utils'
 import { Tabs as BaseTabs } from '@base-ui/react/tabs'
-import { cva, type VariantProps } from 'class-variance-authority'
+import {  cva } from 'class-variance-authority'
 import * as React from 'react'
+import type {VariantProps} from 'class-variance-authority';
+import { cn } from '@/lib/utils'
 
-const tabsRootVariants = cva('rounded-md  ', {
+const tabsRootVariants = cva('rounded-md', {
   variants: {
     variant: {
       default: '',
-      pills: 'border-0 bg-gray-100 p-1',
-      underline: 'border-0 border-b border-gray-200',
+      pills: 'border-0 bg-muted p-1',
+      underline: 'border-0 border-b border-border',
       underlined: 'border-0',
     },
   },
@@ -20,7 +21,7 @@ const tabsRootVariants = cva('rounded-md  ', {
 const tabsListVariants = cva('relative z-0 flex', {
   variants: {
     variant: {
-      default: 'gap-1 px-1 shadow-[inset_0_-1px] shadow-gray-200',
+      default: 'gap-1 px-1 shadow-[inset_0_-1px] shadow-border',
       pills: 'gap-1',
       underline: 'gap-4 px-0 items-center justify-center',
       underlined: 'gap-6',
@@ -37,11 +38,11 @@ const tabVariants = cva(
     variants: {
       variant: {
         default:
-          'h-8 px-2 text-sm text-gray-600 before:inset-x-0 before:inset-y-1 before:rounded-sm before:-outline-offset-1 before:outline-blue-800 hover:text-gray-900 focus-visible:relative focus-visible:before:absolute focus-visible:before:outline focus-visible:before:outline-2 data-[active]:text-gray-900',
+          'h-8 px-2 text-sm text-muted-foreground before:inset-x-0 before:inset-y-1 before:rounded-sm before:-outline-offset-1 before:outline-ring hover:text-foreground focus-visible:relative focus-visible:before:absolute focus-visible:before:outline focus-visible:before:outline-2 data-[active]:text-foreground',
         pills:
-          'h-8 px-3 text-sm text-gray-600 rounded-md hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800 data-[active]:bg-white data-[active]:text-gray-900 data-[active]:shadow-sm',
+          'h-8 px-3 text-sm text-muted-foreground rounded-md hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring data-[active]:bg-background data-[active]:text-foreground data-[active]:shadow-sm',
         underline:
-          'h-10 px-0 p-2 text-sm text-gray-600 border-b-2 border-gray hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800 data-[active]:border-blue-600 data-[active]:text-blue-600',
+          'h-10 px-0 p-2 text-sm text-muted-foreground border-b-2 border-transparent hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring data-[active]:border-primary data-[active]:text-primary',
         underlined:
           'relative py-2 text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:origin-left after:scale-x-0 hover:after:scale-x-50 after:transition-transform after:duration-300 after:ease-out data-[active]:text-foreground data-[active]:after:scale-x-100',
       },
@@ -64,11 +65,11 @@ const tabsIndicatorVariants = cva(
     variants: {
       variant: {
         default:
-          'top-1/2 left-0 z-[-1] h-6 w-[var(--active-tab-width)] translate-x-[var(--active-tab-left)] -translate-y-1/2 rounded-sm bg-gray-100',
-        pills: 'hidden', // Pills don't need an indicator
+          'top-1/2 left-0 z-[-1] h-6 w-[var(--active-tab-width)] translate-x-[var(--active-tab-left)] -translate-y-1/2 rounded-sm bg-muted',
+        pills: 'hidden',
         underline:
-          'bottom-0 left-0 h-0.5 w-[var(--active-tab-width)] translate-x-[var(--active-tab-left)] bg-blue-600',
-        underlined: 'hidden', // Underlined uses pseudo-element on each tab
+          'bottom-0 left-0 h-0.5 w-[var(--active-tab-width)] translate-x-[var(--active-tab-left)] bg-primary',
+        underlined: 'hidden',
       },
     },
     defaultVariants: {
@@ -78,7 +79,7 @@ const tabsIndicatorVariants = cva(
 )
 
 const tabsPanelVariants = cva(
-  'relative -outline-offset-1 outline-blue-800 focus-visible:rounded-md focus-visible:outline focus-visible:outline-2',
+  'relative -outline-offset-1 outline-ring focus-visible:rounded-md focus-visible:outline focus-visible:outline-2',
   {
     variants: {
       variant: {
@@ -95,23 +96,28 @@ const tabsPanelVariants = cva(
 )
 
 interface TabsRootProps
-  extends React.ComponentProps<typeof BaseTabs.Root>,
+  extends
+    React.ComponentProps<typeof BaseTabs.Root>,
     VariantProps<typeof tabsRootVariants> {}
 
 interface TabsListProps
-  extends React.ComponentProps<typeof BaseTabs.List>,
+  extends
+    React.ComponentProps<typeof BaseTabs.List>,
     VariantProps<typeof tabsListVariants> {}
 
 interface TabProps
-  extends React.ComponentProps<typeof BaseTabs.Tab>,
+  extends
+    React.ComponentProps<typeof BaseTabs.Tab>,
     VariantProps<typeof tabVariants> {}
 
 interface TabsIndicatorProps
-  extends React.ComponentProps<typeof BaseTabs.Indicator>,
+  extends
+    React.ComponentProps<typeof BaseTabs.Indicator>,
     VariantProps<typeof tabsIndicatorVariants> {}
 
 interface TabsPanelProps
-  extends React.ComponentProps<typeof BaseTabs.Panel>,
+  extends
+    React.ComponentProps<typeof BaseTabs.Panel>,
     VariantProps<typeof tabsPanelVariants> {}
 
 const TabsRoot = React.forwardRef<

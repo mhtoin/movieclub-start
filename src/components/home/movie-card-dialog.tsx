@@ -1,7 +1,3 @@
-import { Button } from '@/components/ui/button'
-import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
-import type { TMDBMovie } from '@/lib/react-query/queries/home'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Image } from '@unpic/react'
@@ -18,6 +14,10 @@ import {
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import type { TMDBMovie } from '@/lib/react-query/queries/home'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
+import { Button } from '@/components/ui/button'
 
 interface MovieCardDialogProps {
   movie: TMDBMovie | null
@@ -139,6 +139,7 @@ export function MovieCardDialog({
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ delay: 0.1 }}
                 onClick={() => onOpenChange(false)}
+                aria-label="Close dialog"
                 className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition-all hover:bg-black/80 hover:scale-110"
               >
                 <X className="h-5 w-5" />

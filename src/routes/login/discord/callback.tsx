@@ -60,9 +60,6 @@ export const Route = createFileRoute('/login/discord/callback')({
 
         const existingAccount = await getAccountByUserId(user.id, 'discord')
 
-        console.log('Discord OAuth - User:', user)
-        console.log('Discord OAuth - Existing Account:', existingAccount)
-
         if (existingAccount) {
           await updateAccount(user.id, 'discord', {
             accessToken: tokens.accessToken(),

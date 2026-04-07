@@ -7,7 +7,6 @@ interface Props {
   movies: Array<Movie>
   winningMovie: Movie
   onSpinComplete: () => void
-  debug?: boolean
   arrowColor?: string
 }
 
@@ -151,7 +150,6 @@ export function RaffleSpinner({
   movies,
   winningMovie,
   onSpinComplete,
-  debug = false,
   arrowColor = 'var(--primary)',
 }: Props) {
   const spinParams = useMemo(
@@ -195,21 +193,8 @@ export function RaffleSpinner({
     const start = performance.now()
     const startOffset = Math.random() * movies.length * ITEM_HEIGHT
 
-    if (debug) {
-      const SPEED = 400
-      const singleCopyHeight = movies.length * ITEM_HEIGHT
-      const tick = (now: number) => {
-        const elapsed = now - start
-        const offset =
-          (startOffset + (elapsed / 1000) * SPEED) % singleCopyHeight
-        speedProgress.set(0.5)
-        if (stripRef.current) {
-          stripRef.current.style.transform = `translateY(-${offset}px)`
-        }
-        animFrameRef.current = requestAnimationFrame(tick)
-      }
-      animFrameRef.current = requestAnimationFrame(tick)
-      return () => cancelAnimationFrame(animFrameRef.current)
+    if (stripRef.current) {
+      stripRef.current.style.transform = `translateY(-${startOffset}px)`
     }
 
     const totalDistance = targetOffset - startOffset
@@ -277,7 +262,7 @@ export function RaffleSpinner({
       >
         <p
           className="text-[11px] font-bold uppercase tracking-[0.3em] mb-2"
-          style={{ color: 'hsl(var(--primary))' }}
+          style={{ color: 'var(--primary)' }}
         >
           {locked
             ? settling
@@ -399,7 +384,7 @@ export function RaffleSpinner({
           <motion.div
             className="h-full rounded-full"
             style={{
-              background: `linear-gradient(90deg, hsl(var(--primary) / 0.6), hsl(var(--primary)))`,
+              background: `linear-gradient(90deg, color-mix(in oklch, var(--primary) 60%, transparent), var(--primary))`,
               width: locked ? undefined : barWidth,
             }}
             animate={locked ? { opacity: [1, 0.6, 1] } : {}}
