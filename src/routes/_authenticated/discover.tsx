@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
-import { Loader2, SlidersHorizontal, X } from 'lucide-react'
+import { Film, Loader2, SlidersHorizontal, X } from 'lucide-react'
 import { Suspense, useState } from 'react'
 import { z } from 'zod'
 
@@ -17,7 +17,9 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { useMediaQuery } from '@/lib/hooks'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import { useQuery } from '@tanstack/react-query'
 
 const discoverSearchSchema = z.object({
   genres: fallback(z.string(), '').default(''),
@@ -25,6 +27,7 @@ const discoverSearchSchema = z.object({
   minRating: fallback(z.number(), 0).default(0),
   maxRating: fallback(z.number(), 10).default(10),
   sortBy: fallback(z.string(), 'popularity.desc').default('popularity.desc'),
+  adding: fallback(z.boolean(), false).default(false),
 })
 
 export const Route = createFileRoute('/_authenticated/discover')({
@@ -51,14 +54,29 @@ export const Route = createFileRoute('/_authenticated/discover')({
 function RouteComponent() {
   const navigate = Route.useNavigate()
   const search = Route.useSearch()
+  const { user } = Route.useRouteContext()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [totalResults, setTotalResults] = useState<number | null>(null)
   const isDesktop = useMediaQuery('(min-width: 768px)')
+  const isAdding = search.adding
+
+  const { data: shortlist } = useQuery(
+    shortlistQueries.byUser(user?.userId ?? ''),
+  )
+  const movieCount = shortlist?.movies?.length ?? 0
+  const slotsLeft = 3 - movieCount
 
   const selectedGenres = search.genres ? search.genres.split(',') : []
   const selectedProviders = search.providers ? search.providers.split('|') : []
   const voteRange: [number, number] = [search.minRating, search.maxRating]
   const sortBy = search.sortBy
+
+  const handleExitAdding = () => {
+    navigate({
+      search: (prev) => ({ ...prev, adding: false }),
+      resetScroll: false,
+    })
+  }
 
   const handleGenresChange = (genres: Array<string>) => {
     navigate({
@@ -144,6 +162,31 @@ function RouteComponent() {
       )}
       <main className="flex-1 overflow-hidden md:pl-14">
         <div className="h-full flex flex-col">
+          {isAdding && (
+            <div className="mx-4 mt-3 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                <Film className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  Adding to your shortlist
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {slotsLeft > 0
+                    ? `${slotsLeft} slot${slotsLeft === 1 ? '' : 's'} remaining`
+                    : 'Shortlist is full — remove a movie first'}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleExitAdding}
+                className="flex-shrink-0 text-muted-foreground hover:text-foreground"
+              >
+                Done
+              </Button>
+            </div>
+          )}
           {!isDesktop && (
             <div className="px-4 py-2.5 flex items-center gap-3 border-b border-border">
               <Button
@@ -174,7 +217,7 @@ function RouteComponent() {
           )}
           <div className="relative flex-1 flex flex-col overflow-hidden isolate">
             <div className="flex-shrink-0 px-4 pt-3 pb-1">
-              {isDesktop && (
+              {isDesktop && !isAdding && (
                 <h1 className="text-lg font-semibold text-foreground/90 mb-2">
                   Discover
                 </h1>
@@ -189,7 +232,11 @@ function RouteComponent() {
                   </div>
                 }
               >
-                <DiscoverMoviesList onTotalResults={setTotalResults} />
+                <DiscoverMoviesList
+                  onTotalResults={setTotalResults}
+                  addingMode={isAdding}
+                  onAdded={slotsLeft <= 1 ? handleExitAdding : undefined}
+                />
               </Suspense>
             </div>
           </div>

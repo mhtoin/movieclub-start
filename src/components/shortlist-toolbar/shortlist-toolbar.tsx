@@ -4,10 +4,10 @@ import {
 } from '@/lib/react-query/mutations/shortlist'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
-import { Film, Plus, Sparkles, X } from 'lucide-react'
-import { Suspense, useEffect, useState } from 'react'
-import { AddMovieDialog } from './add-movie-dialog'
+import { Film, Plus, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import ShortlistItem from './shortlist-item'
 
 interface ShortlistToolbarProps {
@@ -56,9 +56,20 @@ const itemVariants: Variants = {
   exit: { opacity: 0, y: -4, transition: { duration: 0.12 } },
 }
 
-function AddMovieButton({ movieCount }: { movieCount: number }) {
+function AddMovieLink({
+  movieCount,
+  onClick,
+}: {
+  movieCount: number
+  onClick?: () => void
+}) {
   return (
-    <div className="w-full h-auto py-2.5 px-3 rounded-lg border border-dashed border-border bg-transparent">
+    <Link
+      to="/discover"
+      search={{ adding: true }}
+      onClick={onClick}
+      className="block w-full h-auto py-2.5 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all bg-transparent"
+    >
       <div className="flex items-center gap-2.5">
         <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Plus className="w-4 h-4 text-primary" />
@@ -70,7 +81,7 @@ function AddMovieButton({ movieCount }: { movieCount: number }) {
           </p>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 
@@ -176,22 +187,19 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                       exit="exit"
                       className="flex flex-col items-center py-8 text-center"
                     >
-                      <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mb-3">
-                        <Sparkles className="w-8 h-8 text-primary/30" />
+                      <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
+                        <Film className="w-6 h-6 text-muted-foreground/40" />
                       </div>
                       <p className="text-sm font-medium text-foreground mb-1">
                         No movies yet
                       </p>
-                      <p className="text-xs text-muted-foreground mb-5">
+                      <p className="text-xs text-muted-foreground mb-4">
                         Add up to 3 movies to your shortlist
                       </p>
-                      <div className="w-full">
-                        <Suspense
-                          fallback={<AddMovieButton movieCount={movieCount} />}
-                        >
-                          <AddMovieDialog movieCount={movieCount} />
-                        </Suspense>
-                      </div>
+                      <AddMovieLink
+                        movieCount={movieCount}
+                        onClick={() => setIsExpanded(false)}
+                      />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -243,13 +251,10 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                           initial="hidden"
                           animate="visible"
                         >
-                          <Suspense
-                            fallback={
-                              <AddMovieButton movieCount={movieCount} />
-                            }
-                          >
-                            <AddMovieDialog movieCount={movieCount} />
-                          </Suspense>
+                          <AddMovieLink
+                            movieCount={movieCount}
+                            onClick={() => setIsExpanded(false)}
+                          />
                         </motion.div>
                       )}
                     </motion.div>

@@ -9,10 +9,14 @@ import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
 interface DiscoverMoviesListProps {
   onTotalResults?: (count: number) => void
+  addingMode?: boolean
+  onAdded?: () => void
 }
 
 export default function DiscoverMoviesList({
   onTotalResults,
+  addingMode = false,
+  onAdded,
 }: DiscoverMoviesListProps) {
   const routeApi = getRouteApi('/_authenticated/discover')
   const search = routeApi.useSearch()
@@ -93,6 +97,8 @@ export default function DiscoverMoviesList({
         open={dialogOpen}
         onOpenChange={handleDialogOpenChange}
         triggerRect={triggerRect}
+        addingMode={addingMode}
+        onAdded={onAdded}
       />
 
       <div ref={observerTarget} className="py-8">

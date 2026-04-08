@@ -25,6 +25,8 @@ interface MovieDetailsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   triggerRect: DOMRect | null
+  addingMode?: boolean
+  onAdded?: () => void
 }
 
 export function MovieDetailsDialog({
@@ -32,6 +34,8 @@ export function MovieDetailsDialog({
   open,
   onOpenChange,
   triggerRect,
+  addingMode = false,
+  onAdded,
 }: MovieDetailsDialogProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { mutate: addToShortlist, isPending } = useAddToShortlistMutation()
@@ -84,6 +88,19 @@ export function MovieDetailsDialog({
     onOpenChange(false)
     setCurrentView('overview')
     setIsTransitioning(false)
+  }
+
+  const handleAddToShortlist = () => {
+    addToShortlist(movie!.id, {
+      onSuccess: () => {
+        if (addingMode) {
+          setTimeout(() => {
+            onOpenChange(false)
+            onAdded?.()
+          }, 400)
+        }
+      },
+    })
   }
 
   if (!movie) return null
@@ -148,7 +165,7 @@ export function MovieDetailsDialog({
                     voteCount={movie.vote_count}
                     overview={movie.overview}
                     movieDetails={movieDetails}
-                    onAddToShortlist={() => addToShortlist(movie.id)}
+                    onAddToShortlist={handleAddToShortlist}
                     onShowMoreInfo={() => handleViewTransition('details')}
                     isPending={isPending}
                     isLoading={isLoading}
@@ -159,7 +176,7 @@ export function MovieDetailsDialog({
                     title={movie.title}
                     movieDetails={movieDetails}
                     onBack={() => handleViewTransition('overview')}
-                    onAddToShortlist={() => addToShortlist(movie.id)}
+                    onAddToShortlist={handleAddToShortlist}
                     isPending={isPending}
                     compact
                   />
@@ -286,7 +303,7 @@ export function MovieDetailsDialog({
                     voteCount={movie.vote_count}
                     overview={movie.overview}
                     movieDetails={movieDetails}
-                    onAddToShortlist={() => addToShortlist(movie.id)}
+                    onAddToShortlist={handleAddToShortlist}
                     onShowMoreInfo={() => handleViewTransition('details')}
                     isPending={isPending}
                     isLoading={isLoading}
@@ -296,7 +313,7 @@ export function MovieDetailsDialog({
                     title={movie.title}
                     movieDetails={movieDetails}
                     onBack={() => handleViewTransition('overview')}
-                    onAddToShortlist={() => addToShortlist(movie.id)}
+                    onAddToShortlist={handleAddToShortlist}
                     isPending={isPending}
                   />
                 )}
