@@ -1,10 +1,10 @@
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { ArrowDownWideNarrow, Film, RotateCcw, Star, Tv, X } from 'lucide-react'
 import { GenreFilter } from './genre-filter'
 import { ProviderFilter } from './provider-filter'
 import { RatingFilter } from './rating-filter'
 import { SortByFilter } from './sort-by-filter'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
 interface DiscoverFiltersProps {
   selectedGenres: Array<string>
@@ -16,6 +16,7 @@ interface DiscoverFiltersProps {
   sortBy: string
   onSortByChange: (value: string) => void
   totalResults?: number | null
+  isSearchActive?: boolean
 }
 
 const sortOptions = [
@@ -36,10 +37,11 @@ export function DiscoverFilters({
   sortBy,
   onSortByChange,
   totalResults,
+  isSearchActive = false,
 }: DiscoverFiltersProps) {
   const hasActiveFilters =
     selectedGenres.length > 0 ||
-    selectedProviders.length > 0 ||
+    (selectedProviders.length > 0 && !isSearchActive) ||
     voteRange[0] !== 0 ||
     voteRange[1] !== 10
 
@@ -58,26 +60,28 @@ export function DiscoverFilters({
   return (
     <div className="w-full space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="relative">
-          <SortByFilter
-            value={sortBy}
-            onValueChange={onSortByChange}
-            variant="chip"
-            chipContent={
-              <div
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
-                  sortBy !== 'popularity.desc'
-                    ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                <ArrowDownWideNarrow size={14} className="flex-shrink-0" />
-                <span className="hidden lg:inline">{currentSortLabel}</span>
-                <span className="lg:hidden">Sort</span>
-              </div>
-            }
-          />
-        </div>
+        {!isSearchActive && (
+          <div className="relative">
+            <SortByFilter
+              value={sortBy}
+              onValueChange={onSortByChange}
+              variant="chip"
+              chipContent={
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
+                    sortBy !== 'popularity.desc'
+                      ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <ArrowDownWideNarrow size={14} className="flex-shrink-0" />
+                  <span className="hidden lg:inline">{currentSortLabel}</span>
+                  <span className="lg:hidden">Sort</span>
+                </div>
+              }
+            />
+          </div>
+        )}
 
         <div className="relative">
           <GenreFilter
@@ -103,29 +107,31 @@ export function DiscoverFilters({
           />
         </div>
 
-        <div className="relative">
-          <ProviderFilter
-            selectedProviders={selectedProviders}
-            onProvidersChange={onProvidersChange}
-            variant="chip"
-            chipContent={
-              <div
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
-                  selectedProviders.length > 0
-                    ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                <Tv size={14} className="flex-shrink-0" />
-                <span>
-                  {selectedProviders.length > 0
-                    ? `${selectedProviders.length} service${selectedProviders.length > 1 ? 's' : ''}`
-                    : 'Streaming'}
-                </span>
-              </div>
-            }
-          />
-        </div>
+        {!isSearchActive && (
+          <div className="relative">
+            <ProviderFilter
+              selectedProviders={selectedProviders}
+              onProvidersChange={onProvidersChange}
+              variant="chip"
+              chipContent={
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
+                    selectedProviders.length > 0
+                      ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Tv size={14} className="flex-shrink-0" />
+                  <span>
+                    {selectedProviders.length > 0
+                      ? `${selectedProviders.length} service${selectedProviders.length > 1 ? 's' : ''}`
+                      : 'Streaming'}
+                  </span>
+                </div>
+              }
+            />
+          </div>
+        )}
 
         <div className="relative">
           <RatingFilter
@@ -151,6 +157,12 @@ export function DiscoverFilters({
           />
         </div>
 
+        {isSearchActive && (
+          <span className="text-[11px] text-muted-foreground/50 leading-snug">
+            Sorted by relevance
+          </span>
+        )}
+
         {hasActiveFilters && (
           <>
             <div className="h-4 w-px bg-border/40 shrink-0" />
@@ -164,11 +176,13 @@ export function DiscoverFilters({
           </>
         )}
 
-        {totalResults !== null && totalResults !== undefined && (
-          <div className="ml-auto text-xs text-muted-foreground/70 font-medium tabular-nums shrink-0">
-            {totalResults.toLocaleString()} movies
-          </div>
-        )}
+        {totalResults !== null &&
+          totalResults !== undefined &&
+          !isSearchActive && (
+            <div className="ml-auto text-xs text-muted-foreground/70 font-medium tabular-nums shrink-0">
+              {totalResults.toLocaleString()} movies
+            </div>
+          )}
       </div>
 
       {hasActiveFilters && (
@@ -180,6 +194,7 @@ export function DiscoverFilters({
           voteRange={voteRange}
           onVoteRangeChange={onVoteRangeChange}
           isRatingModified={isRatingModified}
+          isSearchActive={isSearchActive}
         />
       )}
     </div>
@@ -194,6 +209,7 @@ function ActiveFilterPills({
   voteRange,
   onVoteRangeChange,
   isRatingModified,
+  isSearchActive,
 }: {
   selectedGenres: Array<string>
   onGenresChange: (genres: Array<string>) => void
@@ -202,6 +218,7 @@ function ActiveFilterPills({
   voteRange: [number, number]
   onVoteRangeChange: (range: [number, number]) => void
   isRatingModified: boolean
+  isSearchActive: boolean
 }) {
   const { data: genres = [] } = useSuspenseQuery(tmdbQueries.genres())
   const { data: providers = [] } = useSuspenseQuery(
@@ -224,17 +241,18 @@ function ActiveFilterPills({
           }
         />
       ))}
-      {selectedProviders.map((providerId) => (
-        <FilterPill
-          key={`provider-${providerId}`}
-          label={providerMap.get(providerId) ?? providerId}
-          onRemove={() =>
-            onProvidersChange(
-              selectedProviders.filter((id) => id !== providerId),
-            )
-          }
-        />
-      ))}
+      {!isSearchActive &&
+        selectedProviders.map((providerId) => (
+          <FilterPill
+            key={`provider-${providerId}`}
+            label={providerMap.get(providerId) ?? providerId}
+            onRemove={() =>
+              onProvidersChange(
+                selectedProviders.filter((id) => id !== providerId),
+              )
+            }
+          />
+        ))}
       {isRatingModified ? (
         <FilterPill
           label={`Rating ${voteRange[0].toFixed(0)}–${voteRange[1].toFixed(0)}`}

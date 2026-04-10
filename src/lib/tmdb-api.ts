@@ -145,7 +145,7 @@ export async function fetchWatchProviders(): Promise<WatchProvider[]> {
     throw new Error('TMDB API key is not configured')
   }
 
-  const url = `${TMDB_CONFIG.BASE_URL}/watch/providers/movie?api_key=${TMDB_CONFIG.API_KEY}&language=en-US`
+  const url = `${TMDB_CONFIG.BASE_URL}/watch/providers/movie?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&watch_region=FI`
 
   try {
     const response = await fetch(url)
@@ -158,21 +158,7 @@ export async function fetchWatchProviders(): Promise<WatchProvider[]> {
 
     const data: WatchProvidersResponse = await response.json()
 
-    /**
-     * For some reason, the API no longer returns any results if the watch_region parameter is
-     * set to FI. Therefore, we fetch all providers and filter out those that are used by the club.
-     * This could potentially be set to be user configurable in the future.
-     */
-
-    const finnishIds = [8, 76, 323, 338, 496, 1773, 1899, 2029]
-
-    const finnishProviders = data.results
-      .filter((provider) => {
-        return finnishIds.includes(provider.provider_id)
-      })
-      .sort((a, b) => a.display_priorities['FI'] - b.display_priorities['FI'])
-
-    return finnishProviders
+    return data.results
   } catch (error) {
     console.error('Error fetching watch providers:', error)
     throw error

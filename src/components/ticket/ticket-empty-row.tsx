@@ -7,9 +7,6 @@ export function TicketEmptyRow({ position }: { position: number }) {
         <Plus className="w-4 h-4" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-foreground opacity-40">
-          Add a movie
-        </p>
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground opacity-40">
           <span>Slot {position}</span>
         </div>

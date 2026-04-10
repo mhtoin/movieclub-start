@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
 import { Film, Loader2, SlidersHorizontal, X } from 'lucide-react'
@@ -5,6 +6,11 @@ import { Suspense, useState } from 'react'
 import { z } from 'zod'
 
 import DiscoverMoviesList from '@/components/discover/discover-movie-list'
+import {
+  DiscoverSearchInput,
+  MIN_SEARCH_LENGTH,
+  SearchBanner,
+} from '@/components/discover/discover-search'
 import { DiscoverFilters } from '@/components/discover/filters'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,11 +25,11 @@ import {
 import { useMediaQuery } from '@/lib/hooks'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { useQuery } from '@tanstack/react-query'
 
 const discoverSearchSchema = z.object({
+  search: fallback(z.string(), '').default(''),
   genres: fallback(z.string(), '').default(''),
-  providers: fallback(z.string(), '').default('8|323|463|496'),
+  providers: fallback(z.string(), '').default('8|323|496'),
   minRating: fallback(z.number(), 0).default(0),
   maxRating: fallback(z.number(), 10).default(10),
   sortBy: fallback(z.string(), 'popularity.desc').default('popularity.desc'),
@@ -38,15 +44,23 @@ export const Route = createFileRoute('/_authenticated/discover')({
       context.queryClient.ensureQueryData(tmdbQueries.genres()),
       context.queryClient.ensureQueryData(tmdbQueries.watchProviders()),
     ])
-    context.queryClient.prefetchInfiniteQuery(
-      tmdbQueries.discover({
-        with_genres: deps.genres || undefined,
-        with_watch_providers: deps.providers || undefined,
-        'vote_average.gte': deps.minRating,
-        'vote_average.lte': deps.maxRating,
-        sort_by: deps.sortBy,
-      }),
-    )
+    const isSearchActive =
+      deps.search && deps.search.trim().length >= MIN_SEARCH_LENGTH
+    if (isSearchActive) {
+      context.queryClient.prefetchInfiniteQuery(
+        tmdbQueries.search(deps.search.trim()),
+      )
+    } else {
+      context.queryClient.prefetchInfiniteQuery(
+        tmdbQueries.discover({
+          with_genres: deps.genres || undefined,
+          with_watch_providers: deps.providers || undefined,
+          'vote_average.gte': deps.minRating,
+          'vote_average.lte': deps.maxRating,
+          sort_by: deps.sortBy,
+        }),
+      )
+    }
   },
   component: RouteComponent,
 })
@@ -60,10 +74,26 @@ function RouteComponent() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const isAdding = search.adding
 
+  const isSearchActive = search.search.trim().length >= MIN_SEARCH_LENGTH
+
+  const handleSearchChange = (value: string) => {
+    navigate({
+      search: (prev) => ({ ...prev, search: value }),
+      resetScroll: false,
+    })
+  }
+
+  const handleClearSearch = () => {
+    navigate({
+      search: (prev) => ({ ...prev, search: '' }),
+      resetScroll: false,
+    })
+  }
+
   const { data: shortlist } = useQuery(
     shortlistQueries.byUser(user?.userId ?? ''),
   )
-  const movieCount = shortlist?.movies?.length ?? 0
+  const movieCount = shortlist?.movies.length ?? 0
   const slotsLeft = 3 - movieCount
 
   const selectedGenres = search.genres ? search.genres.split(',') : []
@@ -133,6 +163,7 @@ function RouteComponent() {
         sortBy={sortBy}
         onSortByChange={handleSortByChange}
         totalResults={totalResults}
+        isSearchActive={isSearchActive}
       />
     </Suspense>
   )
@@ -189,38 +220,49 @@ function RouteComponent() {
           )}
           {!isDesktop && (
             <div className="px-4 py-2.5 flex items-center gap-3 border-b border-border">
+              <DiscoverSearchInput
+                searchQuery={search.search}
+                onSearchChange={handleSearchChange}
+              />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setFiltersOpen(true)}
-                className="relative"
+                className="relative shrink-0"
               >
                 <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
                 Filters
                 {(selectedGenres.length > 0 ||
-                  selectedProviders.length > 0 ||
+                  (selectedProviders.length > 0 && !isSearchActive) ||
                   voteRange[0] !== 0 ||
                   voteRange[1] !== 10) && (
                   <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold bg-primary text-primary-foreground rounded-full">
                     {selectedGenres.length +
-                      selectedProviders.length +
+                      (isSearchActive ? 0 : selectedProviders.length) +
                       (voteRange[0] !== 0 || voteRange[1] !== 10 ? 1 : 0)}
                   </span>
                 )}
               </Button>
-              {totalResults !== null && (
-                <span className="text-xs text-muted-foreground/70 font-medium tabular-nums">
-                  {totalResults.toLocaleString()} movies
-                </span>
-              )}
             </div>
+          )}
+          {isDesktop && isSearchActive && (
+            <SearchBanner
+              query={search.search.trim()}
+              onClear={handleClearSearch}
+            />
           )}
           <div className="relative flex-1 flex flex-col overflow-hidden isolate">
             <div className="flex-shrink-0 px-4 pt-3 pb-1">
               {isDesktop && !isAdding && (
-                <h1 className="text-lg font-semibold text-foreground/90 mb-2">
-                  Discover
-                </h1>
+                <div className="flex items-center justify-between gap-4 mb-2">
+                  <h1 className="text-lg font-semibold text-foreground/90">
+                    Discover
+                  </h1>
+                  <DiscoverSearchInput
+                    searchQuery={search.search}
+                    onSearchChange={handleSearchChange}
+                  />
+                </div>
               )}
               {isDesktop && filtersContent}
             </div>
@@ -236,6 +278,9 @@ function RouteComponent() {
                   onTotalResults={setTotalResults}
                   addingMode={isAdding}
                   onAdded={slotsLeft <= 1 ? handleExitAdding : undefined}
+                  searchQuery={
+                    isSearchActive ? search.search.trim() : undefined
+                  }
                 />
               </Suspense>
             </div>
