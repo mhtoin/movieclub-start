@@ -101,7 +101,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
                 <img
                   src={logoUrl}
                   alt={movie.title}
-                  className="h-24 w-auto max-w-[400px] object-contain drop-shadow-2xl sm:h-28 md:h-32 lg:h-36"
+                  className="h-24 w-auto max-w-[400px] object-contain [filter:drop-shadow(0_0_2px_rgba(0,0,0,0.9))_drop-shadow(0_0_12px_rgba(0,0,0,0.55))_drop-shadow(0_20px_40px_rgba(0,0,0,0.4))] dark:[filter:drop-shadow(0_25px_50px_rgba(0,0,0,0.55))] sm:h-28 md:h-32 lg:h-36"
                 />
               ) : (
                 <h1 className="font-cinema-caps text-5xl font-bold tracking-wide text-foreground drop-shadow-2xl sm:text-6xl md:text-7xl lg:text-8xl uppercase">
