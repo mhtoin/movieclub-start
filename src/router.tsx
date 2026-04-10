@@ -1,31 +1,9 @@
 import { createRouter } from '@tanstack/react-router'
 
 // Import the generated route tree
-import { QueryClient } from '@tanstack/react-query'
-import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
+import { queryClient } from '@/lib/query-client'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { routeTree } from './routeTree.gen.ts'
-
-const ONE_WEEK = 1000 * 60 * 60 * 24 * 7
-
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      gcTime: ONE_WEEK,
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-})
-
-export const persister =
-  typeof window !== 'undefined'
-    ? createAsyncStoragePersister({
-        storage: window.localStorage,
-        throttleTime: 1000,
-      })
-    : null
 
 // Create a new router instance
 export const getRouter = () => {

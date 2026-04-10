@@ -9,10 +9,10 @@ import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
 import ToastList from '@/components/ui/toast-list'
 import { getThemeAndSchemeServerFn } from '@/lib/color-scheme'
+import { persister, queryClient } from '@/lib/query-client'
 import type { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Suspense, lazy } from 'react'
-import { persister, queryClient } from '../router'
 import appCss from '../styles.css?url'
 
 const Devtools = import.meta.env.DEV

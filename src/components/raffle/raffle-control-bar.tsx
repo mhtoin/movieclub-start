@@ -1,129 +1,9 @@
-import {
-  AlertTriangle,
-  CalendarDays,
-  Dices,
-  FilmIcon,
-  UserCheck2,
-  Users,
-} from 'lucide-react'
-import { useMemo } from 'react'
+import { RaffleBlockersToast } from '@/components/raffle/raffle-blockers-toast'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Switch } from '@/components/ui/switch'
-import { cn } from '@/lib/utils'
-
-interface BlockersProps {
-  watchDate: Date | undefined
-  readyCount: number
-  totalCount: number
-  pendingSelectionsCount: number
-}
-
-interface Blocker {
-  id: string
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  description: string
-}
-
-function RaffleBlockers({
-  watchDate,
-  readyCount,
-  totalCount,
-  pendingSelectionsCount,
-}: BlockersProps) {
-  const blockers: Array<Blocker> = []
-
-  if (!watchDate) {
-    blockers.push({
-      id: 'date',
-      icon: CalendarDays,
-      title: 'Pick a date',
-      description: 'Select a watch date to proceed',
-    })
-  }
-
-  if (totalCount === 0) {
-    blockers.push({
-      id: 'participants',
-      icon: Users,
-      title: 'No participants',
-      description: 'Someone must join first',
-    })
-  }
-
-  if (readyCount < totalCount && totalCount > 0) {
-    const notReady = totalCount - readyCount
-    blockers.push({
-      id: 'ready',
-      icon: UserCheck2,
-      title: `${notReady} not ready`,
-      description: 'Everyone must mark ready',
-    })
-  }
-
-  if (pendingSelectionsCount > 0) {
-    blockers.push({
-      id: 'selection',
-      icon: FilmIcon,
-      title: 'Selection pending',
-      description: 'Someone must pick a film',
-    })
-  }
-
-  if (blockers.length === 0) return null
-
-  return (
-    <div
-      className={cn(
-        'absolute bottom-full left-1/2 -translate-x-1/2 mb-3',
-        'animate-in fade-in slide-in-from-bottom-2 duration-300',
-      )}
-    >
-      <div
-        className={cn(
-          'relative overflow-hidden rounded-xl border border-warning/30',
-          'bg-card/98 backdrop-blur-md shadow-2xl',
-          'before:absolute before:-bottom-2 before:left-1/2 before:-translate-x-1/2',
-          'before:border-8 before:border-transparent before:border-t-warning/30',
-          'after:absolute after:-bottom-[10px] after:left-1/2 after:-translate-x-1/2',
-          'after:border-[9px] after:border-transparent after:border-t-card/98',
-        )}
-      >
-        <div className="px-4 py-3 max-w-[280px]">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-warning/15 flex items-center justify-center">
-              <AlertTriangle
-                className="w-3.5 h-3.5 text-warning"
-                strokeWidth={2.5}
-              />
-            </div>
-            <span className="text-xs font-semibold text-warning uppercase tracking-wide">
-              Cannot start
-            </span>
-          </div>
-
-          <ul className="space-y-1.5">
-            {blockers.map((blocker) => (
-              <li key={blocker.id} className="flex items-start gap-2 text-xs">
-                <div className="flex items-center justify-center w-4 h-4 rounded-sm bg-warning/10 mt-0.5 shrink-0">
-                  <blocker.icon className="w-2.5 h-2.5 text-warning/80" />
-                </div>
-                <span className="text-muted-foreground">
-                  <span className="text-foreground/90 font-medium">
-                    {blocker.title}
-                  </span>
-                  {' — '}
-                  {blocker.description}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  )
-}
+import { Dices, Users } from 'lucide-react'
+import { useMemo } from 'react'
 
 interface Props {
   watchDate: Date | undefined
@@ -154,7 +34,7 @@ export function RaffleControlBar({
     <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pointer-events-none">
       <div className="container mx-auto flex justify-center">
         <div className="relative flex flex-col items-center">
-          <RaffleBlockers
+          <RaffleBlockersToast
             watchDate={watchDate}
             readyCount={readyCount}
             totalCount={totalCount}
