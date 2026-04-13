@@ -1,5 +1,3 @@
-import { AppearanceSection } from './appearance-section'
-import { ProfileSection } from './profile-section'
 import {
   Tab,
   TabsIndicator,
@@ -8,10 +6,14 @@ import {
   TabsRoot,
 } from '@/components/ui/tabs'
 import { Route as RootRoute } from '@/routes/__root'
-import { Route } from '@/routes/_authenticated/settings'
+import { getRouteApi } from '@tanstack/react-router'
+import { AppearanceSection } from './appearance-section'
+import { ProfileSection } from './profile-section'
+
+const AuthenticatedRoute = getRouteApi('/_authenticated')
 
 export function SettingsContent() {
-  const { user } = Route.useRouteContext()
+  const { user } = AuthenticatedRoute.useRouteContext()
   const { colorScheme } = RootRoute.useLoaderData()
 
   return (
