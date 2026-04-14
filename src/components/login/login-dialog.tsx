@@ -10,21 +10,157 @@ import {
   DialogTrigger,
 } from '../ui/dialog'
 import LoginForm from './login-form'
+import { MoviePosterCard } from './movie-poster-card'
 import type { LoginMethod } from '@/lib/auth/last-used-login'
-import { getImageUrl } from '@/lib/tmdb-api'
+import type { Movie } from '@/lib/tmdb-api'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getLastUsedLoginMethodFromClient } from '@/lib/auth/last-used-login'
 
-const POSTERS = [
-  'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg', // The Dark Knight
-  'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', // Interstellar
-  'https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg', // Inception
-  'https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg', // The Godfather
-  'https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg', // The Matrix
-  'https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', // Fight Club
-  'https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg', // Forrest Gump
-  'https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg', // Parasite
-  'https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', // The Shawshank Redemption
+const FALLBACK_POSTERS: Array<Movie> = [
+  {
+    id: 155,
+    title: 'The Dark Knight',
+    overview: '',
+    poster_path: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
+    backdrop_path: null,
+    release_date: '2008-07-16',
+    vote_average: 9.0,
+    vote_count: 30000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'The Dark Knight',
+    popularity: 500,
+    video: false,
+  },
+  {
+    id: 157336,
+    title: 'Interstellar',
+    overview: '',
+    poster_path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+    backdrop_path: null,
+    release_date: '2014-11-05',
+    vote_average: 8.4,
+    vote_count: 35000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'Interstellar',
+    popularity: 400,
+    video: false,
+  },
+  {
+    id: 27205,
+    title: 'Inception',
+    overview: '',
+    poster_path: '/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg',
+    backdrop_path: null,
+    release_date: '2010-07-15',
+    vote_average: 8.4,
+    vote_count: 40000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'Inception',
+    popularity: 450,
+    video: false,
+  },
+  {
+    id: 238,
+    title: 'The Godfather',
+    overview: '',
+    poster_path: '/3bhkrj58Vtu7enYsRolD1fZdja1.jpg',
+    backdrop_path: null,
+    release_date: '1972-03-14',
+    vote_average: 8.7,
+    vote_count: 20000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'The Godfather',
+    popularity: 300,
+    video: false,
+  },
+  {
+    id: 603,
+    title: 'The Matrix',
+    overview: '',
+    poster_path: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
+    backdrop_path: null,
+    release_date: '1999-03-30',
+    vote_average: 8.2,
+    vote_count: 28000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'The Matrix',
+    popularity: 350,
+    video: false,
+  },
+  {
+    id: 550,
+    title: 'Fight Club',
+    overview: '',
+    poster_path: '/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg',
+    backdrop_path: null,
+    release_date: '1999-10-15',
+    vote_average: 8.4,
+    vote_count: 27000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'Fight Club',
+    popularity: 320,
+    video: false,
+  },
+  {
+    id: 13,
+    title: 'Forrest Gump',
+    overview: '',
+    poster_path: '/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg',
+    backdrop_path: null,
+    release_date: '1994-06-23',
+    vote_average: 8.5,
+    vote_count: 26000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'Forrest Gump',
+    popularity: 280,
+    video: false,
+  },
+  {
+    id: 496243,
+    title: 'Parasite',
+    overview: '',
+    poster_path: '/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg',
+    backdrop_path: null,
+    release_date: '2019-05-30',
+    vote_average: 8.5,
+    vote_count: 18000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'ko',
+    original_title: 'Gisaengchung',
+    popularity: 250,
+    video: false,
+  },
+  {
+    id: 278,
+    title: 'The Shawshank Redemption',
+    overview: '',
+    poster_path: '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg',
+    backdrop_path: null,
+    release_date: '1994-09-23',
+    vote_average: 8.7,
+    vote_count: 24000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'The Shawshank Redemption',
+    popularity: 200,
+    video: false,
+  },
 ]
 
 export default function LoginDialog() {
@@ -57,11 +193,8 @@ function LoginDialogContent() {
     setLastUsedMethod(getLastUsedLoginMethodFromClient())
   }, [])
 
-  const posters = movies
-    ? movies.map((m) => getImageUrl(m.poster_path) || '').filter(Boolean)
-    : POSTERS
-
-  const displayPosters = posters.length > 0 ? posters : POSTERS
+  const displayMovies: Array<Movie> =
+    movies && movies.length > 0 ? movies : FALLBACK_POSTERS
 
   return (
     <div className="flex flex-col md:flex-row min-h-[600px]">
@@ -80,19 +213,10 @@ function LoginDialogContent() {
           >
             <div className="flex flex-col gap-4 motion-safe:animate-poster-scroll">
               {[...Array(12)].map((_, i) => (
-                <div
+                <MoviePosterCard
                   key={`col1-${i}`}
-                  className="aspect-[2/3] rounded-md bg-muted shadow-2xl overflow-hidden shrink-0"
-                >
-                  <img
-                    src={displayPosters[i % displayPosters.length]}
-                    className="w-full h-full object-cover"
-                    alt=""
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                </div>
+                  movie={displayMovies[i % displayMovies.length]}
+                />
               ))}
             </div>
             <div
@@ -103,19 +227,10 @@ function LoginDialogContent() {
               }}
             >
               {[...Array(12)].map((_, i) => (
-                <div
+                <MoviePosterCard
                   key={`col2-${i}`}
-                  className="aspect-[2/3] rounded-md bg-muted shadow-2xl overflow-hidden shrink-0"
-                >
-                  <img
-                    src={displayPosters[(i + 3) % displayPosters.length]}
-                    className="w-full h-full object-cover"
-                    alt=""
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                </div>
+                  movie={displayMovies[(i + 3) % displayMovies.length]}
+                />
               ))}
             </div>
             <div
@@ -123,19 +238,10 @@ function LoginDialogContent() {
               style={{ animationDuration: '90s' }}
             >
               {[...Array(12)].map((_, i) => (
-                <div
+                <MoviePosterCard
                   key={`col3-${i}`}
-                  className="aspect-[2/3] rounded-md bg-muted shadow-2xl overflow-hidden shrink-0"
-                >
-                  <img
-                    src={displayPosters[(i + 6) % displayPosters.length]}
-                    className="w-full h-full object-cover"
-                    alt=""
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                </div>
+                  movie={displayMovies[(i + 6) % displayMovies.length]}
+                />
               ))}
             </div>
           </div>
@@ -167,9 +273,10 @@ function LoginDialogContent() {
             <span className="font-bold text-xl tracking-tight">MovieClub</span>
           </div>
 
-          <div className="mt-auto mb-4">
-            <h2 className="text-3xl font-bold leading-tight mb-4"></h2>
-            <p className="text-muted-foreground text-lg"></p>
+          <div className="mt-auto">
+            <p className="text-sm text-muted-foreground/70 italic">
+              "The movies we love are the ones we watch together."
+            </p>
           </div>
         </div>
       </div>

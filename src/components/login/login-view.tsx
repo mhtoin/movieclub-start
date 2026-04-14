@@ -127,9 +127,26 @@ export default function LoginView({
         >
           {isPending ? 'Signing in...' : 'Sign In'}
           {lastUsedMethod === 'password' && !isPending && (
-            <span className="absolute right-4 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-secondary backdrop-blur-sm border border-border/30 text-secondary-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-white" />
-              Last used
+            <span className="absolute right-4 inline-flex items-center gap-1 text-xs font-medium text-primary-foreground/70">
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  className="stroke-current"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle
+                  cx="12"
+                  cy="7"
+                  r="4"
+                  className="stroke-current"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Welcome back
             </span>
           )}
         </Button>
