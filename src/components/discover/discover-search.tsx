@@ -65,11 +65,14 @@ export function DiscoverSearchInput({
         className="pl-9 pr-8 h-8 text-sm bg-muted/50 border-muted-foreground/10 focus-visible:bg-background"
         size="sm"
         ref={inputRef}
+        aria-label="Search movies"
+        maxLength={200}
       />
       {localSearch && (
         <button
           onClick={handleClearSearch}
           className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center rounded-full hover:bg-muted-foreground/10 text-muted-foreground/50 hover:text-foreground transition-colors"
+          aria-label="Clear search"
         >
           <X className="h-3 w-3" />
         </button>
@@ -87,7 +90,7 @@ export function SearchBanner({ query, onClear }: SearchBannerProps) {
   return (
     <div className="mx-4 mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/8 border border-primary/15">
       <Search className="h-3.5 w-3.5 text-primary/70 flex-shrink-0" />
-      <span className="text-sm text-foreground/80">
+      <span className="text-sm text-foreground/80 truncate">
         Showing results for{' '}
         <span className="font-medium text-foreground">
           &ldquo;{query}&rdquo;

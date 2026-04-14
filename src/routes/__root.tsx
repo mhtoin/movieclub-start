@@ -12,8 +12,46 @@ import { getThemeAndSchemeServerFn } from '@/lib/color-scheme'
 import { persister, queryClient } from '@/lib/query-client'
 import type { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { Link } from '@tanstack/react-router'
+import { Home, Search } from 'lucide-react'
 import { Suspense, lazy } from 'react'
 import appCss from '../styles.css?url'
+
+function NotFound() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="max-w-md w-full space-y-8 text-center">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold text-foreground">404</h1>
+          <p className="text-xl font-semibold text-foreground">
+            Page not found
+          </p>
+          <p className="text-sm text-muted-foreground">
+            The page you&apos;re looking for doesn&apos;t exist or has been
+            moved.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Home className="h-4 w-4" />
+            Go Home
+          </Link>
+          <Link
+            to="/discover"
+            className="inline-flex items-center gap-2 px-4 py-2 border border-input bg-background text-foreground rounded-lg text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <Search className="h-4 w-4" />
+            Discover Movies
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const Devtools = import.meta.env.DEV
   ? lazy(async () => {
@@ -49,6 +87,7 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
 }>()({
   errorComponent: ErrorComponent,
+  notFoundComponent: NotFound,
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -98,6 +137,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     >
       <head>
         <HeadContent />
+        <meta
+          name="description"
+          content="Movie club for picking and tracking movies together"
+        />
       </head>
 
       <body>

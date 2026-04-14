@@ -1,7 +1,7 @@
+import { ArrowLeft, Plus } from 'lucide-react'
+import type { TMDBMovieResponse } from '@/types/tmdb'
 import { Button } from '@/components/ui/button'
 import { getImageUrl } from '@/lib/tmdb-api'
-import { TMDBMovieResponse } from '@/types/tmdb'
-import { ArrowLeft, Plus } from 'lucide-react'
 
 interface MovieDetailsViewProps {
   title: string
@@ -180,7 +180,11 @@ export function MovieDetailsView({
                 <div className="rounded-lg bg-secondary/30 p-2.5">
                   <p className="text-muted-foreground mb-0.5 text-xs">Budget</p>
                   <p className="font-medium text-sm">
-                    ${(movieDetails.budget / 1000000).toFixed(0)}M
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                      maximumFractionDigits: 0,
+                    }).format(movieDetails.budget)}
                   </p>
                 </div>
               )}
@@ -190,7 +194,11 @@ export function MovieDetailsView({
                     Revenue
                   </p>
                   <p className="font-medium text-sm">
-                    ${(movieDetails.revenue / 1000000).toFixed(0)}M
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                      maximumFractionDigits: 0,
+                    }).format(movieDetails.revenue)}
                   </p>
                 </div>
               )}
@@ -208,6 +216,7 @@ export function MovieDetailsView({
           className="gap-2 w-full"
           variant={'primary'}
           loading={isPending}
+          disabled={isPending}
           onClick={onAddToShortlist}
         >
           <Plus className="h-4 w-4" />

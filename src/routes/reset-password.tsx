@@ -1,9 +1,19 @@
 import { Form } from '@base-ui/react/form'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { z } from 'zod'
 import { Button, buttonVariants } from '@/components/ui/button'
 import Field from '@/components/ui/field'
 import { useResetPasswordMutation } from '@/lib/react-query/mutations/auth'
+
+const resetPasswordSchema = z.object({
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(72, 'Password must be 72 characters or fewer'),
+})
+
+type ResetErrors = Partial<Record<'password' | 'form', string>>
 
 export const Route = createFileRoute('/reset-password')({
   component: ResetPasswordPage,
@@ -16,8 +26,7 @@ export const Route = createFileRoute('/reset-password')({
 
 function ResetPasswordPage() {
   const { token } = Route.useSearch()
-  const [errors, setErrors] = useState({})
-  const [isResetting, setIsResetting] = useState(false)
+  const [errors, setErrors] = useState<ResetErrors>({})
   const [isSuccess, setIsSuccess] = useState(false)
   const resetPasswordMutation = useResetPasswordMutation()
 
@@ -37,27 +46,42 @@ function ResetPasswordPage() {
     )
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
-    const password = formData.get('password') as string
+    const values = {
+      password: (formData.get('password') as string) || '',
+    }
 
-    setIsResetting(true)
+    const result = resetPasswordSchema.safeParse(values)
+    if (!result.success) {
+      const fieldErrors: ResetErrors = {}
+      for (const issue of result.error.issues) {
+        const key = issue.path[0] as string | undefined
+        if (key && !fieldErrors[key as keyof ResetErrors]) {
+          fieldErrors[key as keyof ResetErrors] = issue.message
+        }
+      }
+      setErrors(fieldErrors)
+      return
+    }
+
+    setErrors({})
 
     resetPasswordMutation.mutate(
-      { token, password },
+      { token, password: result.data.password },
       {
         onSuccess: () => {
           setIsSuccess(true)
-          setIsResetting(false)
         },
         onError: (error) => {
           setErrors({ form: error.message })
-          setIsResetting(false)
         },
       },
     )
   }
+
+  const isPending = resetPasswordMutation.isPending
 
   if (isSuccess) {
     return (
@@ -91,29 +115,37 @@ function ResetPasswordPage() {
           errors={errors}
           onSubmit={handleSubmit}
         >
-          <fieldset disabled={isResetting} className="contents">
+          <fieldset disabled={isPending} className="contents">
             <Field
               name="password"
               label="New Password"
               type="password"
               required
-              placeholder="Enter new password"
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+              maxLength={72}
+              hint="Must be at least 8 characters"
             />
           </fieldset>
 
-          {resetPasswordMutation.error && (
-            <div className="text-sm text-red-600 text-center">
-              {resetPasswordMutation.error.message || 'Password reset failed'}
+          {errors.form && (
+            <div
+              className="rounded-md bg-destructive/10 p-3 text-center"
+              role="alert"
+            >
+              <p className="text-sm font-medium text-destructive">
+                {errors.form}
+              </p>
             </div>
           )}
 
           <Button
-            disabled={isResetting}
+            disabled={isPending}
             type="submit"
             variant="primary"
             className="w-full mt-4"
           >
-            {isResetting ? 'Resetting...' : 'Reset Password'}
+            {isPending ? 'Resetting...' : 'Reset Password'}
           </Button>
         </Form>
       </div>

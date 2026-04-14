@@ -120,7 +120,7 @@ export function WatchedItem({
                   />
                 </div>
                 <div className="flex-grow min-w-0 space-y-2">
-                  <h2 className="text-xl md:text-2xl font-bold leading-tight">
+                  <h2 className="text-xl md:text-2xl font-bold leading-tight line-clamp-3">
                     {movie?.title}
                   </h2>
                   {movie?.tagline && (
@@ -168,8 +168,10 @@ export function WatchedItem({
                       size={32}
                     />
                     <div>
-                      <p className="text-xs text-muted-foreground">Chosen by</p>
-                      <p className="text-sm font-semibold">{user.name}</p>
+                      <p className="text-sm text-muted-foreground">Chosen by</p>
+                      <p className="text-sm font-semibold truncate">
+                        {user.name}
+                      </p>
                     </div>
                   </div>
                 </routeApi.Link>
@@ -258,7 +260,7 @@ export function WatchedItem({
             <div className="flex-grow min-w-0">
               <div className="grid grid-cols-8 gap-4">
                 <div className="flex-grow min-w-0 col-span-6">
-                  <h3 className="font-semibold text-lg leading-tight mb-1 group-hover:text-primary transition-colors">
+                  <h3 className="font-semibold text-lg leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-2">
                     {movie?.title}
                   </h3>
                   {watchDate && (
@@ -289,8 +291,8 @@ export function WatchedItem({
                       size={32}
                     />
 
-                    <div className="text-sm">
-                      <p className="font-medium">{user.name}</p>
+                    <div className="text-sm min-w-0">
+                      <p className="font-medium truncate">{user.name}</p>
                       <p className="text-muted-foreground">Chosen by</p>
                     </div>
                   </div>
@@ -339,7 +341,9 @@ export function WatchedItem({
                 />
               </div>
               <div className="flex-grow space-y-3">
-                <h2 className="text-3xl font-bold">{movie?.title}</h2>
+                <h2 className="text-3xl font-bold line-clamp-3">
+                  {movie?.title}
+                </h2>
                 {movie?.tagline && (
                   <p className="text-lg italic text-muted-foreground">
                     {movie?.tagline}

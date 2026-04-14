@@ -904,6 +904,17 @@
     font-family:
       source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
@@ -979,6 +990,26 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .truncate-multiline {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .truncate-2 {
+    -webkit-line-clamp: 2;
+  }
+
+  .truncate-3 {
+    -webkit-line-clamp: 3;
+  }
+
+  .break-word {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   /* Safe area utilities for mobile devices */

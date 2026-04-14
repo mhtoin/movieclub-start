@@ -41,11 +41,11 @@ export function MovieOverviewView({
     <>
       <div className="space-y-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight leading-tight">
+          <h2 className="text-2xl font-bold tracking-tight leading-tight line-clamp-3">
             {title}
           </h2>
           {originalTitle !== title && (
-            <p className="text-sm text-muted-foreground mt-0.5 italic">
+            <p className="text-sm text-muted-foreground mt-0.5 italic line-clamp-1">
               {originalTitle}
             </p>
           )}
@@ -117,6 +117,7 @@ export function MovieOverviewView({
             className={`gap-2 ${compact ? 'w-full' : 'flex-1'}`}
             variant={'primary'}
             loading={isPending}
+            disabled={isPending}
             onClick={onAddToShortlist}
           >
             <Plus className="h-4 w-4" />

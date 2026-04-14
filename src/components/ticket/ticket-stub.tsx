@@ -1,7 +1,7 @@
 import { getStubClass } from './ticket-helpers'
 import { TicketStamp } from './ticket-stamp'
-import Avatar from '@/components/ui/avatar'
 import type { ShortlistWithUserMovies } from '@/db/schema'
+import Avatar from '@/components/ui/avatar'
 
 interface TicketStubProps {
   shortlist: ShortlistWithUserMovies
@@ -31,7 +31,7 @@ export function TicketStub({
           decoding="async"
         />
         <p
-          className={`text-[11px] font-semibold text-center break-words leading-[1.3] mt-2 max-w-[60px] text-foreground ${
+          className={`text-[11px] font-semibold text-center leading-[1.3] mt-2 max-w-[60px] text-foreground line-clamp-2 ${
             !participating ? 'line-through opacity-50' : ''
           }`}
         >

@@ -1,3 +1,8 @@
+import { Toast } from '@base-ui/react/toast'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
+import { ChevronRight, Plus, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DialogBackdrop,
@@ -16,11 +21,6 @@ import {
 import { createTierlist } from '@/lib/react-query/mutations/tierlists'
 import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { Toast } from '@base-ui/react/toast'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { format } from 'date-fns'
-import { ChevronRight, Plus, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
 
 export function CreateTierlistDialog({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false)
@@ -33,7 +33,7 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
   const [watchDateTo, setWatchDateTo] = useState<Date | undefined>(undefined)
   const [fromYear, setFromYear] = useState<string>('')
   const [toYear, setToYear] = useState<string>('')
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([])
+  const [selectedGenres, setSelectedGenres] = useState<Array<string>>([])
   const [tiers, setTiers] = useState([
     { label: 'S', value: 0 },
     { label: 'A', value: 1 },
@@ -230,8 +230,14 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Title</label>
+                    <label
+                      htmlFor="tierlist-title"
+                      className="text-sm font-medium"
+                    >
+                      Title
+                    </label>
                     <Input
+                      id="tierlist-title"
                       required
                       autoFocus
                       value={title}
@@ -240,6 +246,7 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
                       }
                       placeholder="My Movie Rankings"
                       className="h-11"
+                      maxLength={100}
                     />
                   </div>
 
@@ -385,6 +392,7 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
                           updateTierLabel(index, e.target.value)
                         }
                         className="h-9"
+                        maxLength={30}
                       />
                       <Button
                         type="button"

@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface CompactStatProps {
   label: string
@@ -42,11 +42,15 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <div className="relative overflow-hidden rounded-lg border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/50">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-muted-foreground truncate">
+            {title}
+          </p>
           <div className="mt-2 flex items-baseline gap-2">
-            <h3 className="text-3xl font-bold tracking-tight">{value}</h3>
+            <h3 className="text-3xl font-bold tracking-tight truncate">
+              {value}
+            </h3>
             {trend && (
               <span
                 className={`text-xs font-medium ${

@@ -74,7 +74,7 @@ export function ShortlistCard({
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-card" />
           </div>
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+            <span className="text-sm font-semibold text-foreground truncate max-w-[120px]">
               {shortlist.user.name}
             </span>
             <div className="flex items-center text-xs px-2 py-0.5 rounded-full whitespace-nowrap">

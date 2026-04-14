@@ -1,8 +1,19 @@
 import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
+import { z } from 'zod'
 import { Button } from '../ui/button'
 import Field from '../ui/field'
 import { useRequestPasswordResetMutation } from '@/lib/react-query/mutations/auth'
+
+const requestResetSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email'),
+})
+
+type ResetFormErrors = Partial<Record<'email' | 'form', string>>
 
 interface ResetPasswordViewProps {
   onSwitchToLogin: () => void
@@ -11,34 +22,44 @@ interface ResetPasswordViewProps {
 export default function ResetPasswordView({
   onSwitchToLogin,
 }: ResetPasswordViewProps) {
-  const [errors, setErrors] = useState({})
-  const [isRequesting, setIsRequesting] = useState(false)
+  const [errors, setErrors] = useState<ResetFormErrors>({})
   const [isSuccess, setIsSuccess] = useState(false)
   const requestPasswordResetMutation = useRequestPasswordResetMutation()
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
 
-    const email = formData.get('email') as string
+    const values = {
+      email: (formData.get('email') as string) || '',
+    }
 
-    setIsRequesting(true)
+    const result = requestResetSchema.safeParse(values)
+    if (!result.success) {
+      const fieldErrors: ResetFormErrors = {}
+      for (const issue of result.error.issues) {
+        const key = issue.path[0] as string | undefined
+        if (key && !fieldErrors[key as keyof ResetFormErrors]) {
+          fieldErrors[key as keyof ResetFormErrors] = issue.message
+        }
+      }
+      setErrors(fieldErrors)
+      return
+    }
 
-    requestPasswordResetMutation.mutate(
-      { email },
-      {
-        onSuccess: () => {
-          setIsSuccess(true)
-          setIsRequesting(false)
-        },
-        onError: (error) => {
-          console.error('Password reset request failed:', error)
-          setErrors({ form: error.message })
-          setIsRequesting(false)
-        },
+    setErrors({})
+
+    requestPasswordResetMutation.mutate(result.data, {
+      onSuccess: () => {
+        setIsSuccess(true)
       },
-    )
+      onError: (error) => {
+        setErrors({ form: error.message })
+      },
+    })
   }
+
+  const isPending = requestPasswordResetMutation.isPending
 
   if (isSuccess) {
     return (
@@ -48,8 +69,8 @@ export default function ResetPasswordView({
             Check your email
           </h1>
           <p className="text-sm text-muted-foreground">
-            If an account exists with that email, we've sent a password reset
-            link.
+            If an account exists with that email, we&apos;ve sent a password
+            reset link.
           </p>
         </div>
         <Button
@@ -79,30 +100,33 @@ export default function ResetPasswordView({
         errors={errors}
         onSubmit={handleSubmit}
       >
-        <fieldset disabled={isRequesting} className="contents">
+        <fieldset disabled={isPending} className="contents">
           <Field
             name="email"
             label="Email"
             type="email"
             required
             placeholder="user@example.com"
+            autoComplete="email"
+            maxLength={254}
           />
         </fieldset>
 
-        {requestPasswordResetMutation.error && (
-          <div className="text-sm text-red-600">
-            {requestPasswordResetMutation.error.message ||
-              'Failed to request password reset'}
+        {errors.form && (
+          <div className="rounded-md bg-destructive/10 p-3" role="alert">
+            <p className="text-sm font-medium text-destructive">
+              {errors.form}
+            </p>
           </div>
         )}
 
         <Button
-          disabled={isRequesting}
+          disabled={isPending}
           type="submit"
           variant={'primary'}
           className="w-full mt-2"
         >
-          {isRequesting ? 'Sending...' : 'Send Reset Link'}
+          {isPending ? 'Sending...' : 'Send Reset Link'}
         </Button>
       </Form>
 

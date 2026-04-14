@@ -1,14 +1,79 @@
-import { ErrorComponentProps } from '@tanstack/react-router'
 import { Button } from './ui/button'
+import type { ErrorComponentProps } from '@tanstack/react-router'
+
+const DB_ERROR_PATTERNS = [
+  'Failed query',
+  'ECONNREFUSED',
+  'connection',
+  'relation',
+  'database',
+]
+
+const RATE_LIMIT_MESSAGES = ['Too many attempts', 'rate limit', '429']
+
+function classifyError(error: Error | undefined): {
+  type: 'database' | 'rate-limit' | 'not-found' | 'unauthorized' | 'generic'
+  userMessage: string
+  detail: string
+} {
+  const msg = error?.message ?? ''
+
+  if (DB_ERROR_PATTERNS.some((p) => msg.includes(p))) {
+    return {
+      type: 'database',
+      userMessage: 'Service temporarily unavailable',
+      detail:
+        'We\u2019re having trouble connecting to our services. This is usually temporary.',
+    }
+  }
+
+  if (RATE_LIMIT_MESSAGES.some((p) => msg.toLowerCase().includes(p))) {
+    return {
+      type: 'rate-limit',
+      userMessage: 'Too many requests',
+      detail:
+        'You\u2019ve made too many attempts. Please wait a moment and try again.',
+    }
+  }
+
+  if (msg.includes('404') || msg.includes('Not Found')) {
+    return {
+      type: 'not-found',
+      userMessage: 'Page not found',
+      detail:
+        'The page you\u2019re looking for doesn\u2019t exist or has been moved.',
+    }
+  }
+
+  if (
+    msg.includes('401') ||
+    msg.includes('403') ||
+    msg.includes('Unauthorized')
+  ) {
+    return {
+      type: 'unauthorized',
+      userMessage: 'Access denied',
+      detail:
+        "You don't have permission to view this page. Try signing in again.",
+    }
+  }
+
+  return {
+    type: 'generic',
+    userMessage: 'Something went wrong',
+    detail:
+      'An unexpected error occurred. Please try again or go back to the home page.',
+  }
+}
 
 export function ErrorComponent({ error, reset }: ErrorComponentProps) {
-  const isDatabaseError =
-    error?.message?.includes('Failed query') ||
-    error?.message?.includes('ECONNREFUSED') ||
-    error?.message?.includes('connection')
+  const { type, userMessage, detail } = classifyError(error)
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div
+      className="flex min-h-screen items-center justify-center bg-background px-4"
+      role="alert"
+    >
       <div className="w-full max-w-md space-y-6 rounded-lg border border-border bg-card p-8 shadow-lg">
         <div className="space-y-2 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
@@ -17,6 +82,7 @@ export function ErrorComponent({ error, reset }: ErrorComponentProps) {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -26,48 +92,31 @@ export function ErrorComponent({ error, reset }: ErrorComponentProps) {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {isDatabaseError
-              ? 'Database Connection Error'
-              : 'Something went wrong'}
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">{userMessage}</h1>
         </div>
 
         <div className="space-y-4">
-          {/* This is mostly for myself for when I forget to start the db */}
-          {isDatabaseError ? (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Unable to connect to the database. This usually happens when:
+          <div className="rounded-md bg-muted p-4">
+            <p className="text-sm text-muted-foreground">{detail}</p>
+          </div>
+
+          {type === 'database' && process.env.NODE_ENV === 'development' && (
+            <div className="rounded-md bg-muted p-4">
+              <p className="text-xs font-semibold text-muted-foreground">
+                Development hint:
               </p>
-              <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
-                <li>The database server is not running</li>
-                <li>Database connection configuration is incorrect</li>
-                <li>Network connectivity issues</li>
-              </ul>
-              <div className="mt-4 rounded-md bg-muted p-4">
-                <p className="text-xs font-semibold text-muted-foreground">
-                  Try running:
-                </p>
-                <code className="mt-1 block text-xs text-foreground">
-                  pnpm db:start
-                </code>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-md bg-destructive/10 p-4">
-              <p className="text-sm font-medium text-destructive">
-                {error?.message || 'An unexpected error occurred'}
-              </p>
+              <code className="mt-1 block text-xs text-foreground">
+                pnpm db:start
+              </code>
             </div>
           )}
 
-          {process.env.NODE_ENV === 'development' && error?.stack && (
+          {process.env.NODE_ENV === 'development' && error.stack && (
             <details className="text-xs">
               <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
                 Error details
               </summary>
-              <pre className="mt-2 overflow-x-auto rounded-md bg-muted p-2 text-xs">
+              <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-words rounded-md bg-muted p-2 text-xs">
                 {error.stack}
               </pre>
             </details>

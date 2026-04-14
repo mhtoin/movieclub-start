@@ -1,6 +1,7 @@
-import { cn } from '@/lib/utils'
 import { Field as BaseField } from '@base-ui/react/field'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
+import type { VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
 
 const fieldVariants = cva('flex flex-col items-start gap-1', {
   variants: {
@@ -29,7 +30,7 @@ const labelVariants = cva('font-medium text-foreground', {
 })
 
 const controlVariants = cva(
-  'w-full rounded-md border border-gray-200 pl-3.5 text-foreground focus:outline focus:outline-2 focus:-outline-offset-1 focus:outline-primary',
+  'w-full rounded-md border border-input bg-background pl-3.5 text-foreground focus:outline focus:outline-2 focus:-outline-offset-1 focus:outline-primary',
   {
     variants: {
       size: {
@@ -44,7 +45,7 @@ const controlVariants = cva(
   },
 )
 
-const errorVariants = cva('text-red-800', {
+const errorVariants = cva('text-destructive text-sm', {
   variants: {
     size: {
       sm: 'text-xs',
@@ -68,6 +69,10 @@ interface FieldProps extends VariantProps<typeof fieldVariants> {
   labelClassName?: string
   controlClassName?: string
   errorClassName?: string
+  hint?: string
+  maxLength?: number
+  autoComplete?: string
+  pattern?: string
 }
 
 export default function Field({
@@ -82,13 +87,17 @@ export default function Field({
   labelClassName,
   controlClassName,
   errorClassName,
-  ...props
+  hint,
+  maxLength,
+  autoComplete,
+  pattern,
 }: FieldProps) {
+  const hintId = hint ? `${name}-hint` : undefined
+
   return (
     <BaseField.Root
       name={name}
       className={cn(fieldVariants({ size }), className)}
-      {...props}
     >
       <BaseField.Label className={cn(labelVariants({ size }), labelClassName)}>
         {label}
@@ -98,8 +107,17 @@ export default function Field({
         required={required}
         defaultValue={defaultValue}
         placeholder={placeholder}
+        maxLength={maxLength}
+        autoComplete={autoComplete}
+        pattern={pattern}
+        aria-describedby={hintId}
         className={cn(controlVariants({ size }), controlClassName)}
       />
+      {hint && (
+        <p id={hintId} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      )}
       <BaseField.Error
         className={cn(errorVariants({ size }), errorClassName)}
       />

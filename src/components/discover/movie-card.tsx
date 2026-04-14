@@ -33,7 +33,7 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-muted">
-              <span className="text-xs text-muted-foreground text-center px-1">
+              <span className="text-sm text-muted-foreground px-2 text-center line-clamp-2">
                 {movie.title}
               </span>
             </div>
