@@ -44,7 +44,7 @@ export default function OAuthProviders({
           <span className="text-muted-foreground">Continue with</span>
           <span className="font-medium text-foreground">Google</span>
           {lastUsedMethod === 'google' && (
-            <span className="absolute right-3 inline-flex items-center gap-1 text-xs font-medium text-foreground/70">
+            <span className="absolute -top-2 -right-2 inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 bg-primary text-primary-foreground rounded-full shadow-sm">
               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
@@ -77,7 +77,7 @@ export default function OAuthProviders({
           <span className="text-muted-foreground">Continue with</span>
           <span className="font-medium text-foreground">Discord</span>
           {lastUsedMethod === 'discord' && (
-            <span className="absolute right-3 inline-flex items-center gap-1 text-xs font-medium text-foreground/70">
+            <span className="absolute -top-2 -right-2 inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 bg-primary text-primary-foreground rounded-full shadow-sm">
               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
