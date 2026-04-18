@@ -891,6 +891,11 @@
 }
 
 @layer base {
+  * {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
   body {
     @apply m-0 bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
@@ -898,6 +903,8 @@
     min-height: 100vh;
     overflow-x: hidden;
     isolation: isolate;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   code {
@@ -990,6 +997,29 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Mobile performance optimizations */
+  @media (max-width: 768px) {
+    .animate-fade-in,
+    .animate-fade-in-up,
+    .animate-scale-in {
+      animation-duration: 0.2s;
+    }
+
+    /* Reduce backdrop blur on mobile for better performance */
+    .backdrop-blur-xl {
+      backdrop-filter: blur(8px);
+    }
+
+    .backdrop-blur-2xl {
+      backdrop-filter: blur(12px);
+    }
+
+    /* Disable complex animations on mobile */
+    .bg-projector {
+      display: none;
+    }
   }
 
   .truncate-multiline {
@@ -1229,26 +1259,35 @@
     height: 200%;
     pointer-events: none;
     opacity: 0.035;
+    will-change: transform;
     animation: grainShift 8s steps(4) infinite;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-size: 256px 256px;
   }
 
-  @keyframes grainShift {
-    0% {
-      transform: translate(0, 0);
+  @media (prefers-reduced-motion: reduce) {
+    .bg-projector__grain {
+      animation: none;
     }
-    25% {
-      transform: translate(-5%, -5%);
-    }
-    50% {
-      transform: translate(5%, 5%);
-    }
-    75% {
-      transform: translate(-2%, 3%);
-    }
-    100% {
-      transform: translate(0, 0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes grainShift {
+      0% {
+        transform: translate(0, 0);
+      }
+      25% {
+        transform: translate(-5%, -5%);
+      }
+      50% {
+        transform: translate(5%, 5%);
+      }
+      75% {
+        transform: translate(-2%, 3%);
+      }
+      100% {
+        transform: translate(0, 0);
+      }
     }
   }
 
@@ -1284,11 +1323,20 @@
   }
 
   .bg-projector__beam {
+    will-change: transform;
     animation: projectorBeamSway 16s ease-in-out infinite;
   }
 
   .bg-projector__halo {
+    will-change: transform, opacity;
     animation: projectorHaloPulse 5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-projector__beam,
+    .bg-projector__halo {
+      animation: none;
+    }
   }
 
   :is(.light) .bg-projector__dust {
@@ -1300,23 +1348,36 @@
   }
 
   .bg-projector__dust--1 {
+    will-change: transform, opacity;
     animation: dustFloat1 18s ease-in-out infinite;
     animation-delay: 0s;
   }
 
   .bg-projector__dust--2 {
+    will-change: transform, opacity;
     animation: dustFloat2 14s ease-in-out infinite;
     animation-delay: -5s;
   }
 
   .bg-projector__dust--3 {
+    will-change: transform, opacity;
     animation: dustFloat1 22s ease-in-out infinite reverse;
     animation-delay: -9s;
   }
 
   .bg-projector__dust--4 {
+    will-change: transform, opacity;
     animation: dustFloat2 17s ease-in-out infinite reverse;
     animation-delay: -13s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-projector__dust--1,
+    .bg-projector__dust--2,
+    .bg-projector__dust--3,
+    .bg-projector__dust--4 {
+      animation: none;
+    }
   }
 
   :is(.light) .bg-projector__device {

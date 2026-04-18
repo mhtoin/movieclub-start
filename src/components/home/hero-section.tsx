@@ -1,6 +1,3 @@
-import { Button } from '@/components/ui/button'
-import type { MovieWithCredits } from '@/db/schema/movies'
-import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   Calendar,
@@ -14,6 +11,12 @@ import {
   Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import type { MovieWithCredits } from '@/db/schema/movies'
+
+import { Link } from '@tanstack/react-router'
+
 import { fadeInUp, staggerContainer } from './animation-variants'
 import { HeroBackdrop } from './hero-backdrop'
 
@@ -27,18 +30,25 @@ export function HeroSection({ movie }: HeroSectionProps) {
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
+    let ticking = false
     const handleScroll = () => {
-      const scrollContainer = document.querySelector(
-        '[class*=\"overflow-auto\"]',
-      )
-      const scrolled = scrollContainer
-        ? scrollContainer.scrollTop
-        : window.scrollY
-      if (scrolled > 10) {
-        setHasScrolled(true)
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollContainer = document.querySelector(
+            '[class*=overflow-auto]',
+          )
+          const scrolled = scrollContainer
+            ? scrollContainer.scrollTop
+            : window.scrollY
+          if (scrolled > 10) {
+            setHasScrolled(true)
+          }
+          ticking = false
+        })
+        ticking = true
       }
     }
-    const scrollContainer = document.querySelector('[class*=\"overflow-auto\"]')
+    const scrollContainer = document.querySelector('[class*=overflow-auto]')
     scrollContainer?.addEventListener('scroll', handleScroll, { passive: true })
     return () => scrollContainer?.removeEventListener('scroll', handleScroll)
   }, [])
@@ -92,9 +102,9 @@ export function HeroSection({ movie }: HeroSectionProps) {
         <div className="w-full px-6 sm:px-8 md:pl-[72px] md:pr-12 lg:pl-20 lg:pr-16">
           <motion.div
             className="mx-auto max-w-7xl px-5"
-            variants={staggerContainer}
-            initial="initial"
+            initial={shouldReduceMotion ? false : 'initial'}
             animate="animate"
+            variants={staggerContainer}
           >
             <motion.div variants={fadeInUp} className="mb-8">
               {logoUrl ? (

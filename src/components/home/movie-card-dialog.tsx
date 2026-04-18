@@ -92,9 +92,9 @@ export function MovieCardDialog({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: prefersSimpleAnimations ? 0.15 : 0.3 }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-black/80"
           />
 
           <div
@@ -134,13 +134,21 @@ export function MovieCardDialog({
               }}
             >
               <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={
+                  prefersSimpleAnimations
+                    ? { opacity: 1, scale: 1 }
+                    : { opacity: 0, scale: 0.8 }
+                }
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ delay: 0.1 }}
+                exit={
+                  prefersSimpleAnimations
+                    ? { opacity: 0, scale: 0.8 }
+                    : { opacity: 0, scale: 0.8 }
+                }
+                transition={{ delay: prefersSimpleAnimations ? 0 : 0.1 }}
                 onClick={() => onOpenChange(false)}
                 aria-label="Close dialog"
-                className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition-all hover:bg-black/80 hover:scale-110"
+                className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition-all hover:bg-black/80 active:scale-95"
               >
                 <X className="h-5 w-5" />
               </motion.button>
@@ -173,18 +181,31 @@ export function MovieCardDialog({
                   <div className="absolute inset-0 bg-gradient-to-r from-card/80 via-transparent to-transparent" />
                 </div>
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={
+                    prefersSimpleAnimations
+                      ? { opacity: 1, y: 0 }
+                      : { opacity: 0, y: 20 }
+                  }
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15, duration: 0.3 }}
+                  transition={{
+                    delay: prefersSimpleAnimations ? 0 : 0.15,
+                    duration: prefersSimpleAnimations ? 0.15 : 0.3,
+                  }}
                   className="relative -mt-24 px-6 pb-8 md:px-8"
                 >
                   <div className="relative z-10">
                     <div>
                       <motion.div
-                        initial={{ opacity: 0, scale: 0.8, y: -10 }}
+                        initial={
+                          prefersSimpleAnimations
+                            ? { opacity: 1, scale: 1, y: 0 }
+                            : { opacity: 0, scale: 0.8, y: -10 }
+                        }
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ delay: 0.15 }}
-                        className="absolute right-6 top-6 flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-base font-semibold text-white backdrop-blur-md"
+                        transition={{
+                          delay: prefersSimpleAnimations ? 0 : 0.15,
+                        }}
+                        className="absolute right-6 top-6 flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-base font-semibold text-white"
                       >
                         <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                         {movie.vote_average.toFixed(1)}

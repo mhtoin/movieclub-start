@@ -1,21 +1,29 @@
-import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
-import type { TMDBMovie } from '@/lib/react-query/queries/home'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Calendar, Film, Star } from 'lucide-react'
 import { useState } from 'react'
+
+import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
+import type { TMDBMovie } from '@/lib/react-query/queries/home'
+
 import { MovieCardDialog } from './movie-card-dialog'
 
 interface MovieCardProps {
   movie: TMDBMovie
   index: number
+  isLowEnd?: boolean
 }
 
-export function MovieCard({ movie, index }: MovieCardProps) {
+export function MovieCard({
+  movie,
+  index,
+  isLowEnd: isLowEndProp,
+}: MovieCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const shouldReduceMotion = useReducedMotion()
   const isLowEndDevice = useIsLowEndDevice()
-  const prefersSimpleAnimations = shouldReduceMotion || isLowEndDevice
+  const prefersSimpleAnimations =
+    (shouldReduceMotion || isLowEndProp) ?? isLowEndDevice
   const backdropUrl = movie.backdrop_path
     ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
     : null
@@ -40,9 +48,12 @@ export function MovieCard({ movie, index }: MovieCardProps) {
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={prefersSimpleAnimations ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.05, duration: 0.3 }}
+        transition={{
+          delay: prefersSimpleAnimations ? 0 : index * 0.05,
+          duration: prefersSimpleAnimations ? 0.15 : 0.3,
+        }}
         className="flex-shrink-0"
       >
         <button
@@ -55,7 +66,7 @@ export function MovieCard({ movie, index }: MovieCardProps) {
           <motion.div
             layoutId={prefersSimpleAnimations ? undefined : layoutId}
             layoutDependency={isOpen}
-            transition={{ layout: layoutTransition }}
+            transition={layoutTransition}
             className="relative h-[200px] w-[320px] overflow-hidden rounded-2xl border border-border/30 bg-card shadow-xl sm:h-[240px] sm:w-[400px]"
           >
             {backdropUrl ? (
@@ -126,12 +137,14 @@ export function MovieCard({ movie, index }: MovieCardProps) {
                 )}
               </div>
               <motion.p
-                initial={{ opacity: 0, height: 0 }}
+                initial={
+                  prefersSimpleAnimations ? false : { opacity: 0, height: 0 }
+                }
                 animate={{
                   opacity: isHovered ? 1 : 0,
                   height: isHovered ? 'auto' : 0,
                 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: prefersSimpleAnimations ? 0.1 : 0.2 }}
                 className="mt-2 line-clamp-2 text-xs leading-relaxed text-white/70 sm:text-sm text-left"
               >
                 {movie.overview}

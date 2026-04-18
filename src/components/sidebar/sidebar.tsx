@@ -300,7 +300,7 @@ export default function Sidebar() {
       </div>
 
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pt-2">
-        <nav className="relative flex items-center justify-around bg-sidebar/95 backdrop-blur-xl border border-sidebar-border/40 rounded-2xl shadow-xl shadow-black/10 px-2 py-2">
+        <nav className="relative flex items-center justify-around bg-sidebar/95 border border-sidebar-border/40 rounded-2xl shadow-xl shadow-black/10 px-2 py-2">
           <div className="absolute left-2 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-sidebar-border/50 to-transparent" />
           <div className="absolute right-2 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-sidebar-border/50 to-transparent" />
 

@@ -1,9 +1,11 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useCallback, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
+
 import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
 import type { TMDBMovie } from '@/lib/react-query/queries/home'
 import { cn } from '@/lib/utils'
-import { LayoutGroup, motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useCallback, useId, useRef, useState, type ReactNode } from 'react'
+
 import { MovieCard } from './movie-card'
 
 interface MovieReelProps {
@@ -29,7 +31,6 @@ export function MovieReel({
   accentColor = 'orange',
 }: MovieReelProps) {
   const isLowEnd = useIsLowEndDevice()
-  const layoutGroupId = useId()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(true)
@@ -80,21 +81,10 @@ export function MovieReel({
   }, [])
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.5 }}
-      className="relative py-10 md:py-14"
-    >
+    <section className="relative py-10 md:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-12 lg:px-16">
         <div className="mb-6 flex items-center justify-between">
-          <motion.div
-            className="flex items-center gap-3"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-          >
+          <div className="flex items-center gap-3">
             <div
               className={cn(
                 'rounded-xl border p-2.5',
@@ -111,36 +101,32 @@ export function MovieReel({
                 {subtitle}
               </p>
             </div>
-          </motion.div>
+          </div>
           <div className="flex gap-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={scrollPrev}
               disabled={!canScrollPrev}
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background/80 backdrop-blur-sm transition-all hover:bg-accent',
+                'flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background/80 backdrop-blur-sm transition-all hover:bg-accent active:scale-95',
                 !canScrollPrev && 'cursor-not-allowed opacity-30',
               )}
               type="button"
               aria-label="Scroll left"
             >
               <ChevronLeft className="h-4 w-4" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            </button>
+            <button
               onClick={scrollNext}
               disabled={!canScrollNext}
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background/80 backdrop-blur-sm transition-all hover:bg-accent',
+                'flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background/80 backdrop-blur-sm transition-all hover:bg-accent active:scale-95',
                 !canScrollNext && 'cursor-not-allowed opacity-30',
               )}
               type="button"
               aria-label="Scroll right"
             >
               <ChevronRight className="h-4 w-4" />
-            </motion.button>
+            </button>
           </div>
         </div>
         <div className="overflow-hidden">
@@ -156,30 +142,14 @@ export function MovieReel({
               isDragging ? 'cursor-grabbing' : 'cursor-grab',
             )}
           >
-            {isLowEnd ? (
-              movies.map((movie, index) => (
-                <div
-                  className="min-w-0 flex-shrink-0 snap-start"
-                  key={movie.id}
-                >
-                  <MovieCard movie={movie} index={index} />
-                </div>
-              ))
-            ) : (
-              <LayoutGroup id={layoutGroupId}>
-                {movies.map((movie, index) => (
-                  <div
-                    className="min-w-0 flex-shrink-0 snap-start"
-                    key={movie.id}
-                  >
-                    <MovieCard movie={movie} index={index} />
-                  </div>
-                ))}
-              </LayoutGroup>
-            )}
+            {movies.map((movie, index) => (
+              <div className="min-w-0 flex-shrink-0 snap-start" key={movie.id}>
+                <MovieCard movie={movie} index={index} isLowEnd={isLowEnd} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    </motion.section>
+    </section>
   )
 }

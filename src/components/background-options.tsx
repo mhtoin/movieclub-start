@@ -2,10 +2,22 @@ import { useEffect, useState } from 'react'
 
 export function ProjectorBackground() {
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
   useEffect(() => {
     setMounted(true)
+    setIsMobile(window.innerWidth < 768)
   }, [])
+
   if (!mounted) return <div className="app-background-option" aria-hidden />
+  if (isMobile)
+    return (
+      <div
+        className="app-background-option"
+        aria-hidden
+        style={{ background: 'var(--background)' }}
+      />
+    )
 
   const dustMotes = [
     { cx: 960, cy: 85, r: 1.4, i: 1 },
