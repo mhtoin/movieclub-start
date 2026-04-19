@@ -34,6 +34,12 @@ import {
   PopoverRoot,
   PopoverTrigger,
 } from '../ui/popover'
+import {
+  DrawerRoot,
+  DrawerPortal,
+  DrawerOverlay,
+  DrawerContent,
+} from '../ui/drawer'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   value: value as ColorScheme,
@@ -299,10 +305,16 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pt-2">
-        <nav className="relative flex items-center justify-around bg-sidebar/95 border border-sidebar-border/40 rounded-2xl shadow-xl shadow-black/10 px-2 py-2">
-          <div className="absolute left-2 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-sidebar-border/50 to-transparent" />
-          <div className="absolute right-2 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-sidebar-border/50 to-transparent" />
+      {/* Mobile bottom bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+        {/* Gradient fade above bar */}
+        <div className="absolute inset-x-0 bottom-full h-8 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+        
+        <nav className="relative flex items-stretch bg-sidebar/98 backdrop-blur-xl border-t border-sidebar-border/30 pb-safe">
+          {/* Active indicator background */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 transition-opacity duration-300" />
+          </div>
 
           {mobileNavItems.map((item) => {
             const Icon = item.icon
@@ -311,201 +323,198 @@ export default function Sidebar() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-150 ${
+                className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[3.25rem] transition-all duration-150 active:scale-95 ${
                   active
                     ? 'text-primary'
-                    : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/80 active:bg-sidebar-accent/40'
+                    : 'text-sidebar-foreground/40 hover:text-sidebar-foreground/70 active:bg-sidebar-accent/30'
                 }`}
                 viewTransition
               >
-                <div
-                  className={`relative transition-transform duration-200 ${active ? 'scale-110' : 'active:scale-95'}`}
-                >
-                  <Icon size={20} className={active ? 'drop-shadow-lg' : ''} />
+                {/* Active background glow */}
+                {active && (
+                  <div className="absolute inset-0 bg-primary/5" />
+                )}
+                
+                <div className="relative flex items-center justify-center w-10 h-10">
+                  <Icon size={22} strokeWidth={active ? 2.5 : 1.5} className={active ? 'drop-shadow-sm' : ''} />
                   {active && (
-                    <Sparkles
-                      size={8}
-                      className="absolute -top-1 -right-1 text-primary animate-pulse"
-                    />
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
                   )}
                 </div>
-                <span
-                  className={`text-[9px] font-medium transition-colors ${active ? 'text-primary' : ''}`}
-                >
+                <span className={`text-[10px] font-medium leading-none tracking-wide ${active ? 'text-primary' : ''}`}>
                   {item.label}
                 </span>
-                {active && (
-                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-lg shadow-primary/50" />
-                )}
               </Link>
             )
           })}
-          <PopoverRoot open={mobileMoreOpen} onOpenChange={setMobileMoreOpen}>
-            <PopoverTrigger
-              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
-                isMoreActive
-                  ? 'text-primary'
-                  : 'text-sidebar-foreground/60 active:text-sidebar-foreground'
-              }`}
-            >
-              <div
-                className={`relative transition-transform duration-200 ${isMoreActive ? 'scale-110' : 'active:scale-95'}`}
-              >
-                <MoreHorizontal size={20} />
-                {isMoreActive && (
-                  <Sparkles
-                    size={8}
-                    className="absolute -top-1 -right-1 text-primary animate-pulse"
-                  />
-                )}
-              </div>
-              <span className="text-[9px] font-medium">More</span>
+
+          {/* More button - opens drawer */}
+          <button
+            onClick={() => setMobileMoreOpen(true)}
+            className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[3.25rem] transition-all duration-150 active:scale-95 ${
+              isMoreActive
+                ? 'text-primary'
+                : 'text-sidebar-foreground/40 hover:text-sidebar-foreground/70 active:bg-sidebar-accent/30'
+            }`}
+          >
+            {isMoreActive && (
+              <div className="absolute inset-0 bg-primary/5" />
+            )}
+            <div className="relative flex items-center justify-center w-10 h-10">
+              <MoreHorizontal size={22} strokeWidth={isMoreActive ? 2.5 : 1.5} />
               {isMoreActive && (
-                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-lg shadow-primary/50" />
+                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
               )}
-            </PopoverTrigger>
-            <PopoverPortal>
-              <PopoverPositioner side="top" align="end" sideOffset={8}>
-                <PopoverPopup
-                  size="sm"
-                  className="animate-in fade-in slide-in-from-bottom-2 duration-200"
-                >
-                  <div className="space-y-1 min-w-[160px]">
-                    {mobileMoreItems.map((item) => {
-                      const Icon = item.icon
-                      const active = isActive(item.path)
-                      return (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          onClick={() => setMobileMoreOpen(false)}
-                          className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
-                            active
-                              ? 'text-primary bg-primary/10'
-                              : 'text-foreground/80 hover:bg-accent'
-                          }`}
-                          viewTransition
-                        >
-                          <Icon size={18} />
-                          <span className="text-sm font-medium">
-                            {item.label}
-                          </span>
-                          <span className="text-xs text-muted-foreground ml-auto">
-                            {item.tagline}
-                          </span>
-                        </Link>
-                      )
-                    })}
+            </div>
+            <span className={`text-[10px] font-medium leading-none tracking-wide ${isMoreActive ? 'text-primary' : ''}`}>
+              More
+            </span>
+          </button>
+        </nav>
+      </div>
+
+      {/* Mobile More Drawer */}
+      <DrawerRoot open={mobileMoreOpen} onOpenChange={setMobileMoreOpen}>
+        <DrawerPortal>
+          <DrawerOverlay className="fixed inset-0 bg-black/40 z-[60]" />
+          <DrawerContent className="fixed inset-x-0 bottom-0 z-[60] max-h-[85vh] flex flex-col bg-background rounded-t-2xl shadow-2xl">
+            <div className="flex-shrink-0 flex items-center justify-center py-3">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            </div>
+            
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+                More
+              </h3>
+              
+              <div className="space-y-1">
+                {mobileMoreItems.map((item) => {
+                  const Icon = item.icon
+                  const active = isActive(item.path)
+                  return (
                     <Link
-                      to="/settings"
+                      key={item.path}
+                      to={item.path}
                       onClick={() => setMobileMoreOpen(false)}
-                      className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
-                        isActive('/settings')
+                      className={`flex items-center gap-4 p-3.5 rounded-xl transition-colors active:scale-[0.98] ${
+                        active
                           ? 'text-primary bg-primary/10'
-                          : 'text-foreground/80 hover:bg-accent'
+                          : 'text-foreground/80 hover:bg-accent active:bg-accent/60'
                       }`}
                       viewTransition
                     >
-                      <User size={18} />
-                      <span className="text-sm font-medium">Profile</span>
-                      <span className="text-xs text-muted-foreground ml-auto">
-                        Settings
-                      </span>
-                    </Link>
-
-                    <div className="h-px bg-border my-1" />
-                    <div className="flex items-center justify-between p-2">
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Film size={10} className="text-primary" />
-                        Customize
-                      </span>
-                      <div className="flex items-center gap-0.5">
-                        <PopoverRoot
-                          open={schemeOpen}
-                          onOpenChange={setSchemeOpen}
-                        >
-                          <PopoverTrigger className="p-2 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-accent transition-colors">
-                            <Palette size={16} />
-                          </PopoverTrigger>
-                          <PopoverPortal>
-                            <PopoverPositioner
-                              side="top"
-                              align="end"
-                              sideOffset={8}
-                            >
-                              <PopoverPopup size="sm">
-                                <div className="space-y-1">
-                                  <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                    <Sparkles
-                                      size={10}
-                                      className="text-primary"
-                                    />
-                                    Color Scheme
-                                  </h3>
-                                  {schemes.map((scheme) => (
-                                    <button
-                                      key={scheme.value}
-                                      onClick={() =>
-                                        schemeMutation.mutate(scheme.value)
-                                      }
-                                      disabled={schemeMutation.isPending}
-                                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50"
-                                    >
-                                      <div className="flex gap-1">
-                                        <div
-                                          className="w-4 h-4 rounded-full border border-border shadow-sm"
-                                          style={{
-                                            backgroundColor:
-                                              scheme.colors.light,
-                                          }}
-                                        />
-                                        <div
-                                          className="w-4 h-4 rounded-full border border-border shadow-sm"
-                                          style={{
-                                            backgroundColor: scheme.colors.dark,
-                                          }}
-                                        />
-                                      </div>
-                                      <span className="text-sm">
-                                        {scheme.label}
-                                      </span>
-                                    </button>
-                                  ))}
-                                </div>
-                              </PopoverPopup>
-                            </PopoverPositioner>
-                          </PopoverPortal>
-                        </PopoverRoot>
-                        <button
-                          onClick={() =>
-                            setTheme(theme === 'dark' ? 'light' : 'dark')
-                          }
-                          className="p-2 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-accent transition-colors"
-                        >
-                          {theme === 'dark' ? (
-                            <Sun size={16} />
-                          ) : (
-                            <Moon size={16} />
-                          )}
-                        </button>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        active ? 'bg-primary/15' : 'bg-muted/50'
+                      }`}>
+                        <Icon size={20} />
                       </div>
-                    </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium block">{item.label}</span>
+                        <span className="text-xs text-muted-foreground">{item.tagline}</span>
+                      </div>
+                      {active && (
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                      )}
+                    </Link>
+                  )
+                })}
 
-                    <div className="h-px bg-border my-1" />
+                <div className="h-px bg-border/50 my-2" />
+
+                <Link
+                  to="/settings"
+                  onClick={() => setMobileMoreOpen(false)}
+                  className={`flex items-center gap-4 p-3.5 rounded-xl transition-colors active:scale-[0.98] ${
+                    isActive('/settings')
+                      ? 'text-primary bg-primary/10'
+                      : 'text-foreground/80 hover:bg-accent active:bg-accent/60'
+                  }`}
+                  viewTransition
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    isActive('/settings') ? 'bg-primary/15' : 'bg-muted/50'
+                  }`}>
+                    <User size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium block">Profile</span>
+                    <span className="text-xs text-muted-foreground">Settings</span>
+                  </div>
+                </Link>
+
+                <div className="h-px bg-border/50 my-2" />
+
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-muted/30">
+                  <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <Palette size={16} className="text-muted-foreground" />
+                    Appearance
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <PopoverRoot open={schemeOpen} onOpenChange={setSchemeOpen}>
+                      <PopoverTrigger className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                        <Sparkles size={18} />
+                      </PopoverTrigger>
+                      <PopoverPortal>
+                        <PopoverPositioner side="top" align="end" sideOffset={12}>
+                          <PopoverPopup size="sm">
+                            <div className="space-y-1">
+                              <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                <Sparkles size={10} className="text-primary" />
+                                Color Scheme
+                              </h3>
+                              {schemes.map((scheme) => (
+                                <button
+                                  key={scheme.value}
+                                  onClick={() => schemeMutation.mutate(scheme.value)}
+                                  disabled={schemeMutation.isPending}
+                                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50"
+                                >
+                                  <div className="flex gap-1">
+                                    <div
+                                      className="w-4 h-4 rounded-full border border-border shadow-sm"
+                                      style={{ backgroundColor: scheme.colors.light }}
+                                    />
+                                    <div
+                                      className="w-4 h-4 rounded-full border border-border shadow-sm"
+                                      style={{ backgroundColor: scheme.colors.dark }}
+                                    />
+                                  </div>
+                                  <span className="text-sm">{scheme.label}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </PopoverPopup>
+                        </PopoverPositioner>
+                      </PopoverPortal>
+                    </PopoverRoot>
                     <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 p-2.5 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+                      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                      className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                     >
-                      <LogOut size={18} />
-                      <span className="text-sm font-medium">Exit theater</span>
+                      {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                     </button>
                   </div>
-                </PopoverPopup>
-              </PopoverPositioner>
-            </PopoverPortal>
-          </PopoverRoot>
-        </nav>
-      </div>
+                </div>
+
+                <div className="h-px bg-border/50 my-2" />
+
+                <button
+                  onClick={() => {
+                    handleLogout()
+                    setMobileMoreOpen(false)
+                  }}
+                  className="w-full flex items-center gap-4 p-3.5 rounded-xl text-destructive hover:bg-destructive/10 transition-colors active:scale-[0.98]"
+                >
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-destructive/10">
+                    <LogOut size={20} />
+                  </div>
+                  <span className="text-sm font-medium">Exit theater</span>
+                </button>
+              </div>
+            </div>
+          </DrawerContent>
+        </DrawerPortal>
+      </DrawerRoot>
     </>
   )
 }

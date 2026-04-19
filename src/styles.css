@@ -891,11 +891,6 @@
 }
 
 @layer base {
-  * {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-  }
-
   body {
     @apply m-0 bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
@@ -1055,11 +1050,24 @@
   .pr-safe {
     padding-right: env(safe-area-inset-right);
   }
+  .pb-safe-offset-24 {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 6rem);
+  }
+  .pb-safe-offset-44 {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 11rem);
+  }
 
   /* Minimum touch target size for mobile */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Prevent iOS rubber-band scrolling on overscroll */
+  @media (max-width: 768px) {
+    .no-overscroll {
+      overscroll-behavior: none;
+    }
   }
 
   @keyframes fadeIn {

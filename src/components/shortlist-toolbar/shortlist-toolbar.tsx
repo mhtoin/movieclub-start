@@ -9,9 +9,25 @@ import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { Film, Plus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ShortlistItem from './shortlist-item'
+import {
+  DrawerRoot,
+  DrawerPortal,
+  DrawerOverlay,
+  DrawerContent,
+} from '@/components/ui/drawer'
 
 interface ShortlistToolbarProps {
   userId: string
+}
+
+interface ShortlistData {
+  movies: Array<any>
+  id: string
+  userId: string
+  isReady: boolean
+  participating: boolean
+  requiresSelection: boolean | null
+  selectedIndex: number | null
 }
 
 const panelVariants: Variants = {
@@ -85,6 +101,184 @@ function AddMovieLink({
   )
 }
 
+function ShortlistPanelContent({
+  data,
+  isLoading,
+  movieCount,
+  canAddMoreMovies,
+  handleToggleReady,
+  handleToggleParticipating,
+  onClose,
+}: {
+  data: ShortlistData | null | undefined
+  isLoading: boolean
+  movieCount: number
+  canAddMoreMovies: boolean
+  handleToggleReady: () => void
+  handleToggleParticipating: () => void
+  onClose: () => void
+}) {
+  return (
+    <>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Film className="w-[18px] h-[18px] text-primary" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">
+              My Shortlist
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {movieCount === 0
+                ? 'No movies added'
+                : `${movieCount}/3 movie${movieCount === 1 ? '' : 's'}`}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 rounded-lg hover:bg-accent flex items-center justify-center transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4 text-muted-foreground" />
+        </button>
+      </div>
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <motion.div
+            key="loading"
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="space-y-2"
+          >
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="animate-pulse bg-accent/30 rounded-lg h-[88px]"
+              />
+            ))}
+          </motion.div>
+        ) : movieCount === 0 ? (
+          <motion.div
+            key="empty"
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="flex flex-col items-center py-8 text-center"
+          >
+            <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
+              <Film className="w-6 h-6 text-muted-foreground/40" />
+            </div>
+            <p className="text-sm font-medium text-foreground mb-1">
+              No movies yet
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              Add up to 3 movies to your shortlist
+            </p>
+            <AddMovieLink
+              movieCount={movieCount}
+              onClick={onClose}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="list"
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="space-y-2"
+          >
+            {data?.requiresSelection &&
+              data?.selectedIndex === null && (
+                <motion.div
+                  variants={itemVariants}
+                  className="p-2.5 rounded-lg bg-primary/10 border border-primary/20"
+                >
+                  <p className="text-xs font-medium text-primary">
+                    Select one movie for the raffle
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    You won last time — choose which to include.
+                  </p>
+                </motion.div>
+              )}
+            <AnimatePresence initial={false}>
+              {data?.movies?.map((movie, index) => (
+                <motion.div
+                  key={movie.id}
+                  variants={itemVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  <ShortlistItem
+                    movie={movie}
+                    index={index}
+                    requiresSelection={
+                      data?.requiresSelection ?? undefined
+                    }
+                    selectedIndex={data?.selectedIndex ?? undefined}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {canAddMoreMovies && (
+              <motion.div
+                key="add-movie"
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <AddMovieLink
+                  movieCount={movieCount}
+                  onClick={onClose}
+                />
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/40">
+        <button
+          onClick={handleToggleParticipating}
+          disabled={useToggleParticipatingMutation().isPending}
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+            data?.participating
+              ? 'bg-primary/15 text-primary border border-primary/30'
+              : 'bg-accent/50 text-muted-foreground border border-transparent hover:bg-accent hover:text-foreground'
+          }`}
+        >
+          <div
+            className={`w-1.5 h-1.5 rounded-full transition-colors ${data?.participating ? 'bg-primary' : 'bg-muted-foreground/40'}`}
+          />
+          {data?.participating ? 'Participating' : 'Sitting out'}
+        </button>
+
+        <button
+          onClick={handleToggleReady}
+          disabled={useToggleIsReadyMutation().isPending}
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+            data?.isReady
+              ? 'bg-success/15 text-success border border-success/30'
+              : 'bg-accent/50 text-muted-foreground border border-transparent hover:bg-accent hover:text-foreground'
+          }`}
+        >
+          <div
+            className={`w-1.5 h-1.5 rounded-full transition-colors ${data?.isReady ? 'bg-success' : 'bg-muted-foreground/40'}`}
+          />
+          {data?.isReady ? 'Ready' : 'Not ready'}
+        </button>
+      </div>
+    </>
+  )
+}
+
 export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -111,244 +305,120 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
 
   return (
     <>
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            className="fixed inset-0 bg-black/30 z-40 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            onClick={() => setIsExpanded(false)}
-          />
-        )}
-      </AnimatePresence>
-      <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50">
-        <AnimatePresence mode="wait">
+      {/* Mobile: bottom sheet drawer */}
+      <div className="md:hidden">
+        <DrawerRoot open={isExpanded} onOpenChange={setIsExpanded}>
+          <DrawerPortal>
+            <DrawerOverlay className="fixed inset-0 bg-black/40 z-[55]" />
+            <DrawerContent className="fixed inset-x-0 bottom-0 z-[60] max-h-[80vh] flex flex-col bg-background rounded-t-2xl shadow-2xl pb-safe">
+              <div className="flex-shrink-0 flex items-center justify-center py-3">
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+              </div>
+              <div className="flex-1 overflow-y-auto px-5 pb-5">
+                <ShortlistPanelContent
+                  data={data}
+                  isLoading={isLoading}
+                  movieCount={movieCount}
+                  canAddMoreMovies={canAddMoreMovies}
+                  handleToggleReady={handleToggleReady}
+                  handleToggleParticipating={handleToggleParticipating}
+                  onClose={() => setIsExpanded(false)}
+                />
+              </div>
+            </DrawerContent>
+          </DrawerPortal>
+        </DrawerRoot>
+      </div>
+
+      {/* Desktop: floating panel */}
+      <div className="hidden md:block">
+        <AnimatePresence>
           {isExpanded && (
             <motion.div
-              className="absolute bottom-[calc(100%+0.75rem)] right-0 w-[calc(100vw-2rem)] sm:w-[380px] bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl origin-bottom-right"
-              variants={panelVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              <div className="p-5">
-                <motion.div
-                  variants={itemVariants}
-                  className="flex items-center justify-between mb-4"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Film className="w-[18px] h-[18px] text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="text-base font-semibold tracking-tight text-foreground">
-                        My Shortlist
-                      </h2>
-                      <p className="text-xs text-muted-foreground">
-                        {movieCount === 0
-                          ? 'No movies added'
-                          : `${movieCount}/3 movie${movieCount === 1 ? '' : 's'}`}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsExpanded(false)}
-                    className="w-8 h-8 rounded-lg hover:bg-accent flex items-center justify-center transition-colors"
-                    aria-label="Close"
-                  >
-                    <X className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                </motion.div>
-                <AnimatePresence mode="wait">
-                  {isLoading ? (
-                    <motion.div
-                      key="loading"
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      className="space-y-2"
-                    >
-                      {[1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="animate-pulse bg-accent/30 rounded-lg h-[88px]"
-                        />
-                      ))}
-                    </motion.div>
-                  ) : movieCount === 0 ? (
-                    <motion.div
-                      key="empty"
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      className="flex flex-col items-center py-8 text-center"
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
-                        <Film className="w-6 h-6 text-muted-foreground/40" />
-                      </div>
-                      <p className="text-sm font-medium text-foreground mb-1">
-                        No movies yet
-                      </p>
-                      <p className="text-xs text-muted-foreground mb-4">
-                        Add up to 3 movies to your shortlist
-                      </p>
-                      <AddMovieLink
-                        movieCount={movieCount}
-                        onClick={() => setIsExpanded(false)}
-                      />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="list"
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      className="space-y-2"
-                    >
-                      {data?.requiresSelection &&
-                        data?.selectedIndex === null && (
-                          <motion.div
-                            variants={itemVariants}
-                            className="p-2.5 rounded-lg bg-primary/10 border border-primary/20"
-                          >
-                            <p className="text-xs font-medium text-primary">
-                              Select one movie for the raffle
-                            </p>
-                            <p className="text-[11px] text-muted-foreground mt-0.5">
-                              You won last time — choose which to include.
-                            </p>
-                          </motion.div>
-                        )}
-                      <AnimatePresence initial={false}>
-                        {data?.movies?.map((movie, index) => (
-                          <motion.div
-                            key={movie.id}
-                            variants={itemVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                          >
-                            <ShortlistItem
-                              movie={movie}
-                              index={index}
-                              requiresSelection={
-                                data?.requiresSelection ?? undefined
-                              }
-                              selectedIndex={data?.selectedIndex ?? undefined}
-                            />
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
-                      {canAddMoreMovies && (
-                        <motion.div
-                          key="add-movie"
-                          variants={itemVariants}
-                          initial="hidden"
-                          animate="visible"
-                        >
-                          <AddMovieLink
-                            movieCount={movieCount}
-                            onClick={() => setIsExpanded(false)}
-                          />
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <motion.div
-                  variants={itemVariants}
-                  className="flex items-center gap-2 mt-4 pt-3 border-t border-border/40"
-                >
-                  <button
-                    onClick={handleToggleParticipating}
-                    disabled={toggleParticipatingMutation.isPending}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      data?.participating
-                        ? 'bg-primary/15 text-primary border border-primary/30'
-                        : 'bg-accent/50 text-muted-foreground border border-transparent hover:bg-accent hover:text-foreground'
-                    }`}
-                  >
-                    <div
-                      className={`w-1.5 h-1.5 rounded-full transition-colors ${data?.participating ? 'bg-primary' : 'bg-muted-foreground/40'}`}
-                    />
-                    {data?.participating ? 'Participating' : 'Sitting out'}
-                  </button>
-
-                  <button
-                    onClick={handleToggleReady}
-                    disabled={toggleIsReadyMutation.isPending}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      data?.isReady
-                        ? 'bg-success/15 text-success border border-success/30'
-                        : 'bg-accent/50 text-muted-foreground border border-transparent hover:bg-accent hover:text-foreground'
-                    }`}
-                  >
-                    <div
-                      className={`w-1.5 h-1.5 rounded-full transition-colors ${data?.isReady ? 'bg-success' : 'bg-muted-foreground/40'}`}
-                    />
-                    {data?.isReady ? 'Ready' : 'Not ready'}
-                  </button>
-                </motion.div>
-              </div>
-            </motion.div>
+              className="fixed inset-0 bg-black/30 z-40 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              onClick={() => setIsExpanded(false)}
+            />
           )}
         </AnimatePresence>
-        <motion.button
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.94 }}
-          onClick={() => setIsExpanded(!isExpanded)}
-          className={`relative w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-colors duration-200 ${
-            isExpanded
-              ? 'bg-accent text-foreground shadow-lg'
-              : 'bg-primary text-primary-foreground hover:shadow-primary/30 hover:shadow-2xl'
-          }`}
-          aria-label={isExpanded ? 'Close shortlist' : 'Open shortlist'}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {isExpanded ? (
+        <div className="fixed bottom-6 right-6 z-50">
+          <AnimatePresence mode="wait">
+            {isExpanded && (
               <motion.div
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                className="absolute bottom-[calc(100%+0.75rem)] right-0 w-[380px] bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl origin-bottom-right"
+                variants={panelVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
               >
-                <X className="w-5 h-5" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="film"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <Film className="w-6 h-6" />
+                <div className="p-5">
+                  <ShortlistPanelContent
+                    data={data}
+                    isLoading={isLoading}
+                    movieCount={movieCount}
+                    canAddMoreMovies={canAddMoreMovies}
+                    handleToggleReady={handleToggleReady}
+                    handleToggleParticipating={handleToggleParticipating}
+                    onClose={() => setIsExpanded(false)}
+                  />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
-          {mounted && (
-            <AnimatePresence>
-              {!isExpanded && movieCount > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  transition={{ type: 'spring', damping: 15, stiffness: 400 }}
-                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-background"
+          <motion.button
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.94 }}
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={`relative w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-colors duration-200 ${
+              isExpanded
+                ? 'bg-accent text-foreground shadow-lg'
+                : 'bg-primary text-primary-foreground hover:shadow-primary/30 hover:shadow-2xl'
+            }`}
+            aria-label={isExpanded ? 'Close shortlist' : 'Open shortlist'}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {isExpanded ? (
+                <motion.div
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  {movieCount}
-                </motion.span>
+                  <X className="w-5 h-5" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="film"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Film className="w-6 h-6" />
+                </motion.div>
               )}
             </AnimatePresence>
-          )}
-        </motion.button>
+            {mounted && (
+              <AnimatePresence>
+                {!isExpanded && movieCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', damping: 15, stiffness: 400 }}
+                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-background"
+                  >
+                    {movieCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            )}
+          </motion.button>
+        </div>
       </div>
     </>
   )

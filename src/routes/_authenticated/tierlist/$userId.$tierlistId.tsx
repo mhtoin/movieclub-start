@@ -458,7 +458,7 @@ function TierlistContent() {
         </div>
       )}
 
-      <div className="relative flex-1 overflow-y-auto pr-20">
+      <div className="relative flex-1 overflow-y-auto pr-4 md:pr-20">
         {isSaving && (
           <>
             <div className="absolute inset-0 z-20 cursor-wait" />

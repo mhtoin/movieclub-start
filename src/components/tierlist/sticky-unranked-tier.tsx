@@ -1,9 +1,15 @@
 import { TierWithMovies } from '@/lib/react-query/queries/tierlists'
 import { useDroppable } from '@dnd-kit/core'
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable'
-import { ChevronLeft, ChevronRight, Inbox } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Inbox } from 'lucide-react'
 import { memo, useState } from 'react'
 import TierItem from './tier-item'
+import {
+  DrawerRoot,
+  DrawerPortal,
+  DrawerOverlay,
+  DrawerContent,
+} from '@/components/ui/drawer'
 
 interface StickyUnrankedTierProps {
   tier: TierWithMovies
@@ -26,8 +32,9 @@ function StickyUnrankedTier({
 
   return (
     <>
+      {/* Desktop: right-side slide panel */}
       <div
-        className={`fixed right-0 top-1/2 -translate-y-1/2 z-50 flex items-stretch transition-all duration-300 ease-in-out ${
+        className={`hidden md:block fixed right-0 top-1/2 -translate-y-1/2 z-50 flex items-stretch transition-all duration-300 ease-in-out ${
           isExpanded ? 'translate-x-0' : 'translate-x-[calc(100%-2.5rem)]'
         } ${disabled ? 'opacity-50' : ''}`}
       >
@@ -57,7 +64,7 @@ function StickyUnrankedTier({
           </span>
         </button>
         <div
-          className={`w-72 max-h-[70vh] flex flex-col  border-y-2 border-l-2 transition-all duration-200 ${
+          className={`w-72 max-h-[70vh] flex flex-col border-y-2 border-l-2 transition-all duration-200 ${
             isOver
               ? 'bg-primary/10 border-primary shadow-xl shadow-primary/20'
               : 'bg-background/95 border-border/50 shadow-2xl'
@@ -115,8 +122,106 @@ function StickyUnrankedTier({
           </SortableContext>
         </div>
       </div>
+
+      {/* Mobile: bottom sheet */}
+      <div className="md:hidden">
+        <DrawerRoot open={isExpanded} onOpenChange={setIsExpanded}>
+          <DrawerPortal>
+            <DrawerOverlay className="fixed inset-0 bg-black/40 z-[55]" />
+            <DrawerContent className="fixed inset-x-0 bottom-0 z-[60] max-h-[75vh] flex flex-col bg-background rounded-t-2xl shadow-2xl pb-safe">
+              <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-border/30">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center">
+                    <span className="text-sm font-bold text-muted-foreground">
+                      ?
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold">Unranked</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {movieCount} {movieCount === 1 ? 'movie' : 'movies'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {movieCount > 0 && (
+                    <span className="flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 text-xs font-bold rounded-full bg-primary text-primary-foreground">
+                      {movieCount}
+                    </span>
+                  )}
+                  <button
+                    onClick={() => setIsExpanded(false)}
+                    className="w-8 h-8 rounded-lg hover:bg-accent flex items-center justify-center"
+                  >
+                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
+              <SortableContext
+                id={tier.id}
+                items={tier.movies.map((movie) => movie.id)}
+                strategy={rectSortingStrategy}
+              >
+                <div
+                  ref={setNodeRef}
+                  className="flex-1 overflow-y-auto p-3"
+                >
+                  {movieCount === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                        <Inbox className="w-7 h-7 text-muted-foreground/50" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground mb-1">All ranked!</p>
+                      <p className="text-xs text-muted-foreground">
+                        Drag movies here to unrank them
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      {tier.movies.map((movie) => (
+                        <div key={movie.id} className="aspect-[2/3]">
+                          <TierItem
+                            movie={movie}
+                            id={movie.id}
+                            compact
+                            isOwner={isOwner}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </SortableContext>
+            </DrawerContent>
+          </DrawerPortal>
+        </DrawerRoot>
+
+        {/* Mobile: floating trigger button */}
+        <button
+          onClick={() => setIsExpanded(true)}
+          className={`fixed bottom-24 left-4 z-40 flex items-center gap-2 px-3 py-2.5 rounded-full shadow-lg transition-all duration-200 active:scale-95 ${
+            isOver
+              ? 'bg-primary text-primary-foreground shadow-primary/30'
+              : 'bg-card/95 backdrop-blur-md border border-border/40 text-foreground hover:bg-card'
+          }`}
+        >
+          <Inbox className="w-4 h-4" />
+          <span className="text-xs font-medium">Unranked</span>
+          {movieCount > 0 && (
+            <span className={`flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[10px] font-bold rounded-full ${
+              isOver
+                ? 'bg-white/20 text-white'
+                : 'bg-primary text-primary-foreground'
+            }`}>
+              {movieCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Desktop: drop indicator */}
       <div
-        className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-200 ${
+        className={`hidden md:block fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-200 ${
           isOver
             ? 'opacity-100 translate-y-0'
             : 'opacity-0 translate-y-4 pointer-events-none'
@@ -124,6 +229,19 @@ function StickyUnrankedTier({
       >
         <div className="px-6 py-3 rounded-full bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 backdrop-blur-sm">
           <span className="text-sm font-medium">Drop to unrank</span>
+        </div>
+      </div>
+
+      {/* Mobile: drop indicator */}
+      <div
+        className={`md:hidden fixed bottom-28 left-1/2 -translate-x-1/2 z-40 transition-all duration-200 ${
+          isOver
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
+        <div className="px-5 py-2.5 rounded-full bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 backdrop-blur-sm">
+          <span className="text-xs font-medium">Drop to unrank</span>
         </div>
       </div>
     </>

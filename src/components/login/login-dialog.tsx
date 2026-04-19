@@ -1,14 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
-import {
-  DialogBackdrop,
-  DialogClose,
-  DialogPopup,
-  DialogPortal,
-  DialogRoot,
-  DialogTrigger,
-} from '../ui/dialog'
+import { ResponsiveDialog } from '../ui/responsive-dialog'
 import LoginForm from './login-form'
 import { MoviePosterCard } from './movie-poster-card'
 import type { LoginMethod } from '@/lib/auth/last-used-login'
@@ -25,17 +18,21 @@ export default function LoginDialog() {
   }
 
   return (
-    <DialogRoot>
-      <DialogTrigger onMouseEnter={prefetchPosters} onFocus={prefetchPosters}>
+    <ResponsiveDialog>
+      <ResponsiveDialog.Trigger
+        onMouseEnter={prefetchPosters}
+        onFocus={prefetchPosters}
+      >
         <Button variant="primary">Login or Sign Up</Button>
-      </DialogTrigger>
-      <DialogPortal>
-        <DialogBackdrop />
-        <DialogPopup className="p-0 overflow-hidden max-w-5xl w-full">
-          <LoginDialogContent />
-        </DialogPopup>
-      </DialogPortal>
-    </DialogRoot>
+      </ResponsiveDialog.Trigger>
+      <ResponsiveDialog.Content
+        className="p-0 overflow-hidden max-w-5xl w-full"
+        size="xl"
+        showHandle={false}
+      >
+        <LoginDialogContent />
+      </ResponsiveDialog.Content>
+    </ResponsiveDialog>
   )
 }
 
@@ -100,24 +97,26 @@ function LoginDialogContent() {
         </div>
       </div>
       <div className="flex-1 p-8 sm:p-12 flex flex-col justify-center relative bg-dialog-background">
-        <DialogClose className="absolute right-6 top-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-5 w-5"
-          >
-            <path d="M18 6 6 18" />
-            <path d="m6 6 12 12" />
-          </svg>
-          <span className="sr-only">Close</span>
-        </DialogClose>
+        <ResponsiveDialog.Close>
+          <button className="absolute right-6 top-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+            <span className="sr-only">Close</span>
+          </button>
+        </ResponsiveDialog.Close>
 
         <div className="w-full max-w-sm mx-auto">
           <LoginForm lastUsedMethod={lastUsedMethod} />
