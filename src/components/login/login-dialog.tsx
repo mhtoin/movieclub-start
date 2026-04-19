@@ -26,8 +26,8 @@ export default function LoginDialog() {
         <Button variant="primary">Login or Sign Up</Button>
       </ResponsiveDialog.Trigger>
       <ResponsiveDialog.Content
-        className="p-0 overflow-hidden max-w-5xl w-full"
-        size="xl"
+        className="p-0 overflow-hidden"
+        size="xxl"
         showHandle={false}
       >
         <LoginDialogContent />
@@ -63,8 +63,8 @@ function LoginDialogContent() {
             ))}
           </div>
         </div>
-        <div className="absolute inset-0 z-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-background/30 to-background" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-t from-background/80 via-background/30 to-transparent" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-background/10 to-background/40" />
         <div className="relative z-10 p-10 flex flex-col h-full justify-between">
           <div className="flex items-center gap-2">
             <svg

@@ -34,6 +34,7 @@ const drawerContentVariants = cva(
         default: 'max-h-[60vh]',
         lg: 'max-h-[75vh]',
         xl: 'max-h-[90vh]',
+        xxl: 'max-h-[95vh]',
       },
     },
     compoundVariants: [

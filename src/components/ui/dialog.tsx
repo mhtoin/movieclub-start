@@ -28,6 +28,7 @@ const dialogPopupVariants = cva(
         default: 'w-96 max-w-[calc(100vw-3rem)] p-6',
         lg: 'w-[32rem] max-w-[calc(100vw-4rem)] p-8',
         xl: 'w-[48rem] max-w-[calc(100vw-6rem)] p-10',
+        xxl: 'w-[90rem] max-w-[calc(100vw-8rem)] p-12',
       },
       position: {
         center: '-mt-8',
@@ -43,13 +44,11 @@ const dialogPopupVariants = cva(
 )
 
 interface DialogBackdropProps
-  extends
-    React.ComponentProps<typeof BaseDialog.Backdrop>,
+  extends React.ComponentProps<typeof BaseDialog.Backdrop>,
     VariantProps<typeof dialogBackdropVariants> {}
 
 interface DialogPopupProps
-  extends
-    React.ComponentProps<typeof BaseDialog.Popup>,
+  extends React.ComponentProps<typeof BaseDialog.Popup>,
     VariantProps<typeof dialogPopupVariants> {}
 
 const DialogRoot = BaseDialog.Root

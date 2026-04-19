@@ -82,7 +82,7 @@ function ResponsiveDialogTrigger({
 interface ResponsiveDialogContentProps {
   children: React.ReactNode
   className?: string
-  size?: 'sm' | 'default' | 'lg' | 'xl'
+  size?: 'sm' | 'default' | 'lg' | 'xl' | 'xxl'
   position?: 'center' | 'top' | 'bottom'
   opacity?: 'light' | 'medium' | 'heavy'
   showHandle?: boolean
