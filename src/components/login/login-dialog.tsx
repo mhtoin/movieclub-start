@@ -1,14 +1,14 @@
+import type { LoginMethod } from '@/lib/auth/last-used-login'
+import { getLastUsedLoginMethodFromClient } from '@/lib/auth/last-used-login'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import type { Movie } from '@/lib/tmdb-api'
+import { FALLBACK_POSTERS } from '@/lib/tmdb-api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import { ResponsiveDialog } from '../ui/responsive-dialog'
 import LoginForm from './login-form'
 import { MoviePosterCard } from './movie-poster-card'
-import type { LoginMethod } from '@/lib/auth/last-used-login'
-import type { Movie } from '@/lib/tmdb-api'
-import { FALLBACK_POSTERS } from '@/lib/tmdb-api'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { getLastUsedLoginMethodFromClient } from '@/lib/auth/last-used-login'
 
 export default function LoginDialog() {
   const queryClient = useQueryClient()
@@ -52,11 +52,11 @@ function LoginDialogContent() {
       <div className="hidden md:flex flex-col justify-between bg-background text-foreground w-1/2 lg:w-3/5 relative overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-          <div className="grid grid-cols-4 gap-2 p-6 h-full">
+          <div className="grid grid-cols-3 lg:grid-cols-4 grid-rows-2 gap-2 p-6 h-full">
             {displayMovies.slice(0, 8).map((movie, i) => (
               <div
                 key={`poster-${i}`}
-                className="aspect-[2/3] rounded-md overflow-hidden bg-muted"
+                className="rounded-md overflow-hidden bg-muted h-full"
               >
                 <MoviePosterCard movie={movie} />
               </div>
@@ -98,7 +98,11 @@ function LoginDialogContent() {
       </div>
       <div className="flex-1 p-8 sm:p-12 flex flex-col justify-center relative bg-dialog-background">
         <ResponsiveDialog.Close>
-          <button className="absolute right-6 top-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+          <Button
+            className="absolute right-6 top-6"
+            variant={'icon'}
+            size="icon"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -115,7 +119,7 @@ function LoginDialogContent() {
               <path d="m6 6 12 12" />
             </svg>
             <span className="sr-only">Close</span>
-          </button>
+          </Button>
         </ResponsiveDialog.Close>
 
         <div className="w-full max-w-sm mx-auto">

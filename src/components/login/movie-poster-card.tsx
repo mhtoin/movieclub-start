@@ -12,7 +12,7 @@ export function MoviePosterCard({ movie, className }: MoviePosterCardProps) {
   return (
     <div
       className={cn(
-        'group relative aspect-[2/3] rounded-md bg-muted shadow-2xl overflow-hidden shrink-0 cursor-default',
+        'group relative h-full w-full rounded-md bg-muted shadow-2xl overflow-hidden shrink-0 cursor-default',
         'transition-transform duration-300 ease-out hover:scale-105 hover:z-10',
         className,
       )}

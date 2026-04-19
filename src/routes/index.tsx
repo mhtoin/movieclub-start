@@ -9,7 +9,6 @@ import LoginDialog from '@/components/login/login-dialog'
 import { authMiddleware } from '@/middleware/auth'
 import { MoviePosterCard } from '@/components/login/movie-poster-card'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { Button } from '@/components/ui/button'
 
 // Server function to get the current user
 const getCurrentUserServerFn = createServerFn({ method: 'GET' })
@@ -35,9 +34,9 @@ function LandingPage() {
     movies && movies.length > 0 ? movies : FALLBACK_POSTERS
 
   const POSTER_CONFIG = [
-    { x: '58%', y: '8%', rotate: 6, scale: 0.95, zIndex: 2 },
-    { x: '72%', y: '40%', rotate: -4, scale: 0.88, zIndex: 1 },
-    { x: '64%', y: '68%', rotate: 3, scale: 0.92, zIndex: 3 },
+    { x: '65%', y: '12%', rotate: 6, scale: 0.95, zIndex: 2 },
+    { x: '78%', y: '38%', rotate: -4, scale: 0.88, zIndex: 1 },
+    { x: '70%', y: '65%', rotate: 3, scale: 0.92, zIndex: 3 },
   ]
 
   return (
@@ -56,7 +55,7 @@ function LandingPage() {
                 zIndex: config.zIndex,
               }}
             >
-              <div className="w-44 sm:w-52 aspect-[2/3] rounded-md overflow-hidden shadow-2xl shadow-foreground/20">
+              <div className="w-28 sm:w-44 md:w-52 aspect-[2/3] rounded-md overflow-hidden shadow-2xl shadow-foreground/20 opacity-60 sm:opacity-80 md:opacity-100">
                 <MoviePosterCard movie={movie} />
               </div>
             </div>
@@ -65,14 +64,13 @@ function LandingPage() {
       </div>
 
       <div className="relative z-20 min-h-screen flex flex-col">
-        <header className="flex items-center justify-between w-full px-6 sm:px-12 py-6">
+        <header className="flex items-center w-full px-6 sm:px-12 py-6">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
               <Clapperboard className="h-5 w-5 text-primary" />
             </div>
             <span className="font-bold text-lg tracking-tight">MovieClub</span>
           </div>
-          <LoginDialog />
         </header>
 
         <main className="flex-1 flex items-center px-6 sm:px-12">
@@ -87,14 +85,8 @@ function LandingPage() {
                 The social way to track movies, build shortlists, and pick your
                 next group watch.
               </p>
-              <div className="flex gap-4 pt-4">
+              <div className="pt-4">
                 <LoginDialog />
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Learn more
-                </Button>
               </div>
             </div>
           </div>
