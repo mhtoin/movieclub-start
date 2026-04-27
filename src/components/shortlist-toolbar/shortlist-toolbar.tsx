@@ -8,6 +8,7 @@ import { Link } from '@tanstack/react-router'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { Film, Plus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useMediaQuery } from '@/lib/hooks'
 import ShortlistItem from './shortlist-item'
 import {
   DrawerRoot,
@@ -282,6 +283,7 @@ function ShortlistPanelContent({
 export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const isMobile = !useMediaQuery('(min-width: 768px)')
   const { data, isLoading } = useQuery(shortlistQueries.byUser(userId))
   const toggleIsReadyMutation = useToggleIsReadyMutation()
   const toggleParticipatingMutation = useToggleParticipatingMutation()
@@ -306,7 +308,7 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
   return (
     <>
       {/* Mobile: bottom sheet drawer */}
-      <div className="md:hidden">
+      {isMobile && (
         <DrawerRoot open={isExpanded} onOpenChange={setIsExpanded}>
           <DrawerPortal>
             <DrawerOverlay className="fixed inset-0 bg-black/40 z-[55]" />
@@ -328,7 +330,7 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
             </DrawerContent>
           </DrawerPortal>
         </DrawerRoot>
-      </div>
+      )}
 
       {/* Desktop: floating panel */}
       <div className="hidden md:block">
