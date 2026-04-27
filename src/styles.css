@@ -359,6 +359,104 @@
   --dialog-shadow: oklch(0.05 0.02 260 / 0.3);
 }
 
+.scheme-tokyo.light {
+  --scheme-hue: 50;
+  --bg-scheme-hue: 50;
+  --background: oklch(0.9879 0.0059 223.4547); /* Unoharairo — #F7FCFE */
+  --foreground: oklch(0.22 0.015 50);
+  --dialog-background: oklch(0.9992 0.0039 106.4707); /* Gofuniro — #FFFFFC */
+  --dialog-border: oklch(0.9202 0.0029 308.4256); /* Shiraumenezu — #E5E4E6 */
+  --dialog-shadow: oklch(0.2 0.04 50 / 0.06);
+
+  --card: oklch(0.9992 0.0039 106.4707); /* Gofuniro — #FFFFFC */
+  --card-foreground: oklch(0.22 0.015 50);
+  --popover: oklch(0.9992 0.0039 106.4707); /* Gofuniro — #FFFFFC */
+  --popover-foreground: oklch(0.22 0.015 50);
+  --primary: oklch(0.22 0.015 50);
+  --primary-foreground: oklch(0.985 0.0051 145.5374); /* Hakuji — #F8FBF8 */
+  --secondary: oklch(0.9252 0.0061 43.3319); /* Soshoku — #EAE5E3 */
+  --secondary-foreground: oklch(0.22 0.015 50);
+  --destructive: oklch(0.55 0.18 25);
+  --destructive-foreground: oklch(1 0 0);
+  --muted: oklch(0.9639 0.0013 106.4245); /* Shironeri — #F3F3F2 */
+  --muted-foreground: oklch(0.55 0.015 50);
+  --accent: oklch(0.9291 0.0054 286.2948); /* Murasakisuishiyou — #E7E7EB */
+  --accent-foreground: oklch(0.22 0.015 50);
+  --border: oklch(0.9202 0.0029 308.4256); /* Shiraumenezu — #E5E4E6 */
+  --input: oklch(0.9202 0.0029 308.4256); /* Shiraumenezu — #E5E4E6 */
+  --ring: oklch(0.22 0.015 50);
+
+  --success: oklch(0.5 0.02 145);
+  --success-foreground: oklch(0.97 0.005 50);
+  --warning: oklch(0.6 0.02 75);
+  --warning-foreground: oklch(0.22 0.015 50);
+
+  --imdb: oklch(0.79 0.17 85);
+  --imdb-foreground: oklch(0.15 0.02 85);
+  --tmdb: oklch(0.72 0.15 220);
+  --tmdb-foreground: oklch(1 0 0);
+
+  --sidebar: oklch(0.985 0.0051 145.5374); /* Hakuji — #F8FBF8 */
+  --sidebar-foreground: oklch(0.22 0.015 50);
+  --sidebar-primary: oklch(0.22 0.015 50);
+  --sidebar-primary-foreground: oklch(0.985 0.0051 145.5374); /* Hakuji — #F8FBF8 */
+  --sidebar-accent: oklch(0.9845 0.0067 97.35); /* Kinariiro — #FBFAF5 */
+  --sidebar-accent-foreground: oklch(0.22 0.015 50);
+  --sidebar-border: oklch(0.9202 0.0029 308.4256); /* Shiraumenezu — #E5E4E6 */
+  --sidebar-ring: oklch(0.22 0.015 50);
+
+  --icon: oklch(0.55 0.015 50);
+}
+
+.scheme-tokyo.dark {
+  --scheme-hue: 50;
+  --bg-scheme-hue: 50;
+  --background: oklch(0.14 0.01 50);
+  --foreground: oklch(0.88 0.005 50);
+
+  --card: oklch(0.18 0.008 50);
+  --card-foreground: oklch(0.88 0.005 50);
+  --popover: oklch(0.14 0.01 50);
+  --popover-foreground: oklch(0.88 0.005 50);
+  --primary: oklch(0.88 0.005 50);
+  --primary-foreground: oklch(0.14 0.01 50);
+  --secondary: oklch(0.28 0.01 50);
+  --secondary-foreground: oklch(0.88 0.005 50);
+  --destructive: oklch(0.65 0.18 25);
+  --destructive-foreground: oklch(1 0 0);
+  --muted: oklch(0.22 0.008 50);
+  --muted-foreground: oklch(0.62 0.01 50);
+  --accent: oklch(0.24 0.01 280);
+  --accent-foreground: oklch(0.88 0.005 50);
+  --border: oklch(0.25 0.008 50);
+  --input: oklch(0.25 0.008 50);
+  --ring: oklch(0.88 0.005 50);
+
+  --success: oklch(0.65 0.12 145);
+  --success-foreground: oklch(0.12 0.005 50);
+  --warning: oklch(0.72 0.14 80);
+  --warning-foreground: oklch(0.12 0.005 50);
+
+  --imdb: oklch(0.85 0.16 85);
+  --imdb-foreground: oklch(0.12 0.02 85);
+  --tmdb: oklch(0.65 0.17 220);
+  --tmdb-foreground: oklch(1 0 0);
+
+  --sidebar: oklch(0.16 0.008 50);
+  --sidebar-foreground: oklch(0.88 0.005 50);
+  --sidebar-primary: oklch(0.88 0.005 50);
+  --sidebar-primary-foreground: oklch(0.14 0.01 50);
+  --sidebar-accent: oklch(0.24 0.008 50);
+  --sidebar-accent-foreground: oklch(0.88 0.005 50);
+  --sidebar-border: oklch(0.25 0.008 50);
+  --sidebar-ring: oklch(0.88 0.005 50);
+
+  --icon: oklch(0.75 0.02 50);
+  --dialog-background: oklch(0.12 0.008 50);
+  --dialog-border: oklch(0.25 0.01 50);
+  --dialog-shadow: oklch(0 0 0 / 0.4);
+}
+
 @theme {
   --text-xxs: 0.625rem;
   --font-cinema: 'Oswald', 'Bebas Neue', sans-serif;
