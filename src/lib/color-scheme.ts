@@ -8,10 +8,6 @@ import * as z from 'zod'
 
 const schemeValidator = z.enum([
   'default',
-  'ocean',
-  'sunset',
-  'forest',
-  'rose',
   'mono',
   'teal',
 ])
@@ -23,34 +19,6 @@ export const COLOR_SCHEMES = {
     colors: {
       light: 'oklch(0.6716 0.1368 48.513)',
       dark: 'oklch(0.7214 0.1337 49.9802)',
-    },
-  },
-  ocean: {
-    label: 'Ocean',
-    colors: {
-      light: 'oklch(0.55 0.15 230)',
-      dark: 'oklch(0.65 0.18 220)',
-    },
-  },
-  sunset: {
-    label: 'Sunset',
-    colors: {
-      light: 'oklch(0.65 0.18 30)',
-      dark: 'oklch(0.68 0.20 25)',
-    },
-  },
-  forest: {
-    label: 'Forest',
-    colors: {
-      light: 'oklch(0.55 0.14 145)',
-      dark: 'oklch(0.62 0.16 150)',
-    },
-  },
-  rose: {
-    label: 'Rose',
-    colors: {
-      light: 'oklch(0.60 0.18 340)',
-      dark: 'oklch(0.65 0.20 335)',
     },
   },
   mono: {

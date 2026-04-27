@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const colorSchemeSchema = z.enum(['default', 'ocean'])
+export const colorSchemeSchema = z.enum(['default', 'mono', 'teal'])
 
 export type ColorScheme = z.infer<typeof colorSchemeSchema>
 
