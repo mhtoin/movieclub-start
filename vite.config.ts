@@ -5,7 +5,12 @@ import { nitro } from 'nitro/vite'
 import { defineConfig } from 'vite'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
+const BUILD_TIMESTAMP = Date.now()
+
 const config = defineConfig({
+  define: {
+    __BUILD_TIMESTAMP__: JSON.stringify(BUILD_TIMESTAMP),
+  },
   build: {
     rollupOptions: {
       output: {
