@@ -106,15 +106,15 @@ export function HeroSection({ movie }: HeroSectionProps) {
             animate="animate"
             variants={staggerContainer}
           >
-            <motion.div variants={fadeInUp} className="mb-8">
+            <motion.div variants={fadeInUp} className="mb-4 sm:mb-6 md:mb-8">
               {logoUrl ? (
                 <img
                   src={logoUrl}
                   alt={movie.title}
-                  className="h-24 w-auto max-w-[400px] object-contain [filter:drop-shadow(0_0_2px_rgba(0,0,0,0.9))_drop-shadow(0_0_12px_rgba(0,0,0,0.55))_drop-shadow(0_20px_40px_rgba(0,0,0,0.4))] dark:[filter:drop-shadow(0_25px_50px_rgba(0,0,0,0.55))] sm:h-28 md:h-32 lg:h-36"
+                  className="h-16 w-auto max-w-[240px] object-contain [filter:drop-shadow(0_0_2px_rgba(0,0,0,0.9))_drop-shadow(0_0_12px_rgba(0,0,0,0.55))_drop-shadow(0_20px_40px_rgba(0,0,0,0.4))] dark:[filter:drop-shadow(0_25px_50px_rgba(0,0,0,0.55))] sm:h-24 sm:max-w-[320px] md:h-32 md:max-w-[400px] lg:h-36"
                 />
               ) : (
-                <h1 className="font-cinema-caps text-5xl font-bold tracking-wide text-foreground drop-shadow-2xl sm:text-6xl md:text-7xl lg:text-8xl uppercase">
+                <h1 className="font-cinema-caps text-4xl font-bold tracking-wide text-foreground drop-shadow-2xl sm:text-5xl md:text-7xl lg:text-8xl uppercase">
                   {movie.title}
                 </h1>
               )}
@@ -123,7 +123,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
             {movie.tagline && (
               <motion.p
                 variants={fadeInUp}
-                className="mb-6 text-lg italic text-foreground/70 sm:text-xl"
+                className="mb-4 text-base italic text-foreground/70 sm:mb-6 sm:text-lg md:text-xl"
               >
                 "{movie.tagline}"
               </motion.p>

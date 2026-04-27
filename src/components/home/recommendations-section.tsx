@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { useMediaQuery } from '@/lib/hooks'
 import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
 import type { TMDBMovie } from '@/lib/react-query/queries/home'
 import { homeQueries } from '@/lib/react-query/queries/home'
@@ -67,37 +68,7 @@ export function RecommendationsSection({
     (seed0.isFetching || seed1.isFetching || seed2.isFetching)
 
   if (isLoading) {
-    return (
-      <section className="relative py-12 md:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <div className="mb-8">
-            <h2 className="font-cinema-caps text-2xl font-bold tracking-wide text-foreground uppercase md:text-3xl">
-              Shortlist Picks
-            </h2>
-            <p className="text-sm text-foreground/60">
-              Based on your top ranked films
-            </p>
-          </div>
-          <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:gap-8">
-            <div className="aspect-[16/10] animate-pulse rounded-2xl bg-muted" />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex gap-4 rounded-xl border border-border/50 bg-background/60 p-2"
-                >
-                  <div className="h-24 w-16 animate-pulse rounded-lg bg-muted" />
-                  <div className="flex flex-1 flex-col justify-center gap-2">
-                    <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-                    <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    )
+    return <RecommendationsSkeleton />
   }
 
   if (movies.length === 0) return null
@@ -108,6 +79,51 @@ export function RecommendationsSection({
       addToShortlist={addToShortlist}
       isAddingToShortlist={isAddingToShortlist}
     />
+  )
+}
+
+function RecommendationsSkeleton() {
+  return (
+    <section className="relative py-12 md:py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="mb-8">
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-muted md:h-9" />
+          <div className="mt-2 h-4 w-32 animate-pulse rounded bg-muted" />
+        </div>
+
+        {/* Featured skeleton */}
+        <div className="aspect-[16/10] animate-pulse rounded-2xl bg-muted" />
+
+        {/* Desktop sidebar skeleton */}
+        <div className="mt-6 hidden gap-4 lg:grid lg:grid-cols-1 lg:gap-4 xl:grid-cols-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex gap-4 rounded-xl border border-border/50 bg-background/60 p-2"
+            >
+              <div className="h-24 w-16 animate-pulse rounded-lg bg-muted" />
+              <div className="flex flex-1 flex-col justify-center gap-2">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile strip skeleton */}
+        <div className="mt-6 flex gap-3 overflow-hidden lg:hidden">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0"
+            >
+              <div className="h-40 w-28 animate-pulse rounded-xl bg-muted sm:h-48 sm:w-32" />
+              <div className="mt-2 h-3 w-20 animate-pulse rounded bg-muted" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -123,6 +139,8 @@ function RecommendationsLoaded({
   const [featuredIndex, setFeaturedIndex] = useState(0)
   const [page, setPage] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const featuredRef = useRef<HTMLDivElement>(null)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   const safeIndex = featuredIndex < movies.length ? featuredIndex : 0
   const featured = movies[safeIndex]
@@ -149,6 +167,13 @@ function RecommendationsLoaded({
 
   const handleSelect = (index: number) => {
     setFeaturedIndex(index)
+    // On mobile, smooth-scroll the featured card back into view
+    if (!isDesktop && featuredRef.current) {
+      featuredRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }
   }
 
   const handleAddToShortlist = (movieId: number) => {
@@ -177,6 +202,7 @@ function RecommendationsLoaded({
 
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:gap-8">
           <motion.div
+            ref={featuredRef}
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -189,7 +215,8 @@ function RecommendationsLoaded({
             />
           </motion.div>
 
-          <div className="relative">
+          {/* Desktop: grid of compact cards */}
+          <div className="relative hidden lg:block">
             <div
               ref={scrollRef}
               className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 lg:max-h-[420px] lg:overflow-y-auto lg:pr-2 no-scrollbar"
@@ -214,13 +241,22 @@ function RecommendationsLoaded({
           </div>
         </div>
 
+        {/* Mobile/Tablet: horizontal poster strip */}
+        <div className="mt-6 lg:hidden">
+          <MobilePosterStrip
+            movies={movies}
+            featuredIndex={safeIndex}
+            onSelect={handleSelect}
+          />
+        </div>
+
         {totalPages > 1 && (
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
-            className="mt-6 flex items-center justify-center gap-2"
+            className="mt-6 hidden items-center justify-center gap-2 lg:flex"
           >
             <Button
               variant="outline"
@@ -273,8 +309,10 @@ function RecommendationsLoaded({
         >
           <Users className="h-3 w-3" />
           <span>
-            {rest.length} films
-            {totalPages > 1 && ` · Page ${page + 1} of ${totalPages}`}
+            {movies.length} films
+            {totalPages > 1 && (
+              <span className="hidden lg:inline">{` · Page ${page + 1} of ${totalPages}`}</span>
+            )}
           </span>
         </motion.div>
       </div>
@@ -337,8 +375,8 @@ function FeaturedCard({
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
 
-      <div className="absolute bottom-0 left-0 right-0 p-6">
-        <div className="mb-3 flex flex-wrap items-center gap-3">
+      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 md:p-6">
+        <div className="mb-3 flex flex-wrap items-center gap-2 sm:gap-3">
           <span className="rounded-full border border-warning/40 bg-warning/20 px-2.5 py-1 text-xs font-semibold text-warning">
             <span className="flex items-center gap-1">
               <Star className="h-3 w-3 fill-warning text-warning" />
@@ -355,7 +393,7 @@ function FeaturedCard({
           )}
         </div>
 
-        <h3 className="mb-2 font-cinema-caps text-3xl font-bold tracking-wide text-white uppercase md:text-4xl">
+        <h3 className="mb-2 font-cinema-caps text-2xl font-bold tracking-wide text-white uppercase md:text-3xl lg:text-4xl">
           {movie.title}
         </h3>
 
@@ -503,5 +541,108 @@ function CompactCard({
         <div className="absolute -left-px top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
       )}
     </button>
+  )
+}
+
+function MobilePosterStrip({
+  movies,
+  featuredIndex,
+  onSelect,
+}: {
+  movies: TMDBMovie[]
+  featuredIndex: number
+  onSelect: (index: number) => void
+}) {
+  const stripRef = useRef<HTMLDivElement>(null)
+
+  return (
+    <div className="relative">
+      <div
+        ref={stripRef}
+        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6"
+      >
+        {movies.map((movie, index) => {
+          const isSelected = index === featuredIndex
+          const posterUrl = movie.poster_path
+            ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
+            : null
+          const backdropUrl = movie.backdrop_path
+            ? `https://image.tmdb.org/t/p/w342${movie.backdrop_path}`
+            : null
+          const year = movie.release_date
+            ? new Date(movie.release_date).getFullYear()
+            : null
+
+          return (
+            <motion.button
+              key={movie.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.04 }}
+              onClick={() => onSelect(index)}
+              className={`group snap-start flex-shrink-0 text-left transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl ${
+                isSelected ? 'scale-[1.02]' : 'hover:scale-[1.02]'
+              }`}
+            >
+              <div
+                className={`relative h-40 w-28 overflow-hidden rounded-xl bg-muted sm:h-48 sm:w-32 ${
+                  isSelected
+                    ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                    : 'ring-1 ring-border/40'
+                }`}
+              >
+                {posterUrl ? (
+                  <img
+                    src={posterUrl}
+                    alt={movie.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : backdropUrl ? (
+                  <img
+                    src={backdropUrl}
+                    alt={movie.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Ticket className="h-8 w-8 text-muted-foreground/30" />
+                  </div>
+                )}
+
+                {/* Rating badge */}
+                <div className="absolute left-2 top-2 flex items-center gap-0.5 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                  <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
+                  {movie.vote_average.toFixed(1)}
+                </div>
+
+                {/* Selected indicator */}
+                {isSelected && (
+                  <div className="absolute inset-x-0 bottom-0 h-1 bg-primary" />
+                )}
+              </div>
+
+              <div className="mt-2 w-28 sm:w-32">
+                <h4
+                  className={`line-clamp-1 text-xs font-semibold ${
+                    isSelected ? 'text-primary' : 'text-foreground'
+                  }`}
+                >
+                  {movie.title}
+                </h4>
+                {year && (
+                  <span className="text-[10px] text-foreground/50">{year}</span>
+                )}
+              </div>
+            </motion.button>
+          )
+        })}
+      </div>
+
+      {/* Fade edges for visual polish */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent sm:w-6" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent sm:w-6" />
+    </div>
   )
 }
