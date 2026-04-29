@@ -60,9 +60,19 @@ const config = defineConfig({
           headers: { 'Cache-Control': 'no-store, no-cache' },
         },
       },
+      externals: {
+        // Bundle recharts' transitive deps instead of externalizing them.
+        // These are needed at runtime but aren't in the output node_modules.
+        inline: ['decimal.js-light', 'recharts-scale', 'react-smooth'],
+      },
     }),
     viteReact(),
   ],
+  ssr: {
+    // Bundle recharts' transitive dependencies that would otherwise be
+    // treated as external and missing at runtime in the Nitro output.
+    noExternal: [/decimal\.js/, /recharts-scale/, /react-smooth/],
+  },
 })
 
 export default config
