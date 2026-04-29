@@ -1,4 +1,5 @@
 import { TMDBMovieResponse } from '@/types/tmdb'
+import { getCached, setCache } from '@/lib/tmdb-cache'
 
 // Types for The Movie Database API
 export interface Movie {
@@ -107,7 +108,13 @@ export async function fetchBackgroundMovies(
   return movies.filter((movie) => movie.poster_path !== null).slice(0, count)
 }
 
+const GENRES_CACHE_KEY = 'tmdb:genres'
+const GENRES_TTL = 1000 * 60 * 60 * 24 * 7 // 7 days
+
 export async function getFilters() {
+  const cached = getCached<Array<{ label: string; value: string }>>(GENRES_CACHE_KEY)
+  if (cached) return cached
+
   const res = await fetch(
     `https://api.themoviedb.org/3/genre/movie/list?language=en-US&api_key=${TMDB_CONFIG.API_KEY}`,
     {
@@ -122,9 +129,11 @@ export async function getFilters() {
   const responseBody = await res.json()
 
   if (responseBody.genres) {
-    return responseBody.genres.map((genre: { name: string; id: number }) => {
+    const genres = responseBody.genres.map((genre: { name: string; id: number }) => {
       return { label: genre.name, value: genre.id.toString() }
     }) as Array<{ label: string; value: string }>
+    setCache(GENRES_CACHE_KEY, genres, GENRES_TTL)
+    return genres
   }
 }
 
@@ -140,10 +149,16 @@ export interface WatchProvidersResponse {
   results: WatchProvider[]
 }
 
+const PROVIDERS_CACHE_KEY = 'tmdb:watchProviders'
+const PROVIDERS_TTL = 1000 * 60 * 60 * 24 // 24 hours
+
 export async function fetchWatchProviders(): Promise<WatchProvider[]> {
   if (!TMDB_CONFIG.API_KEY) {
     throw new Error('TMDB API key is not configured')
   }
+
+  const cached = getCached<WatchProvider[]>(PROVIDERS_CACHE_KEY)
+  if (cached) return cached
 
   const url = `${TMDB_CONFIG.BASE_URL}/watch/providers/movie?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&watch_region=FI`
 
@@ -158,6 +173,7 @@ export async function fetchWatchProviders(): Promise<WatchProvider[]> {
 
     const data: WatchProvidersResponse = await response.json()
 
+    setCache(PROVIDERS_CACHE_KEY, data.results, PROVIDERS_TTL)
     return data.results
   } catch (error) {
     console.error('Error fetching watch providers:', error)

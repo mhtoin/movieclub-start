@@ -40,10 +40,8 @@ export const Route = createFileRoute('/_authenticated/discover')({
   validateSearch: zodValidator(discoverSearchSchema),
   loaderDeps: ({ search }) => search,
   loader: async ({ context, deps }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(tmdbQueries.genres()),
-      context.queryClient.ensureQueryData(tmdbQueries.watchProviders()),
-    ])
+    context.queryClient.prefetchQuery(tmdbQueries.genres())
+    context.queryClient.prefetchQuery(tmdbQueries.watchProviders())
     const isSearchActive =
       deps.search && deps.search.trim().length >= MIN_SEARCH_LENGTH
     if (isSearchActive) {

@@ -5,6 +5,7 @@ import { DeviceCapabilityProvider } from '@/lib/hooks/use-device-capability'
 import { useSSEInvalidation } from '@/lib/hooks/use-sse-invalidation'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { authMiddleware } from '@/middleware/auth'
 import {
   createFileRoute,
@@ -63,6 +64,8 @@ export const Route = createFileRoute('/_authenticated')({
       context.queryClient.prefetchQuery(shortlistQueries.byUser(user.userId))
       context.queryClient.prefetchQuery(movieQueries.latest())
     }
+    context.queryClient.prefetchQuery(tmdbQueries.genres())
+    context.queryClient.prefetchQuery(tmdbQueries.watchProviders())
   },
   component: AuthenticatedLayout,
 })

@@ -9,7 +9,7 @@ import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
 import ToastList from '@/components/ui/toast-list'
 import { getThemeAndSchemeServerFn } from '@/lib/color-scheme'
-import { persister, queryClient } from '@/lib/query-client'
+import { persister } from '@/lib/query-client'
 import type { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Link } from '@tanstack/react-router'
@@ -132,6 +132,7 @@ function AppChildren({ children }: { children: React.ReactNode }) {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { theme, colorScheme } = Route.useLoaderData()
+  const { queryClient } = Route.useRouteContext()
 
   return (
     <html

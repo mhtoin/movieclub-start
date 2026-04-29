@@ -17,20 +17,23 @@ function isNetworkError(error: unknown): boolean {
   return false
 }
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      gcTime: ONE_WEEK,
-      refetchOnWindowFocus: false,
-      retry: (failureCount, error) => {
-        if (!isNetworkError(error)) return false
-        return failureCount < 2
+export function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5,
+        gcTime: ONE_WEEK,
+        refetchOnWindowFocus: false,
+        retry: (failureCount, error) => {
+          if (!isNetworkError(error)) return false
+          return failureCount < 2
+        },
+        retryDelay: (attemptIndex) =>
+          Math.min(1000 * 2 ** attemptIndex, 30000),
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
-  },
-})
+  })
+}
 
 export const persister =
   typeof window !== 'undefined'
