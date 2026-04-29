@@ -14,10 +14,13 @@ const config = defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // All assets use content hashes for immutable long-term caching.
-        // The CSS is referenced with a build-timestamp query param in __root.tsx
-        // for cache busting when the app is redeployed.
-        assetFileNames: 'assets/[name]-[hash][extname]',
+        assetFileNames: (assetInfo) => {
+          const name = assetInfo.names?.[0] ?? ''
+          if (name === 'styles.css') {
+            return 'assets/styles[extname]'
+          }
+          return 'assets/[name]-[hash][extname]'
+        },
         manualChunks(id) {
           // React core must be its own chunk so Rollup uses it (not framer-motion)
           // as the shared JSX runtime for all other chunks.

@@ -102,10 +102,10 @@ export const Route = createRootRouteWithContext<{
       { rel: 'dns-prefetch', href: 'https://api.themoviedb.org' },
       {
         rel: 'preload',
-        href: appCss,
+        href: `${appCss}?v=${__BUILD_TIMESTAMP__}`,
         as: 'style',
       },
-      { rel: 'stylesheet', href: appCss },
+      { rel: 'stylesheet', href: `${appCss}?v=${__BUILD_TIMESTAMP__}` },
     ],
   }),
   loader: async () => getThemeAndSchemeServerFn(),
