@@ -1,5 +1,6 @@
 import { EmptyState } from '@/components/home/empty-state'
 import { HeroSection } from '@/components/home/hero-section'
+import { HeroSkeleton } from '@/components/home/hero-skeleton'
 import { MovieReelSkeleton } from '@/components/home/movie-reel-skeleton'
 import { RecommendationsSection } from '@/components/home/recommendations-section'
 import { homeQueries } from '@/lib/react-query/queries/home'
@@ -23,15 +24,12 @@ export const Route = createFileRoute('/_authenticated/home')({
 
 function Home() {
   const { user } = Route.useRouteContext()
-  const { data: latestMovie } = useSuspenseQuery(movieQueries.latest())
-
-  if (!latestMovie) {
-    return <EmptyState />
-  }
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground pb-24 md:pb-0">
-      <HeroSection movie={latestMovie.movie} />
+      <Suspense fallback={<HeroSkeleton />}>
+        <HomeHero />
+      </Suspense>
 
       <div className="relative md:pl-[72px] md:pr-12 lg:pl-20 lg:pr-16">
         <Suspense fallback={<MovieReelSkeleton />}>
@@ -40,4 +38,14 @@ function Home() {
       </div>
     </div>
   )
+}
+
+function HomeHero() {
+  const { data: latestMovie } = useSuspenseQuery(movieQueries.latest())
+
+  if (!latestMovie) {
+    return <EmptyState />
+  }
+
+  return <HeroSection movie={latestMovie.movie} />
 }

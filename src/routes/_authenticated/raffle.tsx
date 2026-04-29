@@ -1,7 +1,7 @@
 import { Suspense, useMemo, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import type { Movie } from '@/db/schema/movies'
 import { PageTitleBar } from '@/components/page-titlebar'
@@ -31,6 +31,24 @@ export const Route = createFileRoute('/_authenticated/raffle')({
 type Phase = 'setup' | 'countdown' | 'spinning' | 'winner'
 
 function RafflePage() {
+  return (
+    <div className="min-h-full flex flex-col px-2 sm:px-4 py-2 relative container mx-auto pb-44 md:pb-4 md:pl-[72px]">
+      <Link
+        to="/shortlists"
+        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" />
+        Back to Shortlists
+      </Link>
+      <PageTitleBar title="Raffle" description="Draw next time's movie" />
+      <Suspense fallback={<ShortlistsSkeleton />}>
+        <RaffleSetup />
+      </Suspense>
+    </div>
+  )
+}
+
+function RaffleSetup() {
   const [phase, setPhase] = useState<Phase>('setup')
   const [watchDate, setWatchDate] = useState<Date | undefined>(undefined)
   const [dryRun, setDryRun] = useState(false)
@@ -53,7 +71,7 @@ function RafflePage() {
     crew: Array<any> | null
   }> | null>(null)
 
-  const { data: shortlists = [] } = useQuery(shortlistQueries.all())
+  const { data: shortlists = [] } = useSuspenseQuery(shortlistQueries.all())
   const participatingMovies = useMemo(
     () => shortlists.filter((s) => s.participating).flatMap((s) => s.movies),
     [shortlists],
@@ -154,50 +172,40 @@ function RafflePage() {
   }
 
   return (
-    <div className="min-h-full flex flex-col px-2 sm:px-4 py-2 relative container mx-auto pb-44 md:pb-4 md:pl-[72px]">
-      <Link
-        to="/shortlists"
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Back to Shortlists
-      </Link>
-      <PageTitleBar title="Raffle" description="Draw next time's movie" />
+    <div className="flex-1 py-6 space-y-6">
       {phase === 'setup' && (
-        <div className="flex-1 py-6 space-y-6">
-          <Suspense fallback={<ShortlistsSkeleton />}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {shortlists.map((shortlist, index) => (
-                <ParticipantTicket
-                  key={shortlist.id}
-                  shortlist={shortlist}
-                  colorIndex={index}
-                  onToggleReady={() =>
-                    handleToggleReady(shortlist.user.id, shortlist.isReady)
-                  }
-                  onToggleParticipating={() =>
-                    handleToggleParticipating(
-                      shortlist.user.id,
-                      shortlist.participating,
-                    )
-                  }
-                  onSelectMovie={(movieIndex: number) =>
-                    handleSelectMovie(shortlist.user.id, movieIndex)
-                  }
-                  isUpdating={
-                    updateStatusMutation.isPending &&
-                    updateStatusMutation.variables.userId === shortlist.user.id
-                  }
-                  isSelecting={
-                    updateSelectedIndexMutation.isPending &&
-                    updateSelectedIndexMutation.variables.userId ===
-                      shortlist.user.id
-                  }
-                  delay={index * 0.06}
-                />
-              ))}
-            </div>
-          </Suspense>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {shortlists.map((shortlist, index) => (
+              <ParticipantTicket
+                key={shortlist.id}
+                shortlist={shortlist}
+                colorIndex={index}
+                onToggleReady={() =>
+                  handleToggleReady(shortlist.user.id, shortlist.isReady)
+                }
+                onToggleParticipating={() =>
+                  handleToggleParticipating(
+                    shortlist.user.id,
+                    shortlist.participating,
+                  )
+                }
+                onSelectMovie={(movieIndex: number) =>
+                  handleSelectMovie(shortlist.user.id, movieIndex)
+                }
+                isUpdating={
+                  updateStatusMutation.isPending &&
+                  updateStatusMutation.variables.userId === shortlist.user.id
+                }
+                isSelecting={
+                  updateSelectedIndexMutation.isPending &&
+                  updateSelectedIndexMutation.variables.userId ===
+                    shortlist.user.id
+                }
+                delay={index * 0.06}
+              />
+            ))}
+          </div>
           <RaffleControlBar
             watchDate={watchDate}
             onDateSelect={setWatchDate}
@@ -209,7 +217,7 @@ function RafflePage() {
             totalCount={participating.length}
             pendingSelectionsCount={pendingSelections.length}
           />
-        </div>
+        </>
       )}
       <AnimatePresence>
         {phase === 'countdown' && (
