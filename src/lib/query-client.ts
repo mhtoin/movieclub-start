@@ -1,5 +1,5 @@
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
-import { QueryClient } from '@tanstack/react-query'
+import { defaultShouldDehydrateQuery, QueryClient } from '@tanstack/react-query'
 
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7
 
@@ -30,6 +30,11 @@ export function createQueryClient() {
         },
         retryDelay: (attemptIndex) =>
           Math.min(1000 * 2 ** attemptIndex, 30000),
+      },
+      dehydrate: {
+        shouldDehydrateQuery: (query) =>
+          defaultShouldDehydrateQuery(query) &&
+          query.state.status === 'success',
       },
     },
   })
