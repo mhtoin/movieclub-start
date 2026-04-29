@@ -111,6 +111,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
                 <img
                   src={logoUrl}
                   alt={movie.title}
+                  fetchPriority="high"
                   className="h-16 w-auto max-w-[240px] object-contain [filter:drop-shadow(0_0_2px_rgba(0,0,0,0.9))_drop-shadow(0_0_12px_rgba(0,0,0,0.55))_drop-shadow(0_20px_40px_rgba(0,0,0,0.4))] dark:[filter:drop-shadow(0_25px_50px_rgba(0,0,0,0.55))] sm:h-24 sm:max-w-[320px] md:h-32 md:max-w-[400px] lg:h-36"
                 />
               ) : (

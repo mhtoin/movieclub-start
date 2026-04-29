@@ -1,10 +1,11 @@
 import { db } from '@/db/db'
 import { movie, movieCredits } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { getCached, setCache } from '@/lib/tmdb-cache'
 import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { and, count, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 
 export interface DashboardStats {
   totalWatchedMovies: number
@@ -119,6 +120,55 @@ export interface NextMovieToWatch {
   }
 }
 
+const DASHBOARD_CACHE_TTL = 5000
+
+type WatchedMovie = {
+  id: string
+  title: string
+  genres: string[] | null
+  voteAverage: number
+  releaseDate: string | null
+  runtime: number | null
+  originalLanguage: string | null
+  images: unknown
+  userId: string | null
+  cast: unknown
+  crew: unknown
+}
+
+async function getWatchedMoviesForDashboard(
+  userId?: string,
+): Promise<WatchedMovie[]> {
+  const cacheKey = `dashboard:movies:${userId ?? 'all'}`
+  const cached = getCached<WatchedMovie[]>(cacheKey)
+  if (cached) return cached
+
+  const whereConditions = userId
+    ? and(isNotNull(movie.watchDate), eq(movie.userId, userId))
+    : isNotNull(movie.watchDate)
+
+  const rows = await db
+    .select({
+      id: movie.id,
+      title: movie.title,
+      genres: movie.genres,
+      voteAverage: movie.voteAverage,
+      releaseDate: movie.releaseDate,
+      runtime: movie.runtime,
+      originalLanguage: movie.originalLanguage,
+      images: movie.images,
+      userId: movie.userId,
+      cast: movieCredits.cast,
+      crew: movieCredits.crew,
+    })
+    .from(movie)
+    .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
+    .where(whereConditions)
+
+  setCache(cacheKey, rows, DASHBOARD_CACHE_TTL)
+  return rows
+}
+
 export const getDashboardStats = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .inputValidator((data: { userId: string }) => data)
@@ -127,99 +177,46 @@ export const getDashboardStats = createServerFn({ method: 'GET' })
       throw new Error('Forbidden')
 
     try {
-      const [
-        totalWatchedResult,
-        userWatchedResult,
-        watchTimeResult,
-        genresResult,
-        ratingResult,
-        userWatchTimeResult,
-        userGenresResult,
-        userRatingResult,
-      ] = await Promise.all([
-        db
-          .select({ count: count() })
-          .from(movie)
-          .where(isNotNull(movie.watchDate)),
+      const allMovies = await getWatchedMoviesForDashboard()
+      const userMovies = data.userId
+        ? await getWatchedMoviesForDashboard(data.userId)
+        : []
 
-        db
-          .select({ count: count() })
-          .from(movie)
-          .where(
-            and(isNotNull(movie.watchDate), eq(movie.userId, data.userId)),
-          ),
+      const totalWatched = allMovies.length
+      const userWatched = userMovies.length
 
-        db
-          .select({
-            totalMinutes: sql<number>`COALESCE(SUM(${movie.runtime}), 0)`,
-          })
-          .from(movie)
-          .where(and(isNotNull(movie.watchDate), isNotNull(movie.runtime))),
-
-        db
-          .select({ genres: movie.genres })
-          .from(movie)
-          .where(and(isNotNull(movie.watchDate), isNotNull(movie.genres))),
-
-        db
-          .select({
-            avgRating: sql<number>`COALESCE(AVG(${movie.voteAverage}), 0)`,
-          })
-          .from(movie)
-          .where(isNotNull(movie.watchDate)),
-
-        db
-          .select({
-            totalMinutes: sql<number>`COALESCE(SUM(${movie.runtime}), 0)`,
-          })
-          .from(movie)
-          .where(
-            and(
-              isNotNull(movie.watchDate),
-              isNotNull(movie.runtime),
-              eq(movie.userId, data.userId),
-            ),
-          ),
-
-        db
-          .select({ genres: movie.genres })
-          .from(movie)
-          .where(
-            and(
-              isNotNull(movie.watchDate),
-              isNotNull(movie.genres),
-              eq(movie.userId, data.userId),
-            ),
-          ),
-
-        db
-          .select({
-            avgRating: sql<number>`COALESCE(AVG(${movie.voteAverage}), 0)`,
-          })
-          .from(movie)
-          .where(
-            and(isNotNull(movie.watchDate), eq(movie.userId, data.userId)),
-          ),
-      ])
-
-      const totalWatched = totalWatchedResult[0]?.count ?? 0
-      const userWatched = userWatchedResult[0]?.count ?? 0
-      const totalWatchTime = Math.round(watchTimeResult[0]?.totalMinutes ?? 0)
-      const allGenres = new Set<string>()
-      genresResult.forEach((row) => {
-        if (row.genres) row.genres.forEach((genre) => allGenres.add(genre))
-      })
-      const averageRating = Number((ratingResult[0]?.avgRating ?? 0).toFixed(1))
+      const totalWatchTime = Math.round(
+        allMovies.reduce((sum, m) => sum + (m.runtime ?? 0), 0),
+      )
       const userWatchTime = Math.round(
-        userWatchTimeResult[0]?.totalMinutes ?? 0,
+        userMovies.reduce((sum, m) => sum + (m.runtime ?? 0), 0),
       )
+
+      const allGenres = new Set<string>()
+      allMovies.forEach((m) => m.genres?.forEach((g) => allGenres.add(g)))
+
       const userGenres = new Set<string>()
-      userGenresResult.forEach((row) => {
-        if (row.genres) row.genres.forEach((genre) => userGenres.add(genre))
-      })
-      const userAverageRating = Number(
-        (userRatingResult[0]?.avgRating ?? 0).toFixed(1),
-      )
+      userMovies.forEach((m) => m.genres?.forEach((g) => userGenres.add(g)))
+
+      const averageRating =
+        allMovies.length > 0
+          ? Number(
+              (
+                allMovies.reduce((sum, m) => sum + m.voteAverage, 0) /
+                allMovies.length
+              ).toFixed(1),
+            )
+          : 0
+
+      const userAverageRating =
+        userMovies.length > 0
+          ? Number(
+              (
+                userMovies.reduce((sum, m) => sum + m.voteAverage, 0) /
+                userMovies.length
+              ).toFixed(1),
+            )
+          : 0
 
       return {
         totalWatchedMovies: totalWatched,
@@ -258,26 +255,7 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
     }
 
     try {
-      const whereConditions = data.userId
-        ? and(isNotNull(movie.watchDate), eq(movie.userId, data.userId))
-        : isNotNull(movie.watchDate)
-
-      const watchedMovies = await db
-        .select({
-          id: movie.id,
-          genres: movie.genres,
-          voteAverage: movie.voteAverage,
-          releaseDate: movie.releaseDate,
-          cast: movieCredits.cast,
-          crew: movieCredits.crew,
-          originalLanguage: movie.originalLanguage,
-          title: movie.title,
-          runtime: movie.runtime,
-          userId: movie.userId,
-        })
-        .from(movie)
-        .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
-        .where(whereConditions)
+      const watchedMovies = await getWatchedMoviesForDashboard(data.userId)
 
       // Genre distribution
       const genreMap = new Map<string, number>()

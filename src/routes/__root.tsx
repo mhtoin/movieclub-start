@@ -97,13 +97,15 @@ export const Route = createRootRouteWithContext<{
     links: [
       { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
       { rel: 'preconnect', href: 'https://image.tmdb.org' },
+      { rel: 'preconnect', href: 'https://api.themoviedb.org' },
       { rel: 'dns-prefetch', href: 'https://image.tmdb.org' },
+      { rel: 'dns-prefetch', href: 'https://api.themoviedb.org' },
       {
         rel: 'preload',
-        href: `${appCss}?v=${__BUILD_TIMESTAMP__}`,
+        href: appCss,
         as: 'style',
       },
-      { rel: 'stylesheet', href: `${appCss}?v=${__BUILD_TIMESTAMP__}` },
+      { rel: 'stylesheet', href: appCss },
     ],
   }),
   loader: async () => getThemeAndSchemeServerFn(),

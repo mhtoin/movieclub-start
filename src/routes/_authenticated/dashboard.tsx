@@ -1,8 +1,13 @@
-import { DashboardContent } from '@/components/dashboard/dashboard-content'
 import { DashboardSkeletonFull } from '@/components/dashboard/dashboard-skeleton'
 import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 import { createFileRoute } from '@tanstack/react-router'
-import { Suspense } from 'react'
+import { lazy, Suspense } from 'react'
+
+const DashboardContent = lazy(() =>
+  import('@/components/dashboard/dashboard-content').then((m) => ({
+    default: m.DashboardContent,
+  })),
+)
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   loader: ({ context }) => {

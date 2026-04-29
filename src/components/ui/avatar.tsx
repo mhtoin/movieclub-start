@@ -48,8 +48,8 @@ export default function Avatar({
           width: '100%',
           height: '100%',
         }}
-        loading={loading}
-        decoding={decoding}
+        loading={loading ?? 'lazy'}
+        decoding={decoding ?? 'async'}
         onError={(e) => {
           // Hide the image on error to reveal the fallback
           e.currentTarget.style.display = 'none'

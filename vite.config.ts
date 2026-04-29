@@ -14,17 +14,10 @@ const config = defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Use a stable (hash-free) filename for CSS so the server and client
-        // builds always reference the same URL, regardless of minor Tailwind
-        // processing differences between Linux and macOS Docker environments.
-        // Cache invalidation relies on Cache-Control: no-cache + ETag.
-        assetFileNames: (assetInfo) => {
-          const name = assetInfo.names?.[0] ?? ''
-          if (name.endsWith('.css')) {
-            return 'assets/[name][extname]'
-          }
-          return 'assets/[name]-[hash][extname]'
-        },
+        // All assets use content hashes for immutable long-term caching.
+        // The CSS is referenced with a build-timestamp query param in __root.tsx
+        // for cache busting when the app is redeployed.
+        assetFileNames: 'assets/[name]-[hash][extname]',
         manualChunks(id) {
           // React core must be its own chunk so Rollup uses it (not framer-motion)
           // as the shared JSX runtime for all other chunks.
@@ -58,11 +51,7 @@ const config = defineConfig({
     tanstackStart(),
     nitro({
       routeRules: {
-        // The main stylesheet has a stable name — revalidate on every request
-        '/assets/styles.css': {
-          headers: { 'Cache-Control': 'no-cache, must-revalidate' },
-        },
-        // All other hashed assets never change — cache forever
+        // All hashed assets never change — cache forever
         '/assets/**': {
           headers: { 'Cache-Control': 'public, max-age=31536000, immutable' },
         },

@@ -9,7 +9,6 @@ import { StatCardsSection } from '@/components/dashboard/stat-cards-section'
 import { StatCardsSkeleton } from '@/components/dashboard/stat-cards-skeleton'
 import { PageTitleBar } from '@/components/page-titlebar'
 import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
-import { OverviewInsights } from '@/components/dashboard/overview-insights'
 import {
   Tab,
   TabsIndicator,
@@ -31,6 +30,11 @@ const PeopleTabContent = lazy(() =>
 const DeepDiveTabContent = lazy(() =>
   import('@/components/dashboard/deep-dive-tab-content').then((m) => ({
     default: m.DeepDiveTabContent,
+  })),
+)
+const OverviewInsights = lazy(() =>
+  import('@/components/dashboard/overview-insights').then((m) => ({
+    default: m.OverviewInsights,
   })),
 )
 

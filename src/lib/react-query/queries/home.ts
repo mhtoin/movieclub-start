@@ -1,5 +1,6 @@
 import { db } from '@/db/db'
 import { movie, moviesOnTiers, tier, tierlist } from '@/db/schema'
+import { getCached, setCache } from '@/lib/tmdb-cache'
 import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
@@ -170,15 +171,26 @@ export const getRecommendationSeeds = createServerFn({ method: 'GET' })
 
 const TARGET_PROVIDERS = '8|323|463|496'
 const WATCH_REGION = 'FI'
+const PROVIDER_CHECK_TTL = 1000 * 60 * 60 * 24 // 24 hours
 
 async function isAvailableInTargetProviders(movieId: number): Promise<boolean> {
+  const cacheKey = `provider:${movieId}`
+  const cached = getCached<boolean>(cacheKey)
+  if (cached !== undefined) return cached
+
   const url = `${TMDB_CONFIG.BASE_URL}/movie/${movieId}/watch/providers?api_key=${TMDB_CONFIG.API_KEY}`
   try {
     const response = await fetch(url)
-    if (!response.ok) return false
+    if (!response.ok) {
+      setCache(cacheKey, false, PROVIDER_CHECK_TTL)
+      return false
+    }
     const data = await response.json()
     const regionData = data.results?.[WATCH_REGION]
-    if (!regionData) return false
+    if (!regionData) {
+      setCache(cacheKey, false, PROVIDER_CHECK_TTL)
+      return false
+    }
     const providerIds = new Set<number>()
     for (const provider of regionData.flatrate ?? [])
       providerIds.add(provider.provider_id)
@@ -187,7 +199,9 @@ async function isAvailableInTargetProviders(movieId: number): Promise<boolean> {
     for (const provider of regionData.free ?? [])
       providerIds.add(provider.provider_id)
     const targetIds = TARGET_PROVIDERS.split('|').map(Number)
-    return targetIds.some((id) => providerIds.has(id))
+    const result = targetIds.some((id) => providerIds.has(id))
+    setCache(cacheKey, result, PROVIDER_CHECK_TTL)
+    return result
   } catch {
     return false
   }
@@ -196,6 +210,7 @@ async function isAvailableInTargetProviders(movieId: number): Promise<boolean> {
 /**
  * Fetch provider-filtered TMDB recommendations for a single seed movie.
  * Paginates until it finds enough movies available on target providers.
+ * Provider availability checks are cached for 24 hours.
  */
 export const getRecommendationsForSeed = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
@@ -216,40 +231,48 @@ export const getRecommendationsForSeed = createServerFn({ method: 'GET' })
     const results: TMDBMovie[] = []
     const perSeedTarget = 10
     let page = 1
-    const maxPages = 5
+    const maxPages = 2
 
     while (results.length < perSeedTarget && page <= maxPages) {
-      const url = `${TMDB_CONFIG.BASE_URL}/movie/${seedTmdbId}/recommendations?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&page=${page}`
-      try {
-        const response = await fetch(url)
-        if (!response.ok) break
-        const recData: TMDBResponse = await response.json()
-        if (recData.results.length === 0) break
+      const recsCacheKey = `recs:${seedTmdbId}:${page}`
+      let recData = getCached<TMDBResponse>(recsCacheKey)
 
-        const providerChecks = await Promise.all(
-          recData.results.map(async (movie) => {
-            if (excludeSet.has(movie.id)) return null
-            excludeSet.add(movie.id)
-            const ok = await isAvailableInTargetProviders(movie.id)
-            if (!ok) return null
-            return {
-              ...movie,
-              becauseYouLiked: {
-                title: seedTitle,
-                posterPath: seedPosterPath,
-              },
-            }
-          }),
-        )
-
-        for (const rec of providerChecks) {
-          if (rec) {
-            results.push(rec)
-            if (results.length >= perSeedTarget) break
-          }
+      if (!recData) {
+        const url = `${TMDB_CONFIG.BASE_URL}/movie/${seedTmdbId}/recommendations?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&page=${page}`
+        try {
+          const response = await fetch(url)
+          if (!response.ok) break
+          const json = (await response.json()) as TMDBResponse
+          setCache(recsCacheKey, json, 1000 * 60 * 60 * 6)
+          recData = json
+        } catch {
+          break
         }
-      } catch {
-        break
+      }
+
+      if (recData.results.length === 0) break
+
+      const providerChecks = await Promise.all(
+        recData.results.map(async (movie) => {
+          if (excludeSet.has(movie.id)) return null
+          excludeSet.add(movie.id)
+          const ok = await isAvailableInTargetProviders(movie.id)
+          if (!ok) return null
+          return {
+            ...movie,
+            becauseYouLiked: {
+              title: seedTitle,
+              posterPath: seedPosterPath,
+            },
+          }
+        }),
+      )
+
+      for (const rec of providerChecks) {
+        if (rec) {
+          results.push(rec)
+          if (results.length >= perSeedTarget) break
+        }
       }
       page++
     }

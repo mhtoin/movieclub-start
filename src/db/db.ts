@@ -7,10 +7,11 @@ if (!process.env.DATABASE_URL) {
 }
 
 const client = postgres(process.env.DATABASE_URL, {
-  max: 10,
+  max: 20,
   idle_timeout: 30,
-  max_lifetime: 1800,
-  connect_timeout: 15,
+  max_lifetime: 3600,
+  connect_timeout: 10,
+  prepare: false,
 })
 
 export const db = drizzle(client, { schema })
