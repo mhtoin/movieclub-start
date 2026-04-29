@@ -13,10 +13,10 @@ import { Suspense } from 'react'
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
     const userId = context.user?.userId
-    context.queryClient.prefetchQuery(movieQueries.latest())
     context.queryClient.prefetchQuery(tmdbQueries.genres())
+    await context.queryClient.ensureQueryData(movieQueries.latest())
     if (userId) {
-      context.queryClient.prefetchQuery(homeQueries.seeds(userId))
+      await context.queryClient.ensureQueryData(homeQueries.seeds(userId))
     }
   },
   component: Home,
