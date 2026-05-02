@@ -56,9 +56,9 @@ export function ShortlistOverviewGrid() {
 
   return (
     <>
-      <div className="flex items-center gap-4 mb-5 flex-wrap">
+      <div className="flex items-center gap-4 mb-6 flex-wrap">
         <div className="flex items-center gap-1.5">
-          <Users className="w-4 h-4 text-muted-foreground" />
+          <Users className="w-4 h-4 text-muted-foreground/60" />
           <span className="text-sm text-muted-foreground">
             <span className="font-semibold text-foreground">
               {shortlists.length}
@@ -66,20 +66,20 @@ export function ShortlistOverviewGrid() {
             {shortlists.length === 1 ? 'member' : 'members'}
           </span>
         </div>
-        <span className="text-muted-foreground/30">·</span>
+        <span className="text-muted-foreground/20">·</span>
         <span className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">{totalMovies}</span>{' '}
           movies
         </span>
-        <span className="text-muted-foreground/30">·</span>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-success/10 rounded-full">
+        <span className="text-muted-foreground/20">·</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-success/8 rounded-full">
           <span className="text-sm font-semibold text-success">
             {readyCount}
           </span>
-          <span className="text-sm text-success/80">ready</span>
+          <span className="text-sm text-success/70">ready</span>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {shortlists.map((shortlist, index) => (
           <ShortlistUserCard
             key={shortlist.id}

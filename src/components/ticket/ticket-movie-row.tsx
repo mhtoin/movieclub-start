@@ -34,12 +34,12 @@ export function TicketMovieRow({
     : null
 
   const baseClass = interactive
-    ? 'flex items-center gap-3 p-2 rounded-md border border-transparent hover:translate-x-1 transition-all duration-200 cursor-pointer group bg-muted/50 hover:bg-muted hover:border-border'
-    : 'flex items-center gap-3 p-2 rounded-md bg-muted/50'
+    ? 'flex items-center gap-3 p-2 rounded-md border border-transparent hover:translate-x-1 transition-all duration-200 cursor-pointer group bg-transparent hover:bg-muted/30 hover:border-border/30'
+    : 'flex items-center gap-3 p-2 rounded-md bg-transparent'
 
   const selectedClass =
     showSelection && isSelected
-      ? 'border-primary/50 bg-primary/5 shadow-sm'
+      ? 'border-primary/30 bg-primary/3'
       : ''
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {

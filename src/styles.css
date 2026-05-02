@@ -43,7 +43,7 @@
   --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
   --tracking-normal: 0rem;
   --spacing: 0.25rem;
-  --ticket-notch-size: 40px;
+  --ticket-notch-size: 28px;
 }
 
 .scheme-default.light {
@@ -517,26 +517,23 @@
   0% {
     transform: translateY(0) rotate(0deg);
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.08),
-      0 4px 12px rgba(0, 0, 0, 0.05);
+      0 1px 2px rgba(0, 0, 0, 0.04);
   }
   100% {
-    transform: translateY(-6px) rotate(-0.5deg);
+    transform: translateY(-4px) rotate(-0.25deg);
     box-shadow:
-      0 4px 8px rgba(0, 0, 0, 0.12),
-      0 12px 32px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+      0 8px 24px rgba(0, 0, 0, 0.08);
   }
 }
 
 @keyframes ticket-print {
   0% {
     opacity: 0;
-    transform: translateY(20px) scaleY(0.95);
+    transform: translateY(12px) scaleY(0.97);
   }
   60% {
     opacity: 1;
-    transform: translateY(-4px) scaleY(1.02);
+    transform: translateY(-2px) scaleY(1.01);
   }
   100% {
     opacity: 1;
@@ -574,10 +571,9 @@
 }
 
 .animate-ticket-lift:hover {
-  transform: translateY(-6px) rotate(-0.5deg);
+  transform: translateY(-4px) rotate(-0.25deg);
   box-shadow:
-    0 8px 16px rgba(0, 0, 0, 0.15),
-    0 20px 40px rgba(0, 0, 0, 0.1);
+    0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .animate-ticket-punch:active {
