@@ -1,14 +1,14 @@
 import { Link, useRouter } from '@tanstack/react-router'
 
 import {
+  Compass,
+  Dices,
   Film,
   Home,
-  LayoutDashboard,
-  List,
   LogOut,
-  Search,
   Settings,
   Star,
+  Ticket,
   User,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -105,21 +105,21 @@ export default function Header() {
               <Home size={20} />
               <span className="font-medium">Home</span>
             </HeaderLink>
-            <HeaderLink destination="/dashboard" setIsOpen={setIsOpen}>
-              <LayoutDashboard size={20} />
-              <span className="font-medium">Dashboard</span>
+            <HeaderLink destination="/discover" setIsOpen={setIsOpen}>
+              <Compass size={20} />
+              <span className="font-medium">Discover</span>
+            </HeaderLink>
+            <HeaderLink destination="/shortlists" setIsOpen={setIsOpen}>
+              <Ticket size={20} />
+              <span className="font-medium">Shortlists</span>
+            </HeaderLink>
+            <HeaderLink destination="/raffle" setIsOpen={setIsOpen}>
+              <Dices size={20} />
+              <span className="font-medium">Raffle</span>
             </HeaderLink>
             <HeaderLink destination="/watched" setIsOpen={setIsOpen}>
               <Film size={20} />
               <span className="font-medium">Watched</span>
-            </HeaderLink>
-            <HeaderLink destination="/discover" setIsOpen={setIsOpen}>
-              <Search size={20} />
-              <span className="font-medium">Discover</span>
-            </HeaderLink>
-            <HeaderLink destination="/shortlists" setIsOpen={setIsOpen}>
-              <List size={20} />
-              <span className="font-medium">Shortlists</span>
             </HeaderLink>
             <HeaderLink destination="/tierlist" setIsOpen={setIsOpen}>
               <Star size={20} />

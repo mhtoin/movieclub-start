@@ -1,13 +1,19 @@
-import { Link, useRouter, useRouterState  } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 
+import { logoutFn } from '@/lib/auth/logout-action'
+import {
+  COLOR_SCHEMES,
+  setSchemeServerFn,
+  type ColorScheme,
+} from '@/lib/color-scheme'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import {
   Compass,
   Dices,
   Film,
   Home,
-  LayoutDashboard,
   LogOut,
   Moon,
   MoreHorizontal,
@@ -21,25 +27,18 @@ import {
 import { useState } from 'react'
 import { useTheme } from '../theme-provider'
 import {
+  DrawerContent,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerRoot,
+} from '../ui/drawer'
+import {
   PopoverPopup,
   PopoverPortal,
   PopoverPositioner,
   PopoverRoot,
   PopoverTrigger,
 } from '../ui/popover'
-import {
-  DrawerContent,
-  DrawerOverlay,
-  DrawerPortal,
-  DrawerRoot,
-} from '../ui/drawer'
-import type {ColorScheme} from '@/lib/color-scheme';
-import {
-  COLOR_SCHEMES,
-  
-  setSchemeServerFn
-} from '@/lib/color-scheme'
-import { logoutFn } from '@/lib/auth/logout-action'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   value: value as ColorScheme,
@@ -49,18 +48,6 @@ const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
 
 const navItems = [
   { icon: Home, label: 'Home', tagline: 'Now showing', path: '/' },
-  {
-    icon: LayoutDashboard,
-    label: 'Dashboard',
-    tagline: 'Your stats',
-    path: '/dashboard',
-  },
-  {
-    icon: Film,
-    label: 'Watched',
-    tagline: 'Past selections',
-    path: '/watched',
-  },
   {
     icon: Compass,
     label: 'Discover',
@@ -74,6 +61,12 @@ const navItems = [
     path: '/shortlists',
   },
   { icon: Dices, label: 'Raffle', tagline: 'Pick a winner', path: '/raffle' },
+  {
+    icon: Film,
+    label: 'Watched',
+    tagline: 'Past selections',
+    path: '/watched',
+  },
   { icon: Star, label: 'Tierlists', tagline: 'Hot takes', path: '/tierlist' },
 ]
 
@@ -95,7 +88,6 @@ export default function Sidebar() {
       await setSchemeServerFn({ data: scheme })
     },
     onSuccess: () => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (document.startViewTransition) {
         const x = window.innerWidth
         const y = 0
@@ -305,14 +297,10 @@ export default function Sidebar() {
           </div>
         </nav>
       </div>
-
-      {/* Mobile bottom bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-        {/* Gradient fade above bar */}
         <div className="absolute inset-x-0 bottom-full h-8 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-        
+
         <nav className="relative flex items-stretch bg-sidebar/98 backdrop-blur-xl border-t border-sidebar-border/30 pb-safe">
-          {/* Active indicator background */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 transition-opacity duration-300" />
           </div>
@@ -331,25 +319,26 @@ export default function Sidebar() {
                 }`}
                 viewTransition
               >
-                {/* Active background glow */}
-                {active && (
-                  <div className="absolute inset-0 bg-primary/5" />
-                )}
-                
+                {active && <div className="absolute inset-0 bg-primary/5" />}
+
                 <div className="relative flex items-center justify-center w-10 h-10">
-                  <Icon size={22} strokeWidth={active ? 2.5 : 1.5} className={active ? 'drop-shadow-sm' : ''} />
+                  <Icon
+                    size={22}
+                    strokeWidth={active ? 2.5 : 1.5}
+                    className={active ? 'drop-shadow-sm' : ''}
+                  />
                   {active && (
                     <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
                   )}
                 </div>
-                <span className={`text-[10px] font-medium leading-none tracking-wide ${active ? 'text-primary' : ''}`}>
+                <span
+                  className={`text-[10px] font-medium leading-none tracking-wide ${active ? 'text-primary' : ''}`}
+                >
                   {item.label}
                 </span>
               </Link>
             )
           })}
-
-          {/* More button - opens drawer */}
           <button
             onClick={() => setMobileMoreOpen(true)}
             className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[3.25rem] transition-all duration-150 active:scale-95 ${
@@ -358,23 +347,25 @@ export default function Sidebar() {
                 : 'text-sidebar-foreground/40 hover:text-sidebar-foreground/70 active:bg-sidebar-accent/30'
             }`}
           >
-            {isMoreActive && (
-              <div className="absolute inset-0 bg-primary/5" />
-            )}
+            {isMoreActive && <div className="absolute inset-0 bg-primary/5" />}
             <div className="relative flex items-center justify-center w-10 h-10">
-              <MoreHorizontal size={22} strokeWidth={isMoreActive ? 2.5 : 1.5} />
+              <MoreHorizontal
+                size={22}
+                strokeWidth={isMoreActive ? 2.5 : 1.5}
+              />
               {isMoreActive && (
                 <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
               )}
             </div>
-            <span className={`text-[10px] font-medium leading-none tracking-wide ${isMoreActive ? 'text-primary' : ''}`}>
+            <span
+              className={`text-[10px] font-medium leading-none tracking-wide ${isMoreActive ? 'text-primary' : ''}`}
+            >
               More
             </span>
           </button>
         </nav>
       </div>
 
-      {/* Mobile More Drawer */}
       <DrawerRoot open={mobileMoreOpen} onOpenChange={setMobileMoreOpen}>
         <DrawerPortal>
           <DrawerOverlay className="fixed inset-0 bg-black/40 z-[60]" />
@@ -382,12 +373,12 @@ export default function Sidebar() {
             <div className="flex-shrink-0 flex items-center justify-center py-3">
               <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             </div>
-            
+
             <div className="flex-1 overflow-y-auto px-4 pb-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
                 More
               </h3>
-              
+
               <div className="space-y-1">
                 {mobileMoreItems.map((item) => {
                   const Icon = item.icon
@@ -404,14 +395,20 @@ export default function Sidebar() {
                       }`}
                       viewTransition
                     >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        active ? 'bg-primary/15' : 'bg-muted/50'
-                      }`}>
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          active ? 'bg-primary/15' : 'bg-muted/50'
+                        }`}
+                      >
                         <Icon size={20} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium block">{item.label}</span>
-                        <span className="text-xs text-muted-foreground">{item.tagline}</span>
+                        <span className="text-sm font-medium block">
+                          {item.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {item.tagline}
+                        </span>
                       </div>
                       {active && (
                         <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
@@ -432,14 +429,18 @@ export default function Sidebar() {
                   }`}
                   viewTransition
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    isActive('/settings') ? 'bg-primary/15' : 'bg-muted/50'
-                  }`}>
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      isActive('/settings') ? 'bg-primary/15' : 'bg-muted/50'
+                    }`}
+                  >
                     <User size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="text-sm font-medium block">Profile</span>
-                    <span className="text-xs text-muted-foreground">Settings</span>
+                    <span className="text-xs text-muted-foreground">
+                      Settings
+                    </span>
                   </div>
                 </Link>
 
@@ -456,7 +457,11 @@ export default function Sidebar() {
                         <Sparkles size={18} />
                       </PopoverTrigger>
                       <PopoverPortal>
-                        <PopoverPositioner side="top" align="end" sideOffset={12}>
+                        <PopoverPositioner
+                          side="top"
+                          align="end"
+                          sideOffset={12}
+                        >
                           <PopoverPopup size="sm">
                             <div className="space-y-1">
                               <h3 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -466,21 +471,29 @@ export default function Sidebar() {
                               {schemes.map((scheme) => (
                                 <button
                                   key={scheme.value}
-                                  onClick={() => schemeMutation.mutate(scheme.value)}
+                                  onClick={() =>
+                                    schemeMutation.mutate(scheme.value)
+                                  }
                                   disabled={schemeMutation.isPending}
                                   className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50"
                                 >
                                   <div className="flex gap-1">
                                     <div
                                       className="w-4 h-4 rounded-full border border-border shadow-sm"
-                                      style={{ backgroundColor: scheme.colors.light }}
+                                      style={{
+                                        backgroundColor: scheme.colors.light,
+                                      }}
                                     />
                                     <div
                                       className="w-4 h-4 rounded-full border border-border shadow-sm"
-                                      style={{ backgroundColor: scheme.colors.dark }}
+                                      style={{
+                                        backgroundColor: scheme.colors.dark,
+                                      }}
                                     />
                                   </div>
-                                  <span className="text-sm">{scheme.label}</span>
+                                  <span className="text-sm">
+                                    {scheme.label}
+                                  </span>
                                 </button>
                               ))}
                             </div>
@@ -489,10 +502,16 @@ export default function Sidebar() {
                       </PopoverPortal>
                     </PopoverRoot>
                     <button
-                      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                      onClick={() =>
+                        setTheme(theme === 'dark' ? 'light' : 'dark')
+                      }
                       className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                     >
-                      {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                      {theme === 'dark' ? (
+                        <Sun size={18} />
+                      ) : (
+                        <Moon size={18} />
+                      )}
                     </button>
                   </div>
                 </div>
