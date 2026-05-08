@@ -1,8 +1,3 @@
-import { Toast } from '@base-ui/react/toast'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { format } from 'date-fns'
-import { ChevronRight, Plus, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DialogBackdrop,
@@ -21,10 +16,76 @@ import {
 import { createTierlist } from '@/lib/react-query/mutations/tierlists'
 import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import { Toast } from '@base-ui/react/toast'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import confetti from 'canvas-confetti'
+import { format } from 'date-fns'
+import { AnimatePresence, motion } from 'framer-motion'
+import {
+  CalendarDays,
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+  Clapperboard,
+  Clock,
+  Film,
+  Infinity,
+  Plus,
+  Sparkles,
+  Star,
+  X,
+} from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
+const easeOut = [0.22, 1, 0.36, 1] as const
+
+const slideVariants = {
+  enter: (dir: number) => ({
+    x: dir > 0 ? 28 : -28,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (dir: number) => ({
+    x: dir > 0 ? -28 : 28,
+    opacity: 0,
+  }),
+}
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.08 },
+  },
+}
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 10 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: easeOut },
+  },
+}
+
+const TIER_SWATCHES = [
+  { bg: 'oklch(0.82 0.12 82)', text: '#4a2e08', letter: '#7a4a10' },
+  { bg: 'oklch(0.78 0.12 55)', text: '#4a2208', letter: '#8a3a10' },
+  { bg: 'oklch(0.85 0.11 95)', text: '#4a3a08', letter: '#8a6a10' },
+  { bg: 'oklch(0.82 0.10 145)', text: '#1e3a18', letter: '#2e6a28' },
+  { bg: 'oklch(0.76 0.10 25)', text: '#4a1212', letter: '#8a2222' },
+  { bg: 'oklch(0.78 0.08 280)', text: '#2e1e4a', letter: '#4e2e7a' },
+  { bg: 'oklch(0.80 0.07 200)', text: '#1e2e4a', letter: '#2e4e7a' },
+]
 
 export function CreateTierlistDialog({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(1)
+  const [direction, setDirection] = useState(1)
+
   const [title, setTitle] = useState('')
   const [datePreset, setDatePreset] = useState<string | null>(null)
   const [watchDateFrom, setWatchDateFrom] = useState<Date | undefined>(
@@ -57,20 +118,36 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
   const createMutation = useMutation({
     mutationFn: createTierlist,
     onSuccess: () => {
+      const currentData = queryClient.getQueryData(
+        tierlistQueries.userSummary(userId).queryKey,
+      )
+      const wasEmpty =
+        !currentData || (Array.isArray(currentData) && currentData.length === 0)
+
       toastManager.add({
-        title: 'Created',
-        description: 'Tierlist is ready',
+        title: 'Premiere ready',
+        description: 'Your tierlist is live',
         type: 'success',
       })
       handleClose()
       queryClient.invalidateQueries({
         queryKey: tierlistQueries.userSummary(userId).queryKey,
       })
+
+      if (wasEmpty) {
+        confetti({
+          particleCount: 120,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#E8B931', '#C0392B', '#F39C12', '#27AE60'],
+          disableForReducedMotion: true,
+        })
+      }
     },
     onError: () => {
       toastManager.add({
         title: 'Error',
-        description: 'Failed to create',
+        description: 'Failed to create tierlist',
         type: 'error',
       })
     },
@@ -79,6 +156,7 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
   const handleClose = () => {
     setOpen(false)
     setStep(1)
+    setDirection(1)
     setTitle('')
     setDatePreset(null)
     setWatchDateFrom(undefined)
@@ -93,6 +171,11 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
       { label: 'C', value: 3 },
       { label: 'D', value: 4 },
     ])
+  }
+
+  const goToStep = (target: number) => {
+    setDirection(target > step ? 1 : -1)
+    setStep(target)
   }
 
   const handleDatePreset = (preset: string) => {
@@ -188,256 +271,522 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
       </DialogTrigger>
       <DialogPortal>
         <DialogBackdrop className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPopup className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 sm:max-w-[440px]">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Create Tierlist</h2>
-              <button
+        <DialogPopup className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 max-w-[calc(100vw-2rem)] w-[580px]">
+          <div className="relative overflow-hidden rounded-t-lg">
+            <div className="flex items-center justify-between px-8 pt-8 pb-5">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Clapperboard className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2
+                    className="text-xl font-bold tracking-tight text-foreground"
+                    style={{ fontFamily: "'Oswald', sans-serif" }}
+                  >
+                    New Tierlist
+                  </h2>
+                  <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mt-0.5">
+                    {step === 1
+                      ? 'Scene 1 — The Program'
+                      : 'Scene 2 — The Rating Board'}
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
                 onClick={handleClose}
-                className="inline-flex items-center justify-center h-9 w-9 rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+                className="h-9 w-9 rounded-xl"
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
-              </button>
+              </Button>
             </div>
-
-            <div className="flex gap-1 mb-6">
-              <div
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  step >= 1 ? 'bg-primary' : 'bg-muted'
+            <div className="flex items-center gap-3 px-8 pb-6">
+              <Button
+                type="button"
+                variant={step === 1 ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => goToStep(1)}
+                className={`rounded-full h-auto px-3 py-1 text-xs font-semibold gap-2 ${
+                  step !== 1 && 'bg-muted text-muted-foreground hover:text-foreground'
                 }`}
-              />
-              <div
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  step >= 2 ? 'bg-primary' : 'bg-muted'
+              >
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-current/15 text-[10px] font-bold">
+                  1
+                </span>
+                Program
+              </Button>
+              <div className="flex-1 h-px bg-border/60" />
+              <Button
+                type="button"
+                variant={step === 2 ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => title.trim() && goToStep(2)}
+                disabled={!title.trim()}
+                className={`rounded-full h-auto px-3 py-1 text-xs font-semibold gap-2 ${
+                  step !== 2 && 'bg-muted text-muted-foreground hover:text-foreground'
                 }`}
-              />
+              >
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-current/15 text-[10px] font-bold">
+                  2
+                </span>
+                Tiers
+              </Button>
             </div>
+            <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1">
+              {Array.from({ length: 24 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{
+                    background: 'var(--dialog-background)',
+                    marginBottom: '-3px',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
 
+          <div className="px-8 pb-8 pt-4">
             <form onSubmit={handleSubmit}>
-              <div
-                className="transition-all duration-300 ease-out"
-                style={{
-                  opacity: step === 1 ? 1 : 0,
-                  transform: step === 1 ? 'translateX(0)' : 'translateX(-16px)',
-                  display: step === 1 ? 'block' : 'none',
-                  position: step === 1 ? 'relative' : 'absolute',
-                }}
-              >
-                <p className="text-sm text-muted-foreground mb-5">
-                  Choose which movies to include
-                </p>
-
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="tierlist-title"
-                      className="text-sm font-medium"
-                    >
-                      Title
-                    </label>
-                    <Input
-                      id="tierlist-title"
-                      required
-                      autoFocus
-                      value={title}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setTitle(e.target.value)
-                      }
-                      placeholder="My Movie Rankings"
-                      className="h-11"
-                      maxLength={100}
+              <div className="relative min-h-[380px]">
+                <AnimatePresence mode="wait" custom={direction} initial={false}>
+                  {step === 1 ? (
+                    <StepOne
+                      key="step1"
+                      direction={direction}
+                      title={title}
+                      setTitle={setTitle}
+                      datePreset={datePreset}
+                      handleDatePreset={handleDatePreset}
+                      fromYear={fromYear}
+                      toYear={toYear}
+                      handleFromYearChange={handleFromYearChange}
+                      handleToYearChange={handleToYearChange}
+                      genresData={genresData}
+                      selectedGenres={selectedGenres}
+                      setSelectedGenres={setSelectedGenres}
+                      onNext={() => goToStep(2)}
                     />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Time Period</label>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { value: 'this-year', label: 'This Year' },
-                        { value: 'last-year', label: 'Last Year' },
-                        { value: 'custom-range', label: 'Custom Range' },
-                        { value: 'all-time', label: 'All Time' },
-                      ].map((preset) => (
-                        <button
-                          key={preset.value}
-                          type="button"
-                          onClick={() => handleDatePreset(preset.value)}
-                          className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                            datePreset === preset.value
-                              ? 'bg-primary text-primary-foreground border-primary'
-                              : 'bg-muted/50 text-muted-foreground border-border hover:border-primary/50'
-                          }`}
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
-                    </div>
-                    {datePreset === 'custom-range' && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <SelectRoot
-                          value={fromYear}
-                          onValueChange={handleFromYearChange}
-                        >
-                          <SelectTrigger
-                            size="sm"
-                            placeholder="From year"
-                            className="flex-1"
-                          />
-                          <SelectPopup positionerClassName="z-[120]">
-                            {Array.from(
-                              { length: 30 },
-                              (_, i) => new Date().getFullYear() - i,
-                            ).map((year) => (
-                              <SelectItem key={year} value={String(year)}>
-                                {year}
-                              </SelectItem>
-                            ))}
-                          </SelectPopup>
-                        </SelectRoot>
-                        <span className="text-muted-foreground text-sm">
-                          to
-                        </span>
-                        <SelectRoot
-                          value={toYear}
-                          onValueChange={handleToYearChange}
-                        >
-                          <SelectTrigger
-                            size="sm"
-                            placeholder="To year"
-                            className="flex-1"
-                          />
-                          <SelectPopup positionerClassName="z-[120]">
-                            {Array.from(
-                              { length: 30 },
-                              (_, i) => new Date().getFullYear() - i,
-                            ).map((year) => (
-                              <SelectItem key={year} value={String(year)}>
-                                {year}
-                              </SelectItem>
-                            ))}
-                          </SelectPopup>
-                        </SelectRoot>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Genres</label>
-                    <div className="flex flex-wrap gap-2">
-                      {genresData.slice(0, 8).map((genre) => (
-                        <button
-                          key={genre.value}
-                          type="button"
-                          onClick={() => {
-                            if (selectedGenres.includes(genre.value)) {
-                              setSelectedGenres(
-                                selectedGenres.filter((g) => g !== genre.value),
-                              )
-                            } else {
-                              setSelectedGenres([
-                                ...selectedGenres,
-                                genre.value,
-                              ])
-                            }
-                          }}
-                          className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                            selectedGenres.includes(genre.value)
-                              ? 'bg-primary text-primary-foreground border-primary'
-                              : 'bg-muted/50 text-muted-foreground border-border hover:border-primary/50'
-                          }`}
-                        >
-                          {genre.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end mt-6">
-                  <Button
-                    type="button"
-                    onClick={() => setStep(2)}
-                    disabled={!title.trim()}
-                    className="gap-2"
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div
-                className="transition-all duration-300 ease-out"
-                style={{
-                  opacity: step === 2 ? 1 : 0,
-                  transform: step === 2 ? 'translateX(0)' : 'translateX(16px)',
-                  display: step === 2 ? 'block' : 'none',
-                  position: step === 2 ? 'relative' : 'absolute',
-                }}
-              >
-                <p className="text-sm text-muted-foreground mb-5">
-                  Customize your tier labels (optional)
-                </p>
-
-                <div className="space-y-3 max-h-[240px] overflow-y-auto pr-1">
-                  {tiers.map((tier, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <span className="w-6 text-sm font-medium text-muted-foreground text-center">
-                        {index + 1}
-                      </span>
-                      <Input
-                        value={tier.label}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          updateTierLabel(index, e.target.value)
-                        }
-                        className="h-9"
-                        maxLength={30}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeTier(index)}
-                        disabled={tiers.length <= 1}
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={addTier}
-                  className="mt-3 w-full h-8 text-xs"
-                >
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add Tier
-                </Button>
-
-                <div className="flex justify-between mt-6 pt-4 border-t border-border/50">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setStep(1)}
-                    className="gap-2"
-                  >
-                    <ChevronRight className="h-4 w-4 rotate-180" />
-                    Back
-                  </Button>
-                  <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? 'Creating...' : 'Create'}
-                  </Button>
-                </div>
+                  ) : (
+                    <StepTwo
+                      key="step2"
+                      direction={direction}
+                      tiers={tiers}
+                      updateTierLabel={updateTierLabel}
+                      removeTier={removeTier}
+                      addTier={addTier}
+                      onBack={() => goToStep(1)}
+                      isPending={createMutation.isPending}
+                    />
+                  )}
+                </AnimatePresence>
               </div>
             </form>
           </div>
         </DialogPopup>
       </DialogPortal>
     </DialogRoot>
+  )
+}
+
+function StepOne({
+  direction,
+  title,
+  setTitle,
+  datePreset,
+  handleDatePreset,
+  fromYear,
+  toYear,
+  handleFromYearChange,
+  handleToYearChange,
+  genresData,
+  selectedGenres,
+  setSelectedGenres,
+  onNext,
+}: {
+  direction: number
+  title: string
+  setTitle: (v: string) => void
+  datePreset: string | null
+  handleDatePreset: (preset: string) => void
+  fromYear: string
+  toYear: string
+  handleFromYearChange: (v: string | null) => void
+  handleToYearChange: (v: string | null) => void
+  genresData: Array<{ value: string; label: string }>
+  selectedGenres: string[]
+  setSelectedGenres: (v: string[]) => void
+  onNext: () => void
+}) {
+  const yearOptions = useMemo(
+    () =>
+      Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map(
+        (year) => String(year),
+      ),
+    [],
+  )
+
+  return (
+    <motion.div
+      custom={direction}
+      variants={slideVariants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={{ duration: 0.3, ease: easeOut }}
+      className="space-y-7"
+    >
+      <motion.div variants={staggerContainer} initial="hidden" animate="show">
+        <motion.div variants={staggerItem} className="space-y-3">
+          <label
+            htmlFor="tierlist-title"
+            className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground"
+          >
+            <Star className="h-4 w-4" />
+            Title
+          </label>
+          <Input
+            id="tierlist-title"
+            required
+            autoFocus
+            value={title}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setTitle(e.target.value)
+            }
+            placeholder="e.g. Best Horror of the 90s"
+            className="h-12 text-base"
+            maxLength={100}
+            style={{
+              fontFamily: "'Oswald', sans-serif",
+              letterSpacing: '0.01em',
+            }}
+          />
+        </motion.div>
+        <motion.div variants={staggerItem} className="space-y-3 pt-4">
+          <label className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            <CalendarRange className="h-4 w-4" />
+            Time Period
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {(
+              [
+                {
+                  value: 'this-year',
+                  label: 'This Year',
+                  icon: CalendarDays,
+                },
+                {
+                  value: 'last-year',
+                  label: 'Last Year',
+                  icon: Clock,
+                },
+                {
+                  value: 'custom-range',
+                  label: 'Custom Range',
+                  icon: CalendarRange,
+                },
+                { value: 'all-time', label: 'All Time', icon: Infinity },
+              ] as const
+            ).map((preset) => {
+              const Icon = preset.icon
+              const active = datePreset === preset.value
+              return (
+                <Button
+                  key={preset.value}
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDatePreset(preset.value)}
+                  className={`relative flex items-center gap-2.5 rounded-xl h-auto px-3 py-2.5 text-left justify-start font-normal ${
+                    active
+                      ? 'border border-primary/40 bg-primary/[0.07] text-foreground shadow-sm'
+                      : 'border border-border bg-muted text-foreground hover:border-primary/30 hover:bg-primary/[0.05]'
+                  }`}>
+                  <Icon
+                    className={`h-4 w-4 shrink-0 transition-colors ${
+                      active ? 'text-primary' : 'text-muted-foreground'
+                    }`}
+                  />
+                  <span className="text-sm font-medium">{preset.label}</span>
+                  {active && (
+                    <motion.div
+                      layoutId="time-preset-glow"
+                      className="absolute inset-0 rounded-xl ring-1 ring-primary/20"
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
+                </Button>
+              )
+            })}
+          </div>
+
+          <AnimatePresence>
+            {datePreset === 'custom-range' && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: easeOut }}
+                className="overflow-hidden"
+              >
+                <div className="flex items-center gap-2 pt-1">
+                  <SelectRoot
+                    value={fromYear}
+                    onValueChange={handleFromYearChange}
+                  >
+                    <SelectTrigger
+                      size="sm"
+                      placeholder="From year"
+                      className="flex-1"
+                    />
+                    <SelectPopup positionerClassName="z-[120]">
+                      {yearOptions.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectPopup>
+                  </SelectRoot>
+                  <span className="text-muted-foreground text-sm font-medium">
+                    to
+                  </span>
+                  <SelectRoot value={toYear} onValueChange={handleToYearChange}>
+                    <SelectTrigger
+                      size="sm"
+                      placeholder="To year"
+                      className="flex-1"
+                    />
+                    <SelectPopup positionerClassName="z-[120]">
+                      {yearOptions.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectPopup>
+                  </SelectRoot>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+        <motion.div variants={staggerItem} className="space-y-3 pt-4">
+          <label className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            <Film className="h-4 w-4" />
+            Genres
+          </label>
+          <div className="flex flex-wrap gap-2.5">
+            {genresData.map((genre) => {
+              const active = selectedGenres.includes(genre.value)
+              return (
+                <Button
+                  key={genre.value}
+                  type="button"
+                  variant={active ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => {
+                    if (active) {
+                      setSelectedGenres(
+                        selectedGenres.filter((g) => g !== genre.value),
+                      )
+                    } else {
+                      setSelectedGenres([...selectedGenres, genre.value])
+                    }
+                  }}
+                  className={`rounded-full h-auto px-3.5 py-1.5 text-xs font-semibold tracking-wide ${
+                    !active &&
+                    'bg-muted text-foreground hover:bg-primary/[0.05] hover:border-primary/30 border border-border'
+                  }`}
+                >
+                  {genre.label}
+                </Button>
+              )
+            })}
+          </div>
+        </motion.div>
+        <motion.div variants={staggerItem} className="flex justify-end pt-4">
+          <Button
+            type="button"
+            onClick={onNext}
+            disabled={!title.trim()}
+            className="gap-2 h-11 px-5"
+          >
+            Next Scene
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+function StepTwo({
+  direction,
+  tiers,
+  updateTierLabel,
+  removeTier,
+  addTier,
+  onBack,
+  isPending,
+}: {
+  direction: number
+  tiers: Array<{ label: string; value: number }>
+  updateTierLabel: (index: number, label: string) => void
+  removeTier: (index: number) => void
+  addTier: () => void
+  onBack: () => void
+  isPending: boolean
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const prevTierCount = useRef(tiers.length)
+  useEffect(() => {
+    if (tiers.length > prevTierCount.current && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+    prevTierCount.current = tiers.length
+  }, [tiers.length])
+
+  return (
+    <motion.div
+      custom={direction}
+      variants={slideVariants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={{ duration: 0.3, ease: easeOut }}
+      className="space-y-6"
+    >
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="space-y-6"
+      >
+        <motion.div
+          variants={staggerItem}
+          className="flex items-center gap-2.5"
+        >
+          <Sparkles className="h-4 w-4 text-primary" />
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Customize your scoring board
+          </p>
+        </motion.div>
+
+        <motion.div
+          ref={scrollRef}
+          variants={staggerItem}
+          className="space-y-3 max-h-[280px] overflow-y-auto pr-1 no-scrollbar"
+        >
+          <AnimatePresence initial={false}>
+            {tiers.map((tier, index) => {
+              const swatch = TIER_SWATCHES[index % TIER_SWATCHES.length]
+              return (
+                <motion.div
+                  key={index}
+                  layout
+                  initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                  transition={{ duration: 0.25, ease: easeOut }}
+                  className="flex items-center gap-3 group"
+                >
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold shadow-sm"
+                    style={{
+                      background: swatch.bg,
+                      color: swatch.letter,
+                      fontFamily: "'Bebas Neue', sans-serif",
+                      letterSpacing: '0.04em',
+                      fontSize: '1.1rem',
+                    }}
+                  >
+                    {tier.label.charAt(0).toUpperCase()}
+                  </div>
+
+                  <div className="flex-1 relative">
+                    <Input
+                      value={tier.label}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        updateTierLabel(index, e.target.value)
+                      }
+                      className="h-9 pr-8 text-sm font-medium"
+                      maxLength={30}
+                      style={{
+                        background: swatch.bg,
+                        color: swatch.text,
+                        borderColor: 'transparent',
+                      }}
+                    />
+                    <span
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold opacity-40 pointer-events-none"
+                      style={{ color: swatch.text }}
+                    >
+                      #{index + 1}
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeTier(index)}
+                    disabled={tiers.length <= 1}
+                    className="h-8 w-8 shrink-0 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive disabled:opacity-0"
+                    title="Remove tier"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={addTier}
+            className="w-full rounded-xl h-auto py-3 text-xs font-semibold text-foreground border border-dashed border-border bg-muted hover:border-primary/40 hover:bg-primary/[0.05]"
+          >
+            <Plus className="h-4 w-4" />
+            Add Tier
+          </Button>
+        </motion.div>
+        <motion.div
+          variants={staggerItem}
+          className="flex items-center justify-between pt-4 border-t border-border/40"
+        >
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onBack}
+            className="gap-2 h-10 text-muted-foreground"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="gap-2 h-10 px-5"
+          >
+            {isPending ? (
+              <>
+                <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                Creating…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Create Tierlist
+              </>
+            )}
+          </Button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   )
 }

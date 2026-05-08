@@ -399,7 +399,9 @@
   --sidebar: oklch(0.985 0.0051 145.5374); /* Hakuji — #F8FBF8 */
   --sidebar-foreground: oklch(0.22 0.015 50);
   --sidebar-primary: oklch(0.22 0.015 50);
-  --sidebar-primary-foreground: oklch(0.985 0.0051 145.5374); /* Hakuji — #F8FBF8 */
+  --sidebar-primary-foreground: oklch(
+    0.985 0.0051 145.5374
+  ); /* Hakuji — #F8FBF8 */
   --sidebar-accent: oklch(0.9845 0.0067 97.35); /* Kinariiro — #FBFAF5 */
   --sidebar-accent-foreground: oklch(0.22 0.015 50);
   --sidebar-border: oklch(0.9202 0.0029 308.4256); /* Shiraumenezu — #E5E4E6 */
@@ -516,13 +518,11 @@
 @keyframes ticket-lift {
   0% {
     transform: translateY(0) rotate(0deg);
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
   100% {
     transform: translateY(-4px) rotate(-0.25deg);
-    box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -572,8 +572,7 @@
 
 .animate-ticket-lift:hover {
   transform: translateY(-4px) rotate(-0.25deg);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .animate-ticket-punch:active {
@@ -1238,6 +1237,44 @@
     100% {
       transform: scaleX(1);
       opacity: 0;
+    }
+  }
+
+  .featured-poster-item {
+    transition:
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      margin-left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .group:hover .featured-poster-item {
+    transform: rotate(calc(var(--fp-rotate) * 1.7))
+      translateY(calc(var(--fp-lift) * 2)) !important;
+  }
+
+  .group:hover .featured-poster-item.featured-poster-item--offset {
+    margin-left: calc(var(--fp-overlap) - 14px) !important;
+  }
+  .lobby-wall {
+    perspective: 900px;
+    transform-style: preserve-3d;
+  }
+
+  .lobby-wall__grid {
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .group:hover .lobby-wall__grid {
+    transform: scale(1.15) rotateX(2deg) rotateY(-1.5deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lobby-wall__grid {
+      transition: none !important;
+    }
+    .group:hover .lobby-wall__grid {
+      transform: scale(1.15);
     }
   }
 }

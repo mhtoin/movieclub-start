@@ -28,18 +28,20 @@ export function UserTierlistsSkeleton() {
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-xl overflow-hidden border border-border/50 bg-card p-5"
+              className="ticket-card overflow-hidden bg-card shadow-sm"
             >
-              <div className="flex gap-4">
-                <div className="flex gap-1 h-24 w-24 shrink-0 rounded-lg overflow-hidden">
-                  {Array.from({ length: 4 }).map((_, j) => (
-                    <Skeleton key={j} className="flex-1" />
-                  ))}
+              <div className="flex items-stretch">
+                <div className="shrink-0 w-[88px] p-3 flex items-center justify-center bg-muted/30">
+                  <div className="flex gap-0.5 h-[72px] w-full rounded overflow-hidden">
+                    {Array.from({ length: 4 }).map((_, j) => (
+                      <Skeleton key={j} className="flex-1" />
+                    ))}
+                  </div>
                 </div>
-                <div className="flex-1 space-y-2">
+                <div className="w-px self-stretch border-l border-dashed border-border/50 my-3" />
+                <div className="flex-1 p-4 space-y-2 flex flex-col justify-center">
                   <Skeleton className="h-5 w-3/4" />
                   <Skeleton className="h-3 w-16" />
-                  <Skeleton className="h-3 w-20" />
                   <div className="flex gap-1 pt-1">
                     <Skeleton className="h-5 w-12 rounded" />
                     <Skeleton className="h-5 w-16 rounded" />
