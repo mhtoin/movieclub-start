@@ -1,22 +1,22 @@
-import { EmptyState } from '@/components/home/empty-state'
-import { HeroSection } from '@/components/home/hero-section'
-import { HeroSkeleton } from '@/components/home/hero-skeleton'
-import { MovieReelSkeleton } from '@/components/home/movie-reel-skeleton'
-import { RecommendationsSection } from '@/components/home/recommendations-section'
-import { homeQueries } from '@/lib/react-query/queries/home'
-import { movieQueries } from '@/lib/react-query/queries/movies'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense } from 'react'
+
+import { LandingPage, LandingSkeleton } from '@/components/home/landing-page'
+import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
+import { movieQueries } from '@/lib/react-query/queries/movies'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
     const userId = context.user?.userId
-    context.queryClient.prefetchQuery(tmdbQueries.genres())
+
     await context.queryClient.ensureQueryData(movieQueries.latest())
+    await context.queryClient.ensureQueryData(shortlistQueries.all())
+    await context.queryClient.ensureQueryData(movieQueries.allWatched())
+
     if (userId) {
-      await context.queryClient.ensureQueryData(homeQueries.seeds(userId))
+      await context.queryClient.ensureQueryData(shortlistQueries.byUser(userId))
+      await context.queryClient.ensureQueryData(dashboardQueries.stats(userId))
     }
   },
   component: Home,
@@ -26,26 +26,10 @@ function Home() {
   const { user } = Route.useRouteContext()
 
   return (
-    <div className="min-h-screen w-full bg-background text-foreground pb-24 md:pb-0">
-      <Suspense fallback={<HeroSkeleton />}>
-        <HomeHero />
+    <div className="min-h-screen w-full bg-background text-foreground">
+      <Suspense fallback={<LandingSkeleton />}>
+        <LandingPage userId={user?.userId || ''} />
       </Suspense>
-
-      <div className="relative md:pl-[72px] md:pr-12 lg:pl-20 lg:pr-16">
-        <Suspense fallback={<MovieReelSkeleton />}>
-          <RecommendationsSection userId={user?.userId || ''} />
-        </Suspense>
-      </div>
     </div>
   )
-}
-
-function HomeHero() {
-  const { data: latestMovie } = useSuspenseQuery(movieQueries.latest())
-
-  if (!latestMovie) {
-    return <EmptyState />
-  }
-
-  return <HeroSection movie={latestMovie.movie} />
 }

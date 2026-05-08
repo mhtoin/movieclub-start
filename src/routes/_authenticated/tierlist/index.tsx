@@ -94,7 +94,7 @@ function TierlistContent() {
 }
 
 function CreateTierlistButton({ currentUserId }: { currentUserId?: string }) {
-  const href = currentUserId ? `/tierlist/${currentUserId}` : '/dashboard'
+  const href = currentUserId ? `/tierlist/${currentUserId}` : '/home'
 
   return (
     <Link
