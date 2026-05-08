@@ -1,5 +1,5 @@
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
-import { defaultShouldDehydrateQuery, QueryClient } from '@tanstack/react-query'
+import { QueryClient, defaultShouldDehydrateQuery } from '@tanstack/react-query'
 
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7
 

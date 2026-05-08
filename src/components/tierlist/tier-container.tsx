@@ -1,11 +1,11 @@
-import { TierWithMovies } from '@/lib/react-query/queries/tierlists'
 import { useDroppable } from '@dnd-kit/core'
 import {
-  horizontalListSortingStrategy,
   SortableContext,
+  horizontalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { memo } from 'react'
 import TierItem from './tier-item'
+import type { TierWithMovies } from '@/lib/react-query/queries/tierlists'
 
 interface TierContainerProps {
   id: string
@@ -25,6 +25,7 @@ const getTierColors = (value: number) => {
     default: { text: 'text-primary' },
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return colorSchemes[numberValue] || { text: 'text-primary' }
 }
 

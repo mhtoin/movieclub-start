@@ -1,21 +1,20 @@
 import { Toast } from '@base-ui/react/toast'
 import {
   HeadContent,
-  Scripts,
-  createRootRouteWithContext,
+  Link,
+  Scripts, createRootRouteWithContext 
 } from '@tanstack/react-router'
 
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { Home, Search } from 'lucide-react'
+import { Suspense, lazy } from 'react'
+import appCss from '../styles.css?url'
+import type { QueryClient } from '@tanstack/react-query'
 import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
 import ToastList from '@/components/ui/toast-list'
 import { getThemeAndSchemeServerFn } from '@/lib/color-scheme'
 import { persister } from '@/lib/query-client'
-import type { QueryClient } from '@tanstack/react-query'
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { Link } from '@tanstack/react-router'
-import { Home, Search } from 'lucide-react'
-import { Suspense, lazy } from 'react'
-import appCss from '../styles.css?url'
 
 function NotFound() {
   return (

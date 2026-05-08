@@ -1,8 +1,8 @@
-import { CompactStat } from '@/components/dashboard/stat-card'
-import { FilterScope } from '@/components/dashboard/scope-toggle'
-import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Clock, Film, Star } from 'lucide-react'
+import type { FilterScope } from '@/components/dashboard/scope-toggle'
+import { CompactStat } from '@/components/dashboard/stat-card'
+import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 
 export function StatCardsSection({
   userId,

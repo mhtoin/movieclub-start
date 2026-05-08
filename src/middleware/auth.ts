@@ -1,6 +1,6 @@
-import { getSessionUser, useAppSession } from '@/lib/auth/auth'
-import type { UserSession } from '@/types/auth'
 import { createMiddleware } from '@tanstack/react-start'
+import type { UserSession } from '@/types/auth'
+import { getSessionUser, useAppSession } from '@/lib/auth/auth'
 
 /**
  * Server-function middleware that resolves the current session user once per
@@ -11,7 +11,7 @@ export const authMiddleware = createMiddleware({ type: 'function' }).server(
     let user: UserSession | null = null
     try {
       const session = await useAppSession()
-      user = await getSessionUser(session.data?.sessionToken)
+      user = await getSessionUser(session.data.sessionToken)
     } catch {
       // If session resolution fails (e.g. missing env var in test) continue
       // with a null user so individual handlers can decide what to do.

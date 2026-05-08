@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { X } from 'lucide-react'
 import { AnimatedPoster } from './animated-poster'
 import { MovieDetailsView } from './movie-details-view'
 import { MovieOverviewView } from './movie-overview-view'
@@ -18,7 +19,6 @@ import {
   DrawerPortal,
   DrawerRoot,
 } from '@/components/ui/drawer'
-import { X } from 'lucide-react'
 
 interface MovieDetailsDialogProps {
   movie: Movie | null

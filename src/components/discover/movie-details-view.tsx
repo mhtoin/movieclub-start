@@ -46,6 +46,7 @@ export function MovieDetailsView({
       </div>
 
       <div className="space-y-5 pt-4 flex-1 min-h-0">
+        {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
         {movieDetails?.credits?.cast &&
           movieDetails.credits.cast.length > 0 && (
             <div>
@@ -101,6 +102,7 @@ export function MovieDetailsView({
             </div>
           )}
 
+        {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
         {movieDetails?.credits?.crew &&
           movieDetails.credits.crew.length > 0 && (
             <div>
@@ -202,6 +204,7 @@ export function MovieDetailsView({
                   </p>
                 </div>
               )}
+              {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
               {movieDetails.status && (
                 <div className="rounded-lg bg-secondary/30 p-2.5">
                   <p className="text-muted-foreground mb-0.5 text-xs">Status</p>

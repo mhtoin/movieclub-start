@@ -1,7 +1,8 @@
-import { cn } from '@/lib/utils'
 import { Dialog as BaseDialog } from '@base-ui/react/dialog'
-import { cva, type VariantProps } from 'class-variance-authority'
+import {  cva } from 'class-variance-authority'
 import * as React from 'react'
+import type {VariantProps} from 'class-variance-authority';
+import { cn } from '@/lib/utils'
 
 const dialogBackdropVariants = cva(
   'fixed inset-0 min-h-dvh bg-black transition-all duration-300 ease-out data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 supports-[-webkit-touch-callout:none]:absolute z-[100]',

@@ -1,8 +1,8 @@
+import { queryOptions } from '@tanstack/react-query'
+import { createServerFn } from '@tanstack/react-start'
 import { db } from '@/db/db'
 import { user } from '@/db/schema/users'
 import { authMiddleware } from '@/middleware/auth'
-import { queryOptions } from '@tanstack/react-query'
-import { createServerFn } from '@tanstack/react-start'
 
 export const getUsers = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])

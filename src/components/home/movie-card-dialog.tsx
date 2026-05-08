@@ -269,6 +269,7 @@ export function MovieCardDialog({
                           <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
+                      {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
                       {movieDetails?.['watch/providers']?.results?.FI?.link && (
                         <a
                           href={movieDetails['watch/providers'].results.FI.link}
@@ -327,6 +328,7 @@ export function MovieCardDialog({
                         </div>
                       )}
 
+                    {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
                     {movie.genre_ids && movie.genre_ids.length > 0 && (
                       <div className="mt-6">
                         <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-foreground/60">

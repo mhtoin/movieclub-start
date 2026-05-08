@@ -1,10 +1,10 @@
-import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface MobileFilterProps {
   label: string
-  value: string | string[]
-  options: { value: string; label: string }[]
+  value: string | Array<string>
+  options: Array<{ value: string; label: string }>
   icon: React.ReactNode
   onChange: (value: string) => void
 }
@@ -23,7 +23,7 @@ export default function MobileFilter({
         <span>{label}</span>
       </div>
       <div className="flex flex-wrap gap-2">
-        {options?.map((option) => {
+        {options.map((option) => {
           const isSelected =
             (Array.isArray(value) && value.includes(option.value)) ||
             (!Array.isArray(value) && value === option.value)

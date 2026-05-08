@@ -1,9 +1,10 @@
+import { DashboardList  } from './dashboard-list'
+import type {DashboardListItemRenderer} from './dashboard-list';
 import type { PersonCount } from '@/lib/react-query/queries/dashboard'
 import { getImageUrl } from '@/lib/tmdb-api'
-import { DashboardList, type DashboardListItemRenderer } from './dashboard-list'
 
 interface PeopleListProps {
-  data: PersonCount[]
+  data: Array<PersonCount>
   emptyMessage?: string
 }
 

@@ -6,7 +6,7 @@ import { useEffect } from 'react'
  * be invalidated when that table changes. Keys are prefix-matched so
  * `['movies', 'watched']` also invalidates `['movies', 'watched', '2025-01']`.
  */
-const TABLE_TO_QUERY_KEYS: Record<string, ReadonlyArray<readonly string[]>> = {
+const TABLE_TO_QUERY_KEYS: Record<string, ReadonlyArray<ReadonlyArray<string>>> = {
   movie: [
     ['movies', 'latest'],
     ['movies', 'watched'],
@@ -71,10 +71,9 @@ export function useSSEInvalidation() {
           op: string
         }
         const keys = TABLE_TO_QUERY_KEYS[table]
-        if (!keys) return
         for (const queryKey of keys) {
           queryClient.invalidateQueries({
-            queryKey: queryKey as string[],
+            queryKey: queryKey as Array<string>,
             refetchType: 'active',
           })
         }

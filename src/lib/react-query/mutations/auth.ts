@@ -1,11 +1,12 @@
+import {  useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
+import type {UseMutationResult} from '@tanstack/react-query';
 import {
   loginFn,
   registerFn,
   requestPasswordResetFn,
   resetPasswordFn,
 } from '@/lib/auth/auth-actions'
-import { useMutation, type UseMutationResult } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 
 // Types for mutation inputs
 export type LoginInput = {
@@ -41,11 +42,7 @@ export function useRequestPasswordResetMutation(): UseMutationResult<
 > {
   return useMutation({
     mutationFn: async (variables: RequestPasswordResetInput) => {
-      try {
-        return await requestPasswordResetFn({ data: variables })
-      } catch (error) {
-        throw error
-      }
+      return await requestPasswordResetFn({ data: variables })
     },
   })
 }
@@ -57,11 +54,7 @@ export function useResetPasswordMutation(): UseMutationResult<
 > {
   return useMutation({
     mutationFn: async (variables: ResetPasswordInput) => {
-      try {
-        return await resetPasswordFn({ data: variables })
-      } catch (error) {
-        throw error
-      }
+      return await resetPasswordFn({ data: variables })
     },
   })
 }

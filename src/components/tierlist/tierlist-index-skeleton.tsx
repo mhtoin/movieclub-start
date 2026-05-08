@@ -14,7 +14,7 @@ export function TierlistIndexSkeleton() {
               </div>
             </div>
             <div className="space-y-3">
-              {Array.from({ length: i % 3 === 0 ? 1 : 2 }).map((_, j) => (
+              {Array.from({ length: i % 3 === 0 ? 1 : 2 }).map((_item, j) => (
                 <div
                   key={j}
                   className="bg-card border border-border/60 rounded-xl overflow-hidden"

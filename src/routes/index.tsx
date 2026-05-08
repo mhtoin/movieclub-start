@@ -13,7 +13,7 @@ import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 // Server function to get the current user
 const getCurrentUserServerFn = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .handler(async ({ context }) => {
+  .handler(({ context }) => {
     return context.user
   })
 

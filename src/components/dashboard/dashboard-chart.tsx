@@ -1,6 +1,4 @@
-import type { ReactNode } from 'react'
 import { useId } from 'react'
-import type { PieLabelRenderProps } from 'recharts'
 import {
   Area,
   AreaChart,
@@ -16,6 +14,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { ReactNode } from 'react'
+import type { PieLabelRenderProps } from 'recharts'
 
 export const CHART_COLORS = [
   'oklch(0.67 0.14 48)',
@@ -75,7 +75,7 @@ export interface DashboardChartProps<
   T extends object = Record<string, unknown>,
 > {
   type: ChartType
-  data: T[]
+  data: Array<T>
   categoryKey: string
   valueKey: string
   xAxisLabel?: string
@@ -84,7 +84,7 @@ export interface DashboardChartProps<
   labelPrefix?: string
   height?: number | 'auto'
   maxHeight?: number
-  colors?: readonly string[]
+  colors?: ReadonlyArray<string>
   showLabels?: boolean
   showGrid?: boolean
   emptyMessage?: string
@@ -201,14 +201,14 @@ export function DashboardChart<T extends object>({
                 radius={[0, 6, 6, 0]}
                 maxBarSize={maxBarSize ?? 28}
                 shape={(props: any) => {
-                  const { x, y, width, height, index } = props
-                  const fill = colors[index % colors.length] as string
+                  const { x, y, width, height: barHeight, index } = props
+                  const fill = colors[index % colors.length]
                   return (
                     <rect
                       x={x}
                       y={y}
                       width={width}
-                      height={height}
+                      height={barHeight}
                       fill={fill}
                       rx={6}
                       ry={6}
@@ -283,14 +283,14 @@ export function DashboardChart<T extends object>({
                 radius={[6, 6, 0, 0]}
                 maxBarSize={maxBarSize ?? 56}
                 shape={(props: any) => {
-                  const { x, y, width, height, index } = props
-                  const fill = colors[index % colors.length] as string
+                  const { x, y, width, height: barHeight, index } = props
+                  const fill = colors[index % colors.length]
                   return (
                     <rect
                       x={x}
                       y={y}
                       width={width}
-                      height={height}
+                      height={barHeight}
                       fill={fill}
                       rx={6}
                       ry={6}
@@ -435,7 +435,7 @@ export function DashboardChart<T extends object>({
                     endAngle,
                     index,
                   } = props
-                  const fill = colors[index % colors.length] as string
+                  const fill = colors[index % colors.length]
                   return (
                     <Sector
                       cx={cx}

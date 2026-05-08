@@ -1,7 +1,7 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { Suspense, lazy } from 'react'
 import { DashboardSkeletonFull } from '@/components/dashboard/dashboard-skeleton'
 import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
-import { createFileRoute } from '@tanstack/react-router'
-import { lazy, Suspense } from 'react'
 
 const DashboardContent = lazy(() =>
   import('@/components/dashboard/dashboard-content').then((m) => ({
@@ -11,7 +11,7 @@ const DashboardContent = lazy(() =>
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   loader: ({ context }) => {
-    const userId = context.user?.userId
+    const userId = context.user.userId
     if (userId) {
       context.queryClient.prefetchQuery(dashboardQueries.stats(userId))
       context.queryClient.prefetchQuery(dashboardQueries.insights())

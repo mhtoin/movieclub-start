@@ -74,8 +74,8 @@ export const movieCredits = pgTable('movie_credits', {
       onDelete: 'cascade',
       onUpdate: 'cascade',
     }),
-  cast: jsonb('cast').$type<any[] | null>().default(null),
-  crew: jsonb('crew').$type<any[] | null>().default(null),
+  cast: jsonb('cast').$type<Array<any> | null>().default(null),
+  crew: jsonb('crew').$type<Array<any> | null>().default(null),
 })
 
 export const review = pgTable(
@@ -215,8 +215,8 @@ export const movieToRaffle = pgTable(
 export type Movie = typeof movie.$inferSelect
 export type Review = typeof review.$inferSelect
 export type MovieWithCredits = Movie & {
-  cast?: any[] | null
-  crew?: any[] | null
+  cast?: Array<any> | null
+  crew?: Array<any> | null
 }
 export type MovieWithUser = {
   movie: MovieWithCredits

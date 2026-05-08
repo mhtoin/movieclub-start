@@ -1,13 +1,13 @@
-import { useAppSession, validateSessionToken } from '@/lib/auth/auth'
 import { createFileRoute } from '@tanstack/react-router'
 import postgres from 'postgres'
+import { useAppSession, validateSessionToken } from '@/lib/auth/auth'
 
 export const Route = createFileRoute('/api/sse')({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const session = await useAppSession()
-        const sessionToken = session.data?.sessionToken
+        const sessionToken = session.data.sessionToken
 
         if (!sessionToken) {
           return new Response('Unauthorized', { status: 401 })

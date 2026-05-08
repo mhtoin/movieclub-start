@@ -1,5 +1,5 @@
-import { authMiddleware } from '@/middleware/auth'
 import { createStart } from '@tanstack/react-start'
+import { authMiddleware } from '@/middleware/auth'
 
 /**
  * TanStack Start application entry-point configuration.

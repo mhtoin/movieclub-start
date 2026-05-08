@@ -1,15 +1,15 @@
-import { TierWithMovies } from '@/lib/react-query/queries/tierlists'
 import { useDroppable } from '@dnd-kit/core'
-import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable'
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable'
 import { ChevronDown, ChevronLeft, ChevronRight, Inbox } from 'lucide-react'
 import { memo, useState } from 'react'
-import { useMediaQuery } from '@/lib/hooks'
 import TierItem from './tier-item'
+import type { TierWithMovies } from '@/lib/react-query/queries/tierlists'
+import { useMediaQuery } from '@/lib/hooks'
 import {
-  DrawerRoot,
-  DrawerPortal,
-  DrawerOverlay,
   DrawerContent,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerRoot,
 } from '@/components/ui/drawer'
 
 interface StickyUnrankedTierProps {

@@ -1,9 +1,9 @@
-import type { TierlistPreview } from '@/lib/react-query/queries/tierlists'
-import { getImageUrl } from '@/lib/tmdb-api'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Calendar, Film, Layers } from 'lucide-react'
 import { DeleteButton } from './delete-button'
+import type { TierlistPreview } from '@/lib/react-query/queries/tierlists'
+import { getImageUrl } from '@/lib/tmdb-api'
 
 interface PolaroidTierlistCardProps {
   tierlist: TierlistPreview
@@ -39,7 +39,7 @@ function formatDateRange(
   return null
 }
 
-function PosterCollage({ paths }: { paths: string[] }) {
+function PosterCollage({ paths }: { paths: Array<string> }) {
   if (paths.length === 0) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -51,7 +51,7 @@ function PosterCollage({ paths }: { paths: string[] }) {
   if (paths.length === 1) {
     return (
       <img
-        src={getImageUrl(paths[0], 'w342')}
+        src={getImageUrl(paths[0], 'w342') ?? undefined}
         alt=""
         className="h-full w-full object-cover"
         loading="lazy"
@@ -65,7 +65,7 @@ function PosterCollage({ paths }: { paths: string[] }) {
         {paths.map((p, i) => (
           <img
             key={i}
-            src={getImageUrl(p, 'w342')}
+            src={getImageUrl(p, 'w342') ?? undefined}
             alt=""
             className="h-full w-full object-cover"
             loading="lazy"
@@ -80,7 +80,7 @@ function PosterCollage({ paths }: { paths: string[] }) {
       <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-0.5">
         <div className="row-span-2">
           <img
-            src={getImageUrl(paths[0], 'w342')}
+            src={getImageUrl(paths[0], 'w342') ?? undefined}
             alt=""
             className="h-full w-full object-cover"
             loading="lazy"
@@ -89,7 +89,7 @@ function PosterCollage({ paths }: { paths: string[] }) {
         {paths.slice(1).map((p, i) => (
           <img
             key={i}
-            src={getImageUrl(p, 'w342')}
+            src={getImageUrl(p, 'w342') ?? undefined}
             alt=""
             className="h-full w-full object-cover"
             loading="lazy"
@@ -104,7 +104,7 @@ function PosterCollage({ paths }: { paths: string[] }) {
       {paths.slice(0, 4).map((p, i) => (
         <img
           key={i}
-          src={getImageUrl(p, 'w342')}
+          src={getImageUrl(p, 'w342') ?? undefined}
           alt=""
           className="h-full w-full object-cover"
           loading="lazy"

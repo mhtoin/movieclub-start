@@ -1,8 +1,9 @@
+import { DashboardList  } from './dashboard-list'
+import type {DashboardListItemRenderer} from './dashboard-list';
 import type { MoviesByUser } from '@/lib/react-query/queries/dashboard'
-import { DashboardList, type DashboardListItemRenderer } from './dashboard-list'
 
 interface MoviesByUserListProps {
-  data: MoviesByUser[]
+  data: Array<MoviesByUser>
   totalMovies: number
 }
 

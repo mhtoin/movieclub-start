@@ -1,9 +1,9 @@
+import { Clapperboard, Link, Users } from 'lucide-react'
+import type { FilterScope } from '@/components/dashboard/scope-toggle'
 import { CollabsList } from '@/components/dashboard/collabs-list'
 import { DashboardSection } from '@/components/dashboard/dashboard-section'
 import { PeopleList } from '@/components/dashboard/people-list'
-import { FilterScope } from '@/components/dashboard/scope-toggle'
 import { useInsights } from '@/components/dashboard/use-insights'
-import { Clapperboard, Link, Users } from 'lucide-react'
 
 export function PeopleTabContent({
   userId,

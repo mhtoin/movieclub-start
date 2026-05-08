@@ -1,3 +1,7 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
+import { motion } from 'framer-motion'
+import { Suspense } from 'react'
 import { PageTitleBar } from '@/components/page-titlebar'
 import { CreateTierlistDialog } from '@/components/tierlist/create-tierlist-dialog'
 import { UserTierlistsEmptyState } from '@/components/tierlist/user-tierlists-empty-state'
@@ -5,10 +9,6 @@ import { FeaturedTierlist } from '@/components/tierlist/featured-tierlist'
 import { PolaroidTierlistCard } from '@/components/tierlist/polaroid-tierlist-card'
 import { UserTierlistsSkeleton } from '@/components/tierlist/user-tierlists-skeleton'
 import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
-import { Suspense } from 'react'
 
 export const Route = createFileRoute('/_authenticated/tierlist/$userId/')({
   component: RouteComponent,
@@ -22,7 +22,7 @@ export const Route = createFileRoute('/_authenticated/tierlist/$userId/')({
 function RouteComponent() {
   const { userId } = Route.useParams()
   const { user } = Route.useRouteContext()
-  const isOwner = user?.userId === userId
+  const isOwner = user.userId === userId
 
   return (
     <div className="container mx-auto py-5 md:pl-[72px]">
@@ -31,7 +31,7 @@ function RouteComponent() {
         description={
           isOwner
             ? 'Manage and organize your movie rankings'
-            : `Browse ${user?.name || 'this user'}'s movie rankings`
+            : `Browse ${user.name || 'this user'}'s movie rankings`
         }
         actions={isOwner && <CreateTierlistDialog userId={userId} />}
       />

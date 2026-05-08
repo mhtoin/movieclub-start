@@ -1,16 +1,16 @@
-import { db } from '@/db/db'
-import { raffle, raffleToUser } from '@/db/schema/raffles'
-import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq } from 'drizzle-orm'
+import { db } from '@/db/db'
+import { raffle, raffleToUser } from '@/db/schema/raffles'
+import { authMiddleware } from '@/middleware/auth'
 
 export interface RaffleStats {
   totalRaffles: number
   userParticipations: number
   userWins: number
   winRate: number
-  raffleHistory: RaffleParticipationBucket[]
+  raffleHistory: Array<RaffleParticipationBucket>
 }
 
 export interface RaffleParticipationBucket {
@@ -40,8 +40,10 @@ export const getRaffleStats = createServerFn({ method: 'GET' })
       ).length
 
       const userWins = allRaffles.filter(
+        /* eslint-disable @typescript-eslint/no-unnecessary-condition */
         (r) =>
           r._raffle_to_user?.b === userId && r.raffle?.winningMovieId !== null,
+        /* eslint-enable @typescript-eslint/no-unnecessary-condition */
       ).length
 
       const winRate =
@@ -53,10 +55,12 @@ export const getRaffleStats = createServerFn({ method: 'GET' })
       const winsByMonth = new Map<string, number>()
 
       allRaffles.forEach((r) => {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (r.raffle?.raffledAt) {
           const month = r.raffle.raffledAt.toISOString().substring(0, 7)
           if (r._raffle_to_user?.b === userId) {
             entriesByMonth.set(month, (entriesByMonth.get(month) || 0) + 1)
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (r.raffle?.winningMovieId) {
               winsByMonth.set(month, (winsByMonth.get(month) || 0) + 1)
             }
@@ -68,7 +72,7 @@ export const getRaffleStats = createServerFn({ method: 'GET' })
         ...entriesByMonth.keys(),
         ...winsByMonth.keys(),
       ])
-      const raffleHistory: RaffleParticipationBucket[] = Array.from(allMonths)
+      const raffleHistory: Array<RaffleParticipationBucket> = Array.from(allMonths)
         .sort()
         .reverse()
         .slice(0, 12)

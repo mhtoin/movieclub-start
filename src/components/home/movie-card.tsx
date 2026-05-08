@@ -2,10 +2,10 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { Calendar, Film, Star } from 'lucide-react'
 import { useState } from 'react'
 
-import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
-import type { TMDBMovie } from '@/lib/react-query/queries/home'
-
 import { MovieCardDialog } from './movie-card-dialog'
+import type { TMDBMovie } from '@/lib/react-query/queries/home'
+import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
+
 
 interface MovieCardProps {
   movie: TMDBMovie

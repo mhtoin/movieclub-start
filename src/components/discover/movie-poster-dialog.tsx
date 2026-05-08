@@ -1,6 +1,7 @@
-import { Movie, getImageUrl } from '@/lib/tmdb-api'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import type { Movie} from '@/lib/tmdb-api';
+import { getImageUrl } from '@/lib/tmdb-api'
 
 interface MoviePosterDialogProps {
   movie: Movie | null
@@ -163,7 +164,7 @@ export default function MoviePosterDialog({
       {posterUrl && (
         <img
           src={posterUrl}
-          alt={movie?.title}
+          alt={movie.title}
           style={getImageStyle()}
           className="object-cover pointer-events-none"
         />

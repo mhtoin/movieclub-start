@@ -1,6 +1,3 @@
-import { db } from '@/db/db'
-import { movie, moviesOnTiers, tier, tierlist, user } from '@/db/schema'
-import { authMiddleware } from '@/middleware/auth'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import {
@@ -8,15 +5,19 @@ import {
   asc,
   count,
   countDistinct,
-  desc,
   eq as dbEq,
+  desc,
   inArray,
-  InferSelectModel,
   sql,
 } from 'drizzle-orm'
 import { useMemo } from 'react'
 import { z } from 'zod'
 import { movieQueries } from './movies'
+import type {
+  InferSelectModel} from 'drizzle-orm';
+import { authMiddleware } from '@/middleware/auth'
+import { movie, moviesOnTiers, tier, tierlist, user } from '@/db/schema'
+import { db } from '@/db/db'
 
 type Tierlist = InferSelectModel<typeof tierlist>
 type Tier = InferSelectModel<typeof tier>
@@ -39,29 +40,29 @@ export type TierlistWithDetails = Tierlist & {
 }
 
 export interface TierWithMovies extends Tier {
-  movies: (Movie & { position: number; movieOnTierId: string })[]
+  movies: Array<Movie & { position: number; movieOnTierId: string }>
 }
 
 interface TierlistWithTiers extends Tierlist {
-  tiers: TierWithMovies[]
+  tiers: Array<TierWithMovies>
 }
 
 export interface TierlistPreview {
   id: string
   title: string | null
-  genres: string[] | null
+  genres: Array<string> | null
   watchDateFrom: string | null
   watchDateTo: string | null
   tierCount: number
   movieCount: number
-  posterPaths: string[]
+  posterPaths: Array<string>
 }
 
 export interface UserTierlistSummary {
   id: string
   name: string | null
   image: string | null
-  tierlists: TierlistPreview[]
+  tierlists: Array<TierlistPreview>
 }
 
 const updateTierMoviePositionSchema = z.object({
@@ -86,7 +87,7 @@ const batchInsertMoviesOnTiersSchema = z.array(
   }),
 )
 
-async function assertOwnedTierIds(userId: string, tierIds: string[]) {
+async function assertOwnedTierIds(userId: string, tierIds: Array<string>) {
   const uniqueTierIds = [...new Set(tierIds)]
 
   if (uniqueTierIds.length === 0) {
@@ -106,7 +107,7 @@ async function assertOwnedTierIds(userId: string, tierIds: string[]) {
 
 async function assertOwnedMovieOnTierIds(
   userId: string,
-  movieOnTierIds: string[],
+  movieOnTierIds: Array<string>,
 ) {
   const uniqueMovieOnTierIds = [...new Set(movieOnTierIds)]
 
@@ -138,7 +139,7 @@ export const updateTierMoviePosition = createServerFn({ method: 'POST' })
     if (!context.user) throw new Error('Unauthorized')
     const currentUser = context.user
     const { movieOnTierId, newPosition, tierId } = data
-    const id = movieOnTierId as (typeof moviesOnTiers.$inferSelect)['id']
+    const id = movieOnTierId
 
     await assertOwnedMovieOnTierIds(currentUser.userId, [movieOnTierId])
     await assertOwnedTierIds(currentUser.userId, tierId ? [tierId] : [])
@@ -156,10 +157,10 @@ export const updateTierMoviePosition = createServerFn({ method: 'POST' })
         .set(updateData)
         .where(dbEq(moviesOnTiers.id, id))
 
-      const [{ txid }] = (await tx.execute(
+      const [result] = (await tx.execute(
         sql`select txid_current() as txid`,
       )) as Array<{ txid: unknown }>
-      return txid as string
+      return result.txid as string
     })
 
     return { txid }
@@ -186,17 +187,17 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
     const txid = await db.transaction(async (tx) => {
       for (const update of data) {
         const id =
-          update.movieOnTierId as (typeof moviesOnTiers.$inferSelect)['id']
+          update.movieOnTierId
         await tx
           .update(moviesOnTiers)
           .set({ position: update.newPosition, tierId: update.tierId })
           .where(dbEq(moviesOnTiers.id, id))
       }
 
-      const [{ txid }] = (await tx.execute(
+      const [result] = (await tx.execute(
         sql`select txid_current() as txid`,
       )) as Array<{ txid: unknown }>
-      return txid as string
+      return result.txid as string
     })
 
     return { txid }
@@ -226,10 +227,10 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
         })
       }
 
-      const [{ txid }] = (await tx.execute(
+      const [result] = (await tx.execute(
         sql`select txid_current() as txid`,
       )) as Array<{ txid: unknown }>
-      return txid as string
+      return result.txid as string
     })
 
     return { txid }
@@ -251,10 +252,11 @@ export const getSingleTierlist = createServerFn({ method: 'GET' })
                 with: { movie: true },
               },
             },
-            orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
+            orderBy: (tiers: any, { asc: ascFn }: any) => [ascFn(tiers.value)],
           },
         },
       })
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       return (result as TierlistWithDetails) ?? null
     } catch (error) {
       console.error('Error fetching single tierlist:', error)
@@ -332,10 +334,11 @@ export const getTierlistIndex = createServerFn({ method: 'GET' })
             .orderBy(tierlist.id, moviesOnTiers.position)
         : []
 
-    const posterMap: Record<string, string[]> = {}
+    const posterMap: Record<string, Array<string>> = {}
     for (const row of posterRows) {
       const posterPath = (row.images as any)?.posters?.[0]?.file_path
       if (posterPath) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
         if (posterMap[row.tierlistId].length < 4) {
           posterMap[row.tierlistId].push(posterPath)
@@ -385,7 +388,7 @@ export const getUserTierlists = createServerFn({ method: 'GET' })
 
     try {
       const userTierlists = await (db as any).query.tierlist.findMany({
-        where: (tierlist: any, { eq }: any) => eq(tierlist.userId, userId),
+        where: (tl: any, { eq }: any) => eq(tl.userId, userId),
         with: {
           tiers: {
             with: {
@@ -395,7 +398,7 @@ export const getUserTierlists = createServerFn({ method: 'GET' })
                 },
               },
             },
-            orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
+            orderBy: (tiers: any, { asc: ascFn }: any) => [ascFn(tiers.value)],
           },
         },
       })
@@ -470,12 +473,13 @@ export const getUserTierlistsSummary = createServerFn({ method: 'GET' })
         movieCountResult.map((r) => [r.tierlistId, r.count]),
       )
 
-      const posterMap: Record<string, string[]> = {}
+      const posterMap: Record<string, Array<string>> = {}
       for (const row of posterRows) {
-        const posterPath = (row.images as any)?.posters?.[0]?.file_path
-        if (posterPath) {
-          if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
-          if (posterMap[row.tierlistId].length < 6) {
+      const posterPath = (row.images as any)?.posters?.[0]?.file_path
+      if (posterPath) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
+        if (posterMap[row.tierlistId].length < 6) {
             posterMap[row.tierlistId].push(posterPath)
           }
         }
@@ -504,12 +508,12 @@ export const tierlistQueries = {
       queryFn: getTierlists,
     }),
   index: () =>
-    queryOptions<UserTierlistSummary[]>({
+    queryOptions<Array<UserTierlistSummary>>({
       queryKey: ['tierlists', 'index'],
       queryFn: getTierlistIndex,
     }),
   user: (userId: string) =>
-    queryOptions<TierlistWithDetails[]>({
+    queryOptions<Array<TierlistWithDetails>>({
       queryKey: ['tierlists', 'user', userId],
       queryFn: () => getUserTierlists({ data: userId }),
     }),
@@ -519,7 +523,7 @@ export const tierlistQueries = {
       queryFn: () => getSingleTierlist({ data: tierlistId }),
     }),
   userSummary: (userId: string) =>
-    queryOptions<TierlistPreview[]>({
+    queryOptions<Array<TierlistPreview>>({
       queryKey: ['tierlists', 'user', userId, 'summary'],
       queryFn: () => getUserTierlistsSummary({ data: userId }),
     }),
@@ -533,7 +537,7 @@ export const useTierlistLiveQuery = (
   const { data: allMovies } = useSuspenseQuery(movieQueries.allWatched())
 
   return useMemo(() => {
-    if (!tierlists || tierlists.length === 0) return null
+    if (tierlists.length === 0) return null
 
     const tierlistData = tierlists.find((t) => t.id === tierlistId)
     if (!tierlistData) return null
@@ -563,7 +567,7 @@ export const useTierlistLiveQuery = (
     // Compute unranked: watched movies not yet in any tier of this tierlist
     const { watchDateFrom, watchDateTo, genres } = tierlistData
 
-    const unrankedMovies = (allMovies ?? []).filter((m) => {
+    const unrankedMovies = allMovies.filter((m) => {
       if (rankedMovieIds.has(m.id)) return false
       if (!m.watchDate) return false
       if (watchDateFrom && new Date(m.watchDate) < new Date(watchDateFrom))
@@ -630,7 +634,7 @@ export const useSingleTierlistLiveQuery = (
 
     const { watchDateFrom, watchDateTo, genres } = tierlistData
 
-    const unrankedMovies = (allMovies ?? []).filter((m) => {
+    const unrankedMovies = allMovies.filter((m) => {
       if (rankedMovieIds.has(m.id)) return false
       if (!m.watchDate) return false
       if (watchDateFrom && new Date(m.watchDate) < new Date(watchDateFrom))

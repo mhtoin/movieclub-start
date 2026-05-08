@@ -1,10 +1,10 @@
-import { db } from '@/db/db'
-import { movie, moviesOnTiers, tier, tierlist } from '@/db/schema'
-import { getCached, setCache } from '@/lib/tmdb-cache'
-import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { InferSelectModel } from 'drizzle-orm'
+import type { InferSelectModel } from 'drizzle-orm'
+import type { movie, moviesOnTiers, tier, tierlist } from '@/db/schema'
+import { db } from '@/db/db'
+import { getCached, setCache } from '@/lib/tmdb-cache'
+import { authMiddleware } from '@/middleware/auth'
 
 type Movie = InferSelectModel<typeof movie>
 type MovieOnTier = InferSelectModel<typeof moviesOnTiers>
@@ -30,7 +30,7 @@ export interface TMDBMovie {
   release_date: string
   vote_average: number
   vote_count: number
-  genre_ids: number[]
+  genre_ids: Array<number>
   becauseYouLiked?: {
     title: string
     posterPath: string | null
@@ -39,7 +39,7 @@ export interface TMDBMovie {
 
 interface TMDBResponse {
   page: number
-  results: TMDBMovie[]
+  results: Array<TMDBMovie>
   total_pages: number
   total_results: number
 }
@@ -49,7 +49,7 @@ interface TMDBResponse {
  */
 export const getTrendingMovies = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .handler(async ({ context }): Promise<TMDBMovie[]> => {
+  .handler(async ({ context }): Promise<Array<TMDBMovie>> => {
     if (!context.user) throw new Error('Unauthorized')
 
     if (!TMDB_CONFIG.API_KEY) {
@@ -102,7 +102,7 @@ export interface RecommendationSeed {
 export const getRecommendationSeeds = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .inputValidator((userId: string) => userId)
-  .handler(async ({ context, data: userId }): Promise<RecommendationSeed[]> => {
+  .handler(async ({ context, data: userId }): Promise<Array<RecommendationSeed>> => {
     if (!context.user || context.user.userId !== userId)
       throw new Error('Forbidden')
 
@@ -121,13 +121,14 @@ export const getRecommendationSeeds = createServerFn({ method: 'GET' })
             orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
           },
         },
-      })) as TierlistWithDetails[]
+      })) as Array<TierlistWithDetails>
 
       const topMovies: Array<{ tmdbId: number; title: string }> = []
       for (const tl of userTierlists) {
         for (const t of tl.tiers) {
           if (t.value <= 2) {
             for (const mot of t.moviesOnTiers) {
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
               if (mot.movie) {
                 topMovies.push({
                   tmdbId: mot.movie.tmdbId,
@@ -219,16 +220,16 @@ export const getRecommendationsForSeed = createServerFn({ method: 'GET' })
       seedTmdbId: number
       seedTitle: string
       seedPosterPath: string | null
-      excludeTmdbIds: number[]
+      excludeTmdbIds: Array<number>
     }) => input,
   )
-  .handler(async ({ context, data }): Promise<TMDBMovie[]> => {
+  .handler(async ({ context, data }): Promise<Array<TMDBMovie>> => {
     if (!context.user) throw new Error('Unauthorized')
     if (!TMDB_CONFIG.API_KEY) return []
 
     const { seedTmdbId, seedTitle, seedPosterPath, excludeTmdbIds } = data
     const excludeSet = new Set(excludeTmdbIds)
-    const results: TMDBMovie[] = []
+    const results: Array<TMDBMovie> = []
     const perSeedTarget = 10
     let page = 1
     const maxPages = 2
@@ -296,7 +297,7 @@ export const homeQueries = {
       staleTime: ONE_WEEK,
       enabled: !!userId,
     }),
-  forSeed: (seed: RecommendationSeed, excludeTmdbIds: number[]) =>
+  forSeed: (seed: RecommendationSeed, excludeTmdbIds: Array<number>) =>
     queryOptions({
       queryKey: [
         'home',

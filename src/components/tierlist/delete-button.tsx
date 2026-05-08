@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button'
-import { deleteTierlist } from '@/lib/react-query/mutations/tierlists'
-import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { deleteTierlist } from '@/lib/react-query/mutations/tierlists'
+import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
 
 export function DeleteButton({
   tierlistId,

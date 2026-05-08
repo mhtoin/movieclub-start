@@ -1,16 +1,16 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { Suspense } from 'react'
 
+import { Dices } from 'lucide-react'
 import { PageTitleBar } from '@/components/page-titlebar'
 import { ShortlistOverviewGrid } from '@/components/shortlists/shortlist-overview-grid'
 import { ShortlistsSkeleton } from '@/components/shortlists/shortlists-skeleton'
 import { buttonVariants } from '@/components/ui/button'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { cn } from '@/lib/utils'
-import { Dices } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/shortlists')({
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     context.queryClient.prefetchQuery(shortlistQueries.all())
   },
   component: ShortlistsPage,

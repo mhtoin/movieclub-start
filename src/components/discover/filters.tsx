@@ -1,10 +1,10 @@
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { ArrowDownWideNarrow, Film, RotateCcw, Star, Tv, X } from 'lucide-react'
 import { GenreFilter } from './genre-filter'
 import { ProviderFilter } from './provider-filter'
 import { RatingFilter } from './rating-filter'
 import { SortByFilter } from './sort-by-filter'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
 interface DiscoverFiltersProps {
   selectedGenres: Array<string>

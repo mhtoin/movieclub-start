@@ -1,20 +1,21 @@
+import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
+import { AnimatePresence,  motion } from 'framer-motion'
+import { Film, Plus, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import ShortlistItem from './shortlist-item'
+import type {Variants} from 'framer-motion';
+import { useMediaQuery } from '@/lib/hooks'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import {
   useToggleIsReadyMutation,
   useToggleParticipatingMutation,
 } from '@/lib/react-query/mutations/shortlist'
-import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
-import { AnimatePresence, motion, type Variants } from 'framer-motion'
-import { Film, Plus, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useMediaQuery } from '@/lib/hooks'
-import ShortlistItem from './shortlist-item'
 import {
-  DrawerRoot,
-  DrawerPortal,
-  DrawerOverlay,
   DrawerContent,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerRoot,
 } from '@/components/ui/drawer'
 
 interface ShortlistToolbarProps {
@@ -194,7 +195,9 @@ function ShortlistPanelContent({
             exit="exit"
             className="space-y-2"
           >
+            { }
             {data?.requiresSelection &&
+              /* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */
               data?.selectedIndex === null && (
                 <motion.div
                   variants={itemVariants}
@@ -209,6 +212,7 @@ function ShortlistPanelContent({
                 </motion.div>
               )}
             <AnimatePresence initial={false}>
+              {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
               {data?.movies?.map((movie, index) => (
                 <motion.div
                   key={movie.id}
@@ -221,8 +225,10 @@ function ShortlistPanelContent({
                     movie={movie}
                     index={index}
                     requiresSelection={
+                      /* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */
                       data?.requiresSelection ?? undefined
                     }
+                    /* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */
                     selectedIndex={data?.selectedIndex ?? undefined}
                   />
                 </motion.div>
@@ -290,7 +296,7 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
 
   useEffect(() => setMounted(true), [])
 
-  const movieCount = data?.movies?.length || 0
+  const movieCount = data?.movies.length || 0
   const canAddMoreMovies = movieCount < 3
 
   const handleToggleReady = () => {

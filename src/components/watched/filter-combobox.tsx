@@ -11,7 +11,7 @@ export default function FilterCombobox({
   value,
   label,
 }: {
-  options?: { value: string; label: string }[]
+  options?: Array<{ value: string; label: string }>
   onChange: (value: string | null) => void
   value: string | null
   label?: string

@@ -1,4 +1,8 @@
-import { db } from '@/db/db'
+import { Toast } from '@base-ui/react/toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createServerFn } from '@tanstack/react-start'
+import { and, eq } from 'drizzle-orm'
+import { authMiddleware } from '@/middleware/auth'
 import {
   movie,
   movieCredits,
@@ -7,11 +11,7 @@ import {
   raffleToUser,
   shortlist,
 } from '@/db/schema'
-import { authMiddleware } from '@/middleware/auth'
-import { Toast } from '@base-ui/react/toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createServerFn } from '@tanstack/react-start'
-import { and, eq } from 'drizzle-orm'
+import { db } from '@/db/db'
 
 export const startRaffle = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
@@ -125,10 +125,6 @@ export const useStartRaffleMutation = () => {
     mutationFn: async () => {
       const response = await startRaffle()
 
-      if (!response.success) {
-        throw new Error('Failed to start raffle')
-      }
-
       return {
         movie: response.movie,
         userId: response.userId,
@@ -165,10 +161,6 @@ export const useFinalizeRaffleMutation = () => {
       const response = await finalizeRaffle({
         data: { movieId, watchDate: watchDate.toISOString(), userId },
       })
-
-      if (!response.success) {
-        throw new Error('Failed to finalize raffle')
-      }
 
       return response
     },

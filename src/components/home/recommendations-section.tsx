@@ -1,9 +1,3 @@
-import { Button } from '@/components/ui/button'
-import { useMediaQuery } from '@/lib/hooks'
-import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
-import type { TMDBMovie } from '@/lib/react-query/queries/home'
-import { homeQueries } from '@/lib/react-query/queries/home'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
@@ -16,13 +10,19 @@ import {
   Users,
 } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
+import type { TMDBMovie } from '@/lib/react-query/queries/home'
+import { Button } from '@/components/ui/button'
+import { useMediaQuery } from '@/lib/hooks'
+import { useAddToShortlistMutation } from '@/lib/react-query/mutations/shortlist'
+import { homeQueries } from '@/lib/react-query/queries/home'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
 interface RecommendationsSectionProps {
   userId: string
 }
 
 const ITEMS_PER_PAGE = 6
-const EMPTY: TMDBMovie[] = []
+const EMPTY: Array<TMDBMovie> = []
 
 export function RecommendationsSection({
   userId,
@@ -32,7 +32,7 @@ export function RecommendationsSection({
     useAddToShortlistMutation()
 
   // Fire a query per seed in parallel — results arrive progressively
-  const seed0 = useQuery(homeQueries.forSeed(seeds[0]!, []))
+  const seed0 = useQuery(homeQueries.forSeed(seeds[0], []))
   const seed1 = useQuery(
     homeQueries.forSeed(
       seeds[1] ?? { tmdbId: 0, title: '', posterPath: null },
@@ -53,7 +53,7 @@ export function RecommendationsSection({
       ...(seed2.data ?? EMPTY),
     ]
     const seen = new Set<number>()
-    const unique: TMDBMovie[] = []
+    const unique: Array<TMDBMovie> = []
     for (const m of all) {
       if (!seen.has(m.id)) {
         seen.add(m.id)
@@ -132,7 +132,7 @@ function RecommendationsLoaded({
   addToShortlist,
   isAddingToShortlist,
 }: {
-  movies: TMDBMovie[]
+  movies: Array<TMDBMovie>
   addToShortlist: (movieId: number) => void
   isAddingToShortlist: boolean
 }) {
@@ -549,7 +549,7 @@ function MobilePosterStrip({
   featuredIndex,
   onSelect,
 }: {
-  movies: TMDBMovie[]
+  movies: Array<TMDBMovie>
   featuredIndex: number
   onSelect: (index: number) => void
 }) {

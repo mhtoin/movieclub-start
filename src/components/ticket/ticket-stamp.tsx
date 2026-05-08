@@ -1,7 +1,7 @@
 import {
   getInteractableStampClass,
-  getStaticStampClass,
   getStampText,
+  getStaticStampClass,
 } from './ticket-helpers'
 
 interface TicketStampProps {

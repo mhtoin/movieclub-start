@@ -1,3 +1,30 @@
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  getFirstCollision,
+  pointerWithin,
+  rectIntersection,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Calendar, Loader2, Pencil, Tag } from 'lucide-react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import type {
+  CollisionDetection,
+  DragEndEvent,
+  DragOverEvent} from '@dnd-kit/core';
+import type {
+  TierWithMovies} from '@/lib/react-query/queries/tierlists';
 import DragOverlayPortal from '@/components/tierlist/drag-overlay-portal'
 import StickyUnrankedTier from '@/components/tierlist/sticky-unranked-tier'
 import TierContainer from '@/components/tierlist/tier-container'
@@ -16,33 +43,8 @@ import { updateTierlist } from '@/lib/react-query/mutations/tierlists'
 import {
   batchInsertMoviesOnTiers,
   batchUpdateTierMoviePositions,
-  TierWithMovies,
   useSingleTierlistLiveQuery,
 } from '@/lib/react-query/queries/tierlists'
-import {
-  closestCorners,
-  CollisionDetection,
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  getFirstCollision,
-  KeyboardSensor,
-  PointerSensor,
-  pointerWithin,
-  rectIntersection,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Calendar, Loader2, Pencil, Tag } from 'lucide-react'
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
 
 interface TierlistContentProps {
   tierlistId: string
@@ -65,7 +67,7 @@ export function TierlistContent({
 
   const tierlistFromDb = useSingleTierlistLiveQuery(tierlistId)
 
-  const [localTiers, setLocalTiers] = useState<TierWithMovies[] | null>(null)
+  const [localTiers, setLocalTiers] = useState<Array<TierWithMovies> | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -277,7 +279,6 @@ export function TierlistContent({
           })
           return
         }
-        if (!original) return
 
         const tierChanged = original.tierId !== tier.id
         const positionChanged = original.position !== index

@@ -1,3 +1,11 @@
+import {
+  Outlet,
+  createFileRoute,
+  redirect,
+  useMatches,
+} from '@tanstack/react-router'
+import { createIsomorphicFn, createServerFn } from '@tanstack/react-start'
+import { Suspense, lazy } from 'react'
 import { ProjectorBackground } from '@/components/background-options'
 import { ErrorComponent } from '@/components/error-component'
 import Sidebar from '@/components/sidebar/sidebar'
@@ -7,14 +15,6 @@ import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { authMiddleware } from '@/middleware/auth'
-import {
-  createFileRoute,
-  Outlet,
-  redirect,
-  useMatches,
-} from '@tanstack/react-router'
-import { createIsomorphicFn, createServerFn } from '@tanstack/react-start'
-import { lazy, Suspense } from 'react'
 
 const ShortlistToolbar = lazy(() =>
   import('@/components/shortlist-toolbar/shortlist-toolbar').then((m) => ({
@@ -25,7 +25,7 @@ const ShortlistToolbar = lazy(() =>
 // Server function used by the client path to fetch auth context via RPC.
 const getAuthContextServerFn = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .handler(async ({ context }) => {
+  .handler(({ context }) => {
     return { user: context.user }
   })
 
@@ -37,7 +37,7 @@ const getAuthContext = createIsomorphicFn()
   .server(async () => {
     const { useAppSession, getSessionUser } = await import('@/lib/auth/auth')
     const session = await useAppSession()
-    const user = await getSessionUser(session.data?.sessionToken)
+    const user = await getSessionUser(session.data.sessionToken)
     return { user }
   })
   .client(() => getAuthContextServerFn())
@@ -60,7 +60,7 @@ export const Route = createFileRoute('/_authenticated')({
   },
   loader: ({ context }) => {
     const user = context.user
-    if (user?.userId) {
+    if (user.userId) {
       context.queryClient.prefetchQuery(shortlistQueries.byUser(user.userId))
       context.queryClient.prefetchQuery(movieQueries.latest())
     }
@@ -92,7 +92,7 @@ function AuthenticatedLayout() {
         >
           <Outlet />
           <Suspense fallback={null}>
-            <ShortlistToolbar userId={user?.userId} />
+            <ShortlistToolbar userId={user.userId} />
           </Suspense>
         </div>
       </div>

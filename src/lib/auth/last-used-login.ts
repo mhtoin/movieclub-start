@@ -30,7 +30,7 @@ export function getLastUsedLoginMethodFromClient(): LoginMethod | null {
   }
 }
 
-export const getLastUsedLoginMethod = createServerFn().handler(async () => {
+export const getLastUsedLoginMethod = createServerFn().handler(() => {
   const cookie = getCookie(LAST_USED_LOGIN_COOKIE)
   if (!cookie) return null
 
@@ -50,7 +50,7 @@ export const getLastUsedLoginMethod = createServerFn().handler(async () => {
 
 export const setLastUsedLoginMethod = createServerFn({ method: 'POST' })
   .inputValidator(loginMethodSchema)
-  .handler(async ({ data }) => {
+  .handler(({ data }) => {
     setCookie(
       LAST_USED_LOGIN_COOKIE,
       JSON.stringify({ method: data, timestamp: Date.now() }),

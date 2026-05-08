@@ -1,8 +1,8 @@
-import { movie as movieSchema } from '@/db/schema/movies'
-import { type Movie as TMDBMovie } from '@/lib/tmdb-api'
 import { DragOverlay, useDndContext } from '@dnd-kit/core'
-import { InferSelectModel } from 'drizzle-orm'
 import { MemoizedMovieCard } from '../discover/movie-card'
+import type {Movie as TMDBMovie} from '@/lib/tmdb-api';
+import type { InferSelectModel } from 'drizzle-orm'
+import type { movie as movieSchema } from '@/db/schema/movies'
 
 type Movie = InferSelectModel<typeof movieSchema>
 
@@ -23,6 +23,7 @@ const mapDbMovieToTmdbMovie = (dbMovie: Movie): TMDBMovie => {
     poster_path: (images as any)?.posters?.[0]?.file_path ?? null,
     backdrop_path: (images as any)?.backdrops?.[0]?.file_path ?? null,
     release_date: dbMovie.releaseDate ?? '',
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     vote_average: dbMovie.voteAverage ?? 0,
     vote_count: dbMovie.voteCount,
     genre_ids: [],

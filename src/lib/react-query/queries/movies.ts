@@ -1,13 +1,3 @@
-import { db } from '@/db/db'
-import {
-  movie,
-  movieCredits,
-  type MovieWithCredits,
-  type MovieWithUser,
-} from '@/db/schema/movies'
-import { user } from '@/db/schema/users'
-import { groupBy } from '@/lib/utils'
-import { authMiddleware } from '@/middleware/auth'
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { format } from 'date-fns'
@@ -18,10 +8,22 @@ import {
   eq,
   isNotNull,
   like,
-  sql,
-  SQL,
+  sql
 } from 'drizzle-orm'
 import { z } from 'zod'
+import type {
+  SQL} from 'drizzle-orm';
+import type {MovieWithCredits, MovieWithUser} from '@/db/schema/movies';
+import { db } from '@/db/db'
+import {
+  
+  
+  movie,
+  movieCredits
+} from '@/db/schema/movies'
+import { user } from '@/db/schema/users'
+import { groupBy } from '@/lib/utils'
+import { authMiddleware } from '@/middleware/auth'
 
 export const getLatestMovies = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
@@ -41,8 +43,6 @@ export const getLatestMovies = createServerFn({ method: 'GET' })
       if (rows.length === 0) return null
 
       const movieData = rows[0].movie
-
-      if (!movieData) return null
 
       return {
         movie: {
@@ -99,7 +99,7 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
     const { search, username } = data
 
     // Conditionally construct filter conditions
-    const conditions: SQL[] = [isNotNull(movie.watchDate)]
+    const conditions: Array<SQL> = [isNotNull(movie.watchDate)]
 
     if (search && search.trim() !== '') {
       conditions.push(like(movie.title, `%${search.trim()}%`))

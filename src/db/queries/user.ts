@@ -1,18 +1,19 @@
-import { eq, lt, and } from 'drizzle-orm'
+import { and, eq, lt } from 'drizzle-orm'
 import { db } from '../db'
 import { shortlist } from '../schema/shortlists'
 import { tierlist } from '../schema/tierlists'
 import { session } from '../schema/sessions'
-import { review, recommendedMovie } from '../schema/movies'
+import { recommendedMovie, review } from '../schema/movies'
 import { raffleToUser } from '../schema/raffles'
 import {
   account,
   passwordResetToken,
-  PasswordResetToken,
-  SelectAccount,
-  User,
   user,
 } from '../schema/users'
+import type {
+  PasswordResetToken,
+  SelectAccount,
+  User} from '../schema/users';
 
 export async function getUserByEmail(
   email: User['email'],
@@ -230,6 +231,7 @@ export async function getUserByProvider(
       .limit(1)
       .then((rows) => rows[0] || null)
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!accountRecord) {
       return null
     }

@@ -1,8 +1,8 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Star, Trophy } from 'lucide-react'
 import type { FilterScope } from '@/components/dashboard/scope-toggle'
 import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 import { getImageUrl } from '@/lib/tmdb-api'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Star, Trophy } from 'lucide-react'
 
 interface OverviewCardsProps {
   userId: string
@@ -15,10 +15,8 @@ export function OverviewCards({ userId, scope }: OverviewCardsProps) {
     dashboardQueries.insights(isMine ? userId : undefined),
   )
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const topMovie = insights.highestRated?.[0]
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const topGenre = insights.genreDistribution?.[0]
+  const topMovie = insights.highestRated.at(0)
+  const topGenre = insights.genreDistribution.at(0)
   const totalMovies = insights.ratingDistribution.reduce(
     (sum, r) => sum + r.count,
     0,
@@ -29,7 +27,6 @@ export function OverviewCards({ userId, scope }: OverviewCardsProps) {
   const ratingPercent =
     totalMovies > 0 ? Math.round((highRatings / totalMovies) * 100) : 0
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!topMovie && !topGenre) {
     return null
   }

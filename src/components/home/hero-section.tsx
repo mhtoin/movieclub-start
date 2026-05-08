@@ -12,13 +12,13 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
-import type { MovieWithCredits } from '@/db/schema/movies'
 
 import { Link } from '@tanstack/react-router'
 
 import { fadeInUp, staggerContainer } from './animation-variants'
 import { HeroBackdrop } from './hero-backdrop'
+import type { MovieWithCredits } from '@/db/schema/movies'
+import { Button } from '@/components/ui/button'
 
 interface HeroSectionProps {
   movie: MovieWithCredits

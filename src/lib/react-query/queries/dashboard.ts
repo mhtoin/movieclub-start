@@ -1,11 +1,11 @@
+import { queryOptions } from '@tanstack/react-query'
+import { createServerFn } from '@tanstack/react-start'
+import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 import { db } from '@/db/db'
 import { movie, movieCredits } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { getCached, setCache } from '@/lib/tmdb-cache'
 import { authMiddleware } from '@/middleware/auth'
-import { queryOptions } from '@tanstack/react-query'
-import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 
 export interface DashboardStats {
   totalWatchedMovies: number
@@ -70,27 +70,27 @@ export interface MoviesByUser {
 }
 
 export interface DashboardInsights {
-  genreDistribution: GenreCount[]
-  ratingDistribution: RatingBucket[]
-  topDirectors: PersonCount[]
-  topCast: PersonCount[]
-  decadeDistribution: DecadeBucket[]
-  languageDistribution: LanguageCount[]
-  moviesByUser: MoviesByUser[]
-  highestRated: {
+  genreDistribution: Array<GenreCount>
+  ratingDistribution: Array<RatingBucket>
+  topDirectors: Array<PersonCount>
+  topCast: Array<PersonCount>
+  decadeDistribution: Array<DecadeBucket>
+  languageDistribution: Array<LanguageCount>
+  moviesByUser: Array<MoviesByUser>
+  highestRated: Array<{
     title: string
     rating: number
     posterPath: string | null
     year: string
-  }[]
-  longestMovies: {
+  }>
+  longestMovies: Array<{
     title: string
     runtime: number
     posterPath: string | null
-  }[]
-  ratingTrend: RatingTrendBucket[]
-  genrePairs: GenrePair[]
-  directorActorCollabs: DirectorActorCollab[]
+  }>
+  ratingTrend: Array<RatingTrendBucket>
+  genrePairs: Array<GenrePair>
+  directorActorCollabs: Array<DirectorActorCollab>
 }
 
 export interface NextMovieToWatch {
@@ -102,7 +102,7 @@ export interface NextMovieToWatch {
     releaseDate: string | null
     runtime: number | null
     voteAverage: number
-    genres: string[] | null
+    genres: Array<string> | null
     tagline: string | null
     tmdbId: number
     imdbId: string | null
@@ -125,7 +125,7 @@ const DASHBOARD_CACHE_TTL = 5000
 type WatchedMovie = {
   id: string
   title: string
-  genres: string[] | null
+  genres: Array<string> | null
   voteAverage: number
   releaseDate: string | null
   runtime: number | null
@@ -138,9 +138,9 @@ type WatchedMovie = {
 
 async function getWatchedMoviesForDashboard(
   userId?: string,
-): Promise<WatchedMovie[]> {
+): Promise<Array<WatchedMovie>> {
   const cacheKey = `dashboard:movies:${userId ?? 'all'}`
-  const cached = getCached<WatchedMovie[]>(cacheKey)
+  const cached = getCached<Array<WatchedMovie>>(cacheKey)
   if (cached) return cached
 
   const whereConditions = userId
@@ -355,7 +355,7 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
       // Movies by user
       const userIds = [
         ...new Set(watchedMovies.map((m) => m.userId).filter(Boolean)),
-      ] as string[]
+      ] as Array<string>
       const users =
         userIds.length > 0
           ? await db
@@ -553,8 +553,6 @@ export const getNextMovieToWatch = createServerFn({ method: 'GET' })
 
       const movieData = rows[0].movie
       const userData = rows[0].user
-
-      if (!movieData || !userData) return null
 
       return {
         movie: movieData,

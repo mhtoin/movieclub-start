@@ -1,7 +1,7 @@
-import type { NextMovieToWatch } from '@/lib/react-query/queries/dashboard'
-import { getImageUrl } from '@/lib/tmdb-api'
 import { format } from 'date-fns'
 import { Calendar, Clock, ExternalLink, Star } from 'lucide-react'
+import type { NextMovieToWatch } from '@/lib/react-query/queries/dashboard'
+import { getImageUrl } from '@/lib/tmdb-api'
 
 interface NextMovieCardProps {
   movieData: NextMovieToWatch

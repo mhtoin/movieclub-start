@@ -1,13 +1,13 @@
-import { EmblaCarouselType, EmblaEventType } from 'embla-carousel'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import MoviePoster from './movie-poster'
+import type { EmblaCarouselType, EmblaEventType } from 'embla-carousel'
 
 const TWEEN_FACTOR_BASE = 0.2
 
 interface RaffleCarouselProps {
-  movies: any[]
+  movies: Array<any>
   raffleState: string
   winningMovie: any | null
   onRaffleComplete: () => void
@@ -52,30 +52,30 @@ function VerticalRaffleCarousel({
   })
 
   const tweenFactor = useRef(0)
-  const tweenNodes = useRef<HTMLElement[]>([])
-  const glowNodes = useRef<HTMLElement[]>([])
+  const tweenNodes = useRef<Array<HTMLElement>>([])
+  const glowNodes = useRef<Array<HTMLElement>>([])
 
-  const setTweenNodes = useCallback((emblaApi: EmblaCarouselType): void => {
-    tweenNodes.current = emblaApi.slideNodes().map((slideNode) => {
+  const setTweenNodes = useCallback((api: EmblaCarouselType): void => {
+    tweenNodes.current = api.slideNodes().map((slideNode) => {
       return slideNode.querySelector('.parallax__layer') as HTMLElement
     })
     glowNodes.current = tweenNodes.current.map((node) => {
-      return node?.querySelector('.spotlight-glow') as HTMLElement
+      return node.querySelector('.spotlight-glow') as HTMLElement
     })
   }, [])
 
-  const setTweenFactor = useCallback((emblaApi: EmblaCarouselType) => {
-    tweenFactor.current = TWEEN_FACTOR_BASE * emblaApi.scrollSnapList().length
+  const setTweenFactor = useCallback((api: EmblaCarouselType) => {
+    tweenFactor.current = TWEEN_FACTOR_BASE * api.scrollSnapList().length
   }, [])
 
   const tweenParallax = useCallback(
-    (emblaApi: EmblaCarouselType, eventName?: EmblaEventType) => {
-      const engine = emblaApi.internalEngine()
-      const scrollProgress = emblaApi.scrollProgress()
-      const slidesInView = emblaApi.slidesInView()
+    (api: EmblaCarouselType, eventName?: EmblaEventType) => {
+      const engine = api.internalEngine()
+      const scrollProgress = api.scrollProgress()
+      const slidesInView = api.slidesInView()
       const isScrollEvent = eventName === 'scroll'
 
-      emblaApi.scrollSnapList().forEach((scrollSnap, snapIndex) => {
+      api.scrollSnapList().forEach((scrollSnap, snapIndex) => {
         let diffToTarget = scrollSnap - scrollProgress
         const slidesInSnap = engine.slideRegistry[snapIndex]
 
@@ -107,9 +107,7 @@ function VerticalRaffleCarousel({
           tweenNode.style.opacity = `${opacity}`
 
           const glowElement = glowNodes.current[slideIndex]
-          if (glowElement) {
-            glowElement.style.opacity = `${glowOpacity}`
-          }
+          glowElement.style.opacity = `${glowOpacity}`
         })
       })
     },
@@ -188,7 +186,7 @@ function VerticalRaffleCarousel({
 
     scheduleNextScroll()
     return () => {
-      if (timeoutId) clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
     }
   }, [emblaApi, raffleState, winningMovie, movies, onRaffleComplete])
 
@@ -264,30 +262,30 @@ function HorizontalRaffleCarousel({
   })
 
   const tweenFactor = useRef(0)
-  const tweenNodes = useRef<HTMLElement[]>([])
-  const glowNodes = useRef<HTMLElement[]>([])
+  const tweenNodes = useRef<Array<HTMLElement>>([])
+  const glowNodes = useRef<Array<HTMLElement>>([])
 
-  const setTweenNodes = useCallback((emblaApi: EmblaCarouselType): void => {
-    tweenNodes.current = emblaApi.slideNodes().map((slideNode) => {
+  const setTweenNodes = useCallback((api: EmblaCarouselType): void => {
+    tweenNodes.current = api.slideNodes().map((slideNode) => {
       return slideNode.querySelector('.parallax__layer') as HTMLElement
     })
     glowNodes.current = tweenNodes.current.map((node) => {
-      return node?.querySelector('.spotlight-glow') as HTMLElement
+      return node.querySelector('.spotlight-glow') as HTMLElement
     })
   }, [])
 
-  const setTweenFactor = useCallback((emblaApi: EmblaCarouselType) => {
-    tweenFactor.current = TWEEN_FACTOR_BASE * emblaApi.scrollSnapList().length
+  const setTweenFactor = useCallback((api: EmblaCarouselType) => {
+    tweenFactor.current = TWEEN_FACTOR_BASE * api.scrollSnapList().length
   }, [])
 
   const tweenParallax = useCallback(
-    (emblaApi: EmblaCarouselType, eventName?: EmblaEventType) => {
-      const engine = emblaApi.internalEngine()
-      const scrollProgress = emblaApi.scrollProgress()
-      const slidesInView = emblaApi.slidesInView()
+    (api: EmblaCarouselType, eventName?: EmblaEventType) => {
+      const engine = api.internalEngine()
+      const scrollProgress = api.scrollProgress()
+      const slidesInView = api.slidesInView()
       const isScrollEvent = eventName === 'scroll'
 
-      emblaApi.scrollSnapList().forEach((scrollSnap, snapIndex) => {
+      api.scrollSnapList().forEach((scrollSnap, snapIndex) => {
         let diffToTarget = scrollSnap - scrollProgress
         const slidesInSnap = engine.slideRegistry[snapIndex]
 
@@ -318,9 +316,7 @@ function HorizontalRaffleCarousel({
           tweenNode.style.opacity = `${opacity}`
 
           const glowElement = glowNodes.current[slideIndex]
-          if (glowElement) {
-            glowElement.style.opacity = `${glowOpacity}`
-          }
+          glowElement.style.opacity = `${glowOpacity}`
         })
       })
     },
@@ -415,7 +411,7 @@ function HorizontalRaffleCarousel({
 
     scheduleNextScroll()
     return () => {
-      if (timeoutId) clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
     }
   }, [emblaApi, raffleState, winningMovie, movies, onRaffleComplete])
 

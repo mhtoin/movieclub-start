@@ -76,10 +76,6 @@ export const Route = createFileRoute('/login/google/callback')({
           }
         }
 
-        if (!user) {
-          return new Response('Failed to create or find user', { status: 500 })
-        }
-
         const existingAccount = await getAccountByUserId(user.id, 'google')
 
         if (existingAccount) {
@@ -88,6 +84,7 @@ export const Route = createFileRoute('/login/google/callback')({
             refreshToken: tokens.hasRefreshToken()
               ? tokens.refreshToken()
               : undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             expiresAt: tokens.accessTokenExpiresAt()
               ? Math.floor(tokens.accessTokenExpiresAt().getTime() / 1000)
               : undefined,
@@ -103,6 +100,7 @@ export const Route = createFileRoute('/login/google/callback')({
             refreshToken: tokens.hasRefreshToken()
               ? tokens.refreshToken()
               : undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             expiresAt: tokens.accessTokenExpiresAt()
               ? Math.floor(tokens.accessTokenExpiresAt().getTime() / 1000)
               : undefined,

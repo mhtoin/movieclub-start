@@ -1,10 +1,10 @@
-import { db } from '@/db/db'
-import { user as userTable } from '@/db/schema/users'
-import { authMiddleware } from '@/middleware/auth'
 import { createServerFn } from '@tanstack/react-start'
 import { getCookie, setCookie } from '@tanstack/react-start/server'
 import { eq } from 'drizzle-orm/sql/expressions/conditions'
 import * as z from 'zod'
+import { authMiddleware } from '@/middleware/auth'
+import { user as userTable } from '@/db/schema/users'
+import { db } from '@/db/db'
 
 const schemeValidator = z.enum([
   'default',
@@ -50,7 +50,7 @@ export const COLOR_SCHEMES = {
 
 export const getSchemeServerFn = createServerFn()
   .middleware([authMiddleware])
-  .handler(async ({ context }) => {
+  .handler(({ context }) => {
     const cookieScheme = (getCookie('color-scheme') || 'default') as ColorScheme
 
     try {
@@ -62,7 +62,7 @@ export const getSchemeServerFn = createServerFn()
         if (user.colorScheme !== cookieScheme) {
           setCookie('color-scheme', user.colorScheme)
         }
-        return user.colorScheme as ColorScheme
+        return user.colorScheme
       }
       return schemeValidator.parse(cookieScheme)
     } catch {
@@ -70,7 +70,7 @@ export const getSchemeServerFn = createServerFn()
     }
   })
 
-export const getThemeAndSchemeServerFn = createServerFn().handler(async () => {
+export const getThemeAndSchemeServerFn = createServerFn().handler(() => {
   // Cookie-only: no DB call needed. The cookie is kept in sync with the DB
   // by setSchemeServerFn whenever the user changes their scheme.
   const theme = (getCookie('theme') || 'light') as 'light' | 'dark'

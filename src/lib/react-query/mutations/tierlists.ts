@@ -1,9 +1,9 @@
-import { db } from '@/db/db'
-import { tier, tierlist } from '@/db/schema'
-import { authMiddleware } from '@/middleware/auth'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
+import { db } from '@/db/db'
+import { tier, tierlist } from '@/db/schema'
+import { authMiddleware } from '@/middleware/auth'
 
 const createTierlistSchema = z.object({
   title: z.string().min(1),
@@ -64,6 +64,7 @@ export const deleteTierlist = createServerFn({ method: 'POST' })
       .limit(1)
       .then((rows) => rows[0])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!existing || existing.userId !== currentUser.userId) {
       throw new Error('Forbidden')
     }
@@ -93,6 +94,7 @@ export const updateTierlist = createServerFn({ method: 'POST' })
       .limit(1)
       .then((rows) => rows[0])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!existing || existing.userId !== currentUser.userId) {
       throw new Error('Forbidden')
     }

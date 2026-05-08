@@ -33,7 +33,7 @@ export function UserTierlistsSkeleton() {
               <div className="flex items-stretch">
                 <div className="shrink-0 w-[88px] p-3 flex items-center justify-center bg-muted/30">
                   <div className="flex gap-0.5 h-[72px] w-full rounded overflow-hidden">
-                    {Array.from({ length: 4 }).map((_, j) => (
+                    {Array.from({ length: 4 }).map((_item, j) => (
                       <Skeleton key={j} className="flex-1" />
                     ))}
                   </div>

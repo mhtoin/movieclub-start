@@ -1,3 +1,6 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
+import { Suspense } from 'react'
 import { EmptyState } from '@/components/home/empty-state'
 import { HeroSection } from '@/components/home/hero-section'
 import { HeroSkeleton } from '@/components/home/hero-skeleton'
@@ -6,13 +9,10 @@ import { RecommendationsSection } from '@/components/home/recommendations-sectio
 import { homeQueries } from '@/lib/react-query/queries/home'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { Suspense } from 'react'
 
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
-    const userId = context.user?.userId
+    const userId = context.user.userId
     context.queryClient.prefetchQuery(tmdbQueries.genres())
     await context.queryClient.ensureQueryData(movieQueries.latest())
     if (userId) {
@@ -33,7 +33,7 @@ function Home() {
 
       <div className="relative md:pl-[72px] md:pr-12 lg:pl-20 lg:pr-16">
         <Suspense fallback={<MovieReelSkeleton />}>
-          <RecommendationsSection userId={user?.userId || ''} />
+          <RecommendationsSection userId={user.userId} />
         </Suspense>
       </div>
     </div>

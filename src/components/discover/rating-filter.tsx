@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   PopoverPopup,
   PopoverPortal,
@@ -12,7 +13,6 @@ import {
   SliderThumb,
   SliderTrack,
 } from '@/components/ui/slider'
-import { useEffect, useState } from 'react'
 
 interface RatingFilterProps {
   voteRange: [number, number]

@@ -1,14 +1,14 @@
-import type { LoginMethod } from '@/lib/auth/last-used-login'
-import { getLastUsedLoginMethodFromClient } from '@/lib/auth/last-used-login'
-import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import type { Movie } from '@/lib/tmdb-api'
-import { FALLBACK_POSTERS } from '@/lib/tmdb-api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import { ResponsiveDialog } from '../ui/responsive-dialog'
 import LoginForm from './login-form'
 import { MoviePosterCard } from './movie-poster-card'
+import type { Movie } from '@/lib/tmdb-api'
+import type { LoginMethod } from '@/lib/auth/last-used-login'
+import { FALLBACK_POSTERS } from '@/lib/tmdb-api'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import { getLastUsedLoginMethodFromClient } from '@/lib/auth/last-used-login'
 
 export default function LoginDialog() {
   const queryClient = useQueryClient()

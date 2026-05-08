@@ -7,7 +7,7 @@ const DISCORD_OAUTH_STATE_COOKIE = 'discord_oauth_state'
 export const Route = createFileRoute('/login/discord')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: () => {
         const { state, url } = createDiscordAuthorizationURL()
 
         setCookie(DISCORD_OAUTH_STATE_COOKIE, state, {

@@ -63,11 +63,15 @@ export const Route = createFileRoute('/login/discord/callback')({
         if (existingAccount) {
           await updateAccount(user.id, 'discord', {
             accessToken: tokens.accessToken(),
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             refreshToken: tokens.refreshToken() ?? undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             expiresAt: tokens.accessTokenExpiresAt()
               ? Math.floor(tokens.accessTokenExpiresAt().getTime() / 1000)
               : undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             scope: tokens.scopes()?.join(' ') ?? undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             tokenType: tokens.tokenType() ?? undefined,
           })
         } else {
@@ -76,11 +80,15 @@ export const Route = createFileRoute('/login/discord/callback')({
             provider: 'discord',
             providerAccountId: discordUser.id,
             accessToken: tokens.accessToken(),
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             refreshToken: tokens.refreshToken() ?? undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             expiresAt: tokens.accessTokenExpiresAt()
               ? Math.floor(tokens.accessTokenExpiresAt().getTime() / 1000)
               : undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             scope: tokens.scopes()?.join(' ') ?? undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             tokenType: tokens.tokenType() ?? undefined,
           })
         }

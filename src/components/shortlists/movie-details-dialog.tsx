@@ -1,9 +1,9 @@
-import { getResponsiveImageProps } from '@/lib/tmdb-api'
 import { useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { X } from 'lucide-react'
 import { AnimatedPoster } from '../discover/animated-poster'
 import { useDialogAnimation } from '../discover/use-dialog-animation'
-import { X } from 'lucide-react'
+import { getResponsiveImageProps } from '@/lib/tmdb-api'
 
 interface MovieDetailsDialogProps {
   movie: any

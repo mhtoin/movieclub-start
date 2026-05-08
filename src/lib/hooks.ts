@@ -16,7 +16,7 @@ export function useDebouncedValue<T>(value: T, delay: number): [T] {
   return [debouncedValue]
 }
 
-export function useDebouncedCallback<T extends (...args: any[]) => void>(
+export function useDebouncedCallback<T extends (...args: Array<any>) => void>(
   callback: T,
   delay: number,
 ): T {
@@ -45,7 +45,6 @@ export function useElementInView(
 
   useEffect(() => {
     const element = elementRef.current
-    if (!element) return
 
     const observer = new IntersectionObserver(
       ([entry]) => {

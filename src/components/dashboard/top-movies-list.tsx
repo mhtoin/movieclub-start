@@ -1,6 +1,7 @@
-import { getImageUrl } from '@/lib/tmdb-api'
 import { Star } from 'lucide-react'
-import { DashboardList, type DashboardListItemRenderer } from './dashboard-list'
+import { DashboardList  } from './dashboard-list'
+import type {DashboardListItemRenderer} from './dashboard-list';
+import { getImageUrl } from '@/lib/tmdb-api'
 
 interface TopMovie {
   title: string
@@ -15,7 +16,7 @@ interface LongestMovie {
   posterPath: string | null
 }
 
-export function HighestRatedList({ data }: { data: TopMovie[] }) {
+export function HighestRatedList({ data }: { data: Array<TopMovie> }) {
   const renderer: DashboardListItemRenderer<TopMovie> = {
     getKey: (movie) => movie.title,
 
@@ -66,7 +67,7 @@ export function HighestRatedList({ data }: { data: TopMovie[] }) {
   )
 }
 
-export function LongestMoviesList({ data }: { data: LongestMovie[] }) {
+export function LongestMoviesList({ data }: { data: Array<LongestMovie> }) {
   const maxRuntime = data[0]?.runtime || 1
 
   const renderer: DashboardListItemRenderer<LongestMovie> = {

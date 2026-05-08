@@ -20,7 +20,7 @@ export function TicketStub({
     <div className={getStubClass(participating, isReady)}>
       <div className="flex flex-col items-center pt-4">
         <Avatar
-          src={user.image ?? ''}
+          src={user.image}
           alt={user.name}
           name={user.name}
           size={44}

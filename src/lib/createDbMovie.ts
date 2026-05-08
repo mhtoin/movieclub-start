@@ -1,8 +1,8 @@
-import { db } from '@/db/db'
-import { movie } from '@/db/schema'
-import { Image, TMDBMovieResponse } from '@/types/tmdb'
 import { eq } from 'drizzle-orm'
 import { getBlurDataUrl } from './utils'
+import type { Image, TMDBMovieResponse } from '@/types/tmdb'
+import { db } from '@/db/db'
+import { movie } from '@/db/schema'
 
 type RankObject = {
   [key: string]: {
@@ -48,19 +48,24 @@ function rankImages(images: Array<Image>, originalLanguage: string) {
     .map((image) => image.image)
 }
 
-export const createDbMovie = async (movieData: TMDBMovieResponse) => {
+export const createDbMovie = (movieData: TMDBMovieResponse) => {
   const finnishProvider = [
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     ...(movieData['watch/providers']?.results?.FI?.flatrate ?? []),
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     ...(movieData['watch/providers']?.results?.FI?.free ?? []),
   ]
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const providerLink = movieData['watch/providers']?.results?.FI?.link
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const cast = movieData.credits?.cast
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const crew = movieData.credits?.crew.filter(
-    (crew) =>
-      crew.job === 'Director' ||
-      crew.job === 'Screenplay' ||
-      crew.job === 'Original Music Composer',
+    (member) =>
+      member.job === 'Director' ||
+      member.job === 'Screenplay' ||
+      member.job === 'Original Music Composer',
   )
 
   const trailers = movieData.videos?.results.filter(
@@ -105,10 +110,12 @@ export const createDbMovie = async (movieData: TMDBMovieResponse) => {
     runtime: movieData.runtime,
     tagline: movieData.tagline,
     genres: movieData.genres.map((genre) => genre.name),
+    /* eslint-disable @typescript-eslint/no-unnecessary-condition */
     watchProviders: {
       link: providerLink ?? '',
       providers: finnishProvider ?? [],
     },
+    /* eslint-enable @typescript-eslint/no-unnecessary-condition */
     images: {
       backdrops: backdropsWithBlurDataUrl,
       posters: postersWithBlurDataUrl,
@@ -116,7 +123,9 @@ export const createDbMovie = async (movieData: TMDBMovieResponse) => {
     },
     videos: trailers,
     credits: {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       cast: cast ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       crew: crew ?? null,
     },
   }

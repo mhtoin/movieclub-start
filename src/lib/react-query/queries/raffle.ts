@@ -1,11 +1,11 @@
+import { queryOptions } from '@tanstack/react-query'
+import { createServerFn } from '@tanstack/react-start'
+import { and, desc, eq } from 'drizzle-orm'
 import { db } from '@/db/db'
 import { movieToShortlist, raffle, raffleToUser, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { authMiddleware } from '@/middleware/auth'
-import { queryOptions } from '@tanstack/react-query'
-import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq } from 'drizzle-orm'
 
 export const getParticipatingShortlists = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
@@ -36,9 +36,7 @@ export const getParticipatingShortlists = createServerFn({ method: 'GET' })
             movies: [],
           })
         }
-        if (row.movie) {
-          shortlistsMap.get(shortlistId).movies.push(row.movie)
-        }
+        shortlistsMap.get(shortlistId).movies.push(row.movie)
       }
 
       return Array.from(shortlistsMap.values())

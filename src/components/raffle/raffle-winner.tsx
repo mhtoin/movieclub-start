@@ -1,7 +1,3 @@
-import { Button } from '@/components/ui/button'
-import type { Movie } from '@/db/schema/movies'
-import { getImageUrl } from '@/lib/tmdb-api'
-import { cn, getMovieBackdropUrl, getMoviePosterUrl } from '@/lib/utils'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -17,6 +13,10 @@ import {
   Users,
 } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
+import type { Movie } from '@/db/schema/movies'
+import { cn, getMovieBackdropUrl, getMoviePosterUrl } from '@/lib/utils'
+import { getImageUrl } from '@/lib/tmdb-api'
+import { Button } from '@/components/ui/button'
 
 interface WinnerUser {
   id: string

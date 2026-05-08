@@ -1,4 +1,3 @@
-import { useMediaQuery } from '@/lib/hooks'
 import * as React from 'react'
 import {
   DialogBackdrop,
@@ -17,6 +16,7 @@ import {
   DrawerRoot,
   DrawerTrigger,
 } from './drawer'
+import { useMediaQuery } from '@/lib/hooks'
 
 interface ResponsiveDialogContextValue {
   isDesktop: boolean

@@ -31,9 +31,9 @@ export function SortByFilter({
   if (variant === 'chip') {
     return (
       <SelectRoot
-        onValueChange={(value) => {
-          if (value !== null) {
-            onValueChange(value)
+        onValueChange={(selectedValue) => {
+          if (selectedValue !== null) {
+            onValueChange(selectedValue)
           }
         }}
         value={value}
@@ -67,9 +67,9 @@ export function SortByFilter({
     <div>
       <label className="mb-2 block text-sm font-medium">Sort By</label>
       <SelectRoot
-        onValueChange={(value) => {
-          if (value !== null) {
-            onValueChange(value)
+        onValueChange={(selectedValue) => {
+          if (selectedValue !== null) {
+            onValueChange(selectedValue)
           }
         }}
         value={value}

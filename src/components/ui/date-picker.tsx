@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils'
 import { endOfYear, format, startOfYear } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import * as React from 'react'
+import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -47,7 +47,7 @@ export interface DatePickerProps {
   /** Caption layout for the calendar header */
   captionLayout?: 'label' | 'dropdown' | 'dropdown-years'
   /** Optional preset shortcuts shown in a sidebar next to the calendar */
-  presets?: DatePickerPreset[]
+  presets?: Array<DatePickerPreset>
 }
 
 export function DatePicker({

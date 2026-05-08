@@ -1,15 +1,15 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { BarChart3, Clock, GitFork, Star, Trophy, Users } from 'lucide-react'
+import type { FilterScope } from '@/components/dashboard/scope-toggle'
 import { DashboardChart } from '@/components/dashboard/dashboard-chart'
 import { DashboardSection } from '@/components/dashboard/dashboard-section'
 import { MoviesByUserList } from '@/components/dashboard/movies-by-user'
-import { FilterScope } from '@/components/dashboard/scope-toggle'
 import {
   HighestRatedList,
   LongestMoviesList,
 } from '@/components/dashboard/top-movies-list'
 import { useInsights } from '@/components/dashboard/use-insights'
 import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { BarChart3, Clock, GitFork, Star, Trophy, Users } from 'lucide-react'
 
 export function GenresTabContent({
   userId,

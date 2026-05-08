@@ -1,9 +1,9 @@
+import { Users } from 'lucide-react'
 import type { DirectorActorCollab } from '@/lib/react-query/queries/dashboard'
 import { getImageUrl } from '@/lib/tmdb-api'
-import { Users } from 'lucide-react'
 
 interface CollabsListProps {
-  data: DirectorActorCollab[]
+  data: Array<DirectorActorCollab>
   emptyMessage?: string
 }
 

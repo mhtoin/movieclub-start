@@ -1,8 +1,3 @@
-import {
-  COLOR_SCHEMES,
-  setSchemeServerFn,
-  type ColorScheme,
-} from '@/lib/color-scheme'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
@@ -17,6 +12,12 @@ import {
   PopoverRoot,
   PopoverTrigger,
 } from './ui/popover'
+import type {ColorScheme} from '@/lib/color-scheme';
+import {
+  COLOR_SCHEMES,
+  
+  setSchemeServerFn
+} from '@/lib/color-scheme'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   value: value as ColorScheme,
@@ -34,6 +35,7 @@ export function ColorSchemeSelector() {
       await setSchemeServerFn({ data: scheme })
     },
     onSuccess: () => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (document.startViewTransition) {
         const x = window.innerWidth
         const y = 0

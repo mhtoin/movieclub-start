@@ -1,3 +1,14 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import {
+  createFileRoute,
+  retainSearchParams,
+  stripSearchParams,
+} from '@tanstack/react-router'
+import { fallback, zodValidator } from '@tanstack/zod-adapter'
+import { format } from 'date-fns'
+import { Filter, Search, X } from 'lucide-react'
+import { Suspense, useState } from 'react'
+import { z } from 'zod'
 import { PageTitleBar } from '@/components/page-titlebar'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,17 +30,6 @@ import { useDebouncedCallback, useMediaQuery } from '@/lib/hooks'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { userQueries } from '@/lib/react-query/queries/users'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  createFileRoute,
-  retainSearchParams,
-  stripSearchParams,
-} from '@tanstack/react-router'
-import { fallback, zodValidator } from '@tanstack/zod-adapter'
-import { format } from 'date-fns'
-import { Filter, Search, X } from 'lucide-react'
-import { Suspense, useState } from 'react'
-import { z } from 'zod'
 
 const defaultValues = {
   search: '',
@@ -86,7 +86,7 @@ function WatchedMoviesList({
   )
   const isMobile = !useMediaQuery('(min-width: 768px)')
 
-  const entries = Object.entries(data || {})
+  const entries = Object.entries(data)
 
   if (entries.length === 0) {
     return <WatchedEmptyState />
@@ -144,19 +144,19 @@ function WatchedMoviesList({
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground">
-                      {movies?.length}{' '}
-                      {movies?.length === 1 ? 'movie' : 'movies'}
+                      {movies.length}{' '}
+                      {movies.length === 1 ? 'movie' : 'movies'}
                     </p>
                   </div>
                 </div>
               </div>
               <div className="space-y-3">
-                {movies?.map((movieData) => {
-                  const watchDate = movieData.movie?.watchDate
-                    ? new Date(movieData?.movie?.watchDate)
+                {movies.map((movieData) => {
+                  const watchDate = movieData.movie.watchDate
+                    ? new Date(movieData.movie.watchDate)
                     : null
                   return (
-                    <div key={movieData?.movie?.id} className="relative">
+                    <div key={movieData.movie.id} className="relative">
                       <div className="absolute -left-[1.9rem] top-6">
                         <div className="flex flex-col items-center gap-0.5">
                           <div className="w-2 h-2 rounded-full bg-primary/40 ring-1 ring-background" />
@@ -239,12 +239,12 @@ function WatchedMoviesList({
               </div>
             </div>
             <div className="ml-20 space-y-4">
-              {movies?.map((movieData) => {
-                const watchDate = movieData.movie?.watchDate
-                  ? new Date(movieData?.movie?.watchDate)
+              {movies.map((movieData) => {
+                const watchDate = movieData.movie.watchDate
+                  ? new Date(movieData.movie.watchDate)
                   : null
                 return (
-                  <div key={movieData?.movie?.id} className="relative">
+                  <div key={movieData.movie.id} className="relative">
                     <div className="absolute -left-[5.5rem] top-1/2 -translate-y-1/2">
                       <div className="flex flex-col items-center">
                         <div className="w-4 h-4 rounded-full bg-primary ring-2 ring-background" />

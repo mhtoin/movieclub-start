@@ -1,7 +1,7 @@
-import { getImageUrl } from '@/lib/tmdb-api'
-import { WatchProviders } from '@/types/tmdb'
 import { ChevronDown, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
+import type { WatchProviders } from '@/types/tmdb'
+import { getImageUrl } from '@/lib/tmdb-api'
 
 interface WatchProvidersListProps {
   watchProviders: WatchProviders
@@ -13,12 +13,15 @@ export function WatchProvidersList({
   region = 'FI',
 }: WatchProvidersListProps) {
   const [showAllProviders, setShowAllProviders] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const providers = watchProviders.results?.[region]?.flatrate
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!providers || providers.length === 0) {
     return null
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const watchProvidersLink = watchProviders.results?.[region]?.link
 
   return (

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 export interface DashboardListConfig {
   showRank?: boolean
@@ -21,7 +21,7 @@ export interface DashboardListItemRenderer<T> {
 }
 
 interface DashboardListProps<T> {
-  data: T[]
+  data: Array<T>
   config?: DashboardListConfig
   renderer: DashboardListItemRenderer<T>
 }

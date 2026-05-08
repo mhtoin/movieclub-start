@@ -1,13 +1,14 @@
+import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+import type {
+  DiscoverParams} from '@/lib/tmdb-api';
 import {
   discoverMovies,
-  DiscoverParams,
   fetchBackgroundMovies,
   fetchMovieDetails,
   fetchWatchProviders,
   getFilters,
   searchMovies,
 } from '@/lib/tmdb-api'
-import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 export const tmdbQueries = {
   backgroundMovies: (count: number = 12) =>

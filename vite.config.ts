@@ -15,7 +15,7 @@ const config = defineConfig({
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
-          const name = assetInfo.names?.[0] ?? ''
+          const name = assetInfo.names[0] ?? ''
           if (name === 'styles.css') {
             return 'assets/styles[extname]'
           }

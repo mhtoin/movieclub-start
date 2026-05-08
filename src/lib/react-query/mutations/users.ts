@@ -1,10 +1,10 @@
-import { deleteUser as deleteUserFromDb } from '@/db/queries/user'
-import { deleteSessionById, useAppSession } from '@/lib/auth/auth'
-import { authMiddleware } from '@/middleware/auth'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { authMiddleware } from '@/middleware/auth'
+import { deleteSessionById, useAppSession } from '@/lib/auth/auth'
+import { deleteUser as deleteUserFromDb } from '@/db/queries/user'
 
 export const deleteUser = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
@@ -16,7 +16,7 @@ export const deleteUser = createServerFn({ method: 'POST' })
     try {
       // Get session token before deleting user data
       const session = await useAppSession()
-      const token = session.data?.sessionToken
+      const token = session.data.sessionToken
 
       // Delete all user data (this also deletes sessions table record via CASCADE)
       await deleteUserFromDb(userId)

@@ -1,9 +1,9 @@
+import type { ShortlistWithUserMovies } from '@/db/schema'
+import type { Movie } from '@/db/schema/movies'
 import { TicketCard } from '@/components/ticket/ticket-card'
 import { TicketEmptyRow } from '@/components/ticket/ticket-empty-row'
 import { TicketMovieRow } from '@/components/ticket/ticket-movie-row'
 import { TicketStub } from '@/components/ticket/ticket-stub'
-import type { ShortlistWithUserMovies } from '@/db/schema'
-import type { Movie } from '@/db/schema/movies'
 
 interface Props {
   shortlist: ShortlistWithUserMovies

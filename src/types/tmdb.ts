@@ -3,22 +3,22 @@ export interface TMDBMovieResponse {
   backdrop_path: string | null
   belongs_to_collection: null | object 
   budget: number
-  genres: Genre[]
+  genres: Array<Genre>
   homepage: string
   id: number
   imdb_id?: string
-  origin_country: string[]
+  origin_country: Array<string>
   original_language: string
   original_title: string
   overview: string
   popularity: number
   poster_path: string | null
-  production_companies: ProductionCompany[]
-  production_countries: ProductionCountry[]
+  production_companies: Array<ProductionCompany>
+  production_countries: Array<ProductionCountry>
   release_date: string
   revenue: number
   runtime: number
-  spoken_languages: SpokenLanguage[]
+  spoken_languages: Array<SpokenLanguage>
   status:
     | "Released"
     | "Post Production"
@@ -33,27 +33,27 @@ export interface TMDBMovieResponse {
   credits: Credits
   "watch/providers"?: WatchProviders // Simplified version, can expand as needed
   images?: {
-    backdrops: Image[]
-    posters: Image[]
-    logos: Image[]
+    backdrops: Array<Image>
+    posters: Array<Image>
+    logos: Array<Image>
   }
 
   similar?: {
     page: number
-    results: SimilarMovie[]
+    results: Array<SimilarMovie>
     total_pages: number
     total_results: number
   }
 
   // For video data if needed
   videos?: {
-    results: Video[]
+    results: Array<Video>
   }
 }
 
 export interface TMDBRecommendationResponse {
   page: number
-  results: SimilarMovie[]
+  results: Array<SimilarMovie>
   total_pages: number
   total_results: number
 }
@@ -71,7 +71,7 @@ export interface Image {
 export interface SimilarMovie {
   adult: boolean
   backdrop_path: string | null
-  genre_ids: number[]
+  genre_ids: Array<number>
   id: number
   original_language: string
   original_title: string
@@ -122,8 +122,8 @@ export interface SpokenLanguage {
 }
 
 export interface Credits {
-  cast: CastMember[]
-  crew: CrewMember[]
+  cast: Array<CastMember>
+  crew: Array<CrewMember>
 }
 
 export interface CastMember {
@@ -159,8 +159,8 @@ export interface WatchProviders {
   results: {
     [key: string]: {
       link: string
-      flatrate: Provider[]
-      free: Provider[]
+      flatrate: Array<Provider>
+      free: Array<Provider>
     }
   }
 }
@@ -174,7 +174,7 @@ export interface Provider {
 
 export interface TMDBSearchResponse {
   page: number
-  results: TMDBSearchResult[]
+  results: Array<TMDBSearchResult>
   total_pages: number
   total_results: number
 }
@@ -182,7 +182,7 @@ export interface TMDBSearchResponse {
 export interface TMDBSearchResult {
   adult: boolean
   backdrop_path: string | null
-  genre_ids: number[]
+  genre_ids: Array<number>
   id: number
   original_language: string
   original_title: string

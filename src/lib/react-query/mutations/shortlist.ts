@@ -1,33 +1,34 @@
-import { db } from '@/db/db'
+import { Toast } from '@base-ui/react/toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createServerFn } from '@tanstack/react-start'
+import { and, eq } from 'drizzle-orm'
 import type { ShortlistWithUserMovies } from '@/db/schema'
+import { db } from '@/db/db'
 import { movie, movieCredits, movieToShortlist, shortlist } from '@/db/schema'
 import { user } from '@/db/schema/users'
 import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
 import { fetchMovieDetails } from '@/lib/tmdb-api'
 import { authMiddleware } from '@/middleware/auth'
-import { Toast } from '@base-ui/react/toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createServerFn } from '@tanstack/react-start'
-import { and, eq } from 'drizzle-orm'
 
 export const removeFromShortlist = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator((data: { movieId: string }) => data)
   .handler(async ({ context, data }) => {
     const { movieId } = data
-    const user = context.user
+    const currentUser = context.user
 
-    if (!user) {
+    if (!currentUser) {
       throw new Error('Unauthorized')
     }
 
     const userShortlist = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .limit(1)
       .then((res) => res[0])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!userShortlist) {
       throw new Error('Shortlist not found')
     }
@@ -44,7 +45,7 @@ export const removeFromShortlist = createServerFn({ method: 'POST' })
     const rows = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
       .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
@@ -65,9 +66,9 @@ export const addToShortlist = createServerFn({ method: 'POST' })
   .inputValidator((data: { movieId: number }) => data)
   .handler(async ({ context, data }) => {
     const { movieId } = data
-    const user = context.user
+    const currentUser = context.user
 
-    if (!user) {
+    if (!currentUser) {
       throw new Error('Unauthorized')
     }
 
@@ -76,7 +77,7 @@ export const addToShortlist = createServerFn({ method: 'POST' })
       db
         .select()
         .from(shortlist)
-        .where(eq(shortlist.userId, user.userId))
+        .where(eq(shortlist.userId, currentUser.userId))
         .limit(1)
         .then((res) => res[0]),
       db
@@ -87,6 +88,7 @@ export const addToShortlist = createServerFn({ method: 'POST' })
         .then((res) => res[0]),
     ])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!userShortlist) {
       throw new Error('Shortlist not found')
     }
@@ -100,6 +102,7 @@ export const addToShortlist = createServerFn({ method: 'POST' })
       throw new Error('Your shortlist is full (maximum 3 movies)')
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (existingEntry?.watchDate != null) {
       throw new Error(
         'This movie has already been watched and cannot be added to a shortlist',
@@ -108,9 +111,11 @@ export const addToShortlist = createServerFn({ method: 'POST' })
 
     let movieEntry = existingEntry
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!movieEntry) {
       const movieDetailsResponse = await fetchMovieDetails(movieId)
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!movieDetailsResponse) {
         throw new Error('Failed to fetch movie details from TMDB')
       }
@@ -132,6 +137,7 @@ export const addToShortlist = createServerFn({ method: 'POST' })
       movieEntry = newMovie[0]
 
       // Store cast/crew in the separate movie_credits table
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (credits.cast != null || credits.crew != null) {
         await db
           .insert(movieCredits)
@@ -140,6 +146,7 @@ export const addToShortlist = createServerFn({ method: 'POST' })
       }
 
       // Generate blur data asynchronously in the background
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (movieData.images) {
         generateAndUpdateBlurData(movieEntry.id, movieData.images).catch(
           (error) => {
@@ -158,7 +165,7 @@ export const addToShortlist = createServerFn({ method: 'POST' })
     const rows = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
       .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
@@ -176,10 +183,6 @@ export const useRemoveFromShortlistMutation = () => {
   return useMutation({
     mutationFn: async (movieId: string) => {
       const response = await removeFromShortlist({ data: { movieId } })
-
-      if (!response.success) {
-        throw new Error('Failed to remove movie from shortlist')
-      }
       return response.shortlist
     },
     onError: (error) => {
@@ -190,10 +193,10 @@ export const useRemoveFromShortlistMutation = () => {
         type: 'error',
       })
     },
-    onSuccess: (shortlist) => {
-      queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+    onSuccess: (updatedShortlist) => {
+      queryClient.setQueryData(['shortlist', updatedShortlist.userId], updatedShortlist)
       queryClient.invalidateQueries({
-        queryKey: ['shortlist', shortlist.userId],
+        queryKey: ['shortlist', updatedShortlist.userId],
       })
       toastManager.add({
         title: 'Success',
@@ -210,24 +213,20 @@ export const useAddToShortlistMutation = () => {
   return useMutation({
     mutationFn: async (movieId: number) => {
       const response = await addToShortlist({ data: { movieId } })
-
-      if (!response.success) {
-        throw new Error('Failed to add movie to shortlist')
-      }
       return response.shortlist
     },
     onError: (error) => {
       console.error('Error adding movie to shortlist:', error)
       toastManager.add({
         title: 'Error',
-        description: error.message ?? 'Failed to add movie to shortlist',
+        description: error.message,
         type: 'error',
       })
     },
-    onSuccess: (shortlist) => {
-      queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+    onSuccess: (updatedShortlist) => {
+      queryClient.setQueryData(['shortlist', updatedShortlist.userId], updatedShortlist)
       queryClient.invalidateQueries({
-        queryKey: ['shortlist', shortlist.userId],
+        queryKey: ['shortlist', updatedShortlist.userId],
       })
       toastManager.add({
         title: 'Success',
@@ -243,19 +242,20 @@ export const toggleIsReady = createServerFn({ method: 'POST' })
   .inputValidator((data: { isReady: boolean }) => data)
   .handler(async ({ context, data }) => {
     const { isReady } = data
-    const user = context.user
+    const currentUser = context.user
 
-    if (!user) {
+    if (!currentUser) {
       throw new Error('Unauthorized')
     }
 
     const userShortlist = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .limit(1)
       .then((res) => res[0])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!userShortlist) {
       throw new Error('Shortlist not found')
     }
@@ -269,7 +269,7 @@ export const toggleIsReady = createServerFn({ method: 'POST' })
     const rows = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
       .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
@@ -290,19 +290,20 @@ export const toggleParticipating = createServerFn({ method: 'POST' })
   .inputValidator((data: { participating: boolean }) => data)
   .handler(async ({ context, data }) => {
     const { participating } = data
-    const user = context.user
+    const currentUser = context.user
 
-    if (!user) {
+    if (!currentUser) {
       throw new Error('Unauthorized')
     }
 
     const userShortlist = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .limit(1)
       .then((res) => res[0])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!userShortlist) {
       throw new Error('Shortlist not found')
     }
@@ -316,7 +317,7 @@ export const toggleParticipating = createServerFn({ method: 'POST' })
     const rows = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
       .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
@@ -338,20 +339,15 @@ export const useToggleIsReadyMutation = () => {
   return useMutation({
     mutationFn: async (isReady: boolean) => {
       const response = await toggleIsReady({ data: { isReady } })
-
-      if (!response.success) {
-        throw new Error('Failed to update ready status')
-      }
       return response.shortlist
     },
-    onMutate: async (isReady: boolean) => {
-      const previousUserShortlist = queryClient.getQueryData(['shortlist']) as
-        | ShortlistWithUserMovies
-        | undefined
-      const previousAllShortlists = queryClient.getQueryData([
-        'shortlists',
-        'all',
-      ]) as ShortlistWithUserMovies[] | undefined
+    onMutate: (isReady: boolean) => {
+      const previousUserShortlist = queryClient.getQueryData<
+        ShortlistWithUserMovies | undefined
+      >(['shortlist'])
+      const previousAllShortlists = queryClient.getQueryData<
+        Array<ShortlistWithUserMovies> | undefined
+      >(['shortlists', 'all'])
 
       const userId = previousUserShortlist?.userId
 
@@ -368,12 +364,12 @@ export const useToggleIsReadyMutation = () => {
       if (previousAllShortlists) {
         queryClient.setQueryData(
           ['shortlists', 'all'],
-          (old: ShortlistWithUserMovies[] | undefined) => {
+          (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
-            return old.map((shortlist) =>
-              shortlist.userId === userId
-                ? { ...shortlist, isReady }
-                : shortlist,
+            return old.map((s) =>
+              s.userId === userId
+                ? { ...s, isReady }
+                : s,
             )
           },
         )
@@ -401,19 +397,19 @@ export const useToggleIsReadyMutation = () => {
         type: 'error',
       })
     },
-    onSettled: (shortlist) => {
-      if (shortlist?.userId) {
+    onSettled: (result) => {
+      if (result?.userId) {
         queryClient.invalidateQueries({
-          queryKey: ['shortlist', shortlist.userId],
+          queryKey: ['shortlist', result.userId],
         })
         queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
       }
     },
-    onSuccess: (shortlist) => {
-      queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+    onSuccess: (result) => {
+      queryClient.setQueryData(['shortlist', result.userId], result)
       toastManager.add({
         title: 'Success',
-        description: shortlist.isReady
+        description: result.isReady
           ? 'Marked as ready to watch'
           : 'Marked as in progress',
         type: 'success',
@@ -428,20 +424,15 @@ export const useToggleParticipatingMutation = () => {
   return useMutation({
     mutationFn: async (participating: boolean) => {
       const response = await toggleParticipating({ data: { participating } })
-
-      if (!response.success) {
-        throw new Error('Failed to update participation status')
-      }
       return response.shortlist
     },
-    onMutate: async (participating: boolean) => {
-      const previousUserShortlist = queryClient.getQueryData(['shortlist']) as
-        | ShortlistWithUserMovies
-        | undefined
-      const previousAllShortlists = queryClient.getQueryData([
-        'shortlists',
-        'all',
-      ]) as ShortlistWithUserMovies[] | undefined
+    onMutate: (participating: boolean) => {
+      const previousUserShortlist = queryClient.getQueryData<
+        ShortlistWithUserMovies | undefined
+      >(['shortlist'])
+      const previousAllShortlists = queryClient.getQueryData<
+        Array<ShortlistWithUserMovies> | undefined
+      >(['shortlists', 'all'])
 
       const userId = previousUserShortlist?.userId
 
@@ -458,12 +449,12 @@ export const useToggleParticipatingMutation = () => {
       if (previousAllShortlists) {
         queryClient.setQueryData(
           ['shortlists', 'all'],
-          (old: ShortlistWithUserMovies[] | undefined) => {
+          (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
-            return old.map((shortlist) =>
-              shortlist.userId === userId
-                ? { ...shortlist, participating }
-                : shortlist,
+            return old.map((s) =>
+              s.userId === userId
+                ? { ...s, participating }
+                : s,
             )
           },
         )
@@ -491,19 +482,19 @@ export const useToggleParticipatingMutation = () => {
         type: 'error',
       })
     },
-    onSettled: (shortlist) => {
-      if (shortlist?.userId) {
+    onSettled: (result) => {
+      if (result?.userId) {
         queryClient.invalidateQueries({
-          queryKey: ['shortlist', shortlist.userId],
+          queryKey: ['shortlist', result.userId],
         })
         queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
       }
     },
-    onSuccess: (shortlist) => {
-      queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+    onSuccess: (result) => {
+      queryClient.setQueryData(['shortlist', result.userId], result)
       toastManager.add({
         title: 'Success',
-        description: shortlist.participating
+        description: result.participating
           ? 'Now participating in movie night'
           : 'No longer participating in movie night',
         type: 'success',
@@ -533,6 +524,7 @@ export const updateUserShortlistStatus = createServerFn({ method: 'POST' })
       .limit(1)
       .then((res) => res[0])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!targetShortlist) {
       throw new Error('Shortlist not found')
     }
@@ -584,13 +576,9 @@ export const useUpdateUserShortlistStatusMutation = () => {
       const response = await updateUserShortlistStatus({
         data: { userId, isReady, participating },
       })
-
-      if (!response.success) {
-        throw new Error('Failed to update user shortlist status')
-      }
       return response.shortlist
     },
-    onMutate: async ({
+    onMutate: ({
       userId,
       isReady,
       participating,
@@ -602,25 +590,25 @@ export const useUpdateUserShortlistStatusMutation = () => {
       const previousAllShortlists = queryClient.getQueryData([
         'shortlists',
         'all',
-      ]) as ShortlistWithUserMovies[] | undefined
+      ])
       const previousUserShortlist = queryClient.getQueryData([
         'shortlist',
         userId,
-      ]) as ShortlistWithUserMovies | undefined
+      ])
 
       if (previousAllShortlists) {
         queryClient.setQueryData(
           ['shortlists', 'all'],
-          (old: ShortlistWithUserMovies[] | undefined) => {
+          (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
-            return old.map((shortlist) =>
-              shortlist.userId === userId
+            return old.map((s) =>
+              s.userId === userId
                 ? {
-                    ...shortlist,
+                    ...s,
                     ...(isReady !== undefined && { isReady }),
                     ...(participating !== undefined && { participating }),
                   }
-                : shortlist,
+                : s,
             )
           },
         )
@@ -656,21 +644,21 @@ export const useUpdateUserShortlistStatusMutation = () => {
         type: 'error',
       })
     },
-    onSettled: (shortlist) => {
-      if (shortlist?.userId) {
+    onSettled: (result) => {
+      if (result?.userId) {
         queryClient.invalidateQueries({
-          queryKey: ['shortlist', shortlist.userId],
+          queryKey: ['shortlist', result.userId],
         })
       }
       queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
     },
-    onSuccess: (shortlist) => {
-      queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+    onSuccess: (result) => {
+      queryClient.setQueryData(['shortlist', result.userId], result)
       queryClient.setQueryData(
         ['shortlists', 'all'],
-        (old: ShortlistWithUserMovies[] | undefined) => {
+        (old: Array<ShortlistWithUserMovies> | undefined) => {
           if (!old) return old
-          return old.map((s) => (s.userId === shortlist.userId ? shortlist : s))
+          return old.map((s) => (s.userId === result.userId ? result : s))
         },
       )
     },
@@ -682,19 +670,20 @@ export const updateSelectedIndex = createServerFn({ method: 'POST' })
   .inputValidator((data: { selectedIndex: number | null }) => data)
   .handler(async ({ context, data }) => {
     const { selectedIndex } = data
-    const user = context.user
+    const currentUser = context.user
 
-    if (!user) {
+    if (!currentUser) {
       throw new Error('Unauthorized')
     }
 
     const userShortlist = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .limit(1)
       .then((res) => res[0])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!userShortlist) {
       throw new Error('Shortlist not found')
     }
@@ -708,7 +697,7 @@ export const updateSelectedIndex = createServerFn({ method: 'POST' })
     const rows = await db
       .select()
       .from(shortlist)
-      .where(eq(shortlist.userId, user.userId))
+      .where(eq(shortlist.userId, currentUser.userId))
       .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
       .leftJoin(movie, eq(movieToShortlist.a, movie.id))
 
@@ -730,20 +719,15 @@ export const useUpdateSelectedIndexMutation = () => {
   return useMutation({
     mutationFn: async (selectedIndex: number | null) => {
       const response = await updateSelectedIndex({ data: { selectedIndex } })
-
-      if (!response.success) {
-        throw new Error('Failed to update selected movie')
-      }
       return response.shortlist
     },
-    onMutate: async (selectedIndex: number | null) => {
-      const previousUserShortlist = queryClient.getQueryData(['shortlist']) as
-        | ShortlistWithUserMovies
-        | undefined
-      const previousAllShortlists = queryClient.getQueryData([
-        'shortlists',
-        'all',
-      ]) as ShortlistWithUserMovies[] | undefined
+    onMutate: (selectedIndex: number | null) => {
+      const previousUserShortlist = queryClient.getQueryData<
+        ShortlistWithUserMovies | undefined
+      >(['shortlist'])
+      const previousAllShortlists = queryClient.getQueryData<
+        Array<ShortlistWithUserMovies> | undefined
+      >(['shortlists', 'all'])
 
       const userId = previousUserShortlist?.userId
 
@@ -760,12 +744,12 @@ export const useUpdateSelectedIndexMutation = () => {
       if (previousAllShortlists) {
         queryClient.setQueryData(
           ['shortlists', 'all'],
-          (old: ShortlistWithUserMovies[] | undefined) => {
+          (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
-            return old.map((shortlist) =>
-              shortlist.userId === userId
-                ? { ...shortlist, selectedIndex }
-                : shortlist,
+            return old.map((s) =>
+              s.userId === userId
+                ? { ...s, selectedIndex }
+                : s,
             )
           },
         )
@@ -793,20 +777,20 @@ export const useUpdateSelectedIndexMutation = () => {
         type: 'error',
       })
     },
-    onSettled: (shortlist) => {
-      if (shortlist?.userId) {
+    onSettled: (result) => {
+      if (result?.userId) {
         queryClient.invalidateQueries({
-          queryKey: ['shortlist', shortlist.userId],
+          queryKey: ['shortlist', result.userId],
         })
         queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
       }
     },
-    onSuccess: (shortlist) => {
-      queryClient.setQueryData(['shortlist', shortlist.userId], shortlist)
+    onSuccess: (result) => {
+      queryClient.setQueryData(['shortlist', result.userId], result)
       toastManager.add({
         title: 'Success',
         description:
-          shortlist.selectedIndex !== null
+          result.selectedIndex !== null
             ? 'Movie selected for raffle'
             : 'Selection cleared',
         type: 'success',
@@ -834,6 +818,7 @@ export const updateUserSelectedIndex = createServerFn({ method: 'POST' })
       .limit(1)
       .then((res) => res[0])
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!targetShortlist) {
       throw new Error('Shortlist not found')
     }
@@ -861,13 +846,9 @@ export const useUpdateUserSelectedIndexMutation = () => {
       const response = await updateUserSelectedIndex({
         data: { userId, selectedIndex },
       })
-
-      if (!response.success) {
-        throw new Error('Failed to update selected movie')
-      }
       return response
     },
-    onMutate: async ({
+    onMutate: ({
       userId,
       selectedIndex,
     }: {
@@ -877,21 +858,21 @@ export const useUpdateUserSelectedIndexMutation = () => {
       const previousAllShortlists = queryClient.getQueryData([
         'shortlists',
         'all',
-      ]) as ShortlistWithUserMovies[] | undefined
+      ])
       const previousUserShortlist = queryClient.getQueryData([
         'shortlist',
         userId,
-      ]) as ShortlistWithUserMovies | undefined
+      ])
 
       if (previousAllShortlists) {
         queryClient.setQueryData(
           ['shortlists', 'all'],
-          (old: ShortlistWithUserMovies[] | undefined) => {
+          (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
-            return old.map((shortlist) =>
-              shortlist.userId === userId
-                ? { ...shortlist, selectedIndex }
-                : shortlist,
+            return old.map((s) =>
+              s.userId === userId
+                ? { ...s, selectedIndex }
+                : s,
             )
           },
         )

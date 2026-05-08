@@ -21,7 +21,7 @@ export type Shortlist = {
     voteAverage: number
     voteCount: number
     runtime?: number | null
-    genres?: string[] | null
+    genres?: Array<string> | null
     tagline?: string | null
     images?: {
       backdrops?: Array<{ file_path: string; [key: string]: any }>

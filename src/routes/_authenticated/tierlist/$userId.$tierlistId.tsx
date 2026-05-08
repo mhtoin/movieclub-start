@@ -1,8 +1,8 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { Suspense, lazy } from 'react'
 import { TierlistDetailSkeleton } from '@/components/tierlist/tierlist-detail-skeleton'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
-import { createFileRoute } from '@tanstack/react-router'
-import { lazy, Suspense } from 'react'
 
 const TierlistContent = lazy(() =>
   import('@/components/tierlist/tierlist-content').then((m) => ({
@@ -23,7 +23,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const { tierlistId } = Route.useParams()
   const { user } = Route.useRouteContext()
-  const isOwner = user?.userId === Route.useParams().userId
+  const isOwner = user.userId === Route.useParams().userId
 
   return (
     <Suspense fallback={<TierlistDetailSkeleton />}>

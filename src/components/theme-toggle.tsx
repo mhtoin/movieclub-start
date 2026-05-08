@@ -1,6 +1,6 @@
-import { useTheme } from '@/components/theme-provider'
 import { Moon, Sun } from 'lucide-react'
 import { Button } from './ui/button'
+import { useTheme } from '@/components/theme-provider'
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -8,6 +8,7 @@ export function ThemeToggle() {
   function toggleTheme(_event: React.MouseEvent<HTMLButtonElement>) {
     const newTheme = theme === 'light' ? 'dark' : 'light'
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (document.startViewTransition) {
       const x = window.innerWidth
       const y = 0

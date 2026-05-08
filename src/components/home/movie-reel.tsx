@@ -1,18 +1,18 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
+import { MovieCard } from './movie-card'
 import type { ReactNode } from 'react'
 
-import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
 import type { TMDBMovie } from '@/lib/react-query/queries/home'
+import { useIsLowEndDevice } from '@/lib/hooks/use-device-capability'
 import { cn } from '@/lib/utils'
 
-import { MovieCard } from './movie-card'
 
 interface MovieReelProps {
   title: string
   subtitle: string
   icon: ReactNode
-  movies: TMDBMovie[]
+  movies: Array<TMDBMovie>
   accentColor?: 'orange' | 'blue' | 'green' | 'purple'
 }
 

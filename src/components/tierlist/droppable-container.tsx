@@ -1,10 +1,12 @@
-import { UniqueIdentifier } from '@dnd-kit/core'
 import {
-  AnimateLayoutChanges,
   defaultAnimateLayoutChanges,
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import type { UniqueIdentifier } from '@dnd-kit/core'
+import type {
+  AnimateLayoutChanges} from '@dnd-kit/sortable';
+
 const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true })
 
@@ -18,7 +20,7 @@ export default function DroppableContainer({
   children: React.ReactNode
   id: UniqueIdentifier
   label?: string
-  items: UniqueIdentifier[]
+  items: Array<UniqueIdentifier>
   style?: React.CSSProperties
 }) {
   const {

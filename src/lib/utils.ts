@@ -1,9 +1,10 @@
+import {  clsx } from 'clsx'
+import { format } from 'date-fns'
+import type {ClassValue} from 'clsx';
 import type { Movie } from '@/db/schema/movies'
 import { getImageUrl } from '@/lib/tmdb-api'
-import { type ClassValue, clsx } from 'clsx'
-import { format } from 'date-fns'
 
-export function cn(...inputs: ClassValue[]) {
+export function cn(...inputs: Array<ClassValue>) {
   return clsx(inputs)
 }
 
@@ -45,15 +46,15 @@ export async function getBlurDataUrl(imageUrl: string): Promise<string> {
 }
 
 export function groupBy<T>(
-  items: T[],
+  items: Array<T>,
   keyFn: (item: T) => string | undefined,
-): Record<string, T[]> {
+): Record<string, Array<T>> {
   return items.reduce(
     (acc, item) => {
       const key = keyFn(item) ?? 'undefined'
       ;(acc[key] ??= []).push(item)
       return acc
     },
-    {} as Record<string, T[]>,
+    {} as Record<string, Array<T>>,
   )
 }

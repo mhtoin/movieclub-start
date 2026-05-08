@@ -1,10 +1,10 @@
-import { movie } from '@/db/schema/movies'
-import { type Movie as TMDBMovie } from '@/lib/tmdb-api'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { InferSelectModel } from 'drizzle-orm'
 import { memo } from 'react'
 import { MemoizedMovieCard } from '../discover/movie-card'
+import type { InferSelectModel } from 'drizzle-orm'
+import type {Movie as TMDBMovie} from '@/lib/tmdb-api';
+import type { movie } from '@/db/schema/movies'
 
 type Movie = InferSelectModel<typeof movie>
 
@@ -25,6 +25,7 @@ const mapDbMovieToTmdbMovie = (dbMovie: Movie): TMDBMovie => {
     poster_path: (images as any)?.posters?.[0]?.file_path ?? null,
     backdrop_path: (images as any)?.backdrops?.[0]?.file_path ?? null,
     release_date: dbMovie.releaseDate ?? '',
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     vote_average: dbMovie.voteAverage ?? 0,
     vote_count: dbMovie.voteCount,
     genre_ids: [],

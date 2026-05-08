@@ -1,12 +1,12 @@
-import { db } from '@/db/db'
+import { queryOptions } from '@tanstack/react-query'
+import { createServerFn } from '@tanstack/react-start'
+import { eq } from 'drizzle-orm'
 import type { ShortlistWithUserMovies } from '@/db/schema'
+import { db } from '@/db/db'
 import { movieCredits, movieToShortlist, shortlist } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { authMiddleware } from '@/middleware/auth'
-import { queryOptions } from '@tanstack/react-query'
-import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
 
 export const getUserShortlist = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
@@ -49,7 +49,7 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
 
 export const getAllShortlists = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .handler(async ({ context }): Promise<ShortlistWithUserMovies[]> => {
+  .handler(async ({ context }): Promise<Array<ShortlistWithUserMovies>> => {
     if (!context.user) throw new Error('Unauthorized')
 
     try {
@@ -72,13 +72,11 @@ export const getAllShortlists = createServerFn({ method: 'GET' })
             movies: [],
           })
         }
-        if (row.movie) {
-          shortlistsMap.get(shortlistId)!.movies.push({
-            ...row.movie,
-            cast: row.movie_credits?.cast ?? null,
-            crew: row.movie_credits?.crew ?? null,
-          })
-        }
+        shortlistsMap.get(shortlistId)!.movies.push({
+          ...row.movie,
+          cast: row.movie_credits?.cast ?? null,
+          crew: row.movie_credits?.crew ?? null,
+        })
       }
 
       return Array.from(shortlistsMap.values())

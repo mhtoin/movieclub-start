@@ -1,4 +1,3 @@
-import { cn } from '@/lib/utils'
 import {
   AlertTriangle,
   CalendarDays,
@@ -7,7 +6,9 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import { type ComponentType, useEffect, useMemo, useState } from 'react'
+import {  useEffect, useMemo, useState } from 'react'
+import type {ComponentType} from 'react';
+import { cn } from '@/lib/utils'
 
 interface Props {
   watchDate: Date | undefined

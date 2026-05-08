@@ -1,3 +1,23 @@
+import { Toast } from '@base-ui/react/toast'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import confetti from 'canvas-confetti'
+import { format } from 'date-fns'
+import { AnimatePresence, motion } from 'framer-motion'
+import {
+  CalendarDays,
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+  Clapperboard,
+  Clock,
+  Film,
+  Infinity as InfinityIcon,
+  Plus,
+  Sparkles,
+  Star,
+  X,
+} from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DialogBackdrop,
@@ -16,26 +36,6 @@ import {
 import { createTierlist } from '@/lib/react-query/mutations/tierlists'
 import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
-import { Toast } from '@base-ui/react/toast'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import confetti from 'canvas-confetti'
-import { format } from 'date-fns'
-import { AnimatePresence, motion } from 'framer-motion'
-import {
-  CalendarDays,
-  CalendarRange,
-  ChevronLeft,
-  ChevronRight,
-  Clapperboard,
-  Clock,
-  Film,
-  Infinity,
-  Plus,
-  Sparkles,
-  Star,
-  X,
-} from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
 
 const easeOut = [0.22, 1, 0.36, 1] as const
 
@@ -417,8 +417,8 @@ function StepOne({
   handleFromYearChange: (v: string | null) => void
   handleToYearChange: (v: string | null) => void
   genresData: Array<{ value: string; label: string }>
-  selectedGenres: string[]
-  setSelectedGenres: (v: string[]) => void
+  selectedGenres: Array<string>
+  setSelectedGenres: (v: Array<string>) => void
   onNext: () => void
 }) {
   const yearOptions = useMemo(
@@ -488,7 +488,7 @@ function StepOne({
                   label: 'Custom Range',
                   icon: CalendarRange,
                 },
-                { value: 'all-time', label: 'All Time', icon: Infinity },
+                { value: 'all-time', label: 'All Time', icon: InfinityIcon },
               ] as const
             ).map((preset) => {
               const Icon = preset.icon

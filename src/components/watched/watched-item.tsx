@@ -1,7 +1,3 @@
-import type { MovieWithCredits } from '@/db/schema/movies'
-import { User } from '@/db/schema/users'
-import { useElementInView } from '@/lib/hooks'
-import { getImageUrl } from '@/lib/tmdb-api'
 import { getRouteApi } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { Calendar, Clock, Users, X } from 'lucide-react'
@@ -9,6 +5,10 @@ import { useEffect, useRef, useState } from 'react'
 import Avatar from '../ui/avatar'
 import { Button } from '../ui/button'
 import { ResponsiveDialog } from '../ui/responsive-dialog'
+import type { MovieWithCredits } from '@/db/schema/movies'
+import type { User } from '@/db/schema/users'
+import { useElementInView } from '@/lib/hooks'
+import { getImageUrl } from '@/lib/tmdb-api'
 
 export function WatchedItem({
   movie,
@@ -35,18 +35,18 @@ export function WatchedItem({
   useEffect(() => {
     setOpen(false)
   }, [search])
-  const posterUrl = movie?.images?.posters?.[0]?.file_path
+  const posterUrl = movie.images?.posters?.[0]?.file_path
     ? `https://image.tmdb.org/t/p/w342${movie.images.posters[0].file_path}`
     : '/placeholder_movie_poster.png'
 
-  const backdropUrl = movie?.images?.backdrops?.[0]?.file_path
+  const backdropUrl = movie.images?.backdrops?.[0]?.file_path
     ? `https://image.tmdb.org/t/p/w1280${movie.images.backdrops[0].file_path}`
     : null
 
-  const watchDate = movie?.watchDate ? new Date(movie.watchDate) : null
+  const watchDate = movie.watchDate ? new Date(movie.watchDate) : null
 
-  const cast = Array.isArray(movie?.cast)
-    ? (movie.cast as any[]).slice(0, 6)
+  const cast = Array.isArray(movie.cast)
+    ? (movie.cast).slice(0, 6)
     : []
 
   const opacity = Math.max(0.3, intersectionRatio)
@@ -65,14 +65,14 @@ export function WatchedItem({
               <div className="flex-shrink-0">
                 <img
                   src={posterUrl}
-                  alt={movie?.title}
+                  alt={movie.title}
                   className="w-16 h-24 rounded object-cover"
                 />
               </div>
               <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                 <div>
                   <h3 className="font-semibold text-sm leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-2">
-                    {movie?.title}
+                    {movie.title}
                   </h3>
                   {watchDate && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -81,7 +81,6 @@ export function WatchedItem({
                     </div>
                   )}
                 </div>
-                {user && (
                   <div className="flex items-center gap-2 mt-2">
                     <Avatar
                       src={user.image}
@@ -93,7 +92,6 @@ export function WatchedItem({
                       {user.name}
                     </span>
                   </div>
-                )}
               </div>
             </div>
           </button>
@@ -103,7 +101,7 @@ export function WatchedItem({
             <div className="relative w-full -mt-6 md:-mx-10 md:-mt-0 mb-4 md:mb-6 overflow-hidden rounded-t-lg md:rounded-none">
               <img
                 src={backdropUrl}
-                alt={movie?.title}
+                alt={movie.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-dialog-background via-dialog-background/20 to-transparent" />
@@ -115,17 +113,17 @@ export function WatchedItem({
                 <div className="flex-shrink-0">
                   <img
                     src={posterUrl}
-                    alt={movie?.title}
+                    alt={movie.title}
                     className="w-24 md:w-32 rounded-lg object-cover shadow-lg"
                   />
                 </div>
                 <div className="flex-grow min-w-0 space-y-2">
                   <h2 className="text-xl md:text-2xl font-bold leading-tight line-clamp-3">
-                    {movie?.title}
+                    {movie.title}
                   </h2>
-                  {movie?.tagline && (
+                  {movie.tagline && (
                     <p className="text-sm md:text-base italic text-muted-foreground line-clamp-2">
-                      {movie?.tagline}
+                      {movie.tagline}
                     </p>
                   )}
 
@@ -136,19 +134,19 @@ export function WatchedItem({
                         <span>{format(watchDate, 'MMM d, yyyy')}</span>
                       </div>
                     )}
-                    {movie?.runtime && (
+                    {movie.runtime && (
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                        <span>{movie?.runtime} min</span>
+                        <span>{movie.runtime} min</span>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {movie?.genres && movie.genres.length > 0 && (
+              {movie.genres && movie.genres.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {movie?.genres.map((genre) => (
+                  {movie.genres.map((genre) => (
                     <routeApi.Link to="." search={{ genre: genre }} key={genre}>
                       <span className="px-2 md:px-3 py-1 bg-primary/10 text-primary rounded-full text-xs">
                         {genre}
@@ -158,7 +156,6 @@ export function WatchedItem({
                 </div>
               )}
 
-              {user && (
                 <routeApi.Link to="." search={{ user: user.name }}>
                   <div className="flex items-center gap-2 pt-2">
                     <Avatar
@@ -175,16 +172,15 @@ export function WatchedItem({
                     </div>
                   </div>
                 </routeApi.Link>
-              )}
             </div>
 
-            {movie?.overview && (
+            {movie.overview && (
               <div>
                 <h3 className="text-base md:text-lg font-semibold mb-2">
                   Overview
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {movie?.overview}
+                  {movie.overview}
                 </p>
               </div>
             )}
@@ -251,7 +247,7 @@ export function WatchedItem({
             <div className="flex-shrink-0">
               <img
                 src={posterUrl}
-                alt={movie?.title}
+                alt={movie.title}
                 width={80}
                 height={120}
                 className="rounded-md object-cover"
@@ -261,7 +257,7 @@ export function WatchedItem({
               <div className="grid grid-cols-8 gap-4">
                 <div className="flex-grow min-w-0 col-span-6">
                   <h3 className="font-semibold text-lg leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-2">
-                    {movie?.title}
+                    {movie.title}
                   </h3>
                   {watchDate && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
@@ -269,7 +265,7 @@ export function WatchedItem({
                       <span>{format(watchDate, 'MMMM d, yyyy')}</span>
                     </div>
                   )}
-                  {movie?.overview && (
+                  {movie.overview && (
                     <p
                       className="text-sm text-muted-foreground mb-2 overflow-hidden text-ellipsis"
                       style={{
@@ -282,7 +278,6 @@ export function WatchedItem({
                     </p>
                   )}
                 </div>
-                {user && (
                   <div className="flex justify-start gap-2 flex-shrink-0 col-span-2">
                     <Avatar
                       src={user.image}
@@ -296,7 +291,6 @@ export function WatchedItem({
                       <p className="text-muted-foreground">Chosen by</p>
                     </div>
                   </div>
-                )}
               </div>
             </div>
           </div>
@@ -321,7 +315,7 @@ export function WatchedItem({
             <div className="relative w-full h-64 -mx-10 -mt-10 mb-6 overflow-hidden">
               <img
                 src={backdropUrl}
-                alt={movie?.title}
+                alt={movie.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-dialog-background via-dialog-background/20 to-transparent" />
@@ -334,7 +328,7 @@ export function WatchedItem({
               <div className="flex-shrink-0">
                 <img
                   src={posterUrl}
-                  alt={movie?.title}
+                  alt={movie.title}
                   width={160}
                   height={240}
                   className="rounded-lg object-cover shadow-lg"
@@ -342,11 +336,11 @@ export function WatchedItem({
               </div>
               <div className="flex-grow space-y-3">
                 <h2 className="text-3xl font-bold line-clamp-3">
-                  {movie?.title}
+                  {movie.title}
                 </h2>
-                {movie?.tagline && (
+                {movie.tagline && (
                   <p className="text-lg italic text-muted-foreground">
-                    {movie?.tagline}
+                    {movie.tagline}
                   </p>
                 )}
 
@@ -357,17 +351,17 @@ export function WatchedItem({
                       <span>{format(watchDate, 'MMMM d, yyyy')}</span>
                     </div>
                   )}
-                  {movie?.runtime && (
+                  {movie.runtime && (
                     <div className="flex items-center gap-1.5">
                       <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{movie?.runtime} min</span>
+                      <span>{movie.runtime} min</span>
                     </div>
                   )}
                 </div>
 
-                {movie?.genres && movie.genres.length > 0 && (
+                {movie.genres && movie.genres.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {movie?.genres.map((genre) => (
+                    {movie.genres.map((genre) => (
                       <routeApi.Link to="." search={{ genre: genre }}>
                         <span
                           key={genre}
@@ -380,7 +374,6 @@ export function WatchedItem({
                   </div>
                 )}
 
-                {user && (
                   <routeApi.Link to="." search={{ user: user.name }}>
                     <div className="flex items-center gap-3 pt-2">
                       <Avatar
@@ -397,15 +390,14 @@ export function WatchedItem({
                       </div>
                     </div>
                   </routeApi.Link>
-                )}
               </div>
             </div>
 
-            {movie?.overview && (
+            {movie.overview && (
               <div>
                 <h3 className="text-xl font-semibold mb-2">Overview</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  {movie?.overview}
+                  {movie.overview}
                 </p>
               </div>
             )}

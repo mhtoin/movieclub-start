@@ -1,9 +1,10 @@
 import { Tabs } from '@base-ui/react/tabs'
-import { motion, Transition } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Calendar, Dices } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '../ui/button'
 import RaffleSettings from './raffle-settings'
+import type { Transition } from 'framer-motion';
 
 interface RaffleControlTabProps {
   value: string

@@ -1,7 +1,7 @@
-import Input from '@/components/ui/input'
-import { useDebouncedCallback } from '@/lib/hooks'
 import { Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import Input from '@/components/ui/input'
+import { useDebouncedCallback } from '@/lib/hooks'
 
 export const MIN_SEARCH_LENGTH = 2
 

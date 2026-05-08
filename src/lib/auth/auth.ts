@@ -1,9 +1,9 @@
+import { useSession } from '@tanstack/react-start/server'
+import { eq } from 'drizzle-orm'
+import type { Session, SessionWithToken, UserSession } from '@/types/auth'
 import { db } from '@/db/db'
 import { getUserById } from '@/db/queries/user'
 import { sessionsTable } from '@/db/schema/sessions'
-import { Session, SessionWithToken, UserSession } from '@/types/auth'
-import { useSession } from '@tanstack/react-start/server'
-import { eq } from 'drizzle-orm'
 
 const sessionDurationInDays = 30
 const sessionExpiresInSeconds = 60 * 60 * 24 * sessionDurationInDays
@@ -19,6 +19,7 @@ function generateSecureRandomString(): string {
   let bitBuffer = 0
   let bitsInBuffer = 0
 
+  // eslint-disable-next-line @typescript-eslint/prefer-for-of
   for (let i = 0; i < bytes.length; i++) {
     // Add the current byte to our bit buffer
     bitBuffer = (bitBuffer << 8) | bytes[i]
@@ -110,6 +111,7 @@ async function getSession(id: string): Promise<Session | null> {
       .limit(1)
       .then((rows) => rows[0] || null)
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!sessionRecord) {
       return null
     }
@@ -223,7 +225,7 @@ export async function getSessionUser(
 
 export async function requireAuthenticatedUser(): Promise<UserSession> {
   const session = await useAppSession()
-  const user = await getSessionUser(session.data?.sessionToken)
+  const user = await getSessionUser(session.data.sessionToken)
 
   if (!user) {
     throw new Error('Unauthorized')

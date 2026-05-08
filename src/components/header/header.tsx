@@ -1,6 +1,5 @@
 import { Link, useRouter } from '@tanstack/react-router'
 
-import { logoutFn } from '@/lib/auth/logout-action'
 import {
   Film,
   Home,
@@ -16,6 +15,7 @@ import { useState } from 'react'
 import { ColorSchemeSelector } from '../color-scheme-selector'
 import { ThemeToggle } from '../theme-toggle'
 import HeaderLink from './header-link'
+import { logoutFn } from '@/lib/auth/logout-action'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)

@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
 import { User, Users } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export type FilterScope = 'everyone' | 'mine'
 

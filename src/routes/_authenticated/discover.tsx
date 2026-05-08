@@ -39,7 +39,7 @@ const discoverSearchSchema = z.object({
 export const Route = createFileRoute('/_authenticated/discover')({
   validateSearch: zodValidator(discoverSearchSchema),
   loaderDeps: ({ search }) => search,
-  loader: async ({ context, deps }) => {
+  loader: ({ context, deps }) => {
     context.queryClient.prefetchQuery(tmdbQueries.genres())
     context.queryClient.prefetchQuery(tmdbQueries.watchProviders())
     const isSearchActive =
@@ -89,7 +89,7 @@ function RouteComponent() {
   }
 
   const { data: shortlist } = useQuery(
-    shortlistQueries.byUser(user?.userId ?? ''),
+    shortlistQueries.byUser(user.userId),
   )
   const movieCount = shortlist?.movies.length ?? 0
   const slotsLeft = 3 - movieCount

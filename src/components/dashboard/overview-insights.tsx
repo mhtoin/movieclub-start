@@ -19,7 +19,7 @@ export function OverviewInsights({ userId, scope }: OverviewInsightsProps) {
 
   const topGenres = insights.genreDistribution.slice(0, 6)
   const topUsers = insights.moviesByUser.slice(0, 6)
-  const topMovie = insights.highestRated[0]
+  const topMovie = insights.highestRated.at(0)
   const totalMovies = insights.ratingDistribution.reduce(
     (sum, r) => sum + r.count,
     0,

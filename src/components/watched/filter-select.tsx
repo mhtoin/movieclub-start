@@ -10,7 +10,7 @@ export default function FilterSelect({
   options,
   onChange,
 }: {
-  options?: { value: string; label: string }[]
+  options?: Array<{ value: string; label: string }>
   onChange: (value: string) => void
 }) {
   const routeApi = getRouteApi('/_authenticated/watched')

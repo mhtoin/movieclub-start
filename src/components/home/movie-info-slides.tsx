@@ -1,8 +1,8 @@
-import type { MovieWithCredits } from '@/db/schema/movies'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, Film, Info, Star, Users } from 'lucide-react'
-import type { ReactNode } from 'react'
 import { fadeInUp, staggerContainer } from './animation-variants'
+import type { ReactNode } from 'react'
+import type { MovieWithCredits } from '@/db/schema/movies'
 
 interface Slide {
   id: string
@@ -15,7 +15,7 @@ interface MovieInfoSlidesProps {
   movie: MovieWithCredits
 }
 
-export function useMovieInfoSlides({ movie }: MovieInfoSlidesProps): Slide[] {
+export function useMovieInfoSlides({ movie }: MovieInfoSlidesProps): Array<Slide> {
   const releaseYear = movie.releaseDate
     ? new Date(movie.releaseDate).getFullYear()
     : null
@@ -70,7 +70,7 @@ interface OverviewSlideProps {
   releaseYear: number | null
   formattedRuntime: string | null
   voteAverage: number
-  genres: string[] | null
+  genres: Array<string> | null
 }
 
 function OverviewSlide({
@@ -135,7 +135,7 @@ interface DetailsSlideProps {
   releaseDate: string | null
   formattedRuntime: string | null
   originalLanguage: string | null
-  genres: string[] | null
+  genres: Array<string> | null
   voteAverage: number
   voteCount: number
 }
@@ -194,8 +194,8 @@ function DetailsSlide({
 }
 
 interface CastSlideProps {
-  cast: any[]
-  crew: any[]
+  cast: Array<any>
+  crew: Array<any>
 }
 
 function CastSlide({ cast, crew }: CastSlideProps) {

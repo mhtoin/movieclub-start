@@ -33,6 +33,7 @@ export function AppearanceSection({
     },
     onSuccess: (scheme) => {
       setCurrentColorScheme(scheme)
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (document.startViewTransition) {
         const x = window.innerWidth / 2
         const y = window.innerHeight / 2
@@ -75,6 +76,7 @@ export function AppearanceSection({
   })
 
   function handleThemeChange(newTheme: 'light' | 'dark') {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (document.startViewTransition) {
       const x = window.innerWidth / 2
       const y = window.innerHeight / 2

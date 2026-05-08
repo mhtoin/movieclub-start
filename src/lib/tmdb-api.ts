@@ -1,4 +1,4 @@
-import { TMDBMovieResponse } from '@/types/tmdb'
+import type { TMDBMovieResponse } from '@/types/tmdb'
 import { getCached, setCache } from '@/lib/tmdb-cache'
 
 // Types for The Movie Database API
@@ -11,7 +11,7 @@ export interface Movie {
   release_date: string
   vote_average: number
   vote_count: number
-  genre_ids: number[]
+  genre_ids: Array<number>
   adult: boolean
   original_language: string
   original_title: string
@@ -21,7 +21,7 @@ export interface Movie {
 
 export interface TMDBResponse {
   page: number
-  results: Movie[]
+  results: Array<Movie>
   total_pages: number
   total_results: number
 }
@@ -75,7 +75,7 @@ export function getResponsiveImageProps(
 
 export async function fetchTrendingMovies(
   timeWindow: TimeWindow = 'week',
-): Promise<Movie[]> {
+): Promise<Array<Movie>> {
   if (!TMDB_CONFIG.API_KEY) {
     throw new Error('TMDB API key is not configured')
   }
@@ -102,7 +102,7 @@ export async function fetchTrendingMovies(
 export async function fetchBackgroundMovies(
   count: number = 12,
   timeWindow: TimeWindow = 'week',
-): Promise<Movie[]> {
+): Promise<Array<Movie>> {
   const movies = await fetchTrendingMovies(timeWindow)
 
   return movies.filter((movie) => movie.poster_path !== null).slice(0, count)
@@ -146,18 +146,18 @@ export interface WatchProvider {
 }
 
 export interface WatchProvidersResponse {
-  results: WatchProvider[]
+  results: Array<WatchProvider>
 }
 
 const PROVIDERS_CACHE_KEY = 'tmdb:watchProviders'
 const PROVIDERS_TTL = 1000 * 60 * 60 * 24 // 24 hours
 
-export async function fetchWatchProviders(): Promise<WatchProvider[]> {
+export async function fetchWatchProviders(): Promise<Array<WatchProvider>> {
   if (!TMDB_CONFIG.API_KEY) {
     throw new Error('TMDB API key is not configured')
   }
 
-  const cached = getCached<WatchProvider[]>(PROVIDERS_CACHE_KEY)
+  const cached = getCached<Array<WatchProvider>>(PROVIDERS_CACHE_KEY)
   if (cached) return cached
 
   const url = `${TMDB_CONFIG.BASE_URL}/watch/providers/movie?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&watch_region=FI`

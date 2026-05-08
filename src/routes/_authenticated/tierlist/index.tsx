@@ -46,7 +46,7 @@ export const Route = createFileRoute('/_authenticated/tierlist/')({
   component: RouteComponent,
   loader: ({ context }) => {
     context.queryClient.prefetchQuery(tierlistQueries.index())
-    return { currentUserId: context.user?.userId }
+    return { currentUserId: context.user.userId }
   },
 })
 

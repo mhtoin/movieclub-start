@@ -1,3 +1,5 @@
+import { AlertTriangle, Trash2 } from 'lucide-react'
+import * as React from 'react'
 import { useDeleteUserMutation } from '@/lib/react-query/mutations/users'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,8 +10,6 @@ import {
   DialogRoot,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { AlertTriangle, Trash2 } from 'lucide-react'
-import * as React from 'react'
 
 export function DeleteAccountDialog() {
   const [confirmationText, setConfirmationText] = React.useState('')

@@ -1,12 +1,12 @@
+import { motion } from 'framer-motion'
+import { Check, Clock, Film, Maximize2, Star, X } from 'lucide-react'
+import { useState } from 'react'
+import { ShortlistItemDialog } from './shortlist-item-dialog'
 import type { Movie } from '@/db/schema/movies'
 import {
   useRemoveFromShortlistMutation,
   useUpdateSelectedIndexMutation,
 } from '@/lib/react-query/mutations/shortlist'
-import { motion } from 'framer-motion'
-import { Check, Clock, Film, Maximize2, Star, X } from 'lucide-react'
-import { useState } from 'react'
-import { ShortlistItemDialog } from './shortlist-item-dialog'
 
 export default function ShortlistItem({
   movie,

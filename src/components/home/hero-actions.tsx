@@ -1,9 +1,9 @@
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowRight, ExternalLink, Film, Play } from 'lucide-react'
 import { fadeInUp } from './animation-variants'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 
 interface HeroActionsProps {
   trailerLink: string | null

@@ -1,10 +1,10 @@
-import { DashboardChart } from '@/components/dashboard/dashboard-chart'
-import { DashboardSection } from '@/components/dashboard/dashboard-section'
-import { FilterScope } from '@/components/dashboard/scope-toggle'
-import { useInsights } from '@/components/dashboard/use-insights'
-import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Calendar, Clapperboard, Globe } from 'lucide-react'
+import type { FilterScope } from '@/components/dashboard/scope-toggle'
+import { DashboardChart } from '@/components/dashboard/dashboard-chart'
+import { DashboardSection } from '@/components/dashboard/dashboard-section'
+import { useInsights } from '@/components/dashboard/use-insights'
+import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 
 export function DeepDiveTabContent({
   userId,

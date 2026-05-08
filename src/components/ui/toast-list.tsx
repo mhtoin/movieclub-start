@@ -1,4 +1,3 @@
-import { cn } from '@/lib/utils'
 import { Toast } from '@base-ui/react/toast'
 import {
   AlertCircle,
@@ -7,6 +6,7 @@ import {
   Info,
   XIcon,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 type ToastType = 'error' | 'success' | 'warning' | 'default'
 
@@ -72,14 +72,13 @@ export default function ToastList() {
   const { toasts } = Toast.useToastManager()
   return toasts.map((toast) => {
     const type =
-      ((toast as unknown as Record<string, unknown>).type as ToastType) ??
+      ((toast as unknown as Record<string, unknown>).type as ToastType | undefined) ??
       'default'
     const {
       Icon,
       typeLabel,
       iconWrapClass,
       iconClass,
-      accentClass,
       labelClass,
       borderClass,
     } = getTypeConfig(type)

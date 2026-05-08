@@ -23,7 +23,7 @@ export function ShortlistsSkeleton() {
                 <Skeleton className="h-5 w-12 rounded" />
               </div>
               <div className="flex-1 flex flex-col p-4 gap-2.5">
-                {Array.from({ length: 3 }).map((_, j) => (
+                {Array.from({ length: 3 }).map((_item, j) => (
                   <div key={j} className="flex gap-3 p-2 rounded-md">
                     <Skeleton className="w-10 h-14 rounded-sm flex-shrink-0" />
                     <div className="flex-1 flex flex-col justify-center gap-2">

@@ -1,9 +1,9 @@
-import type { TierlistPreview } from '@/lib/react-query/queries/tierlists'
-import { getImageUrl } from '@/lib/tmdb-api'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ChevronRight, Layers } from 'lucide-react'
 import { DeleteButton } from './delete-button'
+import type { TierlistPreview } from '@/lib/react-query/queries/tierlists'
+import { getImageUrl } from '@/lib/tmdb-api'
 
 const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
@@ -67,7 +67,7 @@ function LobbyWall({
   posterPaths,
   shouldReduceMotion,
 }: {
-  posterPaths: string[]
+  posterPaths: Array<string>
   shouldReduceMotion: boolean | null
 }) {
   const tiles = posterPaths.slice(0, 12)

@@ -1,3 +1,7 @@
+import { getRouteApi } from '@tanstack/react-router'
+import { AppearanceSection } from './appearance-section'
+import { ProfileSection } from './profile-section'
+import { Route as RootRoute } from '@/routes/__root'
 import {
   Tab,
   TabsIndicator,
@@ -5,10 +9,6 @@ import {
   TabsPanel,
   TabsRoot,
 } from '@/components/ui/tabs'
-import { Route as RootRoute } from '@/routes/__root'
-import { getRouteApi } from '@tanstack/react-router'
-import { AppearanceSection } from './appearance-section'
-import { ProfileSection } from './profile-section'
 
 const AuthenticatedRoute = getRouteApi('/_authenticated')
 

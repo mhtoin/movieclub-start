@@ -1,8 +1,3 @@
-import { MovieWithCredits } from '@/db/schema/movies'
-import {
-  useRemoveFromShortlistMutation,
-  useUpdateSelectedIndexMutation,
-} from '@/lib/react-query/mutations/shortlist'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Calendar,
@@ -18,6 +13,11 @@ import {
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import type { MovieWithCredits } from '@/db/schema/movies'
+import {
+  useRemoveFromShortlistMutation,
+  useUpdateSelectedIndexMutation,
+} from '@/lib/react-query/mutations/shortlist'
 
 interface ShortlistItemDialogProps {
   movie: MovieWithCredits | null
