@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, useInView } from 'framer-motion'
 import {
   ArrowRight,
   Dices,
@@ -24,8 +25,52 @@ function getUserTierlistHref(userId: string): string {
   return `/tierlist/${userId}`
 }
 
-// Subtle rotations for a scattered "tickets on the table" feel
 const ROTATIONS = [0.5, -0.7, 0.4, -0.6]
+
+function AnimatedCounter({
+  value,
+  decimals = 0,
+}: {
+  value: number
+  decimals?: number
+}) {
+  const shouldReduceMotion = useReducedMotion()
+  const ref = useRef<HTMLSpanElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-50px' })
+  const [display, setDisplay] = useState(0)
+
+  useEffect(() => {
+    if (!isInView) return
+    if (shouldReduceMotion) {
+      setDisplay(value)
+      return
+    }
+
+    let raf: number
+    const duration = 1200
+    const start = performance.now()
+    const from = 0
+    const to = value
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 4)
+      setDisplay(from + (to - from) * eased)
+      if (progress < 1) {
+        raf = requestAnimationFrame(tick)
+      }
+    }
+
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [isInView, value, shouldReduceMotion])
+
+  return (
+    <span ref={ref} className="tabular-nums">
+      {decimals > 0 ? display.toFixed(decimals) : Math.round(display)}
+    </span>
+  )
+}
 
 export function ClubSnapshot({
   allShortlists,
@@ -43,7 +88,7 @@ export function ClubSnapshot({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
-      <div className="lg:col-span-7 xl:col-span-8">
+      <div className="lg:col-span-6 xl:col-span-7">
         <div className="flex items-center gap-3 mb-8">
           <div className="h-px w-8 bg-primary" />
           <Ticket className="h-4 w-4 text-primary flex-shrink-0" />
@@ -125,7 +170,7 @@ export function ClubSnapshot({
                     </div>
                   </div>
 
-                  <div className="flex-1 min-w-0 flex items-center -space-x-3 overflow-hidden py-1">
+                  <div className="flex-1 min-w-0 flex items-center -space-x-3 py-1">
                     {shortlist.movies.slice(0, 5).map((movie, mIndex) => {
                       const posterPath =
                         (movie.images as any)?.posters?.[0]?.file_path ?? null
@@ -136,7 +181,7 @@ export function ClubSnapshot({
                       return (
                         <div
                           key={movie.id}
-                          className="relative h-20 w-12 sm:h-24 sm:w-14 md:h-28 md:w-[4.5rem] lg:h-32 lg:w-20 flex-shrink-0 overflow-hidden rounded-md bg-muted
+                          className="relative h-20 w-12 sm:h-24 sm:w-14 md:h-28 md:w-[4.5rem] lg:h-32 lg:w-20 flex-shrink-0 rounded-md bg-muted
                           border-2 border-white/70 dark:border-white/10 shadow-sm
                           transition-all duration-300 hover:z-10 hover:scale-110 hover:shadow-xl hover:-translate-y-2 cursor-pointer"
                           style={{ zIndex: shortlist.movies.length - mIndex }}
@@ -190,7 +235,7 @@ export function ClubSnapshot({
         )}
       </div>
 
-      <div className="lg:col-span-5 xl:col-span-4">
+      <div className="lg:col-span-6 xl:col-span-5">
         <div className="flex items-center gap-3 mb-8">
           <div className="h-px w-8 bg-primary" />
           <Dices className="h-4 w-4 text-primary flex-shrink-0" />
@@ -202,40 +247,56 @@ export function ClubSnapshot({
         <div className="space-y-4">
           <Link
             to="/raffle"
-            className="group relative flex items-center gap-5 rounded-xl border-2 border-border/10 bg-card/60 p-5 transition-all
-            hover:bg-card hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5"
+            className="group flex items-stretch rounded-xl overflow-hidden border-2 border-border/10 bg-card/60 transition-all
+            hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
           >
-            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary transition-transform group-hover:scale-110 group-hover:rotate-3">
-              <Dices className="h-6 w-6" />
+            <div className="flex items-center justify-center w-16 flex-shrink-0 bg-primary/10 transition-all duration-300 group-hover:bg-primary/20">
+              <motion.div
+                className="text-primary"
+                whileHover={shouldReduceMotion ? undefined : { rotate: 25 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 12 }}
+              >
+                <Dices className="h-6 w-6" />
+              </motion.div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-cinema text-lg font-bold text-foreground tracking-wide uppercase">
-                Run the Raffle
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 font-medium">
-                {readyCount} of {allShortlists.length} members ready
-              </p>
+            <div className="flex-1 flex items-center justify-between p-4 min-w-0">
+              <div>
+                <p className="font-cinema text-base font-bold text-foreground tracking-wide uppercase">
+                  Run the Raffle
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                  {readyCount} of {allShortlists.length} members ready
+                </p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary flex-shrink-0 ml-3" />
             </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary" />
           </Link>
 
           <Link
             to={getUserTierlistHref(currentUserId)}
-            className="group relative flex items-center gap-5 rounded-xl border-2 border-border/10 bg-card/60 p-5 transition-all
-            hover:bg-card hover:border-warning/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-warning/5"
+            className="group flex items-stretch rounded-xl overflow-hidden border-2 border-border/10 bg-card/60 transition-all
+            hover:border-warning/30 hover:shadow-lg hover:shadow-warning/5"
           >
-            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning transition-transform group-hover:scale-110 group-hover:rotate-3">
-              <Trophy className="h-6 w-6" />
+            <div className="flex items-center justify-center w-16 flex-shrink-0 bg-warning/10 transition-all duration-300 group-hover:bg-warning/20">
+              <motion.div
+                className="text-warning"
+                whileHover={shouldReduceMotion ? undefined : { rotate: -15 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 12 }}
+              >
+                <Trophy className="h-6 w-6" />
+              </motion.div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-cinema text-lg font-bold text-foreground tracking-wide uppercase">
-                Rank Movies
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 font-medium">
-                Update your tierlists
-              </p>
+            <div className="flex-1 flex items-center justify-between p-4 min-w-0">
+              <div>
+                <p className="font-cinema text-base font-bold text-foreground tracking-wide uppercase">
+                  Rank Movies
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                  Update your tierlists
+                </p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-warning flex-shrink-0 ml-3" />
             </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-warning" />
           </Link>
         </div>
 
@@ -249,48 +310,48 @@ export function ClubSnapshot({
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-card/60 border-l-4 border-primary/50 pl-4 pr-3 py-4 transition-colors hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-2">
-                  <Film className="h-4 w-4 text-primary" />
+              <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
+                <div className="flex items-center gap-2 mb-3">
+                  <Film className="h-3.5 w-3.5 text-primary/70" />
                   <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     Watched
                   </span>
                 </div>
                 <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  {stats.totalWatchedMovies}
+                  <AnimatedCounter value={stats.totalWatchedMovies} />
                 </p>
               </div>
-              <div className="rounded-xl bg-card/60 border-l-4 border-primary/50 pl-4 pr-3 py-4 transition-colors hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="h-4 w-4 text-primary" />
+              <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock className="h-3.5 w-3.5 text-primary/70" />
                   <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     Hours
                   </span>
                 </div>
                 <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  {Math.round(stats.totalWatchTime / 60)}
+                  <AnimatedCounter value={Math.round(stats.totalWatchTime / 60)} />
                 </p>
               </div>
-              <div className="rounded-xl bg-card/60 border-l-4 border-primary/50 pl-4 pr-3 py-4 transition-colors hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="h-4 w-4 text-primary" />
+              <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="h-3.5 w-3.5 text-primary/70" />
                   <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     In Raffle
                   </span>
                 </div>
                 <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  {totalMovies}
+                  <AnimatedCounter value={totalMovies} />
                 </p>
               </div>
-              <div className="rounded-xl bg-card/60 border-l-4 border-primary/50 pl-4 pr-3 py-4 transition-colors hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-2">
-                  <Star className="h-4 w-4 text-primary" />
+              <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
+                <div className="flex items-center gap-2 mb-3">
+                  <Star className="h-3.5 w-3.5 text-primary/70" />
                   <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     Avg Rating
                   </span>
                 </div>
                 <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  {stats.averageRating.toFixed(1)}
+                  <AnimatedCounter value={stats.averageRating} decimals={1} />
                 </p>
               </div>
             </div>

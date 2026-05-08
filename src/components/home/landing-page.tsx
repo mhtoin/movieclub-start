@@ -126,7 +126,7 @@ export function LandingSkeleton() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
-            <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+            <div className="lg:col-span-6 xl:col-span-7 space-y-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-px w-8 animate-pulse rounded bg-muted" />
                 <div className="h-5 w-24 animate-pulse rounded bg-muted" />
@@ -152,18 +152,18 @@ export function LandingSkeleton() {
                 </div>
               ))}
             </div>
-            <div className="lg:col-span-5 xl:col-span-4 space-y-4">
+            <div className="lg:col-span-6 xl:col-span-5 space-y-4">
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-px w-8 animate-pulse rounded bg-muted" />
                 <div className="h-5 w-28 animate-pulse rounded bg-muted" />
               </div>
-              <div className="h-24 animate-pulse rounded-xl bg-muted" />
-              <div className="h-24 animate-pulse rounded-xl bg-muted" />
+              <div className="flex h-20 animate-pulse rounded-xl bg-muted" />
+              <div className="flex h-20 animate-pulse rounded-xl bg-muted" />
               <div className="grid grid-cols-2 gap-3 mt-6">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-24 rounded-xl animate-pulse bg-muted border-l-4 border-border/20"
+                    className="h-24 rounded-xl animate-pulse bg-muted border border-border/10"
                   />
                 ))}
               </div>
