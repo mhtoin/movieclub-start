@@ -5,6 +5,7 @@ import {
   Dices,
   Film,
   Home,
+  LayoutDashboard,
   LogOut,
   Settings,
   Star,
@@ -71,26 +72,48 @@ export default function Header() {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <Link
-          to="/settings"
-          onClick={() => setIsOpen(false)}
-          className="group mx-4 mt-20 mb-4 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
-          viewTransition
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all">
-              <User size={20} className="text-primary" />
+        <div className="mx-4 mt-20 mb-4 space-y-3">
+          <Link
+            to="/settings"
+            onClick={() => setIsOpen(false)}
+            className="group block p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
+            viewTransition
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all">
+                <User size={20} className="text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                  Your Profile
+                </p>
+                <p className="text-xs text-sidebar-foreground/60">
+                  View and edit
+                </p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-sidebar-foreground truncate">
-                Your Profile
-              </p>
-              <p className="text-xs text-sidebar-foreground/60">
-                View and edit
-              </p>
+          </Link>
+          <Link
+            to="/dashboard"
+            onClick={() => setIsOpen(false)}
+            className="group block p-4 rounded-xl bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border border-accent/20 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/10 transition-all duration-300"
+            viewTransition
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center ring-2 ring-accent/30 group-hover:ring-accent/50 transition-all">
+                <LayoutDashboard size={20} className="text-accent-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                  Your Dashboard
+                </p>
+                <p className="text-xs text-sidebar-foreground/60">
+                  Stats and insights
+                </p>
+              </div>
             </div>
-          </div>
-        </Link>
+          </Link>
+        </div>
         <div className="flex items-center justify-between px-6 py-3 border-b border-sidebar-border/30 bg-sidebar-accent/20">
           <div>
             <h2 className="text-xl font-bold tracking-tight">Navigation</h2>

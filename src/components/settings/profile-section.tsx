@@ -1,4 +1,5 @@
-import { Camera, Mail } from 'lucide-react'
+import { Camera, LayoutDashboard, Mail } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import Avatar from '../ui/avatar'
 import { DeleteAccountDialog } from './delete-account-dialog'
 import type { UserSession } from '@/types/auth'
@@ -55,6 +56,25 @@ export function ProfileSection({ user }: ProfileSectionProps) {
           </label>
           <p className="font-medium mt-1">{user.email}</p>
         </div>
+      </section>
+
+      <section className="pt-6 border-t border-border">
+        <h3 className="text-sm font-semibold mb-4">Your Activity</h3>
+        <Link
+          to="/dashboard"
+          className="group flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border border-accent/20 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/10 transition-all duration-300"
+          viewTransition
+        >
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center ring-2 ring-accent/30 group-hover:ring-accent/50 transition-all">
+            <LayoutDashboard size={20} className="text-accent-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">Dashboard</p>
+            <p className="text-xs text-muted-foreground">
+              View your stats and insights
+            </p>
+          </div>
+        </Link>
       </section>
 
       <section className="pt-6 border-t border-border">

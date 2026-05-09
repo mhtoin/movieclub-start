@@ -14,6 +14,7 @@ import {
   Dices,
   Film,
   Home,
+  LayoutDashboard,
   LogOut,
   Moon,
   MoreHorizontal,
@@ -138,7 +139,9 @@ export default function Sidebar() {
   }
 
   const isMoreActive =
-    mobileMoreItems.some((item) => isActive(item.path)) || isActive('/settings')
+    mobileMoreItems.some((item) => isActive(item.path)) ||
+    isActive('/settings') ||
+    isActive('/dashboard')
 
   return (
     <>
@@ -440,6 +443,31 @@ export default function Sidebar() {
                     <span className="text-sm font-medium block">Profile</span>
                     <span className="text-xs text-muted-foreground">
                       Settings
+                    </span>
+                  </div>
+                </Link>
+
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMoreOpen(false)}
+                  className={`flex items-center gap-4 p-3.5 rounded-xl transition-colors active:scale-[0.98] ${
+                    isActive('/dashboard')
+                      ? 'text-primary bg-primary/10'
+                      : 'text-foreground/80 hover:bg-accent active:bg-accent/60'
+                  }`}
+                  viewTransition
+                >
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      isActive('/dashboard') ? 'bg-primary/15' : 'bg-muted/50'
+                    }`}
+                  >
+                    <LayoutDashboard size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium block">Dashboard</span>
+                    <span className="text-xs text-muted-foreground">
+                      Stats and insights
                     </span>
                   </div>
                 </Link>

@@ -17,6 +17,9 @@ export const Route = createFileRoute('/_authenticated/dashboard')({
       context.queryClient.prefetchQuery(dashboardQueries.insights())
       context.queryClient.prefetchQuery(dashboardQueries.insights(userId))
       context.queryClient.prefetchQuery(dashboardQueries.nextMovie())
+      context.queryClient.prefetchQuery(
+        dashboardQueries.moviesByUser('everyone', userId, 'all-time'),
+      )
     }
   },
   component: Dashboard,

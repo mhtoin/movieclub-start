@@ -37,6 +37,11 @@ const OverviewInsights = lazy(() =>
     default: m.OverviewInsights,
   })),
 )
+const MoviesByUserSection = lazy(() =>
+  import('@/components/dashboard/movies-by-user-section').then((m) => ({
+    default: m.MoviesByUserSection,
+  })),
+)
 
 const tabs: Array<{ value: string; label: string; icon: LucideIcon }> = [
   { value: 'overview', label: 'Overview', icon: Film },
@@ -102,9 +107,14 @@ export function DashboardContent({ user }: DashboardContentProps) {
         </TabsList>
 
         <TabsPanel value="overview" variant="underlined">
-          <Suspense fallback={<InsightsSkeleton />}>
-            <OverviewInsights userId={userId} scope={scope} />
-          </Suspense>
+          <div className="space-y-10">
+            <Suspense fallback={<InsightsSkeleton />}>
+              <MoviesByUserSection userId={userId} scope={scope} />
+            </Suspense>
+            <Suspense fallback={<InsightsSkeleton />}>
+              <OverviewInsights userId={userId} scope={scope} />
+            </Suspense>
+          </div>
         </TabsPanel>
 
         <TabsPanel value="genres" variant="underlined">
