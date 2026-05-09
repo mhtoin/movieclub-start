@@ -28,6 +28,9 @@ const TABLES_TO_EXPORT = [
   'SiteConfig',
 ]
 
+// Track unranked tier IDs to filter MoviesOnTiers
+const unrankedTierIds = new Set<string>()
+
 async function exportTable(
   sql: postgres.Sql,
   tableName: string,
@@ -35,8 +38,58 @@ async function exportTable(
   console.log(`  Exporting "${tableName}"...`)
 
   try {
-    // Query all rows from the table
-    const rows = await sql.unsafe(`SELECT * FROM "${tableName}"`)
+    let rows: Record<string, unknown>[]
+
+    if (tableName === 'Tierlist') {
+      const rawRows =
+        await sql.unsafe(`SELECT * FROM "${tableName}"`)
+      rows = Array.from(rawRows as Record<string, unknown>[]).map((row) => {
+        const transformed = { ...row }
+        if (
+          transformed.watchDate &&
+          (typeof transformed.watchDate === 'object' ||
+            typeof transformed.watchDate === 'string')
+        ) {
+          let watchDate: { from?: string; to?: string } | null = null
+          if (typeof transformed.watchDate === 'string') {
+            try {
+              watchDate = JSON.parse(transformed.watchDate)
+            } catch {
+              watchDate = null
+            }
+          } else {
+            watchDate = transformed.watchDate as { from?: string; to?: string }
+          }
+          if (watchDate) {
+            if (watchDate.from) {
+              transformed.watchDateFrom = watchDate.from
+            }
+            if (watchDate.to) {
+              transformed.watchDateTo = watchDate.to
+            }
+          }
+          delete transformed.watchDate
+        }
+        return transformed
+      })
+    } else if (tableName === 'Tier') {
+      const rawRows =
+        await sql.unsafe(`SELECT * FROM "${tableName}"`)
+      rows = Array.from(rawRows as Record<string, unknown>[]).filter((row) => {
+        const isUnranked =
+          row.label === 'Unranked' && (row.value === 0 || row.value === '0')
+        if (isUnranked) {
+          unrankedTierIds.add(row.id as string)
+        }
+        return !isUnranked
+      })
+    } else if (tableName === 'MoviesOnTiers') {
+      const rawRows =
+        await sql.unsafe(`SELECT * FROM "${tableName}"`)
+      rows = Array.from(rawRows as Record<string, unknown>[]).filter((row) => !unrankedTierIds.has(row.tierId as string))
+    } else {
+      rows = await sql.unsafe(`SELECT * FROM "${tableName}"`)
+    }
 
     if (rows.length === 0) {
       console.log(`    → 0 rows (skipping file creation)`)
