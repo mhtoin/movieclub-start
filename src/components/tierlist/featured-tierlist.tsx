@@ -118,15 +118,22 @@ function LobbyWall({
           )
         })}
       </div>
-      <div className="absolute inset-0 bg-black/45" />
+      <div className="absolute inset-0 bg-black/20 dark:bg-black/50" />
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 dark:hidden"
+        style={{
+          background:
+            'radial-gradient(ellipse 80% 60% at 50% 40%, transparent 30%, oklch(from var(--card) l c h / 0.35) 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-0 hidden dark:block"
         style={{
           background:
             'radial-gradient(ellipse 80% 60% at 50% 40%, transparent 30%, rgba(0,0,0,0.55) 100%)',
         }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-card/90 via-card/50 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-card/95 via-card/70 to-transparent dark:from-card/90 dark:via-card/50" />
     </div>
   )
 }
@@ -243,7 +250,10 @@ export function FeaturedTierlist({
               {isOwner && (
                 <DeleteButton tierlistId={tierlist.id} userId={userId} />
               )}
-              <div className="flex items-center gap-1 text-sm font-semibold text-primary opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-all duration-300">
+              <div
+                className="flex items-center gap-1 text-sm font-semibold opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-all duration-300"
+                style={{ color: 'var(--foreground)' }}
+              >
                 <span>Open</span>
                 <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
               </div>
