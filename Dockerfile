@@ -1,6 +1,6 @@
 # Dockerfile
 FROM node:23-alpine AS base
-RUN corepack enable && corepack prepare pnpm@10 --activate
+RUN corepack enable
 WORKDIR /app
 
 # Dependencies stage
