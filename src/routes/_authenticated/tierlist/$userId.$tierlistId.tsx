@@ -30,6 +30,7 @@ function RouteComponent() {
       <TierlistContent
         tierlistId={tierlistId}
         isOwner={isOwner}
+        userName={user.name}
       />
     </Suspense>
   )

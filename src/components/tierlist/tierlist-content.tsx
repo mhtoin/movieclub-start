@@ -21,6 +21,7 @@ import {
   Infinity as InfinityIcon,
   Loader2,
   Pencil,
+  Share2,
   Tag,
 } from 'lucide-react'
 import {
@@ -62,15 +63,18 @@ import {
   batchUpdateTierMoviePositions,
   useSingleTierlistLiveQuery,
 } from '@/lib/react-query/queries/tierlists'
+import { TierlistShareStudio } from '@/components/tierlist/share-studio'
 
 interface TierlistContentProps {
   tierlistId: string
   isOwner: boolean
+  userName?: string | null
 }
 
 export function TierlistContent({
   tierlistId,
   isOwner,
+  userName,
 }: TierlistContentProps) {
   const queryClient = useQueryClient()
 
@@ -87,6 +91,7 @@ export function TierlistContent({
   const [localTiers, setLocalTiers] = useState<Array<TierWithMovies> | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [studioOpen, setStudioOpen] = useState(false)
 
   const localTiersRef = useRef(localTiers)
   localTiersRef.current = localTiers
@@ -395,13 +400,24 @@ export function TierlistContent({
             : ''
         }`}
         actions={
-          isOwner && (
-            <EditTierlistDialog
-              tierlist={tierlist}
-              onEdit={handleEdit}
-              isPending={editMutation.isPending}
-            />
-          )
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setStudioOpen(true)}
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              Share
+            </Button>
+            {isOwner && (
+              <EditTierlistDialog
+                tierlist={tierlist}
+                onEdit={handleEdit}
+                isPending={editMutation.isPending}
+              />
+            )}
+          </div>
         }
       />
       {(dateRangeText || (tierlist.genres && tierlist.genres.length > 0)) && (
@@ -476,6 +492,13 @@ export function TierlistContent({
           </DndContext>
         </div>
       </div>
+
+      <TierlistShareStudio
+        tierlist={tierlist}
+        userName={userName}
+        open={studioOpen}
+        onOpenChange={setStudioOpen}
+      />
     </div>
   )
 }

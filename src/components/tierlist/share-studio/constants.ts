@@ -1,0 +1,185 @@
+import type { AspectRatio, StudioSettings, StudioTheme, TemplateDef, ThemeDef } from './types'
+
+export const PRESETS_STORAGE_KEY = 'movieclub-share-presets'
+
+export const THEME_DEFS: Record<StudioTheme, ThemeDef> = {
+  'dark-theater': {
+    name: 'Dark Theater',
+    bg: '#0a0a0f',
+    fg: '#f5f0e8',
+    accent: '#d4a843',
+    muted: '#6b6570',
+    border: '#2a252e',
+    tierColors: {
+      S: '#10b981', A: '#84cc16', B: '#f59e0b',
+      C: '#f97316', D: '#ef4444', F: '#8b5cf6',
+    },
+    font: "'Oswald', 'Bebas Neue', sans-serif",
+  },
+  'warm-lobby': {
+    name: 'Warm Lobby',
+    bg: '#f5efe6',
+    fg: '#2c1810',
+    accent: '#b45309',
+    muted: '#a89b8c',
+    border: '#ddd3c4',
+    tierColors: {
+      S: '#059669', A: '#65a30d', B: '#d97706',
+      C: '#ea580c', D: '#dc2626', F: '#7c3aed',
+    },
+    font: "'Oswald', 'Bebas Neue', sans-serif",
+  },
+  'vintage-paper': {
+    name: 'Vintage Paper',
+    bg: '#f0e6d3',
+    fg: '#3d2b1f',
+    accent: '#8b4513',
+    muted: '#9c8b7a',
+    border: '#d4c4a8',
+    tierColors: {
+      S: '#166534', A: '#3f6212', B: '#92400e',
+      C: '#9a3412', D: '#991b1b', F: '#5b21b6',
+    },
+    font: "'Bebas Neue', 'Courier New', serif",
+  },
+  'neon-noir': {
+    name: 'Neon Noir',
+    bg: '#050508',
+    fg: '#e0e0ff',
+    accent: '#ff2a6d',
+    muted: '#5a5a7a',
+    border: '#1a1a2e',
+    tierColors: {
+      S: '#00f5d4', A: '#00bbf9', B: '#fee440',
+      C: '#f15bb5', D: '#ff006e', F: '#9b5de5',
+    },
+    font: "'Oswald', sans-serif",
+  },
+  'minimal-white': {
+    name: 'Minimal',
+    bg: '#ffffff',
+    fg: '#1a1a1a',
+    accent: '#2563eb',
+    muted: '#9ca3af',
+    border: '#e5e7eb',
+    tierColors: {
+      S: '#10b981', A: '#84cc16', B: '#f59e0b',
+      C: '#f97316', D: '#ef4444', F: '#8b5cf6',
+    },
+    font: "system-ui, -apple-system, sans-serif",
+  },
+}
+
+export const ASPECT_RATIOS: Record<AspectRatio, { w: number; h: number; label: string }> = {
+  '1:1': { w: 1080, h: 1080, label: 'Square' },
+  '4:5': { w: 1080, h: 1350, label: 'Portrait' },
+  '9:16': { w: 1080, h: 1920, label: 'Story' },
+  '16:9': { w: 1920, h: 1080, label: 'Wide' },
+}
+
+export const TEMPLATES: Record<string, TemplateDef> = {
+  'classic-posters': {
+    name: 'Classic Posters',
+    description: 'Large poster tiles with bold tier badges',
+    settings: {
+      displayMode: 'posters',
+      posterSize: 'md',
+      tierLabelStyle: 'badge',
+      showTitle: true,
+      showAuthor: true,
+      showTierLabels: true,
+    },
+  },
+  'star-grid': {
+    name: 'Star Grid',
+    description: 'Compact posters with star ratings',
+    settings: {
+      displayMode: 'compact-posters',
+      compactPosterSize: 'sm',
+      showTitle: true,
+      showAuthor: false,
+      showTierLabels: true,
+      tierLabelOverrides: {
+        5: '★★★★★',
+        4: '★★★★',
+        3: '★★★',
+        2: '★★',
+        1: '★',
+        0: '☆',
+      },
+    },
+  },
+  'cinematic-list': {
+    name: 'Cinematic List',
+    description: 'Multi-column text with year and rating',
+    settings: {
+      displayMode: 'text-list',
+      textListColumns: 3,
+      showMovieYear: true,
+      showMovieRuntime: false,
+      showMovieRating: true,
+      showMovieGenres: false,
+      showTitle: true,
+      showAuthor: true,
+      showTierLabels: true,
+    },
+  },
+  'dense-wall': {
+    name: 'Poster Wall',
+    description: 'Maximum posters, minimal chrome',
+    settings: {
+      displayMode: 'compact-posters',
+      compactPosterSize: 'xs',
+      showTitle: false,
+      showAuthor: false,
+      showDateRange: false,
+      showMovieCount: false,
+      showTierLabels: true,
+    },
+  },
+  'minimal-text': {
+    name: 'Minimal Text',
+    description: 'Clean single-column list',
+    settings: {
+      displayMode: 'text-list',
+      textListColumns: 1,
+      showMovieYear: true,
+      showMovieRuntime: false,
+      showMovieRating: true,
+      showMovieGenres: false,
+      showTitle: true,
+      showAuthor: false,
+      showDateRange: false,
+      showMovieCount: false,
+      showTierLabels: true,
+    },
+  },
+}
+
+export const DEFAULT_SETTINGS: StudioSettings = {
+  theme: 'dark-theater',
+  aspectRatio: '1:1',
+  displayMode: 'posters',
+  backgroundType: 'theme',
+  backgroundSolid: '#0a0a0f',
+  backgroundImage: null,
+  accentColor: null,
+  tierOrder: null,
+  showTitle: true,
+  showAuthor: true,
+  showDateRange: true,
+  showMovieCount: true,
+  showTierLabels: true,
+  posterSize: 'md',
+  tierLabelShape: 'rounded',
+  tierLabelStyle: 'badge',
+  tierLabelOverrides: {},
+  tierLabelCustomColors: {},
+  textListColumns: 3,
+  showMovieYear: true,
+  showMovieRuntime: false,
+  showMovieRating: true,
+  showMovieGenres: false,
+  compactPosterSize: 'sm',
+  hideEmptyTiers: false,
+}
