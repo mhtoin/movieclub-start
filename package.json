@@ -82,6 +82,7 @@
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "drizzle-kit": "^0.31.5",
+    "eslint": "^9.26.0",
     "husky": "^9.1.7",
     "jsdom": "^27.0.0",
     "nitro": "3.0.1-alpha.1",
