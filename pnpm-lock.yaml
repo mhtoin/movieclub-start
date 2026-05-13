@@ -177,6 +177,9 @@ importers:
       drizzle-kit:
         specifier: ^0.31.5
         version: 0.31.5
+      eslint:
+        specifier: ^9.26.0
+        version: 9.37.0(jiti@2.6.1)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
