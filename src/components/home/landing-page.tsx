@@ -105,7 +105,7 @@ export function LandingSkeleton() {
               <div className="h-px flex-1 animate-pulse rounded bg-muted" />
             </div>
             <div
-              className="flex gap-5 md:gap-7 overflow-hidden pb-8 pt-10"
+              className="flex gap-6 md:gap-8 overflow-hidden pb-8 pt-10"
               style={{
                 backgroundImage:
                   'linear-gradient(to bottom, transparent 30px, var(--border) 30px, var(--border) 31px, transparent 31px)',
@@ -114,7 +114,7 @@ export function LandingSkeleton() {
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="w-32 sm:w-40 flex-shrink-0 pt-2.5 px-2.5 pb-7 rounded-sm animate-pulse bg-muted"
+                  className="w-40 sm:w-48 flex-shrink-0 pt-2.5 px-2.5 pb-10 rounded-sm animate-pulse bg-muted"
                   style={{
                     transform: `rotate(${[-2.5, 1.8, -1.2, 3.0, -0.8][i]}deg)`,
                   }}

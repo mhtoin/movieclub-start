@@ -1277,4 +1277,70 @@
       transform: scale(1.15);
     }
   }
+
+  .polaroid-flip-container {
+    perspective: 2000px;
+  }
+
+  .polaroid-flipper {
+    position: relative;
+    will-change: transform;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .group:hover .polaroid-flipper,
+  .group:focus-within .polaroid-flipper {
+    transform: rotateY(180deg);
+  }
+
+  .polaroid-front,
+  .polaroid-back {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .polaroid-back {
+    transform: rotateY(180deg);
+  }
+
+  .polaroid-back-content {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translateZ(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .polaroid-flipper {
+      transition: none;
+      transform: none !important;
+    }
+
+    .group:hover .polaroid-flipper,
+    .group:focus-within .polaroid-flipper {
+      transform: none !important;
+    }
+
+    .polaroid-front,
+    .polaroid-back {
+      transition: opacity 0.2s ease;
+    }
+
+    .polaroid-back {
+      transform: none;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .group:hover .polaroid-back,
+    .group:focus-within .polaroid-back {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .group:hover .polaroid-front,
+    .group:focus-within .polaroid-front {
+      opacity: 0;
+    }
+  }
 }

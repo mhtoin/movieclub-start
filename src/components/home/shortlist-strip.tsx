@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Clapperboard, Plus, Ticket } from 'lucide-react'
+import { Clapperboard, Clock, Plus, Star, Ticket } from 'lucide-react'
 import type { Shortlist } from '@/db/schema/shortlists'
 import type { MovieWithCredits } from '@/db/schema/movies'
 
@@ -31,6 +31,106 @@ function Clothespin() {
             'color-mix(in oklch, var(--muted-foreground) 70%, var(--primary) 30%)',
         }}
       />
+    </div>
+  )
+}
+
+function PolaroidBack({ movie }: { movie: MovieWithCredits }) {
+  const crewArray = Array.isArray(movie.crew) ? movie.crew : []
+  const foundDirector = crewArray.find((c: any) => c.job === 'Director')
+  const director = foundDirector != null ? (foundDirector.name ?? null) : null
+
+  const castArray = Array.isArray(movie.cast) ? movie.cast : []
+  const topCast = castArray
+    .slice(0, 3)
+    .map((c: any) => c.name)
+    .filter(Boolean)
+
+  const genres = movie.genres ?? []
+  const runtime = movie.runtime
+  const rating = movie.voteAverage
+  const hasTagline = !!movie.tagline?.trim()
+  const snippet =
+    movie.tagline?.trim() || movie.overview.slice(0, 72).trim() || null
+
+  return (
+    <div className="polaroid-back absolute inset-0 bg-[#f5f0e8] dark:bg-[#e8e0d0] rounded-sm shadow-md transition-shadow duration-300 group-hover:shadow-2xl">
+      <div className="polaroid-back-content w-40 sm:w-48 md:w-56 lg:w-64 pt-2.5 px-2.5 pb-10">
+        <div className="aspect-[2/3] flex flex-col gap-3 p-3 overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <Star className="h-3 w-3 text-amber-600 fill-amber-500" />
+              <span className="text-sm font-bold text-black/80">
+                {rating > 0 ? rating.toFixed(1) : '—'}
+              </span>
+            </div>
+            {runtime && runtime > 0 && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3 text-black/30" />
+                <span className="text-[10px] text-black/50 font-medium">
+                  {Math.floor(runtime / 60)}h {runtime % 60}m
+                </span>
+              </div>
+            )}
+          </div>
+
+          {director && (
+            <div>
+              <p className="text-[9px] font-cinema-caps tracking-wider uppercase text-black/40">
+                Directed by
+              </p>
+              <p className="text-xs font-semibold text-black/80 leading-tight mt-0.5">
+                {director}
+              </p>
+            </div>
+          )}
+
+          {topCast.length > 0 && (
+            <div>
+              <p className="text-[9px] font-cinema-caps tracking-wider uppercase text-black/40">
+                Starring
+              </p>
+              <div className="mt-0.5 space-y-0.5">
+                {topCast.map((name) => (
+                  <p
+                    key={name}
+                    className="text-[11px] text-black/70 leading-snug"
+                  >
+                    {name}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {genres.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {genres.slice(0, 3).map((g) => (
+                <span
+                  key={g}
+                  className="text-[9px] px-1.5 py-0.5 bg-black/10 rounded-sm text-black/50 font-medium"
+                >
+                  {g}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {snippet && (
+            <p className="text-[10px] italic text-black/45 leading-snug line-clamp-3">
+              {hasTagline
+                ? `"${snippet}"`
+                : `${snippet}${snippet.length >= 72 ? '...' : ''}`}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-2.5 text-center px-1">
+          <p className="text-[9px] font-cinema-caps tracking-wider uppercase text-black/25">
+            {movie.title}
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
@@ -82,7 +182,7 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
               style={{ transformOrigin: 'top center' }}
             >
               <Clothespin />
-              <div className="w-40 sm:w-44 pt-2.5 px-2.5 pb-8 rounded-sm shadow-md transition-shadow duration-300 hover:shadow-xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
+              <div className="w-44 sm:w-48 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-shadow duration-300 hover:shadow-xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
                 <div className="aspect-[2/3] flex flex-col items-center justify-center gap-3 bg-black/5 rounded-[1px]">
                   <Ticket className="h-10 w-10 text-black/20" />
                   <p className="text-xs text-[color-mix(in_oklch,black_70%,var(--primary)_30%)] font-medium">
@@ -126,7 +226,7 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
               <Clothespin />
               <Link
                 to="/discover"
-                className="block w-40 sm:w-44 pt-2.5 px-2.5 pb-8 rounded-sm shadow-md transition-shadow duration-300 hover:shadow-xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]"
+                className="block w-44 sm:w-48 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-shadow duration-300 hover:shadow-xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]"
               >
                 <div className="aspect-[2/3] flex flex-col items-center justify-center gap-2 bg-black/5 rounded-[1px] border-2 border-dashed border-black/15">
                   <Plus className="h-8 w-8 text-[color-mix(in_oklch,black_50%,var(--primary)_50%)]" />
@@ -178,7 +278,7 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
             'linear-gradient(to bottom, transparent 30px, var(--border) 30px, var(--border) 31px, transparent 31px)',
         }}
       >
-        <div className="flex gap-5 md:gap-7">
+        <div className="flex gap-6 md:gap-8">
           {movies.map((movie, index) => {
             const posterPath =
               (movie.images as any)?.posters?.[0]?.file_path ?? null
@@ -193,7 +293,7 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
             return (
               <motion.div
                 key={movie.id}
-                className="snap-start flex-shrink-0 relative group cursor-pointer"
+                className="snap-start flex-shrink-0 relative group cursor-pointer hover:z-50 focus-within:z-50"
                 style={{ transformOrigin: 'top center' }}
                 initial={
                   shouldReduceMotion ? false : { opacity: 0, y: 20, rotate: 0 }
@@ -203,19 +303,6 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
                   y: 0,
                   rotate: rotation,
                 }}
-                whileHover={
-                  shouldReduceMotion
-                    ? undefined
-                    : {
-                        rotate: rotation * -1.2,
-                        scale: 1.03,
-                        transition: {
-                          type: 'spring',
-                          stiffness: 200,
-                          damping: 10,
-                        },
-                      }
-                }
                 transition={{
                   duration: 0.55,
                   delay: index * 0.07,
@@ -223,31 +310,37 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
                 }}
               >
                 <Clothespin />
-                <div className="w-32 sm:w-40 md:w-48 lg:w-52 pt-2.5 px-2.5 pb-7 rounded-sm shadow-md transition-shadow duration-300 hover:shadow-2xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
-                  <div className="aspect-[2/3] overflow-hidden rounded-[1px] bg-black/5">
-                    {posterUrl ? (
-                      <img
-                        src={posterUrl}
-                        alt={movie.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center">
-                        <Ticket className="h-8 w-8 text-black/20" />
+                <div className="polaroid-flip-container">
+                  <div className="polaroid-flipper">
+                    <div className="polaroid-front">
+                      <div className="w-40 sm:w-48 md:w-56 lg:w-64 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-shadow duration-300 group-hover:shadow-2xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
+                        <div className="aspect-[2/3] overflow-hidden rounded-[1px] bg-black/5">
+                          {posterUrl ? (
+                            <img
+                              src={posterUrl}
+                              alt={movie.title}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <Ticket className="h-8 w-8 text-black/20" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-2.5 text-center px-1">
+                          <p className="text-xs font-semibold text-[color-mix(in_oklch,black_85%,var(--primary)_15%)] line-clamp-1 leading-tight">
+                            {movie.title}
+                          </p>
+                          {year && (
+                            <p className="text-[10px] text-[color-mix(in_oklch,black_55%,var(--primary)_45%)] mt-1 font-medium">
+                              {year}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="mt-2.5 text-center px-1">
-                    <p className="text-xs font-semibold text-[color-mix(in_oklch,black_85%,var(--primary)_15%)] line-clamp-1 leading-tight group-hover:text-[color-mix(in_oklch,black_60%,var(--primary)_40%)] transition-colors duration-200">
-                      {movie.title}
-                    </p>
-                    {year && (
-                      <p className="text-[10px] text-[color-mix(in_oklch,black_55%,var(--primary)_45%)] mt-1 font-medium">
-                        {year}
-                      </p>
-                    )}
+                    </div>
+                    <PolaroidBack movie={movie} />
                   </div>
                 </div>
               </motion.div>
