@@ -1,13 +1,11 @@
-import type { MovieWithCredits } from '@/db/schema/movies'
-import type { Shortlist } from '@/db/schema/shortlists'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Clapperboard, Plus, Ticket } from 'lucide-react'
-
-/* eslint-disable react-refresh/only-export-components */
+import type { Shortlist } from '@/db/schema/shortlists'
+import type { MovieWithCredits } from '@/db/schema/movies'
 
 type ShortlistWithMovies = Shortlist & {
-  movies: MovieWithCredits[]
+  movies: Array<MovieWithCredits>
 }
 
 interface ShortlistStripProps {

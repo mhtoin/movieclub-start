@@ -1,7 +1,7 @@
-import {  cva } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 import * as React from 'react'
 import { Drawer as DrawerPrimitive } from 'vaul'
-import type {VariantProps} from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const drawerOverlayVariants = cva(

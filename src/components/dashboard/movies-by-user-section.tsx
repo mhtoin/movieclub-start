@@ -1,11 +1,11 @@
-import { DatePresetToggle } from '@/components/dashboard/date-preset-toggle'
-import type { FilterScope } from '@/components/dashboard/scope-toggle'
-import type { DatePreset } from '@/lib/react-query/queries/dashboard'
-import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
-import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { Crown, Loader2, Trophy } from 'lucide-react'
 import { useState } from 'react'
+import type { FilterScope } from '@/components/dashboard/scope-toggle'
+import type { DatePreset } from '@/lib/react-query/queries/dashboard'
+import { DatePresetToggle } from '@/components/dashboard/date-preset-toggle'
+import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
+import { cn } from '@/lib/utils'
 
 interface MoviesByUserSectionProps {
   userId: string

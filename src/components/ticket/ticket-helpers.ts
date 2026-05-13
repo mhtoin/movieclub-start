@@ -10,7 +10,8 @@ const baseStampClass =
   'px-2 py-0.5 rounded text-[9px] font-semibold tracking-wide uppercase font-[var(--font-cinema)]'
 
 export function getStaticStampClass(participating: boolean, isReady: boolean) {
-  if (!participating) return `${baseStampClass} bg-muted/30 text-muted-foreground/60`
+  if (!participating)
+    return `${baseStampClass} bg-muted/30 text-muted-foreground/60`
   if (isReady) return `${baseStampClass} bg-success/8 text-success`
   return `${baseStampClass} bg-primary/8 text-primary`
 }
@@ -19,7 +20,8 @@ export function getInteractableStampClass(
   participating: boolean,
   isReady: boolean,
 ) {
-  if (!participating) return `${baseStampClass} bg-muted/30 text-muted-foreground/60`
+  if (!participating)
+    return `${baseStampClass} bg-muted/30 text-muted-foreground/60`
   if (isReady)
     return `${baseStampClass} bg-success/8 text-success hover:brightness-110`
   return `${baseStampClass} bg-primary/8 text-primary hover:brightness-110`

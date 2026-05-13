@@ -102,73 +102,75 @@ export interface RecommendationSeed {
 export const getRecommendationSeeds = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .inputValidator((userId: string) => userId)
-  .handler(async ({ context, data: userId }): Promise<Array<RecommendationSeed>> => {
-    if (!context.user || context.user.userId !== userId)
-      throw new Error('Forbidden')
+  .handler(
+    async ({ context, data: userId }): Promise<Array<RecommendationSeed>> => {
+      if (!context.user || context.user.userId !== userId)
+        throw new Error('Forbidden')
 
-    if (!TMDB_CONFIG.API_KEY || !userId) return []
+      if (!TMDB_CONFIG.API_KEY || !userId) return []
 
-    try {
-      const userTierlists = (await (db as any).query.tierlist.findMany({
-        where: (tierlist: any, { eq }: any) => eq(tierlist.userId, userId),
-        with: {
-          tiers: {
-            with: {
-              moviesOnTiers: {
-                with: { movie: true },
+      try {
+        const userTierlists = (await (db as any).query.tierlist.findMany({
+          where: (tierlist: any, { eq }: any) => eq(tierlist.userId, userId),
+          with: {
+            tiers: {
+              with: {
+                moviesOnTiers: {
+                  with: { movie: true },
+                },
               },
+              orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
             },
-            orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],
           },
-        },
-      })) as Array<TierlistWithDetails>
+        })) as Array<TierlistWithDetails>
 
-      const topMovies: Array<{ tmdbId: number; title: string }> = []
-      for (const tl of userTierlists) {
-        for (const t of tl.tiers) {
-          if (t.value <= 2) {
-            for (const mot of t.moviesOnTiers) {
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-              if (mot.movie) {
-                topMovies.push({
-                  tmdbId: mot.movie.tmdbId,
-                  title: mot.movie.title,
-                })
+        const topMovies: Array<{ tmdbId: number; title: string }> = []
+        for (const tl of userTierlists) {
+          for (const t of tl.tiers) {
+            if (t.value <= 2) {
+              for (const mot of t.moviesOnTiers) {
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                if (mot.movie) {
+                  topMovies.push({
+                    tmdbId: mot.movie.tmdbId,
+                    title: mot.movie.title,
+                  })
+                }
               }
             }
           }
         }
-      }
 
-      if (topMovies.length === 0) return []
+        if (topMovies.length === 0) return []
 
-      const shuffled = topMovies.sort(() => Math.random() - 0.5)
-      const picks = shuffled.slice(0, 3)
+        const shuffled = topMovies.sort(() => Math.random() - 0.5)
+        const picks = shuffled.slice(0, 3)
 
-      // Fetch poster paths from TMDB in parallel
-      const seeds = await Promise.all(
-        picks.map(async (pick) => {
-          const url = `${TMDB_CONFIG.BASE_URL}/movie/${pick.tmdbId}?api_key=${TMDB_CONFIG.API_KEY}&language=en-US`
-          try {
-            const res = await fetch(url)
-            if (!res.ok) return { ...pick, posterPath: null as string | null }
-            const data = await res.json()
-            return {
-              ...pick,
-              posterPath: data.poster_path as string | null,
+        // Fetch poster paths from TMDB in parallel
+        const seeds = await Promise.all(
+          picks.map(async (pick) => {
+            const url = `${TMDB_CONFIG.BASE_URL}/movie/${pick.tmdbId}?api_key=${TMDB_CONFIG.API_KEY}&language=en-US`
+            try {
+              const res = await fetch(url)
+              if (!res.ok) return { ...pick, posterPath: null as string | null }
+              const data = await res.json()
+              return {
+                ...pick,
+                posterPath: data.poster_path as string | null,
+              }
+            } catch {
+              return { ...pick, posterPath: null as string | null }
             }
-          } catch {
-            return { ...pick, posterPath: null as string | null }
-          }
-        }),
-      )
+          }),
+        )
 
-      return seeds
-    } catch (error) {
-      console.error('Error fetching recommendation seeds:', error)
-      return []
-    }
-  })
+        return seeds
+      } catch (error) {
+        console.error('Error fetching recommendation seeds:', error)
+        return []
+      }
+    },
+  )
 
 const TARGET_PROVIDERS = '8|323|463|496'
 const WATCH_REGION = 'FI'

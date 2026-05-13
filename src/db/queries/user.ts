@@ -5,15 +5,8 @@ import { tierlist } from '../schema/tierlists'
 import { session } from '../schema/sessions'
 import { recommendedMovie, review } from '../schema/movies'
 import { raffleToUser } from '../schema/raffles'
-import {
-  account,
-  passwordResetToken,
-  user,
-} from '../schema/users'
-import type {
-  PasswordResetToken,
-  SelectAccount,
-  User} from '../schema/users';
+import { account, passwordResetToken, user } from '../schema/users'
+import type { PasswordResetToken, SelectAccount, User } from '../schema/users'
 
 export async function getUserByEmail(
   email: User['email'],

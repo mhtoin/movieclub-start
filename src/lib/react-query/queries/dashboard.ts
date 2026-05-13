@@ -120,7 +120,11 @@ export interface NextMovieToWatch {
   }
 }
 
-export type DatePreset = 'all-time' | 'current-year' | 'last-30-days' | 'last-90-days'
+export type DatePreset =
+  | 'all-time'
+  | 'current-year'
+  | 'last-30-days'
+  | 'last-90-days'
 
 function getDateRange(preset: DatePreset): { from: Date; to: Date } | null {
   const now = new Date()
@@ -130,9 +134,15 @@ function getDateRange(preset: DatePreset): { from: Date; to: Date } | null {
     case 'current-year':
       return { from: new Date(now.getFullYear(), 0, 1), to: now }
     case 'last-30-days':
-      return { from: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), to: now }
+      return {
+        from: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
+        to: now,
+      }
     case 'last-90-days':
-      return { from: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000), to: now }
+      return {
+        from: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
+        to: now,
+      }
   }
 }
 
@@ -582,68 +592,81 @@ export const getNextMovieToWatch = createServerFn({ method: 'GET' })
 
 export const getMoviesByUser = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((data: { scope: 'everyone' | 'mine'; userId?: string; preset: DatePreset }) => data)
-  .handler(async ({ context, data }): Promise<{ moviesByUser: Array<MoviesByUser>; totalMovies: number }> => {
-    if (!context.user) throw new Error('Unauthorized')
-    if (data.scope === 'mine' && data.userId) {
-      if (context.user.userId !== data.userId) throw new Error('Forbidden')
-    }
-
-    try {
-      const dateRange = getDateRange(data.preset)
-
-      const conditions = [isNotNull(movie.watchDate)]
+  .inputValidator(
+    (data: {
+      scope: 'everyone' | 'mine'
+      userId?: string
+      preset: DatePreset
+    }) => data,
+  )
+  .handler(
+    async ({
+      context,
+      data,
+    }): Promise<{ moviesByUser: Array<MoviesByUser>; totalMovies: number }> => {
+      if (!context.user) throw new Error('Unauthorized')
       if (data.scope === 'mine' && data.userId) {
-        conditions.push(eq(movie.userId, data.userId))
-      }
-      if (dateRange) {
-        conditions.push(gte(movie.watchDate, dateRange.from))
-        conditions.push(lte(movie.watchDate, dateRange.to))
+        if (context.user.userId !== data.userId) throw new Error('Forbidden')
       }
 
-      const rows = await db
-        .select({
-          userId: movie.userId,
-        })
-        .from(movie)
-        .where(and(...conditions))
+      try {
+        const dateRange = getDateRange(data.preset)
 
-      const totalMovies = rows.length
-
-      const userIds = [...new Set(rows.map((r) => r.userId).filter(Boolean))] as Array<string>
-      const users =
-        userIds.length > 0
-          ? await db
-              .select({ id: user.id, name: user.name, image: user.image })
-              .from(user)
-              .where(inArray(user.id, userIds))
-          : []
-
-      const userMap = new Map(users.map((u) => [u.id, u]))
-      const userCountMap = new Map<string, number>()
-      rows.forEach((r) => {
-        if (r.userId) {
-          userCountMap.set(r.userId, (userCountMap.get(r.userId) || 0) + 1)
+        const conditions = [isNotNull(movie.watchDate)]
+        if (data.scope === 'mine' && data.userId) {
+          conditions.push(eq(movie.userId, data.userId))
         }
-      })
+        if (dateRange) {
+          conditions.push(gte(movie.watchDate, dateRange.from))
+          conditions.push(lte(movie.watchDate, dateRange.to))
+        }
 
-      const moviesByUser = Array.from(userCountMap.entries())
-        .map(([id, count]) => {
-          const u = userMap.get(id)
-          return {
-            userName: u?.name || 'Unknown',
-            userImage: u?.image || '',
-            count,
+        const rows = await db
+          .select({
+            userId: movie.userId,
+          })
+          .from(movie)
+          .where(and(...conditions))
+
+        const totalMovies = rows.length
+
+        const userIds = [
+          ...new Set(rows.map((r) => r.userId).filter(Boolean)),
+        ] as Array<string>
+        const users =
+          userIds.length > 0
+            ? await db
+                .select({ id: user.id, name: user.name, image: user.image })
+                .from(user)
+                .where(inArray(user.id, userIds))
+            : []
+
+        const userMap = new Map(users.map((u) => [u.id, u]))
+        const userCountMap = new Map<string, number>()
+        rows.forEach((r) => {
+          if (r.userId) {
+            userCountMap.set(r.userId, (userCountMap.get(r.userId) || 0) + 1)
           }
         })
-        .sort((a, b) => b.count - a.count)
 
-      return { moviesByUser, totalMovies }
-    } catch (error) {
-      console.error('Error fetching movies by user:', error)
-      return { moviesByUser: [], totalMovies: 0 }
-    }
-  })
+        const moviesByUser = Array.from(userCountMap.entries())
+          .map(([id, count]) => {
+            const u = userMap.get(id)
+            return {
+              userName: u?.name || 'Unknown',
+              userImage: u?.image || '',
+              count,
+            }
+          })
+          .sort((a, b) => b.count - a.count)
+
+        return { moviesByUser, totalMovies }
+      } catch (error) {
+        console.error('Error fetching movies by user:', error)
+        return { moviesByUser: [], totalMovies: 0 }
+      }
+    },
+  )
 
 export const dashboardQueries = {
   all: () => ['dashboard'],

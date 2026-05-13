@@ -17,18 +17,12 @@ export const Route = createFileRoute('/api/tierlists/share/discord')({
           const sessionToken = session.data.sessionToken
 
           if (!sessionToken) {
-            return Response.json(
-              { error: 'Unauthorized' },
-              { status: 401 },
-            )
+            return Response.json({ error: 'Unauthorized' }, { status: 401 })
           }
 
           const validSession = await validateSessionToken(sessionToken)
           if (!validSession) {
-            return Response.json(
-              { error: 'Unauthorized' },
-              { status: 401 },
-            )
+            return Response.json({ error: 'Unauthorized' }, { status: 401 })
           }
 
           const { content, imageBlob } = (await request.json()) as {
@@ -77,7 +71,10 @@ export const Route = createFileRoute('/api/tierlists/share/discord')({
           const user = await getSessionUser(sessionToken)
           let finalContent = content
           if (user) {
-            const discordAccount = await getAccountByUserId(user.userId, 'discord')
+            const discordAccount = await getAccountByUserId(
+              user.userId,
+              'discord',
+            )
             if (discordAccount) {
               finalContent = `${content} — <@${discordAccount.providerAccountId}>`
             }

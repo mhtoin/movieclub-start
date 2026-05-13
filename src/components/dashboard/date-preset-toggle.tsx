@@ -1,6 +1,11 @@
-import { Calendar, Clock, Infinity, Sparkles } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import {
+  Calendar,
+  Clock,
+  Infinity as InfinityIcon,
+  Sparkles,
+} from 'lucide-react'
 import type { DatePreset } from '@/lib/react-query/queries/dashboard'
+import { cn } from '@/lib/utils'
 
 interface DatePresetToggleProps {
   value: DatePreset
@@ -13,7 +18,12 @@ const presets: Array<{
   shortLabel: string
   icon: React.ElementType
 }> = [
-  { value: 'all-time', label: 'All Time', shortLabel: 'All', icon: Infinity },
+  {
+    value: 'all-time',
+    label: 'All Time',
+    shortLabel: 'All',
+    icon: InfinityIcon,
+  },
   {
     value: 'current-year',
     label: 'This Year',

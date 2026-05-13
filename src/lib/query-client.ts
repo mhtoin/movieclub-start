@@ -28,8 +28,7 @@ export function createQueryClient() {
           if (!isNetworkError(error)) return false
           return failureCount < 2
         },
-        retryDelay: (attemptIndex) =>
-          Math.min(1000 * 2 ** attemptIndex, 30000),
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
       dehydrate: {
         shouldDehydrateQuery: (query) =>

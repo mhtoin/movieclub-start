@@ -1,6 +1,6 @@
-import {  useMutation } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import type {UseMutationResult} from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query'
 import {
   loginFn,
   registerFn,

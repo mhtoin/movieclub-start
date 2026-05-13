@@ -6,12 +6,7 @@ import { authMiddleware } from '@/middleware/auth'
 import { user as userTable } from '@/db/schema/users'
 import { db } from '@/db/db'
 
-const schemeValidator = z.enum([
-  'default',
-  'mono',
-  'teal',
-  'tokyo',
-])
+const schemeValidator = z.enum(['default', 'mono', 'teal', 'tokyo'])
 export type ColorScheme = z.infer<typeof schemeValidator>
 
 export const COLOR_SCHEMES = {

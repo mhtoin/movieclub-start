@@ -1,7 +1,7 @@
-import { getImageUrl } from '@/lib/tmdb-api'
 import { Star } from 'lucide-react'
-import type { DashboardListItemRenderer } from './dashboard-list'
 import { DashboardList } from './dashboard-list'
+import type { DashboardListItemRenderer } from './dashboard-list'
+import { getImageUrl } from '@/lib/tmdb-api'
 
 interface TopMovie {
   title: string

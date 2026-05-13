@@ -72,8 +72,9 @@ export default function ToastList() {
   const { toasts } = Toast.useToastManager()
   return toasts.map((toast) => {
     const type =
-      ((toast as unknown as Record<string, unknown>).type as ToastType | undefined) ??
-      'default'
+      ((toast as unknown as Record<string, unknown>).type as
+        | ToastType
+        | undefined) ?? 'default'
     const {
       Icon,
       typeLabel,

@@ -18,7 +18,7 @@ export default function WatchedSkeleton() {
                 </div>
               </div>
               <div className="ml-12 space-y-4">
-                {Array.from({ length: 4 }, (__ , itemIndex) => (
+                {Array.from({ length: 4 }, (__, itemIndex) => (
                   <div
                     key={itemIndex}
                     className="bg-card border rounded-lg p-4 transition-all duration-200"

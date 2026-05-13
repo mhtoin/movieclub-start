@@ -1,7 +1,7 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs'
-import {  cva } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 import * as React from 'react'
-import type {VariantProps} from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const tabsRootVariants = cva('rounded-md', {
@@ -96,28 +96,23 @@ const tabsPanelVariants = cva(
 )
 
 interface TabsRootProps
-  extends
-    React.ComponentProps<typeof BaseTabs.Root>,
+  extends React.ComponentProps<typeof BaseTabs.Root>,
     VariantProps<typeof tabsRootVariants> {}
 
 interface TabsListProps
-  extends
-    React.ComponentProps<typeof BaseTabs.List>,
+  extends React.ComponentProps<typeof BaseTabs.List>,
     VariantProps<typeof tabsListVariants> {}
 
 interface TabProps
-  extends
-    React.ComponentProps<typeof BaseTabs.Tab>,
+  extends React.ComponentProps<typeof BaseTabs.Tab>,
     VariantProps<typeof tabVariants> {}
 
 interface TabsIndicatorProps
-  extends
-    React.ComponentProps<typeof BaseTabs.Indicator>,
+  extends React.ComponentProps<typeof BaseTabs.Indicator>,
     VariantProps<typeof tabsIndicatorVariants> {}
 
 interface TabsPanelProps
-  extends
-    React.ComponentProps<typeof BaseTabs.Panel>,
+  extends React.ComponentProps<typeof BaseTabs.Panel>,
     VariantProps<typeof tabsPanelVariants> {}
 
 const TabsRoot = React.forwardRef<

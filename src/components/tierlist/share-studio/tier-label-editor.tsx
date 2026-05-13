@@ -18,7 +18,9 @@ export function TierLabelEditor({
   onOverridesChange: (overrides: Record<string, string>) => void
   onColorsChange: (colors: Record<string, string>) => void
 }) {
-  const ranked = tiers.filter((t) => t.id !== 'unranked').sort((a, b) => a.value - b.value)
+  const ranked = tiers
+    .filter((t) => t.id !== 'unranked')
+    .sort((a, b) => a.value - b.value)
 
   return (
     <div className="space-y-2">

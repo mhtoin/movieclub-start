@@ -30,7 +30,14 @@ export function TierHeader({
         shape={settings.tierLabelShape}
         size="sm"
       />
-      <div style={{ flex: 1, height: 2, background: theme.border, borderRadius: 1 }} />
+      <div
+        style={{
+          flex: 1,
+          height: 2,
+          background: theme.border,
+          borderRadius: 1,
+        }}
+      />
       {count !== undefined && (
         <span style={{ fontSize: 13, color: theme.muted }}>{count}</span>
       )}

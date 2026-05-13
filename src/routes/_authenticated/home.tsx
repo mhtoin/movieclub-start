@@ -8,7 +8,7 @@ import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 
 export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
-    const userId = context.user?.userId
+    const userId = context.user.userId
 
     await context.queryClient.ensureQueryData(movieQueries.latest())
     await context.queryClient.ensureQueryData(shortlistQueries.all())
@@ -28,7 +28,7 @@ function Home() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground">
       <Suspense fallback={<LandingSkeleton />}>
-        <LandingPage userId={user?.userId || ''} />
+        <LandingPage userId={user.userId || ''} />
       </Suspense>
     </div>
   )

@@ -213,12 +213,8 @@
           "name": "movie_userId_user_id_fk",
           "tableFrom": "movie",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -226,12 +222,8 @@
           "name": "Movie_userId_fkey",
           "tableFrom": "movie",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -273,12 +265,8 @@
           "name": "movie_credits_id_movie_id_fk",
           "tableFrom": "movie_credits",
           "tableTo": "movie",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -345,12 +333,8 @@
           "name": "_MovieToRaffle_A_fkey",
           "tableFrom": "_movie_to_raffle",
           "tableTo": "movie",
-          "columnsFrom": [
-            "A"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["A"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -358,12 +342,8 @@
           "name": "_MovieToRaffle_B_fkey",
           "tableFrom": "_movie_to_raffle",
           "tableTo": "raffle",
-          "columnsFrom": [
-            "B"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["B"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -371,10 +351,7 @@
       "compositePrimaryKeys": {
         "_MovieToRaffle_AB_pkey": {
           "name": "_MovieToRaffle_AB_pkey",
-          "columns": [
-            "A",
-            "B"
-          ]
+          "columns": ["A", "B"]
         }
       },
       "uniqueConstraints": {},
@@ -438,12 +415,8 @@
           "name": "_MovieToShortlist_A_fkey",
           "tableFrom": "_movie_to_shortlist",
           "tableTo": "movie",
-          "columnsFrom": [
-            "A"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["A"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -451,12 +424,8 @@
           "name": "_MovieToShortlist_B_fkey",
           "tableFrom": "_movie_to_shortlist",
           "tableTo": "shortlist",
-          "columnsFrom": [
-            "B"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["B"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -464,10 +433,7 @@
       "compositePrimaryKeys": {
         "_MovieToShortlist_AB_pkey": {
           "name": "_MovieToShortlist_AB_pkey",
-          "columns": [
-            "A",
-            "B"
-          ]
+          "columns": ["A", "B"]
         }
       },
       "uniqueConstraints": {},
@@ -563,12 +529,8 @@
           "name": "RecommendedMovie_movieId_fkey",
           "tableFrom": "recommended_movie",
           "tableTo": "movie",
-          "columnsFrom": [
-            "movieId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["movieId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -576,12 +538,8 @@
           "name": "RecommendedMovie_userId_fkey",
           "tableFrom": "recommended_movie",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -589,12 +547,8 @@
           "name": "RecommendedMovie_sourceMovieId_fkey",
           "tableFrom": "recommended_movie",
           "tableTo": "movie",
-          "columnsFrom": [
-            "sourceMovieId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["sourceMovieId"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "cascade"
         }
@@ -684,12 +638,8 @@
           "name": "Review_userId_fkey",
           "tableFrom": "review",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "cascade"
         },
@@ -697,12 +647,8 @@
           "name": "Review_movieId_fkey",
           "tableFrom": "review",
           "tableTo": "movie",
-          "columnsFrom": [
-            "movieId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["movieId"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "cascade"
         }
@@ -791,12 +737,8 @@
           "name": "_RaffleToUser_A_fkey",
           "tableFrom": "_raffle_to_user",
           "tableTo": "raffle",
-          "columnsFrom": [
-            "A"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["A"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -804,12 +746,8 @@
           "name": "_RaffleToUser_B_fkey",
           "tableFrom": "_raffle_to_user",
           "tableTo": "user",
-          "columnsFrom": [
-            "B"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["B"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -817,10 +755,7 @@
       "compositePrimaryKeys": {
         "_RaffleToUser_AB_pkey": {
           "name": "_RaffleToUser_AB_pkey",
-          "columns": [
-            "A",
-            "B"
-          ]
+          "columns": ["A", "B"]
         }
       },
       "uniqueConstraints": {},
@@ -900,12 +835,8 @@
           "name": "Session_userId_fkey",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -983,12 +914,8 @@
           "name": "Shortlist_userId_fkey",
           "tableFrom": "shortlist",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1104,12 +1031,8 @@
           "name": "MoviesOnTiers_movieId_fkey",
           "tableFrom": "movies_on_tiers",
           "tableTo": "movie",
-          "columnsFrom": [
-            "movieId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["movieId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1117,12 +1040,8 @@
           "name": "MoviesOnTiers_tierId_fkey",
           "tableFrom": "movies_on_tiers",
           "tableTo": "tier",
-          "columnsFrom": [
-            "tierId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tierId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1184,12 +1103,8 @@
           "name": "Tier_tierlistId_fkey",
           "tableFrom": "tier",
           "tableTo": "tierlist",
-          "columnsFrom": [
-            "tierlistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tierlistId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1254,12 +1169,8 @@
           "name": "Tierlist_userId_fkey",
           "tableFrom": "tierlist",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1381,12 +1292,8 @@
           "name": "Account_userId_fkey",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1432,12 +1339,8 @@
           "name": "password_reset_token_userId_user_id_fk",
           "tableFrom": "password_reset_token",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1447,9 +1350,7 @@
         "password_reset_token_token_unique": {
           "name": "password_reset_token_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1584,11 +1485,7 @@
     "public.Trailer": {
       "name": "Trailer",
       "schema": "public",
-      "values": [
-        "name",
-        "id",
-        "key"
-      ]
+      "values": ["name", "id", "key"]
     }
   },
   "schemas": {},

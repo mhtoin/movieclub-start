@@ -19,11 +19,20 @@ export function TextListItem({
   const metaItems: Array<string> = []
   if (settings.showMovieYear && year) metaItems.push(year)
   if (settings.showMovieRuntime && runtime) metaItems.push(runtime)
-  if (settings.showMovieRating && rating && Number(rating) > 0) metaItems.push(`★ ${rating}`)
+  if (settings.showMovieRating && rating && Number(rating) > 0)
+    metaItems.push(`★ ${rating}`)
   if (settings.showMovieGenres && genres) metaItems.push(genres)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 6, borderBottom: `1px solid ${theme.border}` }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        paddingBottom: 6,
+        borderBottom: `1px solid ${theme.border}`,
+      }}
+    >
       <span
         style={{
           fontSize: 14,

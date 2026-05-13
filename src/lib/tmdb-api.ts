@@ -112,7 +112,8 @@ const GENRES_CACHE_KEY = 'tmdb:genres'
 const GENRES_TTL = 1000 * 60 * 60 * 24 * 7 // 7 days
 
 export async function getFilters() {
-  const cached = getCached<Array<{ label: string; value: string }>>(GENRES_CACHE_KEY)
+  const cached =
+    getCached<Array<{ label: string; value: string }>>(GENRES_CACHE_KEY)
   if (cached) return cached
 
   const res = await fetch(
@@ -129,9 +130,11 @@ export async function getFilters() {
   const responseBody = await res.json()
 
   if (responseBody.genres) {
-    const genres = responseBody.genres.map((genre: { name: string; id: number }) => {
-      return { label: genre.name, value: genre.id.toString() }
-    }) as Array<{ label: string; value: string }>
+    const genres = responseBody.genres.map(
+      (genre: { name: string; id: number }) => {
+        return { label: genre.name, value: genre.id.toString() }
+      },
+    ) as Array<{ label: string; value: string }>
     setCache(GENRES_CACHE_KEY, genres, GENRES_TTL)
     return genres
   }

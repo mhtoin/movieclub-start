@@ -165,16 +165,15 @@ function StickyUnrankedTier({
                   items={tier.movies.map((movie) => movie.id)}
                   strategy={rectSortingStrategy}
                 >
-                  <div
-                    ref={setNodeRef}
-                    className="flex-1 overflow-y-auto p-3"
-                  >
+                  <div ref={setNodeRef} className="flex-1 overflow-y-auto p-3">
                     {movieCount === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center">
                         <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
                           <Inbox className="w-7 h-7 text-muted-foreground/50" />
                         </div>
-                        <p className="text-sm font-medium text-foreground mb-1">All ranked!</p>
+                        <p className="text-sm font-medium text-foreground mb-1">
+                          All ranked!
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           Drag movies here to unrank them
                         </p>
@@ -211,11 +210,13 @@ function StickyUnrankedTier({
             <Inbox className="w-4 h-4" />
             <span className="text-xs font-medium">Unranked</span>
             {movieCount > 0 && (
-              <span className={`flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[10px] font-bold rounded-full ${
-                isOver
-                  ? 'bg-white/20 text-white'
-                  : 'bg-primary text-primary-foreground'
-              }`}>
+              <span
+                className={`flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[10px] font-bold rounded-full ${
+                  isOver
+                    ? 'bg-white/20 text-white'
+                    : 'bg-primary text-primary-foreground'
+                }`}
+              >
                 {movieCount}
               </span>
             )}

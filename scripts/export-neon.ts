@@ -2,10 +2,10 @@
  * Export script to download data from Neon PostgreSQL database to CSV files
  * Run with: pnpm db:export
  */
+import fs from 'node:fs'
+import path from 'node:path'
 import { stringify } from 'csv-stringify/sync'
 import 'dotenv/config'
-import fs from 'fs'
-import path from 'path'
 import postgres from 'postgres'
 
 const EXPORT_DIR = path.join(process.cwd(), 'data', 'exports')
@@ -38,55 +38,61 @@ async function exportTable(
   console.log(`  Exporting "${tableName}"...`)
 
   try {
-    let rows: Record<string, unknown>[]
+    let rows: Array<Record<string, unknown>>
 
     if (tableName === 'Tierlist') {
-      const rawRows =
-        await sql.unsafe(`SELECT * FROM "${tableName}"`)
-      rows = Array.from(rawRows as Record<string, unknown>[]).map((row) => {
-        const transformed = { ...row }
-        if (
-          transformed.watchDate &&
-          (typeof transformed.watchDate === 'object' ||
-            typeof transformed.watchDate === 'string')
-        ) {
-          let watchDate: { from?: string; to?: string } | null = null
-          if (typeof transformed.watchDate === 'string') {
-            try {
-              watchDate = JSON.parse(transformed.watchDate)
-            } catch {
-              watchDate = null
+      const rawRows = await sql.unsafe(`SELECT * FROM "${tableName}"`)
+      rows = Array.from(rawRows as Array<Record<string, unknown>>).map(
+        (row) => {
+          const transformed = { ...row }
+          if (
+            transformed.watchDate &&
+            (typeof transformed.watchDate === 'object' ||
+              typeof transformed.watchDate === 'string')
+          ) {
+            let watchDate: { from?: string; to?: string } | null = null
+            if (typeof transformed.watchDate === 'string') {
+              try {
+                watchDate = JSON.parse(transformed.watchDate)
+              } catch {
+                watchDate = null
+              }
+            } else {
+              watchDate = transformed.watchDate as {
+                from?: string
+                to?: string
+              }
             }
-          } else {
-            watchDate = transformed.watchDate as { from?: string; to?: string }
+            if (watchDate) {
+              if (watchDate.from) {
+                transformed.watchDateFrom = watchDate.from
+              }
+              if (watchDate.to) {
+                transformed.watchDateTo = watchDate.to
+              }
+            }
+            delete transformed.watchDate
           }
-          if (watchDate) {
-            if (watchDate.from) {
-              transformed.watchDateFrom = watchDate.from
-            }
-            if (watchDate.to) {
-              transformed.watchDateTo = watchDate.to
-            }
-          }
-          delete transformed.watchDate
-        }
-        return transformed
-      })
+          return transformed
+        },
+      )
     } else if (tableName === 'Tier') {
-      const rawRows =
-        await sql.unsafe(`SELECT * FROM "${tableName}"`)
-      rows = Array.from(rawRows as Record<string, unknown>[]).filter((row) => {
-        const isUnranked =
-          row.label === 'Unranked' && (row.value === 0 || row.value === '0')
-        if (isUnranked) {
-          unrankedTierIds.add(row.id as string)
-        }
-        return !isUnranked
-      })
+      const rawRows = await sql.unsafe(`SELECT * FROM "${tableName}"`)
+      rows = Array.from(rawRows as Array<Record<string, unknown>>).filter(
+        (row) => {
+          const isUnranked =
+            row.label === 'Unranked' && (row.value === 0 || row.value === '0')
+          if (isUnranked) {
+            unrankedTierIds.add(row.id as string)
+          }
+          return !isUnranked
+        },
+      )
     } else if (tableName === 'MoviesOnTiers') {
-      const rawRows =
-        await sql.unsafe(`SELECT * FROM "${tableName}"`)
-      rows = Array.from(rawRows as Record<string, unknown>[]).filter((row) => !unrankedTierIds.has(row.tierId as string))
+      const rawRows = await sql.unsafe(`SELECT * FROM "${tableName}"`)
+      rows = Array.from(rawRows as Array<Record<string, unknown>>).filter(
+        (row) => !unrankedTierIds.has(row.tierId as string),
+      )
     } else {
       rows = await sql.unsafe(`SELECT * FROM "${tableName}"`)
     }

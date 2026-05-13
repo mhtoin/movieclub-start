@@ -32,7 +32,7 @@ interface JournalEntry {
 }
 
 interface Journal {
-  entries: JournalEntry[]
+  entries: Array<JournalEntry>
 }
 
 const journal: Journal = JSON.parse(

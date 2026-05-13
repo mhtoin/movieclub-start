@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Check, ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import MobileFilter from './mobile-filter'
-import type { WatchProvider  } from '@/lib/tmdb-api';
+import type { WatchProvider } from '@/lib/tmdb-api'
 import {
   ComboboxInput,
   ComboboxItem,
@@ -10,7 +10,7 @@ import {
   ComboboxRoot,
   ComboboxTrigger,
 } from '@/components/ui/combobox'
-import { getImageUrl  } from '@/lib/tmdb-api'
+import { getImageUrl } from '@/lib/tmdb-api'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
 interface ProviderFilterProps {

@@ -2,7 +2,8 @@ import { Toast } from '@base-ui/react/toast'
 import {
   HeadContent,
   Link,
-  Scripts, createRootRouteWithContext 
+  Scripts,
+  createRootRouteWithContext,
 } from '@tanstack/react-router'
 
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
@@ -90,7 +91,10 @@ export const Route = createRootRouteWithContext<{
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
+      {
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1, viewport-fit=cover',
+      },
       { title: 'leffaseura' },
     ],
     links: [

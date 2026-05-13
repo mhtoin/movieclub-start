@@ -1,8 +1,8 @@
-import { config } from 'dotenv';
-import { defineConfig } from 'drizzle-kit';
+import { config } from 'dotenv'
+import { defineConfig } from 'drizzle-kit'
 
 // Load .env.local file
-config({ path: '.env.local' });
+config({ path: '.env.local' })
 
 export default defineConfig({
   out: './drizzle',
@@ -11,4 +11,4 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
-});
+})

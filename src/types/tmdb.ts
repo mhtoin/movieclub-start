@@ -1,7 +1,7 @@
 export interface TMDBMovieResponse {
   adult: boolean
   backdrop_path: string | null
-  belongs_to_collection: null | object 
+  belongs_to_collection: null | object
   budget: number
   genres: Array<Genre>
   homepage: string
@@ -20,18 +20,18 @@ export interface TMDBMovieResponse {
   runtime: number
   spoken_languages: Array<SpokenLanguage>
   status:
-    | "Released"
-    | "Post Production"
-    | "In Production"
-    | "Planned"
-    | "Canceled"
+    | 'Released'
+    | 'Post Production'
+    | 'In Production'
+    | 'Planned'
+    | 'Canceled'
   tagline: string
   title: string
   video: boolean
   vote_average: number
   vote_count: number
   credits: Credits
-  "watch/providers"?: WatchProviders // Simplified version, can expand as needed
+  'watch/providers'?: WatchProviders // Simplified version, can expand as needed
   images?: {
     backdrops: Array<Image>
     posters: Array<Image>

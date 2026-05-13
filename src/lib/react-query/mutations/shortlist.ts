@@ -194,7 +194,10 @@ export const useRemoveFromShortlistMutation = () => {
       })
     },
     onSuccess: (updatedShortlist) => {
-      queryClient.setQueryData(['shortlist', updatedShortlist.userId], updatedShortlist)
+      queryClient.setQueryData(
+        ['shortlist', updatedShortlist.userId],
+        updatedShortlist,
+      )
       queryClient.invalidateQueries({
         queryKey: ['shortlist', updatedShortlist.userId],
       })
@@ -224,7 +227,10 @@ export const useAddToShortlistMutation = () => {
       })
     },
     onSuccess: (updatedShortlist) => {
-      queryClient.setQueryData(['shortlist', updatedShortlist.userId], updatedShortlist)
+      queryClient.setQueryData(
+        ['shortlist', updatedShortlist.userId],
+        updatedShortlist,
+      )
       queryClient.invalidateQueries({
         queryKey: ['shortlist', updatedShortlist.userId],
       })
@@ -366,11 +372,7 @@ export const useToggleIsReadyMutation = () => {
           ['shortlists', 'all'],
           (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
-            return old.map((s) =>
-              s.userId === userId
-                ? { ...s, isReady }
-                : s,
-            )
+            return old.map((s) => (s.userId === userId ? { ...s, isReady } : s))
           },
         )
       }
@@ -452,9 +454,7 @@ export const useToggleParticipatingMutation = () => {
           (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
             return old.map((s) =>
-              s.userId === userId
-                ? { ...s, participating }
-                : s,
+              s.userId === userId ? { ...s, participating } : s,
             )
           },
         )
@@ -747,9 +747,7 @@ export const useUpdateSelectedIndexMutation = () => {
           (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
             return old.map((s) =>
-              s.userId === userId
-                ? { ...s, selectedIndex }
-                : s,
+              s.userId === userId ? { ...s, selectedIndex } : s,
             )
           },
         )
@@ -870,9 +868,7 @@ export const useUpdateUserSelectedIndexMutation = () => {
           (old: Array<ShortlistWithUserMovies> | undefined) => {
             if (!old) return old
             return old.map((s) =>
-              s.userId === userId
-                ? { ...s, selectedIndex }
-                : s,
+              s.userId === userId ? { ...s, selectedIndex } : s,
             )
           },
         )

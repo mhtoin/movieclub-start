@@ -16,11 +16,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-movieclub}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
       POSTGRES_DB: ${POSTGRES_DB:-movieclub}
-    command: ["postgres", "-c", "wal_level=logical"]
+    command: ['postgres', '-c', 'wal_level=logical']
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-movieclub} -d ${POSTGRES_DB:-movieclub}']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-movieclub} -d ${POSTGRES_DB:-movieclub}',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -73,7 +77,7 @@ services:
       - movieclub-network
     # Expose app on port 3001 for Nginx Proxy Manager to proxy
     ports:
-      - "3001:3001"
+      - '3001:3001'
 
 networks:
   movieclub-network:

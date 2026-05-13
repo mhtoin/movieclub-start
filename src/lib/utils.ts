@@ -1,6 +1,6 @@
-import {  clsx } from 'clsx'
+import { clsx } from 'clsx'
 import { format } from 'date-fns'
-import type {ClassValue} from 'clsx';
+import type { ClassValue } from 'clsx'
 import type { Movie } from '@/db/schema/movies'
 import { getImageUrl } from '@/lib/tmdb-api'
 

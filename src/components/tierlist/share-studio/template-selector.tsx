@@ -23,8 +23,12 @@ export function TemplateSelector({
                 : 'border-border bg-muted hover:border-primary/30 hover:bg-primary/[0.05]'
             }`}
           >
-            <div className="text-sm font-medium text-foreground">{tmpl.name}</div>
-            <div className="text-[11px] text-muted-foreground leading-snug">{tmpl.description}</div>
+            <div className="text-sm font-medium text-foreground">
+              {tmpl.name}
+            </div>
+            <div className="text-[11px] text-muted-foreground leading-snug">
+              {tmpl.description}
+            </div>
             {active && (
               <div className="absolute top-1.5 right-1.5">
                 <Check className="h-3.5 w-3.5 text-primary" />

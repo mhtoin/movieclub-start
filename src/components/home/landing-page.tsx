@@ -1,7 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'framer-motion'
 
-
 import { MarqueeHero } from './marquee-hero'
 import { ShortlistStrip } from './shortlist-strip'
 import { ClubSnapshot } from './club-snapshot'
@@ -37,7 +36,9 @@ export function LandingPage({ userId }: { userId: string }) {
   const shouldReduceMotion = useReducedMotion()
 
   const { data: latestMovieData } = useSuspenseQuery(movieQueries.latest())
-  const { data: userShortlist } = useSuspenseQuery(shortlistQueries.byUser(userId))
+  const { data: userShortlist } = useSuspenseQuery(
+    shortlistQueries.byUser(userId),
+  )
   const { data: allShortlists = [] } = useSuspenseQuery(shortlistQueries.all())
   const { data: stats } = useSuspenseQuery(dashboardQueries.stats(userId))
   const { data: allWatched = [] } = useSuspenseQuery(movieQueries.allWatched())
@@ -142,7 +143,7 @@ export function LandingSkeleton() {
                     <div className="hidden sm:block h-4 w-24 animate-pulse rounded bg-muted" />
                   </div>
                   <div className="flex-1 flex items-center -space-x-3 overflow-hidden">
-                    {Array.from({ length: 5 }).map((_, j) => (
+                    {Array.from({ length: 5 }).map((_item, j) => (
                       <div
                         key={j}
                         className="h-20 w-12 sm:h-24 sm:w-14 md:h-28 md:w-[4.5rem] lg:h-32 lg:w-20 rounded-lg animate-pulse bg-muted flex-shrink-0 border-2 border-white/50"

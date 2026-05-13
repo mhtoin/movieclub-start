@@ -144,8 +144,7 @@ function WatchedMoviesList({
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground">
-                      {movies.length}{' '}
-                      {movies.length === 1 ? 'movie' : 'movies'}
+                      {movies.length} {movies.length === 1 ? 'movie' : 'movies'}
                     </p>
                   </div>
                 </div>

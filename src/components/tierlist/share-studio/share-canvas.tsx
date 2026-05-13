@@ -29,8 +29,12 @@ export function ShareCanvas({
     const { watchDateFrom, watchDateTo } = tierlist
     if (!watchDateFrom && !watchDateTo) return null
     const fmt = (d: string) =>
-      new Date(d).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-    if (watchDateFrom && watchDateTo) return `${fmt(watchDateFrom)} — ${fmt(watchDateTo)}`
+      new Date(d).toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      })
+    if (watchDateFrom && watchDateTo)
+      return `${fmt(watchDateFrom)} — ${fmt(watchDateTo)}`
     if (watchDateFrom) return `From ${fmt(watchDateFrom)}`
     if (watchDateTo) return `Until ${fmt(watchDateTo)}`
     return null
@@ -55,7 +59,12 @@ export function ShareCanvas({
       return { background: settings.backgroundSolid }
     }
     return { background: theme.bg }
-  }, [settings.backgroundType, settings.backgroundImage, settings.backgroundSolid, theme.bg])
+  }, [
+    settings.backgroundType,
+    settings.backgroundImage,
+    settings.backgroundSolid,
+    theme.bg,
+  ])
 
   const accent = settings.accentColor ?? theme.accent
 
@@ -125,17 +134,20 @@ export function ShareCanvas({
         >
           {settings.showAuthor && userName && (
             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <User size={14} />{userName}
+              <User size={14} />
+              {userName}
             </span>
           )}
           {settings.showDateRange && dateRangeText && (
             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Calendar size={14} />{dateRangeText}
+              <Calendar size={14} />
+              {dateRangeText}
             </span>
           )}
           {settings.showMovieCount && (
             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Layers size={14} />{totalMovies} films
+              <Layers size={14} />
+              {totalMovies} films
             </span>
           )}
         </div>

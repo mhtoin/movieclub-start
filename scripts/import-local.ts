@@ -3,11 +3,11 @@
  * Transforms data to match the new schema (lowercase table names, dropped columns)
  * Run with: pnpm db:import
  */
+import fs from 'node:fs'
+import path from 'node:path'
 import bcrypt from 'bcryptjs'
 import { parse } from 'csv-parse/sync'
 import 'dotenv/config'
-import fs from 'fs'
-import path from 'path'
 import postgres from 'postgres'
 
 // Default password for imported users (they should change this)
@@ -89,7 +89,7 @@ const IMPORT_ORDER = [
 // Delete order (reverse of import order to respect foreign keys)
 const DELETE_ORDER = [...IMPORT_ORDER].reverse()
 
-function readCsvFile(tableName: string): Record<string, unknown>[] | null {
+function readCsvFile(tableName: string): Array<Record<string, unknown>> | null {
   const filePath = path.join(EXPORT_DIR, `${tableName}.csv`)
 
   if (!fs.existsSync(filePath)) {
@@ -119,7 +119,7 @@ function readCsvFile(tableName: string): Record<string, unknown>[] | null {
       if (value === 'false') return false
       return value
     },
-  }) as Record<string, unknown>[]
+  })
 
   return records
 }
@@ -131,7 +131,7 @@ function transformRow(
   const transformed = { ...row }
 
   // Drop columns based on table
-  let columnsToDrop: string[] = []
+  let columnsToDrop: Array<string> = []
   switch (tableName) {
     case 'Movie':
       columnsToDrop = MOVIE_COLUMNS_TO_DROP
@@ -238,7 +238,7 @@ async function importTable(
   // Build insert query
   // We need to handle the insert carefully for each row
   let insertedCount = 0
-  const failedRows: { row: Record<string, unknown>; error: string }[] = []
+  const failedRows: Array<{ row: Record<string, unknown>; error: string }> = []
 
   for (const row of transformedRows) {
     try {
@@ -253,7 +253,7 @@ async function importTable(
           return JSON.stringify(value)
         }
         return value
-      }) as postgres.ParameterOrJSON<never>[]
+      }) as Array<postgres.ParameterOrJSON<never>>
 
       // Build parameterized query
       const columnList = columns.map((c) => `"${c}"`).join(', ')
@@ -311,7 +311,7 @@ async function importMovieCredits(sql: postgres.Sql): Promise<number> {
   }
 
   let insertedCount = 0
-  const failedRows: { id: string; error: string }[] = []
+  const failedRows: Array<{ id: string; error: string }> = []
 
   for (const row of creditsRows) {
     const cast =
@@ -325,7 +325,7 @@ async function importMovieCredits(sql: postgres.Sql): Promise<number> {
     try {
       await sql.unsafe(
         `INSERT INTO "movie_credits" ("id", "cast", "crew") VALUES ($1, $2, $3) ON CONFLICT ("id") DO NOTHING`,
-        [row.id, cast, crew] as postgres.ParameterOrJSON<never>[],
+        [row.id, cast, crew] as Array<postgres.ParameterOrJSON<never>>,
       )
       insertedCount++
     } catch (error) {

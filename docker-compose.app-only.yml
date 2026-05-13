@@ -29,4 +29,4 @@ services:
       VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
       VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
     ports:
-      - "3001:3001"
+      - '3001:3001'

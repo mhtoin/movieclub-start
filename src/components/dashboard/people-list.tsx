@@ -1,5 +1,5 @@
-import { DashboardList  } from './dashboard-list'
-import type {DashboardListItemRenderer} from './dashboard-list';
+import { DashboardList } from './dashboard-list'
+import type { DashboardListItemRenderer } from './dashboard-list'
 import type { PersonCount } from '@/lib/react-query/queries/dashboard'
 import { getImageUrl } from '@/lib/tmdb-api'
 

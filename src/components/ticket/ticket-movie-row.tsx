@@ -38,9 +38,7 @@ export function TicketMovieRow({
     : 'flex items-center gap-3 p-2 rounded-md bg-transparent'
 
   const selectedClass =
-    showSelection && isSelected
-      ? 'border-primary/30 bg-primary/3'
-      : ''
+    showSelection && isSelected ? 'border-primary/30 bg-primary/3' : ''
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (showSelection && onSelect && !isLoading) {

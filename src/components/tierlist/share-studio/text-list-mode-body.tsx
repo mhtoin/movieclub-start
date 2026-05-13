@@ -20,7 +20,12 @@ export function TextListModeBody({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       {rankedTiers.map((tier) => {
         const label = getLabel(tier)
-        const tierColor = getTierColor(tier.label, settings.theme, settings.tierLabelCustomColors, tier.value)
+        const tierColor = getTierColor(
+          tier.label,
+          settings.theme,
+          settings.tierLabelCustomColors,
+          tier.value,
+        )
         const colCount = settings.textListColumns
         const colGap = colCount > 3 ? 16 : 24
 
@@ -42,7 +47,12 @@ export function TextListModeBody({
               }}
             >
               {tier.movies.map((m) => (
-                <TextListItem key={m.id} movie={m} settings={settings} theme={theme} />
+                <TextListItem
+                  key={m.id}
+                  movie={m}
+                  settings={settings}
+                  theme={theme}
+                />
               ))}
             </div>
           </div>

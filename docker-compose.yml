@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: movieclub
       POSTGRES_PASSWORD: movieclub_dev_password
       POSTGRES_DB: movieclub_dev
-    command: ["postgres", "-c", "wal_level=logical"]
+    command: ['postgres', '-c', 'wal_level=logical']
     ports:
       - '5432:5432'
     volumes:

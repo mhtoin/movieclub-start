@@ -1,6 +1,5 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
-import type {
-  DiscoverParams} from '@/lib/tmdb-api';
+import type { DiscoverParams } from '@/lib/tmdb-api'
 import {
   discoverMovies,
   fetchBackgroundMovies,

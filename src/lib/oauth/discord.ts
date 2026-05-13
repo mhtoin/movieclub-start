@@ -1,5 +1,5 @@
 import { Discord, generateState } from 'arctic'
-import type { OAuth2Tokens} from 'arctic';
+import type { OAuth2Tokens } from 'arctic'
 
 const baseUrl = process.env.BASE_URL
 if (!baseUrl) {

@@ -1,6 +1,6 @@
 import { DragOverlay, useDndContext } from '@dnd-kit/core'
 import { MemoizedMovieCard } from '../discover/movie-card'
-import type {Movie as TMDBMovie} from '@/lib/tmdb-api';
+import type { Movie as TMDBMovie } from '@/lib/tmdb-api'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { movie as movieSchema } from '@/db/schema/movies'
 

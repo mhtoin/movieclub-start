@@ -72,7 +72,9 @@ export const getRaffleStats = createServerFn({ method: 'GET' })
         ...entriesByMonth.keys(),
         ...winsByMonth.keys(),
       ])
-      const raffleHistory: Array<RaffleParticipationBucket> = Array.from(allMonths)
+      const raffleHistory: Array<RaffleParticipationBucket> = Array.from(
+        allMonths,
+      )
         .sort()
         .reverse()
         .slice(0, 12)

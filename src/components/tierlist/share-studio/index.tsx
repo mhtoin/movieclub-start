@@ -20,7 +20,12 @@ import {
   X,
 } from 'lucide-react'
 import { Toast } from '@base-ui/react/toast'
-import { ASPECT_RATIOS, DEFAULT_SETTINGS, PRESETS_STORAGE_KEY, THEME_DEFS } from './constants'
+import {
+  ASPECT_RATIOS,
+  DEFAULT_SETTINGS,
+  PRESETS_STORAGE_KEY,
+  THEME_DEFS,
+} from './constants'
 import { ShareCanvas } from './share-canvas'
 import { BackgroundControls } from './background-controls'
 import { ControlSection } from './control-section'
@@ -32,7 +37,12 @@ import { SegmentedControl } from './segmented-control'
 import { TierLabelEditor } from './tier-label-editor'
 import { TierOrderEditor } from './tier-order-editor'
 import { ThemeSwatches } from './theme-swatches'
-import type { SharePreset, ShareStudioTierlist, StudioSettings, TextColumns } from './types'
+import type {
+  SharePreset,
+  ShareStudioTierlist,
+  StudioSettings,
+  TextColumns,
+} from './types'
 import { Button } from '@/components/ui/button'
 
 export function TierlistShareStudio({
@@ -98,7 +108,13 @@ export function TierlistShareStudio({
     if (!name) return
     const preset: SharePreset = {
       name,
-      settings: (({ backgroundImage, tierLabelOverrides, tierLabelCustomColors, tierOrder, ...rest }) => rest)(settings),
+      settings: (({
+        backgroundImage,
+        tierLabelOverrides,
+        tierLabelCustomColors,
+        tierOrder,
+        ...rest
+      }) => rest)(settings),
       createdAt: Date.now(),
     }
     setPresets((prev) => {
@@ -147,7 +163,10 @@ export function TierlistShareStudio({
   )
 
   const update = useCallback(
-    <TKey extends keyof StudioSettings>(key: TKey, value: StudioSettings[TKey]) => {
+    <TKey extends keyof StudioSettings>(
+      key: TKey,
+      value: StudioSettings[TKey],
+    ) => {
       setSettings((s) => ({ ...s, [key]: value }))
       setActiveTemplate(null)
     },
@@ -158,10 +177,13 @@ export function TierlistShareStudio({
     setSettings((s) => ({ ...s, ...partial }))
   }, [])
 
-  const handleTemplate = useCallback((key: string, tmplSettings: Partial<StudioSettings>) => {
-    setSettings((s) => ({ ...DEFAULT_SETTINGS, ...s, ...tmplSettings }))
-    setActiveTemplate(key)
-  }, [])
+  const handleTemplate = useCallback(
+    (key: string, tmplSettings: Partial<StudioSettings>) => {
+      setSettings((s) => ({ ...DEFAULT_SETTINGS, ...s, ...tmplSettings }))
+      setActiveTemplate(key)
+    },
+    [],
+  )
 
   const handleExport = useCallback(async () => {
     if (!canvasRef.current) return
@@ -290,7 +312,9 @@ export function TierlistShareStudio({
             <div className="flex-1 flex flex-col min-w-0 bg-muted/30">
               <div className="flex items-center gap-3 px-6 py-4 border-b border-border">
                 <Share2 className="h-4 w-4 text-primary" />
-                <h2 className="text-sm font-semibold">Director&apos;s Studio</h2>
+                <h2 className="text-sm font-semibold">
+                  Director&apos;s Studio
+                </h2>
                 <span className="text-xs text-muted-foreground ml-auto">
                   {dims.w}×{dims.h}
                 </span>
@@ -302,7 +326,9 @@ export function TierlistShareStudio({
                   style={{
                     transform: `scale(${Math.min(
                       1,
-                      (typeof window !== 'undefined' ? window.innerWidth * 0.5 : 600) / dims.w,
+                      (typeof window !== 'undefined'
+                        ? window.innerWidth * 0.5
+                        : 600) / dims.w,
                     )})`,
                     transformOrigin: 'top center',
                   }}
@@ -388,12 +414,16 @@ export function TierlistShareStudio({
                   <div className="flex items-center gap-3">
                     <input
                       type="color"
-                      value={settings.accentColor ?? THEME_DEFS[settings.theme].accent}
+                      value={
+                        settings.accentColor ??
+                        THEME_DEFS[settings.theme].accent
+                      }
                       onChange={(e) => update('accentColor', e.target.value)}
                       className="h-8 w-8 rounded cursor-pointer border-0 p-0 overflow-hidden shrink-0"
                     />
                     <span className="text-sm text-muted-foreground font-mono">
-                      {settings.accentColor ?? THEME_DEFS[settings.theme].accent}
+                      {settings.accentColor ??
+                        THEME_DEFS[settings.theme].accent}
                     </span>
                     {settings.accentColor && (
                       <Button
@@ -476,7 +506,9 @@ export function TierlistShareStudio({
                 <ControlSection title="Tier Labels" icon={Star}>
                   <div className="space-y-3">
                     <div className="space-y-1.5">
-                      <span className="text-xs text-muted-foreground font-medium">Shape</span>
+                      <span className="text-xs text-muted-foreground font-medium">
+                        Shape
+                      </span>
                       <SegmentedControl
                         options={[
                           { label: 'Rounded', value: 'rounded' },
@@ -489,7 +521,9 @@ export function TierlistShareStudio({
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <span className="text-xs text-muted-foreground font-medium">Style</span>
+                      <span className="text-xs text-muted-foreground font-medium">
+                        Style
+                      </span>
                       <SegmentedControl
                         options={[
                           { label: 'Badge', value: 'badge' },
@@ -514,7 +548,9 @@ export function TierlistShareStudio({
                   <ControlSection title="Poster Style" icon={ImageIcon}>
                     <div className="space-y-3">
                       <div className="space-y-1.5">
-                        <span className="text-xs text-muted-foreground font-medium">Size</span>
+                        <span className="text-xs text-muted-foreground font-medium">
+                          Size
+                        </span>
                         <SegmentedControl
                           options={[
                             { label: 'Small', value: 'sm' },
@@ -533,7 +569,9 @@ export function TierlistShareStudio({
                   <ControlSection title="Compact Style" icon={LayoutGrid}>
                     <div className="space-y-3">
                       <div className="space-y-1.5">
-                        <span className="text-xs text-muted-foreground font-medium">Poster size</span>
+                        <span className="text-xs text-muted-foreground font-medium">
+                          Poster size
+                        </span>
                         <SegmentedControl
                           options={[
                             { label: 'XS', value: 'xs' },
@@ -552,7 +590,9 @@ export function TierlistShareStudio({
                   <ControlSection title="Text List" icon={List}>
                     <div className="space-y-3">
                       <div className="space-y-1.5">
-                        <span className="text-xs text-muted-foreground font-medium">Columns</span>
+                        <span className="text-xs text-muted-foreground font-medium">
+                          Columns
+                        </span>
                         <SegmentedControl
                           options={[
                             { label: '1', value: '1' },
@@ -562,7 +602,9 @@ export function TierlistShareStudio({
                             { label: '5', value: '5' },
                           ]}
                           value={String(settings.textListColumns)}
-                          onChange={(v) => update('textListColumns', Number(v) as TextColumns)}
+                          onChange={(v) =>
+                            update('textListColumns', Number(v) as TextColumns)
+                          }
                         />
                       </div>
                       <div className="space-y-2 pt-1">

@@ -88,9 +88,7 @@ function RouteComponent() {
     })
   }
 
-  const { data: shortlist } = useQuery(
-    shortlistQueries.byUser(user.userId),
-  )
+  const { data: shortlist } = useQuery(shortlistQueries.byUser(user.userId))
   const movieCount = shortlist?.movies.length ?? 0
   const slotsLeft = 3 - movieCount
 

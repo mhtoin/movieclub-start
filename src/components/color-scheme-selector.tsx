@@ -12,12 +12,8 @@ import {
   PopoverRoot,
   PopoverTrigger,
 } from './ui/popover'
-import type {ColorScheme} from '@/lib/color-scheme';
-import {
-  COLOR_SCHEMES,
-  
-  setSchemeServerFn
-} from '@/lib/color-scheme'
+import type { ColorScheme } from '@/lib/color-scheme'
+import { COLOR_SCHEMES, setSchemeServerFn } from '@/lib/color-scheme'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   value: value as ColorScheme,

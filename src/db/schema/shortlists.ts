@@ -7,7 +7,7 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { user } from './users'
-import type {MovieWithCredits} from './movies';
+import type { MovieWithCredits } from './movies'
 
 export const shortlist = pgTable(
   'shortlist',

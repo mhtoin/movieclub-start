@@ -32,7 +32,12 @@ export function PosterTile({
         <img
           src={url}
           alt={movie.title}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
           crossOrigin="anonymous"
         />
       ) : (

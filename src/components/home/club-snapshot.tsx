@@ -79,11 +79,11 @@ export function ClubSnapshot({
 }: ClubSnapshotProps) {
   const shouldReduceMotion = useReducedMotion()
   const otherShortlists = allShortlists.filter(
-    (s) => s.user.id !== currentUserId
+    (s) => s.user.id !== currentUserId,
   )
   const totalMovies = allShortlists.reduce((acc, s) => acc + s.movies.length, 0)
   const readyCount = allShortlists.filter(
-    (s) => s.isReady && s.participating
+    (s) => s.isReady && s.participating,
   ).length
 
   return (
@@ -113,9 +113,7 @@ export function ClubSnapshot({
               <motion.div
                 key={shortlist.id}
                 initial={
-                  shouldReduceMotion
-                    ? false
-                    : { opacity: 0, x: -24, rotate: 0 }
+                  shouldReduceMotion ? false : { opacity: 0, x: -24, rotate: 0 }
                 }
                 animate={{
                   opacity: 1,
@@ -152,9 +150,9 @@ export function ClubSnapshot({
                     </div>
 
                     <Avatar
-                      src={shortlist.user.image ?? ''}
-                      alt={shortlist.user.name ?? ''}
-                      name={shortlist.user.name ?? 'User'}
+                      src={shortlist.user.image}
+                      alt={shortlist.user.name}
+                      name={shortlist.user.name}
                       size={48}
                     />
 
@@ -325,7 +323,9 @@ export function ClubSnapshot({
                   </span>
                 </div>
                 <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  <AnimatedCounter value={Math.round(stats.totalWatchTime / 60)} />
+                  <AnimatedCounter
+                    value={Math.round(stats.totalWatchTime / 60)}
+                  />
                 </p>
               </div>
               <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">

@@ -13,8 +13,7 @@ import {
 import { useMemo } from 'react'
 import { z } from 'zod'
 import { movieQueries } from './movies'
-import type {
-  InferSelectModel} from 'drizzle-orm';
+import type { InferSelectModel } from 'drizzle-orm'
 import { authMiddleware } from '@/middleware/auth'
 import { movie, moviesOnTiers, tier, tierlist, user } from '@/db/schema'
 import { db } from '@/db/db'
@@ -186,8 +185,7 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
 
     const txid = await db.transaction(async (tx) => {
       for (const update of data) {
-        const id =
-          update.movieOnTierId
+        const id = update.movieOnTierId
         await tx
           .update(moviesOnTiers)
           .set({ position: update.newPosition, tierId: update.tierId })
@@ -475,11 +473,11 @@ export const getUserTierlistsSummary = createServerFn({ method: 'GET' })
 
       const posterMap: Record<string, Array<string>> = {}
       for (const row of posterRows) {
-      const posterPath = (row.images as any)?.posters?.[0]?.file_path
-      if (posterPath) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
-        if (posterMap[row.tierlistId].length < 6) {
+        const posterPath = (row.images as any)?.posters?.[0]?.file_path
+        if (posterPath) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          if (!posterMap[row.tierlistId]) posterMap[row.tierlistId] = []
+          if (posterMap[row.tierlistId].length < 6) {
             posterMap[row.tierlistId].push(posterPath)
           }
         }

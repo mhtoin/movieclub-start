@@ -1,14 +1,7 @@
-import { Link, useRouterState } from '@tanstack/react-router'
+import { Link, useRouter, useRouterState } from '@tanstack/react-router'
 
-import { logoutFn } from '@/lib/auth/logout-action'
-import {
-  COLOR_SCHEMES,
-  setSchemeServerFn,
-  type ColorScheme,
-} from '@/lib/color-scheme'
 import { Toast } from '@base-ui/react/toast'
 import { useMutation } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 import {
   Compass,
   Dices,
@@ -40,6 +33,9 @@ import {
   PopoverRoot,
   PopoverTrigger,
 } from '../ui/popover'
+import type { ColorScheme } from '@/lib/color-scheme'
+import { COLOR_SCHEMES, setSchemeServerFn } from '@/lib/color-scheme'
+import { logoutFn } from '@/lib/auth/logout-action'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   value: value as ColorScheme,
@@ -89,7 +85,7 @@ export default function Sidebar() {
       await setSchemeServerFn({ data: scheme })
     },
     onSuccess: () => {
-      if (document.startViewTransition) {
+      if (typeof document.startViewTransition === 'function') {
         const x = window.innerWidth
         const y = 0
         const endRadius = Math.hypot(

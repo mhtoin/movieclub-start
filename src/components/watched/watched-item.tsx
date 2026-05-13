@@ -45,9 +45,7 @@ export function WatchedItem({
 
   const watchDate = movie.watchDate ? new Date(movie.watchDate) : null
 
-  const cast = Array.isArray(movie.cast)
-    ? (movie.cast).slice(0, 6)
-    : []
+  const cast = Array.isArray(movie.cast) ? movie.cast.slice(0, 6) : []
 
   const opacity = Math.max(0.3, intersectionRatio)
   const translateY = isInView ? 0 : 20
@@ -81,17 +79,17 @@ export function WatchedItem({
                     </div>
                   )}
                 </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Avatar
-                      src={user.image}
-                      alt={`${user.name}'s avatar`}
-                      name={user.name}
-                      size={24}
-                    />
-                    <span className="text-xs text-muted-foreground truncate">
-                      {user.name}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <Avatar
+                    src={user.image}
+                    alt={`${user.name}'s avatar`}
+                    name={user.name}
+                    size={24}
+                  />
+                  <span className="text-xs text-muted-foreground truncate">
+                    {user.name}
+                  </span>
+                </div>
               </div>
             </div>
           </button>
@@ -156,22 +154,22 @@ export function WatchedItem({
                 </div>
               )}
 
-                <routeApi.Link to="." search={{ user: user.name }}>
-                  <div className="flex items-center gap-2 pt-2">
-                    <Avatar
-                      src={user.image}
-                      alt={`${user.name}'s avatar`}
-                      name={user.name}
-                      size={32}
-                    />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Chosen by</p>
-                      <p className="text-sm font-semibold truncate">
-                        {user.name}
-                      </p>
-                    </div>
+              <routeApi.Link to="." search={{ user: user.name }}>
+                <div className="flex items-center gap-2 pt-2">
+                  <Avatar
+                    src={user.image}
+                    alt={`${user.name}'s avatar`}
+                    name={user.name}
+                    size={32}
+                  />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Chosen by</p>
+                    <p className="text-sm font-semibold truncate">
+                      {user.name}
+                    </p>
                   </div>
-                </routeApi.Link>
+                </div>
+              </routeApi.Link>
             </div>
 
             {movie.overview && (
@@ -278,19 +276,19 @@ export function WatchedItem({
                     </p>
                   )}
                 </div>
-                  <div className="flex justify-start gap-2 flex-shrink-0 col-span-2">
-                    <Avatar
-                      src={user.image}
-                      alt={`${user.name}'s avatar`}
-                      name={user.name}
-                      size={32}
-                    />
+                <div className="flex justify-start gap-2 flex-shrink-0 col-span-2">
+                  <Avatar
+                    src={user.image}
+                    alt={`${user.name}'s avatar`}
+                    name={user.name}
+                    size={32}
+                  />
 
-                    <div className="text-sm min-w-0">
-                      <p className="font-medium truncate">{user.name}</p>
-                      <p className="text-muted-foreground">Chosen by</p>
-                    </div>
+                  <div className="text-sm min-w-0">
+                    <p className="font-medium truncate">{user.name}</p>
+                    <p className="text-muted-foreground">Chosen by</p>
                   </div>
+                </div>
               </div>
             </div>
           </div>
@@ -374,22 +372,20 @@ export function WatchedItem({
                   </div>
                 )}
 
-                  <routeApi.Link to="." search={{ user: user.name }}>
-                    <div className="flex items-center gap-3 pt-2">
-                      <Avatar
-                        src={user.image}
-                        alt={`${user.name}'s avatar`}
-                        name={user.name}
-                        size={40}
-                      />
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Chosen by
-                        </p>
-                        <p className="font-semibold">{user.name}</p>
-                      </div>
+                <routeApi.Link to="." search={{ user: user.name }}>
+                  <div className="flex items-center gap-3 pt-2">
+                    <Avatar
+                      src={user.image}
+                      alt={`${user.name}'s avatar`}
+                      name={user.name}
+                      size={40}
+                    />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Chosen by</p>
+                      <p className="font-semibold">{user.name}</p>
                     </div>
-                  </routeApi.Link>
+                  </div>
+                </routeApi.Link>
               </div>
             </div>
 

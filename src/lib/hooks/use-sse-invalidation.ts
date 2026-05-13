@@ -6,7 +6,10 @@ import { useEffect } from 'react'
  * be invalidated when that table changes. Keys are prefix-matched so
  * `['movies', 'watched']` also invalidates `['movies', 'watched', '2025-01']`.
  */
-const TABLE_TO_QUERY_KEYS: Record<string, ReadonlyArray<ReadonlyArray<string>>> = {
+const TABLE_TO_QUERY_KEYS: Record<
+  string,
+  ReadonlyArray<ReadonlyArray<string>>
+> = {
   movie: [
     ['movies', 'latest'],
     ['movies', 'watched'],
@@ -19,10 +22,7 @@ const TABLE_TO_QUERY_KEYS: Record<string, ReadonlyArray<ReadonlyArray<string>>> 
     ['shortlists', 'all'],
     ['raffle', 'participating'],
   ],
-  _movie_to_shortlist: [
-    ['shortlist'],
-    ['shortlists', 'all'],
-  ],
+  _movie_to_shortlist: [['shortlist'], ['shortlists', 'all']],
   tierlist: [
     ['tierlists', 'index'],
     ['tierlists', 'user'],
@@ -38,11 +38,7 @@ const TABLE_TO_QUERY_KEYS: Record<string, ReadonlyArray<ReadonlyArray<string>>> 
     ['tierlists', 'user'],
     ['dashboard'],
   ],
-  raffle: [
-    ['raffle', 'history'],
-    ['raffle', 'stats'],
-    ['dashboard'],
-  ],
+  raffle: [['raffle', 'history'], ['raffle', 'stats'], ['dashboard']],
   _raffle_to_user: [
     ['raffle', 'history'],
     ['raffle', 'stats'],

@@ -2,15 +2,14 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, Film, Layers, Plus } from 'lucide-react'
 import { Suspense } from 'react'
-import type {TierlistPreview, UserTierlistSummary} from '@/lib/react-query/queries/tierlists';
+import type {
+  TierlistPreview,
+  UserTierlistSummary,
+} from '@/lib/react-query/queries/tierlists'
 import { PageTitleBar } from '@/components/page-titlebar'
 import { TierlistIndexSkeleton } from '@/components/tierlist/tierlist-index-skeleton'
 import Avatar from '@/components/ui/avatar'
-import {
-  
-  
-  tierlistQueries
-} from '@/lib/react-query/queries/tierlists'
+import { tierlistQueries } from '@/lib/react-query/queries/tierlists'
 
 const USER_COLORS = [
   { hue: 48 },
@@ -77,7 +76,7 @@ function TierlistContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 md:pl-[72px]">
       <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-        {(usersWithTierlists).map((user) => (
+        {usersWithTierlists.map((user) => (
           <UserTierlistCard key={user.id} user={user} />
         ))}
       </div>

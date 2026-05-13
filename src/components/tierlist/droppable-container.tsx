@@ -1,11 +1,7 @@
-import {
-  defaultAnimateLayoutChanges,
-  useSortable,
-} from '@dnd-kit/sortable'
+import { defaultAnimateLayoutChanges, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { UniqueIdentifier } from '@dnd-kit/core'
-import type {
-  AnimateLayoutChanges} from '@dnd-kit/sortable';
+import type { AnimateLayoutChanges } from '@dnd-kit/sortable'
 
 const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true })

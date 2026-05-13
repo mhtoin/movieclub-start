@@ -29,11 +29,19 @@ export function ThemeSwatches({
               style={{ background: def.bg, borderColor: def.border }}
             />
             <div>
-              <div className="text-sm font-medium text-foreground">{def.name}</div>
+              <div className="text-sm font-medium text-foreground">
+                {def.name}
+              </div>
               <div className="flex gap-1 mt-1">
-                {Object.values(def.tierColors).slice(0, 4).map((c, i) => (
-                  <div key={i} className="h-1.5 w-1.5 rounded-full" style={{ background: c }} />
-                ))}
+                {Object.values(def.tierColors)
+                  .slice(0, 4)
+                  .map((c, i) => (
+                    <div
+                      key={i}
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ background: c }}
+                    />
+                  ))}
               </div>
             </div>
             {active && (

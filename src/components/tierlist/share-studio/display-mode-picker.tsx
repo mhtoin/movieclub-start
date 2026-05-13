@@ -8,9 +8,17 @@ export function DisplayModePicker({
   value: DisplayMode
   onChange: (d: DisplayMode) => void
 }) {
-  const modes: Array<{ value: DisplayMode; label: string; icon: React.ElementType }> = [
+  const modes: Array<{
+    value: DisplayMode
+    label: string
+    icon: React.ElementType
+  }> = [
     { value: 'posters', label: 'Posters', icon: Grid3X3 },
-    { value: 'compact-posters', label: 'Compact', icon: AlignVerticalSpaceAround },
+    {
+      value: 'compact-posters',
+      label: 'Compact',
+      icon: AlignVerticalSpaceAround,
+    },
     { value: 'text-list', label: 'Text', icon: List },
   ]
 
@@ -29,8 +37,15 @@ export function DisplayModePicker({
                 : 'border-border bg-muted hover:border-primary/30'
             }`}
           >
-            <Icon className="h-4 w-4" style={{ color: active ? 'var(--primary)' : 'var(--muted-foreground)' }} />
-            <span className="text-sm font-medium text-foreground">{mode.label}</span>
+            <Icon
+              className="h-4 w-4"
+              style={{
+                color: active ? 'var(--primary)' : 'var(--muted-foreground)',
+              }}
+            />
+            <span className="text-sm font-medium text-foreground">
+              {mode.label}
+            </span>
           </button>
         )
       })}

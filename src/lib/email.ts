@@ -21,7 +21,9 @@ export async function sendPasswordResetEmail(email: string, resetLink: string) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM ?? `MovieClub <noreply@${process.env.BASE_URL?.split('://')[1]}>`,
+      from:
+        process.env.EMAIL_FROM ??
+        `MovieClub <noreply@${process.env.BASE_URL?.split('://')[1]}>`,
       to: email,
       subject: 'Reset your password',
       html: `

@@ -87,9 +87,7 @@ export function RaffleControlBar({
                   onCheckedChange={onDryRunChange}
                   size="sm"
                 />
-                <span className="text-xs text-muted-foreground">
-                  Test
-                </span>
+                <span className="text-xs text-muted-foreground">Test</span>
               </label>
             </div>
           </div>

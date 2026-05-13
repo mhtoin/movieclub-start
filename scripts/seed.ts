@@ -1,14 +1,13 @@
-// eslint-disable-next-line simple-import-sort/imports
-import { createDbMovie } from '@/lib/createDbMovie'
-import { TMDBMovieResponse } from '@/types/tmdb'
-import bcrypt from 'bcryptjs'
 import 'dotenv/config'
+import bcrypt from 'bcryptjs'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { movie, movieToShortlist } from '../src/db/schema/movies'
 import { shortlist } from '../src/db/schema/shortlists'
 import { moviesOnTiers, tier, tierlist } from '../src/db/schema/tierlists'
 import { user } from '../src/db/schema/users'
+import type { TMDBMovieResponse } from '@/types/tmdb'
+import { createDbMovie } from '@/lib/createDbMovie'
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is required')
@@ -36,7 +35,7 @@ interface TMDBMovie {
   release_date: string
   vote_average: number
   vote_count: number
-  genre_ids: number[]
+  genre_ids: Array<number>
   adult: boolean
   original_language: string
   original_title: string
@@ -44,7 +43,7 @@ interface TMDBMovie {
   video: boolean
 }
 
-async function fetchPopularMovies(page: number = 1): Promise<TMDBMovie[]> {
+async function fetchPopularMovies(page: number = 1): Promise<Array<TMDBMovie>> {
   const url = `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_CONFIG.API_KEY}&page=${page}&include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc&watch_region=FI&with_watch_providers=8%7C323%7C496`
 
   try {
@@ -191,7 +190,7 @@ async function seed() {
     console.log(`✅ Created ${testUsers.length} test users`)
 
     console.log('Fetching movies from TMDB...')
-    const allTmdbMovies: TMDBMovie[] = []
+    const allTmdbMovies: Array<TMDBMovie> = []
 
     for (let page = 1; page <= 7; page++) {
       const movies = await fetchPopularMovies(page)
@@ -207,7 +206,7 @@ async function seed() {
     const shortlistMovies = allTmdbMovies.slice(100, 130)
 
     console.log('Creating watched movies with historical data...')
-    const watchedMovieIds: string[] = []
+    const watchedMovieIds: Array<string> = []
 
     for (let i = 0; i < historyMovies.length; i++) {
       const tmdbMovie = historyMovies[i]
@@ -256,7 +255,7 @@ async function seed() {
 
     console.log('Adding movies to shortlists...')
     const shortlistMovieData = []
-    const shortlistMovieIds: string[] = []
+    const shortlistMovieIds: Array<string> = []
 
     for (let i = 0; i < shortlistData.length; i++) {
       const shortlistItem = shortlistData[i]
@@ -318,7 +317,7 @@ async function seed() {
       })
 
       // Create 5 tiers
-      const tierIds: string[] = []
+      const tierIds: Array<string> = []
       for (let i = 0; i < 5; i++) {
         const tierId = generateId('tier')
         tierIds.push(tierId)

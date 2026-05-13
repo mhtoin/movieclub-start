@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { Movie} from '@/lib/tmdb-api';
+import type { Movie } from '@/lib/tmdb-api'
 import { getImageUrl } from '@/lib/tmdb-api'
 
 interface MoviePosterDialogProps {

@@ -1,26 +1,12 @@
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { format } from 'date-fns'
-import {
-  and,
-  arrayContains,
-  desc,
-  eq,
-  isNotNull,
-  like,
-  sql
-} from 'drizzle-orm'
+import { and, arrayContains, desc, eq, isNotNull, like, sql } from 'drizzle-orm'
 import { z } from 'zod'
-import type {
-  SQL} from 'drizzle-orm';
-import type {MovieWithCredits, MovieWithUser} from '@/db/schema/movies';
+import type { SQL } from 'drizzle-orm'
+import type { MovieWithCredits, MovieWithUser } from '@/db/schema/movies'
 import { db } from '@/db/db'
-import {
-  
-  
-  movie,
-  movieCredits
-} from '@/db/schema/movies'
+import { movie, movieCredits } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { groupBy } from '@/lib/utils'
 import { authMiddleware } from '@/middleware/auth'

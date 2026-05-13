@@ -1,5 +1,5 @@
-import { DashboardList  } from './dashboard-list'
-import type {DashboardListItemRenderer} from './dashboard-list';
+import { DashboardList } from './dashboard-list'
+import type { DashboardListItemRenderer } from './dashboard-list'
 import type { MoviesByUser } from '@/lib/react-query/queries/dashboard'
 
 interface MoviesByUserListProps {

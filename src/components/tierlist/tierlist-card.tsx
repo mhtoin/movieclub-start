@@ -28,15 +28,27 @@ export function TierlistCard({
       className="group block"
     >
       <motion.article
-        initial={shouldReduceMotion ? undefined : { opacity: 0, y: 24, scale: 0.97 }}
-        animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+        initial={
+          shouldReduceMotion ? undefined : { opacity: 0, y: 24, scale: 0.97 }
+        }
+        animate={
+          shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
+        }
         transition={{ delay: index * 0.08, duration: 0.5, ease: easeOut }}
-        whileHover={shouldReduceMotion ? undefined : {
-          y: -4,
-          rotate: -0.3,
-          transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] }
-        }}
-        whileTap={shouldReduceMotion ? undefined : { scale: 0.97, transition: { duration: 0.15 } }}
+        whileHover={
+          shouldReduceMotion
+            ? undefined
+            : {
+                y: -4,
+                rotate: -0.3,
+                transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+              }
+        }
+        whileTap={
+          shouldReduceMotion
+            ? undefined
+            : { scale: 0.97, transition: { duration: 0.15 } }
+        }
         layout
         className="ticket-card relative overflow-hidden bg-card shadow-sm hover:shadow-md transition-shadow"
       >
@@ -78,7 +90,11 @@ export function TierlistCard({
               </h3>
               <div className="flex items-center gap-1 shrink-0">
                 {isOwner && (
-                  <DeleteButton tierlistId={tierlist.id} userId={userId} compact />
+                  <DeleteButton
+                    tierlistId={tierlist.id}
+                    userId={userId}
+                    compact
+                  />
                 )}
                 <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-200" />
               </div>

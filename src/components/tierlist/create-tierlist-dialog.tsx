@@ -310,7 +310,8 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
                 size="sm"
                 onClick={() => goToStep(1)}
                 className={`rounded-full h-auto px-3 py-1 text-xs font-semibold gap-2 ${
-                  step !== 1 && 'bg-muted text-muted-foreground hover:text-foreground'
+                  step !== 1 &&
+                  'bg-muted text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-current/15 text-[10px] font-bold">
@@ -326,7 +327,8 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
                 onClick={() => title.trim() && goToStep(2)}
                 disabled={!title.trim()}
                 className={`rounded-full h-auto px-3 py-1 text-xs font-semibold gap-2 ${
-                  step !== 2 && 'bg-muted text-muted-foreground hover:text-foreground'
+                  step !== 2 &&
+                  'bg-muted text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-current/15 text-[10px] font-bold">
@@ -504,7 +506,8 @@ function StepOne({
                     active
                       ? 'border border-primary/40 bg-primary/[0.07] text-foreground shadow-sm'
                       : 'border border-border bg-muted text-foreground hover:border-primary/30 hover:bg-primary/[0.05]'
-                  }`}>
+                  }`}
+                >
                   <Icon
                     className={`h-4 w-4 shrink-0 transition-colors ${
                       active ? 'text-primary' : 'text-muted-foreground'

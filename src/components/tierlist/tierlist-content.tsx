@@ -24,19 +24,13 @@ import {
   Share2,
   Tag,
 } from 'lucide-react'
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   CollisionDetection,
   DragEndEvent,
-  DragOverEvent} from '@dnd-kit/core';
-import type {
-  TierWithMovies} from '@/lib/react-query/queries/tierlists';
+  DragOverEvent,
+} from '@dnd-kit/core'
+import type { TierWithMovies } from '@/lib/react-query/queries/tierlists'
 import DragOverlayPortal from '@/components/tierlist/drag-overlay-portal'
 import StickyUnrankedTier from '@/components/tierlist/sticky-unranked-tier'
 import TierContainer from '@/components/tierlist/tier-container'
@@ -88,7 +82,9 @@ export function TierlistContent({
 
   const tierlistFromDb = useSingleTierlistLiveQuery(tierlistId)
 
-  const [localTiers, setLocalTiers] = useState<Array<TierWithMovies> | null>(null)
+  const [localTiers, setLocalTiers] = useState<Array<TierWithMovies> | null>(
+    null,
+  )
   const [isDragging, setIsDragging] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [studioOpen, setStudioOpen] = useState(false)
@@ -659,9 +655,7 @@ function EditTierlistForm({
       watchDateFrom: watchDateFrom
         ? format(watchDateFrom, 'yyyy-MM-dd')
         : undefined,
-      watchDateTo: watchDateTo
-        ? format(watchDateTo, 'yyyy-MM-dd')
-        : undefined,
+      watchDateTo: watchDateTo ? format(watchDateTo, 'yyyy-MM-dd') : undefined,
     })
   }
 
@@ -727,7 +721,8 @@ function EditTierlistForm({
                   active
                     ? 'border border-primary/40 bg-primary/[0.07] text-foreground shadow-sm'
                     : 'border border-border bg-muted text-foreground hover:border-primary/30 hover:bg-primary/[0.05]'
-                }`}>
+                }`}
+              >
                 <Icon
                   className={`h-4 w-4 shrink-0 transition-colors ${
                     active ? 'text-primary' : 'text-muted-foreground'

@@ -215,12 +215,8 @@
           "tableFrom": "Movie",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -291,12 +287,8 @@
           "tableFrom": "MoviesOnTiers",
           "tableTo": "Movie",
           "schemaTo": "public",
-          "columnsFrom": [
-            "movieId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["movieId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -305,12 +297,8 @@
           "tableFrom": "MoviesOnTiers",
           "tableTo": "Tier",
           "schemaTo": "public",
-          "columnsFrom": [
-            "tierId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tierId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -433,12 +421,8 @@
           "tableFrom": "Account",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -523,12 +507,8 @@
           "tableFrom": "Shortlist",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -587,12 +567,8 @@
           "tableFrom": "Review",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "cascade"
         },
@@ -601,12 +577,8 @@
           "tableFrom": "Review",
           "tableTo": "Movie",
           "schemaTo": "public",
-          "columnsFrom": [
-            "movieId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["movieId"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "cascade"
         }
@@ -647,12 +619,8 @@
           "tableFrom": "Session",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -730,12 +698,8 @@
           "tableFrom": "RecommendedMovie",
           "tableTo": "Movie",
           "schemaTo": "public",
-          "columnsFrom": [
-            "movieId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["movieId"],
+          "columnsTo": ["id"],
           "onDelete": "set default",
           "onUpdate": "cascade"
         },
@@ -744,12 +708,8 @@
           "tableFrom": "RecommendedMovie",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -758,12 +718,8 @@
           "tableFrom": "RecommendedMovie",
           "tableTo": "Movie",
           "schemaTo": "public",
-          "columnsFrom": [
-            "sourceMovieId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["sourceMovieId"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "cascade"
         }
@@ -1093,12 +1049,8 @@
           "tableFrom": "Tierlist",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1145,12 +1097,8 @@
           "tableFrom": "Tier",
           "tableTo": "Tierlist",
           "schemaTo": "public",
-          "columnsFrom": [
-            "tierlistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tierlistId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1202,12 +1150,8 @@
           "tableFrom": "_MovieToShortlist",
           "tableTo": "Movie",
           "schemaTo": "public",
-          "columnsFrom": [
-            "A"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["A"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1216,12 +1160,8 @@
           "tableFrom": "_MovieToShortlist",
           "tableTo": "Shortlist",
           "schemaTo": "public",
-          "columnsFrom": [
-            "B"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["B"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1229,10 +1169,7 @@
       "compositePrimaryKeys": {
         "_MovieToShortlist_AB_pkey": {
           "name": "_MovieToShortlist_AB_pkey",
-          "columns": [
-            "A",
-            "B"
-          ]
+          "columns": ["A", "B"]
         }
       },
       "uniqueConstraints": {},
@@ -1281,12 +1218,8 @@
           "tableFrom": "_MovieToRaffle",
           "tableTo": "Movie",
           "schemaTo": "public",
-          "columnsFrom": [
-            "A"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["A"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1295,12 +1228,8 @@
           "tableFrom": "_MovieToRaffle",
           "tableTo": "Raffle",
           "schemaTo": "public",
-          "columnsFrom": [
-            "B"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["B"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1308,10 +1237,7 @@
       "compositePrimaryKeys": {
         "_MovieToRaffle_AB_pkey": {
           "name": "_MovieToRaffle_AB_pkey",
-          "columns": [
-            "A",
-            "B"
-          ]
+          "columns": ["A", "B"]
         }
       },
       "uniqueConstraints": {},
@@ -1360,12 +1286,8 @@
           "tableFrom": "_RaffleToUser",
           "tableTo": "Raffle",
           "schemaTo": "public",
-          "columnsFrom": [
-            "A"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["A"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1374,12 +1296,8 @@
           "tableFrom": "_RaffleToUser",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "B"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["B"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1387,10 +1305,7 @@
       "compositePrimaryKeys": {
         "_RaffleToUser_AB_pkey": {
           "name": "_RaffleToUser_AB_pkey",
-          "columns": [
-            "A",
-            "B"
-          ]
+          "columns": ["A", "B"]
         }
       },
       "uniqueConstraints": {},
@@ -1402,11 +1317,7 @@
   "enums": {
     "public.Trailer": {
       "name": "Trailer",
-      "values": [
-        "name",
-        "id",
-        "key"
-      ],
+      "values": ["name", "id", "key"],
       "schema": "public"
     }
   },

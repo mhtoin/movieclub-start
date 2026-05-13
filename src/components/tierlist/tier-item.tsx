@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { memo } from 'react'
 import { MemoizedMovieCard } from '../discover/movie-card'
 import type { InferSelectModel } from 'drizzle-orm'
-import type {Movie as TMDBMovie} from '@/lib/tmdb-api';
+import type { Movie as TMDBMovie } from '@/lib/tmdb-api'
 import type { movie } from '@/db/schema/movies'
 
 type Movie = InferSelectModel<typeof movie>

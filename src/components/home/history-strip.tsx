@@ -64,11 +64,7 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
                   key={movie.id}
                   className="snap-start flex-shrink-0 relative"
                   style={{ width: 'clamp(7rem, 18vw, 10rem)' }}
-                  initial={
-                    shouldReduceMotion
-                      ? false
-                      : { opacity: 0, y: 20 }
-                  }
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
                     duration: 0.5,
@@ -80,9 +76,7 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
                     <span className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase mb-2">
                       {watchDate ?? `Scene ${index + 1}`}
                     </span>
-                    <div
-                      className="group relative overflow-hidden rounded-lg bg-muted shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl cursor-pointer"
-                    >
+                    <div className="group relative overflow-hidden rounded-lg bg-muted shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl cursor-pointer">
                       <div className="aspect-[2/3]">
                         {posterUrl ? (
                           <img

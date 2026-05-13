@@ -16,7 +16,9 @@ export function SegmentedControl<T extends string>({
             key={opt.value}
             onClick={() => onChange(opt.value)}
             className={`flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all ${
-              active ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              active
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {opt.label}

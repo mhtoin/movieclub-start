@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { AnimatePresence,  motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Film, Plus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ShortlistItem from './shortlist-item'
-import type {Variants} from 'framer-motion';
+import type { Variants } from 'framer-motion'
 import { useMediaQuery } from '@/lib/hooks'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import {
@@ -181,10 +181,7 @@ function ShortlistPanelContent({
             <p className="text-xs text-muted-foreground mb-4">
               Add up to 3 movies to your shortlist
             </p>
-            <AddMovieLink
-              movieCount={movieCount}
-              onClick={onClose}
-            />
+            <AddMovieLink movieCount={movieCount} onClick={onClose} />
           </motion.div>
         ) : (
           <motion.div
@@ -195,7 +192,7 @@ function ShortlistPanelContent({
             exit="exit"
             className="space-y-2"
           >
-            { }
+            {}
             {data?.requiresSelection &&
               /* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */
               data?.selectedIndex === null && (
@@ -241,10 +238,7 @@ function ShortlistPanelContent({
                 initial="hidden"
                 animate="visible"
               >
-                <AddMovieLink
-                  movieCount={movieCount}
-                  onClick={onClose}
-                />
+                <AddMovieLink movieCount={movieCount} onClick={onClose} />
               </motion.div>
             )}
           </motion.div>

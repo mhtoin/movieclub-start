@@ -5,9 +5,9 @@
  * Usage:
  *   DATABASE_URL=<url> tsx scripts/apply-migrations.ts
  */
-import { createHash } from 'crypto'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import postgres from 'postgres'
 
 const DATABASE_URL = process.env.DATABASE_URL
@@ -35,11 +35,11 @@ interface JournalEntry {
 }
 
 interface Journal {
-  entries: JournalEntry[]
+  entries: Array<JournalEntry>
 }
 
 async function getAppliedMigrations(): Promise<Set<string>> {
-  const rows = await sql<{ tag: string }[]>`
+  const rows = await sql<Array<{ tag: string }>>`
     SELECT tag FROM drizzle.__drizzle_migrations ORDER BY created_at
   `
   return new Set(rows.map((r) => r.tag))
@@ -72,9 +72,9 @@ function hashMigration(filePath: string): string {
   return createHash('sha256').update(content).digest('hex')
 }
 
-function splitStatements(sql: string): string[] {
+function splitStatements(sqlText: string): Array<string> {
   // Split on drizzle's statement-breakpoint marker, or fall back to semicolons
-  const parts = sql.split(/--> statement-breakpoint/g)
+  const parts = sqlText.split(/--> statement-breakpoint/g)
   return parts.map((s) => s.trim()).filter((s) => s.length > 0)
 }
 

@@ -1,4 +1,10 @@
-import type { AspectRatio, StudioSettings, StudioTheme, TemplateDef, ThemeDef } from './types'
+import type {
+  AspectRatio,
+  StudioSettings,
+  StudioTheme,
+  TemplateDef,
+  ThemeDef,
+} from './types'
 
 export const PRESETS_STORAGE_KEY = 'movieclub-share-presets'
 
@@ -11,8 +17,12 @@ export const THEME_DEFS: Record<StudioTheme, ThemeDef> = {
     muted: '#6b6570',
     border: '#2a252e',
     tierColors: {
-      S: '#10b981', A: '#84cc16', B: '#f59e0b',
-      C: '#f97316', D: '#ef4444', F: '#8b5cf6',
+      S: '#10b981',
+      A: '#84cc16',
+      B: '#f59e0b',
+      C: '#f97316',
+      D: '#ef4444',
+      F: '#8b5cf6',
     },
     font: "'Oswald', 'Bebas Neue', sans-serif",
   },
@@ -24,8 +34,12 @@ export const THEME_DEFS: Record<StudioTheme, ThemeDef> = {
     muted: '#a89b8c',
     border: '#ddd3c4',
     tierColors: {
-      S: '#059669', A: '#65a30d', B: '#d97706',
-      C: '#ea580c', D: '#dc2626', F: '#7c3aed',
+      S: '#059669',
+      A: '#65a30d',
+      B: '#d97706',
+      C: '#ea580c',
+      D: '#dc2626',
+      F: '#7c3aed',
     },
     font: "'Oswald', 'Bebas Neue', sans-serif",
   },
@@ -37,8 +51,12 @@ export const THEME_DEFS: Record<StudioTheme, ThemeDef> = {
     muted: '#9c8b7a',
     border: '#d4c4a8',
     tierColors: {
-      S: '#166534', A: '#3f6212', B: '#92400e',
-      C: '#9a3412', D: '#991b1b', F: '#5b21b6',
+      S: '#166534',
+      A: '#3f6212',
+      B: '#92400e',
+      C: '#9a3412',
+      D: '#991b1b',
+      F: '#5b21b6',
     },
     font: "'Bebas Neue', 'Courier New', serif",
   },
@@ -50,8 +68,12 @@ export const THEME_DEFS: Record<StudioTheme, ThemeDef> = {
     muted: '#5a5a7a',
     border: '#1a1a2e',
     tierColors: {
-      S: '#00f5d4', A: '#00bbf9', B: '#fee440',
-      C: '#f15bb5', D: '#ff006e', F: '#9b5de5',
+      S: '#00f5d4',
+      A: '#00bbf9',
+      B: '#fee440',
+      C: '#f15bb5',
+      D: '#ff006e',
+      F: '#9b5de5',
     },
     font: "'Oswald', sans-serif",
   },
@@ -63,14 +85,21 @@ export const THEME_DEFS: Record<StudioTheme, ThemeDef> = {
     muted: '#9ca3af',
     border: '#e5e7eb',
     tierColors: {
-      S: '#10b981', A: '#84cc16', B: '#f59e0b',
-      C: '#f97316', D: '#ef4444', F: '#8b5cf6',
+      S: '#10b981',
+      A: '#84cc16',
+      B: '#f59e0b',
+      C: '#f97316',
+      D: '#ef4444',
+      F: '#8b5cf6',
     },
-    font: "system-ui, -apple-system, sans-serif",
+    font: 'system-ui, -apple-system, sans-serif',
   },
 }
 
-export const ASPECT_RATIOS: Record<AspectRatio, { w: number; h: number; label: string }> = {
+export const ASPECT_RATIOS: Record<
+  AspectRatio,
+  { w: number; h: number; label: string }
+> = {
   '1:1': { w: 1080, h: 1080, label: 'Square' },
   '4:5': { w: 1080, h: 1350, label: 'Portrait' },
   '9:16': { w: 1080, h: 1920, label: 'Story' },
