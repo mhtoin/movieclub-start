@@ -30,6 +30,7 @@ const discoverSearchSchema = z.object({
   search: fallback(z.string(), '').default(''),
   genres: fallback(z.string(), '').default(''),
   providers: fallback(z.string(), '').default('8|323|496'),
+  originalLanguage: fallback(z.string(), '').default(''),
   minRating: fallback(z.number(), 0).default(0),
   maxRating: fallback(z.number(), 10).default(10),
   sortBy: fallback(z.string(), 'popularity.desc').default('popularity.desc'),
@@ -53,6 +54,7 @@ export const Route = createFileRoute('/_authenticated/discover')({
         tmdbQueries.discover({
           with_genres: deps.genres || undefined,
           with_watch_providers: deps.providers || undefined,
+          with_original_language: deps.originalLanguage || undefined,
           'vote_average.gte': deps.minRating,
           'vote_average.lte': deps.maxRating,
           sort_by: deps.sortBy,
@@ -94,6 +96,9 @@ function RouteComponent() {
 
   const selectedGenres = search.genres ? search.genres.split(',') : []
   const selectedProviders = search.providers ? search.providers.split('|') : []
+  const selectedLanguages = search.originalLanguage
+    ? search.originalLanguage.split(',')
+    : []
   const voteRange: [number, number] = [search.minRating, search.maxRating]
   const sortBy = search.sortBy
 
@@ -118,6 +123,15 @@ function RouteComponent() {
       search: (prev) => ({
         ...prev,
         providers: providers.length > 0 ? providers.join('|') : '',
+      }),
+    })
+  }
+
+  const handleLanguagesChange = (languages: Array<string>) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        originalLanguage: languages.length > 0 ? languages.join(',') : '',
       }),
     })
   }
@@ -154,6 +168,8 @@ function RouteComponent() {
         onGenresChange={handleGenresChange}
         selectedProviders={selectedProviders}
         onProvidersChange={handleProvidersChange}
+        selectedLanguages={selectedLanguages}
+        onLanguagesChange={handleLanguagesChange}
         voteRange={voteRange}
         onVoteRangeChange={handleVoteRangeChange}
         sortBy={sortBy}
@@ -230,11 +246,13 @@ function RouteComponent() {
                 Filters
                 {(selectedGenres.length > 0 ||
                   (selectedProviders.length > 0 && !isSearchActive) ||
+                  selectedLanguages.length > 0 ||
                   voteRange[0] !== 0 ||
                   voteRange[1] !== 10) && (
                   <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold bg-primary text-primary-foreground rounded-full">
                     {selectedGenres.length +
                       (isSearchActive ? 0 : selectedProviders.length) +
+                      selectedLanguages.length +
                       (voteRange[0] !== 0 || voteRange[1] !== 10 ? 1 : 0)}
                   </span>
                 )}

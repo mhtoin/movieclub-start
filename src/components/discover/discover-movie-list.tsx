@@ -43,6 +43,7 @@ function BrowseMoviesList({
       tmdbQueries.discover({
         with_genres: search.genres || undefined,
         with_watch_providers: search.providers || undefined,
+        with_original_language: search.originalLanguage || undefined,
         'vote_average.gte': search.minRating,
         'vote_average.lte': search.maxRating,
         sort_by: search.sortBy,
@@ -177,6 +178,13 @@ function SearchMoviesList({
       )
     }
 
+    if (search.originalLanguage) {
+      const langs = search.originalLanguage.split(',')
+      filtered = filtered.filter((movie) =>
+        langs.includes(movie.original_language),
+      )
+    }
+
     if (search.minRating > 0) {
       filtered = filtered.filter(
         (movie) => movie.vote_average >= search.minRating,
@@ -190,7 +198,13 @@ function SearchMoviesList({
     }
 
     return filtered
-  }, [rawMovies, search.genres, search.minRating, search.maxRating])
+  }, [
+    rawMovies,
+    search.genres,
+    search.originalLanguage,
+    search.minRating,
+    search.maxRating,
+  ])
 
   useEffect(() => {
     onTotalResults?.(movies.length)
