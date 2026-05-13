@@ -1,10 +1,10 @@
-import type { Movie } from '@/db/schema/movies'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Calendar, Film, Ticket } from 'lucide-react'
+import type { Movie } from '@/db/schema/movies'
 
 interface HistoryStripProps {
-  movies: Movie[]
+  movies: Array<Movie>
 }
 
 export function HistoryStrip({ movies }: HistoryStripProps) {
@@ -77,7 +77,7 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
                   }}
                 >
                   <div className="flex flex-col items-center">
-                    <span className="font-cinema-caps text-[10px] tracking-[0.2em] text-muted-foreground uppercase mb-2">
+                    <span className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase mb-2">
                       {watchDate ?? `Scene ${index + 1}`}
                     </span>
                     <div
@@ -107,7 +107,7 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
                       </div>
                     </div>
                     <div className="relative mt-4 flex flex-col items-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-background z-10" />
+                      <div className="w-2 h-2 rounded-full bg-primary/80 z-10" />
                       <p className="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 max-w-full">
                         {movie.title}
                       </p>

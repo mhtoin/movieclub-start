@@ -1,4 +1,3 @@
-import type { MovieWithCredits } from '@/db/schema/movies'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
@@ -11,6 +10,7 @@ import {
   Ticket,
   Trophy,
 } from 'lucide-react'
+import type { MovieWithCredits } from '@/db/schema/movies'
 
 interface MarqueeHeroProps {
   movie: MovieWithCredits | null
@@ -48,7 +48,7 @@ export function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
     return (
       <div className="relative overflow-hidden rounded-2xl bg-muted/40 border border-border/20 p-8 md:p-12">
         <div className="max-w-lg">
-          <span className="font-cinema-caps text-sm tracking-[0.15em] text-muted-foreground uppercase">
+          <span className="text-sm font-semibold tracking-widest text-muted-foreground uppercase">
             Welcome to MovieClub
           </span>
           <h2 className="mt-3 font-cinema text-3xl md:text-4xl font-bold tracking-tight text-foreground">
@@ -111,7 +111,7 @@ export function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
         >
           <div className="flex items-center gap-3 mb-5">
             <div className="h-px w-8 bg-primary/60" />
-            <span className="font-cinema-caps text-xs tracking-[0.2em] text-primary uppercase">
+            <span className="text-xs font-semibold tracking-widest text-primary uppercase">
               Last Watched
             </span>
           </div>
@@ -139,7 +139,7 @@ export function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
                 {formattedRuntime}
               </span>
             )}
-            <span className="inline-flex items-center gap-1.5 font-semibold text-warning">
+            <span className="inline-flex items-center gap-1.5 font-medium text-foreground/80">
               <Star className="h-3.5 w-3.5 fill-warning text-warning" />
               {movie.voteAverage.toFixed(1)}
             </span>

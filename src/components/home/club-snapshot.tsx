@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { motion, useReducedMotion, useInView } from 'framer-motion'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
+  Clock,
   Dices,
   Film,
+  Star,
   Ticket,
   Trophy,
   Users,
-  Clock,
-  Star,
 } from 'lucide-react'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import type { DashboardStats } from '@/lib/react-query/queries/dashboard'
 import Avatar from '@/components/ui/avatar'
 
 interface ClubSnapshotProps {
-  allShortlists: ShortlistWithUserMovies[]
+  allShortlists: Array<ShortlistWithUserMovies>
   currentUserId: string
   stats: DashboardStats | undefined
 }
@@ -159,11 +159,11 @@ export function ClubSnapshot({
                     />
 
                     <div className="text-center sm:text-left min-w-0">
-                      <span className="font-cinema text-sm sm:text-base md:text-lg font-bold text-foreground uppercase tracking-wide truncate block max-w-[8rem] sm:max-w-[10rem]">
+                      <span className="text-sm sm:text-base md:text-lg font-bold text-foreground truncate block max-w-[8rem] sm:max-w-[10rem]">
                         {shortlist.user.name}
                       </span>
                       {shortlist.isReady && shortlist.participating && (
-                        <span className="inline-flex items-center mt-1 sm:mt-1.5 bg-[color-mix(in_oklch,var(--warning)_85%,var(--primary)_15%)] text-[color-mix(in_oklch,var(--warning-foreground)_90%,var(--foreground)_10%)] px-2.5 py-1 font-cinema-caps text-[11px] tracking-wider uppercase font-bold animate-stamp -rotate-3 origin-top-left shadow-sm">
+                        <span className="inline-flex items-center mt-1 sm:mt-1.5 bg-[color-mix(in_oklch,var(--warning)_85%,var(--primary)_15%)] text-[color-mix(in_oklch,var(--warning-foreground)_90%,var(--foreground)_10%)] px-2.5 py-1 text-[11px] tracking-wider uppercase font-bold animate-stamp -rotate-3 origin-top-left shadow-sm">
                           Ready
                         </span>
                       )}
@@ -236,10 +236,8 @@ export function ClubSnapshot({
       </div>
 
       <div className="lg:col-span-6 xl:col-span-5">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px w-8 bg-primary" />
-          <Dices className="h-4 w-4 text-primary flex-shrink-0" />
-          <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
+        <div className="mb-6">
+          <span className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
             Quick Actions
           </span>
         </div>
@@ -247,65 +245,63 @@ export function ClubSnapshot({
         <div className="space-y-4">
           <Link
             to="/raffle"
-            className="group flex items-stretch rounded-xl overflow-hidden border-2 border-border/10 bg-card/60 transition-all
-            hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+            className="group flex items-stretch rounded-xl overflow-hidden border-2 border-primary/20 bg-[color-mix(in_oklch,var(--card)_95%,var(--primary)_5%)] transition-all
+            hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10"
           >
-            <div className="flex items-center justify-center w-16 flex-shrink-0 bg-primary/10 transition-all duration-300 group-hover:bg-primary/20">
+            <div className="flex items-center justify-center w-20 flex-shrink-0 bg-primary/15 transition-all duration-300 group-hover:bg-primary/25">
               <motion.div
                 className="text-primary"
                 whileHover={shouldReduceMotion ? undefined : { rotate: 25 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 12 }}
               >
-                <Dices className="h-6 w-6" />
+                <Dices className="h-7 w-7" />
               </motion.div>
             </div>
-            <div className="flex-1 flex items-center justify-between p-4 min-w-0">
+            <div className="flex-1 flex items-center justify-between p-5 min-w-0">
               <div>
-                <p className="font-cinema text-base font-bold text-foreground tracking-wide uppercase">
+                <p className="text-base font-bold text-foreground">
                   Run the Raffle
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5 font-medium">
                   {readyCount} of {allShortlists.length} members ready
                 </p>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary flex-shrink-0 ml-3" />
+              <ArrowRight className="h-5 w-5 text-primary transition-all group-hover:translate-x-1 flex-shrink-0 ml-3" />
             </div>
           </Link>
 
           <Link
             to={getUserTierlistHref(currentUserId)}
-            className="group flex items-stretch rounded-xl overflow-hidden border-2 border-border/10 bg-card/60 transition-all
-            hover:border-warning/30 hover:shadow-lg hover:shadow-warning/5"
+            className="group flex items-stretch rounded-xl overflow-hidden border border-border/20 bg-card/40 transition-all
+            hover:border-border/40 hover:bg-card/60"
           >
-            <div className="flex items-center justify-center w-16 flex-shrink-0 bg-warning/10 transition-all duration-300 group-hover:bg-warning/20">
+            <div className="flex items-center justify-center w-16 flex-shrink-0 bg-muted/50 transition-all duration-300 group-hover:bg-muted">
               <motion.div
-                className="text-warning"
+                className="text-muted-foreground"
                 whileHover={shouldReduceMotion ? undefined : { rotate: -15 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 12 }}
               >
-                <Trophy className="h-6 w-6" />
+                <Trophy className="h-5 w-5" />
               </motion.div>
             </div>
             <div className="flex-1 flex items-center justify-between p-4 min-w-0">
               <div>
-                <p className="font-cinema text-base font-bold text-foreground tracking-wide uppercase">
+                <p className="text-sm font-semibold text-foreground">
                   Rank Movies
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5 font-medium">
                   Update your tierlists
                 </p>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-warning flex-shrink-0 ml-3" />
+              <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-all group-hover:translate-x-1 group-hover:text-muted-foreground flex-shrink-0 ml-3" />
             </div>
           </Link>
         </div>
 
         {stats && (
           <div className="mt-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-px w-8 bg-primary" />
-              <Star className="h-4 w-4 text-primary flex-shrink-0" />
-              <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
+            <div className="mb-5">
+              <span className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
                 Club Stats
               </span>
             </div>

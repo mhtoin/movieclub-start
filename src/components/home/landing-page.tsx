@@ -1,14 +1,14 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'framer-motion'
 
-import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
-import { movieQueries } from '@/lib/react-query/queries/movies'
-import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 
 import { MarqueeHero } from './marquee-hero'
 import { ShortlistStrip } from './shortlist-strip'
 import { ClubSnapshot } from './club-snapshot'
 import { HistoryStrip } from './history-strip'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
+import { movieQueries } from '@/lib/react-query/queries/movies'
+import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 
 const containerVariants = {
   hidden: { opacity: 0 },
