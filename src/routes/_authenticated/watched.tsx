@@ -192,7 +192,7 @@ function WatchedMoviesList({
             key={yearMonth}
             className="relative mb-12 last:mb-0"
           >
-            <div className="sticky top-0 z-10  py-4 -mx-4 px-4 mb-6">
+            <div className="sticky top-0 z-10 p-4 -mx-4 mb-6">
               <div className="flex items-center gap-4">
                 <div
                   className="relative flex-shrink-0 w-[76px] h-14 rounded overflow-hidden"

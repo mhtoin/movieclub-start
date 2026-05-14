@@ -32,9 +32,11 @@ export function WatchedItem({
   )
 
   // Close dialog when search params change (e.g., when filtering by user)
-  useEffect(() => {
+  const prevSearchRef = useRef(search)
+  if (search !== prevSearchRef.current) {
+    prevSearchRef.current = search
     setOpen(false)
-  }, [search])
+  }
   const posterUrl = movie.images?.posters?.[0]?.file_path
     ? `https://image.tmdb.org/t/p/w342${movie.images.posters[0].file_path}`
     : '/placeholder_movie_poster.png'

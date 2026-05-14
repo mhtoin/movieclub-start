@@ -169,6 +169,7 @@ export function RaffleSpinner({
   )
 
   const animFrameRef = useRef<number>(0)
+  const settleTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const stripRef = useRef<HTMLDivElement | null>(null)
   const completedRef = useRef(false)
   const [locked, setLocked] = useState(false)
@@ -239,7 +240,7 @@ export function RaffleSpinner({
           },
         )
 
-        setTimeout(() => {
+        settleTimeoutRef.current = setTimeout(() => {
           if (!completedRef.current) {
             completedRef.current = true
             onSpinCompleteRef.current()
@@ -249,7 +250,10 @@ export function RaffleSpinner({
     }
 
     animFrameRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(animFrameRef.current)
+    return () => {
+      cancelAnimationFrame(animFrameRef.current)
+      if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current)
+    }
   }, [])
 
   return (

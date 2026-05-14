@@ -120,6 +120,7 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
   })
 
 export const useStartRaffleMutation = () => {
+  const queryClient = useQueryClient()
   const toastManager = Toast.useToastManager()
 
   return useMutation({
@@ -132,6 +133,10 @@ export const useStartRaffleMutation = () => {
         cast: response.cast,
         crew: response.crew,
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shortlists'] })
+      queryClient.invalidateQueries({ queryKey: ['raffle'] })
     },
     onError: (error) => {
       console.error('Error starting raffle:', error)

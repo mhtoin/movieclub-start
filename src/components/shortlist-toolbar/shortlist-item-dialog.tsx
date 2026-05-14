@@ -11,7 +11,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import type { MovieWithCredits } from '@/db/schema/movies'
 import {
@@ -57,10 +57,15 @@ export function ShortlistItemDialog({
     }
   }, [open])
 
+  const onOpenChangeRef = useRef(onOpenChange)
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange
+  })
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && open) {
-        onOpenChange(false)
+        onOpenChangeRef.current(false)
       }
     }
 
@@ -71,7 +76,7 @@ export function ShortlistItemDialog({
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [open, onOpenChange])
+  }, [open])
 
   if (!movie) return null
   if (typeof document === 'undefined') return null
@@ -153,7 +158,6 @@ export function ShortlistItemDialog({
               className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-border/30 bg-card shadow-2xl"
               style={{
                 maxHeight: '85vh',
-                willChange: 'transform',
               }}
             >
               <motion.button

@@ -156,9 +156,9 @@ function ShortlistPanelContent({
             exit="exit"
             className="space-y-2"
           >
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map((n) => (
               <div
-                key={i}
+                key={`skeleton-${n}`}
                 className="animate-pulse bg-accent/30 rounded-lg h-[88px]"
               />
             ))}
@@ -204,7 +204,7 @@ function ShortlistPanelContent({
                     Select one movie for the raffle
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    You won last time — choose which to include.
+                    You won last time: choose which to include.
                   </p>
                 </motion.div>
               )}
@@ -408,9 +408,9 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
               <AnimatePresence>
                 {!isExpanded && movieCount > 0 && (
                   <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
                     transition={{ type: 'spring', damping: 15, stiffness: 400 }}
                     className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full size-5 flex items-center justify-center ring-2 ring-background"
                   >

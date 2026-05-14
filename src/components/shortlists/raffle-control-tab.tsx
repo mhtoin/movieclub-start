@@ -1,7 +1,7 @@
 import { Tabs } from '@base-ui/react/tabs'
 import { LazyMotion, domAnimation, m } from 'framer-motion'
 import { Calendar, Dices } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '../ui/button'
 import RaffleSettings from './raffle-settings'
 import type { Transition } from 'framer-motion'
@@ -29,13 +29,8 @@ export function RaffleControlTab({
   dryRun,
   onDryRunChange,
 }: RaffleControlTabProps) {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
   const [showDatePicker, setShowDatePicker] = useState(false)
 
-  if (!mounted) return null
   return (
     <Tabs.Tab
       value={value}

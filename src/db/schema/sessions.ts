@@ -29,5 +29,4 @@ export const sessionsTable = pgTable(
   ],
 )
 
-// Export alias for relations
-export const session = sessionsTable
+// Internal alias for relations

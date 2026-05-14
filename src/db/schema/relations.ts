@@ -8,7 +8,7 @@ import {
   review,
 } from './movies'
 import { raffle, raffleToUser } from './raffles'
-import { session } from './sessions'
+import { sessionsTable as session } from './sessions'
 import { shortlist } from './shortlists'
 import { moviesOnTiers, tier, tierlist } from './tierlists'
 import { account, user } from './users'

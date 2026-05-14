@@ -45,8 +45,12 @@ export function LanguageFilter({
   }
 
   const selectedLabels = languages
-    .filter((l) => selectedLanguages.includes(l.iso_639_1))
-    .map((l) => l.english_name)
+    .reduce((acc, l) => {
+      if (selectedLanguages.includes(l.iso_639_1)) {
+        acc.push(l.english_name)
+      }
+      return acc
+    }, [] as Array<string>)
     .join(', ')
 
   if (variant === 'mobile') {

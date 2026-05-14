@@ -36,12 +36,8 @@ export default function RaffleCarousel(props: RaffleCarouselProps) {
   )
 }
 
-function VerticalRaffleCarousel({
-  movies,
-  raffleState,
-  winningMovie,
-  onRaffleComplete,
-}: RaffleCarouselProps) {
+function VerticalRaffleCarousel(props: RaffleCarouselProps) {
+  const { movies, raffleState, winningMovie, onRaffleComplete } = props
   const onRaffleCompleteRef = useRef(onRaffleComplete)
   useEffect(() => {
     onRaffleCompleteRef.current = onRaffleComplete
@@ -131,6 +127,15 @@ function VerticalRaffleCarousel({
       .on('reInit', tweenParallax)
       .on('scroll', tweenParallax)
       .on('slideFocus', tweenParallax)
+
+    return () => {
+      emblaApi
+        .off('reInit', setTweenNodes)
+        .off('reInit', setTweenFactor)
+        .off('reInit', tweenParallax)
+        .off('scroll', tweenParallax)
+        .off('slideFocus', tweenParallax)
+    }
   }, [emblaApi, tweenParallax, setTweenNodes, setTweenFactor])
 
   useEffect(() => {
@@ -344,6 +349,15 @@ function HorizontalRaffleCarousel({
       .on('reInit', tweenParallax)
       .on('scroll', tweenParallax)
       .on('slideFocus', tweenParallax)
+
+    return () => {
+      emblaApi
+        .off('reInit', setTweenNodes)
+        .off('reInit', setTweenFactor)
+        .off('reInit', tweenParallax)
+        .off('scroll', tweenParallax)
+        .off('slideFocus', tweenParallax)
+    }
   }, [emblaApi, tweenParallax, setTweenNodes, setTweenFactor])
 
   useEffect(() => {

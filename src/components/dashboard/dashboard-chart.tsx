@@ -69,6 +69,27 @@ const GRID_PROPS = {
   opacity: 0.5,
 }
 
+function ScrollWrapper({
+  children,
+  needsScroll,
+  maxHeight,
+}: {
+  children: ReactNode
+  needsScroll: boolean
+  maxHeight: number
+}) {
+  return needsScroll ? (
+    <div
+      className="overflow-y-auto overscroll-contain"
+      style={{ maxHeight }}
+    >
+      {children}
+    </div>
+  ) : (
+    <>{children}</>
+  )
+}
+
 export type ChartType = 'bar' | 'horizontal-bar' | 'area' | 'pie'
 
 export interface DashboardChartProps<
@@ -141,22 +162,10 @@ export function DashboardChart<T extends object>({
 
   const needsScroll = computedHeight > maxHeight
 
-  const ScrollWrapper = ({ children }: { children: ReactNode }) =>
-    needsScroll ? (
-      <div
-        className="overflow-y-auto overscroll-contain"
-        style={{ maxHeight: maxHeight }}
-      >
-        {children}
-      </div>
-    ) : (
-      <>{children}</>
-    )
-
   switch (type) {
     case 'horizontal-bar':
       return (
-        <ScrollWrapper>
+        <ScrollWrapper needsScroll={needsScroll} maxHeight={maxHeight}>
           <ResponsiveContainer width="100%" height={computedHeight}>
             <BarChart
               data={data}
@@ -234,7 +243,7 @@ export function DashboardChart<T extends object>({
 
     case 'bar':
       return (
-        <ScrollWrapper>
+        <ScrollWrapper needsScroll={needsScroll} maxHeight={maxHeight}>
           <ResponsiveContainer width="100%" height={computedHeight}>
             <BarChart
               data={data}
@@ -313,7 +322,7 @@ export function DashboardChart<T extends object>({
 
     case 'area':
       return (
-        <ScrollWrapper>
+        <ScrollWrapper needsScroll={needsScroll} maxHeight={maxHeight}>
           <ResponsiveContainer width="100%" height={computedHeight}>
             <AreaChart
               data={data}
@@ -404,7 +413,7 @@ export function DashboardChart<T extends object>({
 
     case 'pie':
       return (
-        <ScrollWrapper>
+        <ScrollWrapper needsScroll={needsScroll} maxHeight={maxHeight}>
           <ResponsiveContainer width="100%" height={computedHeight}>
             <PieChart>
               <Tooltip {...TOOLTIP_STYLE} formatter={formatValue} />

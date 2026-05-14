@@ -3,6 +3,12 @@ import type { TMDBMovieResponse } from '@/types/tmdb'
 import { Button } from '@/components/ui/button'
 import { getImageUrl } from '@/lib/tmdb-api'
 
+const usdFormat = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+})
+
 interface MovieDetailsViewProps {
   title: string
   movieDetails?: TMDBMovieResponse
@@ -182,11 +188,7 @@ export function MovieDetailsView({
                 <div className="rounded-lg bg-secondary/30 p-2.5">
                   <p className="text-muted-foreground mb-0.5 text-xs">Budget</p>
                   <p className="font-medium text-sm">
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: 'USD',
-                      maximumFractionDigits: 0,
-                    }).format(movieDetails.budget)}
+                    {usdFormat.format(movieDetails.budget)}
                   </p>
                 </div>
               )}
@@ -196,11 +198,7 @@ export function MovieDetailsView({
                     Revenue
                   </p>
                   <p className="font-medium text-sm">
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: 'USD',
-                      maximumFractionDigits: 0,
-                    }).format(movieDetails.revenue)}
+                    {usdFormat.format(movieDetails.revenue)}
                   </p>
                 </div>
               )}

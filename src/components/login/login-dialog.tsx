@@ -40,6 +40,7 @@ function LoginDialogContent() {
   const { data: movies } = useQuery(tmdbQueries.backgroundMovies(12))
   const [lastUsedMethod, setLastUsedMethod] = useState<LoginMethod | null>(null)
 
+  // react-doctor-disable-next-line react-doctor/rendering-hydration-no-flicker
   useEffect(() => {
     setLastUsedMethod(getLastUsedLoginMethodFromClient())
   }, [])
@@ -52,9 +53,9 @@ function LoginDialogContent() {
       <div className="hidden md:flex flex-col justify-between w-1/2 lg:w-3/5 relative overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="grid grid-cols-3 lg:grid-cols-4 grid-rows-2 gap-1.5 p-5 h-full">
-            {displayMovies.slice(0, 8).map((movie, i) => (
+            {displayMovies.slice(0, 8).map((movie) => (
               <div
-                key={`poster-${i}`}
+                key={movie.id}
                 className="rounded-sm overflow-hidden h-full"
               >
                 <MoviePosterCard movie={movie} />

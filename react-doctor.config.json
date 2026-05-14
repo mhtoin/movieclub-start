@@ -1,0 +1,62 @@
+{
+  "ignore": {
+    "overrides": [
+      {
+        "files": [
+          "src/routes/login/google/callback.tsx",
+          "src/routes/login/discord/callback.tsx",
+          "src/routes/api/sse.ts",
+          "src/routes/api/tierlists/share/discord.ts",
+          "src/lib/auth/auth.ts",
+          "src/components/tierlist/tierlist-content.tsx"
+        ],
+        "rules": ["react-hooks/rules-of-hooks"]
+      },
+      {
+        "files": [
+          "src/routes/_authenticated/watched.tsx",
+          "src/routes/_authenticated/discover.tsx"
+        ],
+        "rules": ["react-doctor/tanstack-start-no-navigate-in-render"]
+      },
+      {
+        "files": [
+          "src/lib/auth/logout-action.ts",
+          "src/lib/react-query/mutations/users.ts"
+        ],
+        "rules": ["react-doctor/tanstack-start-server-fn-validate-input"]
+      },
+      {
+        "files": ["src/lib/react-query/mutations/auth.ts"],
+        "rules": ["react-doctor/query-mutation-missing-invalidation"]
+      },
+      {
+        "files": [
+          "src/components/login/reset-password-view.tsx",
+          "src/routes/reset-password.tsx"
+        ],
+        "rules": ["react-doctor/rerender-state-only-in-handlers"]
+      },
+      {
+        "files": [
+          "src/components/discover/discover-search.tsx",
+          "src/components/discover/rating-filter.tsx",
+          "src/components/settings/appearance-section.tsx"
+        ],
+        "rules": ["react-doctor/no-derived-useState"]
+      },
+      {
+        "files": [
+          "src/components/sidebar/sidebar.tsx",
+          "src/components/settings/appearance-section.tsx",
+          "src/components/color-scheme-selector.tsx"
+        ],
+        "rules": ["react-doctor/query-mutation-missing-invalidation"]
+      },
+      {
+        "files": ["src/components/discover/discover-movie-list.tsx"],
+        "rules": ["react-doctor/no-prop-callback-in-effect"]
+      }
+    ]
+  }
+}

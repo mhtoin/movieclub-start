@@ -133,6 +133,7 @@ export function RaffleCountdown({ onComplete }: Props) {
     onCompleteRef.current = onComplete
   })
 
+  // react-doctor-disable-next-line react-doctor/effect-needs-cleanup
   useEffect(() => {
     const timers: Array<ReturnType<typeof setTimeout>> = []
 

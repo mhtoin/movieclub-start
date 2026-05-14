@@ -1,5 +1,5 @@
 import { Toast } from '@base-ui/react/toast'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { authMiddleware } from '@/middleware/auth'
@@ -42,11 +42,15 @@ export const deleteUser = createServerFn({ method: 'POST' })
   })
 
 export const useDeleteUserMutation = () => {
+  const queryClient = useQueryClient()
   const toastManager = Toast.useToastManager()
 
   return useMutation({
     mutationFn: async () => {
       await deleteUser()
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries()
     },
     onError: (error) => {
       // Don't show error toast for redirects (which are successful navigation)
