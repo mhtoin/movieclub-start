@@ -69,7 +69,11 @@ const config = defineConfig({
         inline: ['decimal.js-light', 'recharts-scale', 'react-smooth'],
       },
     }),
-    viteReact(),
+    viteReact({
+      babel: {
+        plugins: ['babel-plugin-react-compiler'],
+      },
+    }),
   ],
   ssr: {
     // Bundle recharts' transitive dependencies that would otherwise be

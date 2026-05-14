@@ -47,9 +47,10 @@ export function MovieDetailsDialog({
   const posterUrl = movie ? getImageUrl(movie.poster_path, 'w500') : null
   const backdropUrl = movie ? getImageUrl(movie.backdrop_path, 'w1280') : null
 
+  const movieId = movie?.id
   const { data: movieDetails, isLoading } = useQuery({
-    ...tmdbQueries.movieDetails(movie?.id ?? 0),
-    enabled: open && !!movie,
+    ...tmdbQueries.movieDetails(movieId ?? 0),
+    enabled: open && movieId != null && movieId > 0,
   })
 
   const {
@@ -91,7 +92,8 @@ export function MovieDetailsDialog({
   }
 
   const handleAddToShortlist = () => {
-    addToShortlist(movie!.id, {
+    if (!movie) return
+    addToShortlist(movie.id, {
       onSuccess: () => {
         if (addingMode) {
           setTimeout(() => {

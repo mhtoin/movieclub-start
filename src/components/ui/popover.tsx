@@ -149,7 +149,14 @@ const PopoverTrigger = ({
   }
 
   if (React.isValidElement(children)) {
-    return <BasePopover.Trigger ref={ref} render={children} {...props} />
+    return (
+      <BasePopover.Trigger
+        ref={ref}
+        render={children}
+        nativeButton={false}
+        {...props}
+      />
+    )
   }
 
   return (

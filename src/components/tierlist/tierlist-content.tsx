@@ -141,6 +141,13 @@ export function TierlistContent({
     }
   }, [tierlistFromDb, isSaving])
 
+  const editMutation = useMutation({
+    mutationFn: updateTierlist,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['tierlists'] })
+    },
+  })
+
   function handleDragStart() {
     isDragging.current = true
   }
@@ -362,13 +369,6 @@ export function TierlistContent({
     }
     return `Until ${formatDate(tierlist.watchDateTo!)}`
   })()
-
-  const editMutation = useMutation({
-    mutationFn: updateTierlist,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['tierlists'] })
-    },
-  })
 
   const handleEdit = (data: {
     title: string
