@@ -33,7 +33,11 @@ const sectionVariants = {
   },
 }
 
-export const LandingPage = memo(function LandingPage({ userId }: { userId: string }) {
+export const LandingPage = memo(function LandingPage({
+  userId,
+}: {
+  userId: string
+}) {
   const shouldReduceMotion = useReducedMotion()
 
   const { data: latestMovieData } = useSuspenseQuery(movieQueries.latest())

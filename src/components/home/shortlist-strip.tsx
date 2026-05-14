@@ -297,14 +297,16 @@ export const ShortlistStrip = memo(function ShortlistStrip({
               <div
                 key={movie.id}
                 className="snap-start flex-shrink-0 relative group cursor-pointer hover:z-50 focus-within:z-50"
-                style={{
-                  transformOrigin: 'top center',
-                  '--rotation': `${rotation}deg`,
-                  opacity: 0,
-                  animation: shouldReduceMotion
-                    ? 'none'
-                    : `fadeInRotate 0.55s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.07}s forwards`,
-                } as React.CSSProperties}
+                style={
+                  {
+                    transformOrigin: 'top center',
+                    '--rotation': `${rotation}deg`,
+                    opacity: 0,
+                    animation: shouldReduceMotion
+                      ? 'none'
+                      : `fadeInRotate 0.55s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.07}s forwards`,
+                  } as React.CSSProperties
+                }
               >
                 <Clothespin />
                 <div className="polaroid-flip-container">

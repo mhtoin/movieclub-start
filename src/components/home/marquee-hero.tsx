@@ -42,7 +42,10 @@ function getProviderLink(
   return watchProviders[region]?.link ?? null
 }
 
-export const MarqueeHero = memo(function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
+export const MarqueeHero = memo(function MarqueeHero({
+  movie,
+  userId,
+}: MarqueeHeroProps) {
   const shouldReduceMotion = useReducedMotion()
 
   if (!movie) {
