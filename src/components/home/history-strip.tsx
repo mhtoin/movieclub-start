@@ -1,5 +1,6 @@
+import { memo } from 'react'
 import { Link } from '@tanstack/react-router'
-import { motion, useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'framer-motion'
 import { ArrowRight, Calendar, Film, Ticket } from 'lucide-react'
 import type { Movie } from '@/db/schema/movies'
 
@@ -7,7 +8,9 @@ interface HistoryStripProps {
   movies: Array<Movie>
 }
 
-export function HistoryStrip({ movies }: HistoryStripProps) {
+export const HistoryStrip = memo(function HistoryStrip({
+  movies,
+}: HistoryStripProps) {
   const shouldReduceMotion = useReducedMotion()
 
   return (
@@ -50,7 +53,7 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
               const posterPath =
                 (movie.images as any)?.posters?.[0]?.file_path ?? null
               const posterUrl = posterPath
-                ? `https://image.tmdb.org/t/p/w342${posterPath}`
+                ? `https://image.tmdb.org/t/p/w154${posterPath}`
                 : null
               const watchDate = movie.watchDate
                 ? new Date(movie.watchDate).toLocaleDateString('en-US', {
@@ -60,16 +63,15 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
                 : null
 
               return (
-                <motion.div
+                <div
                   key={movie.id}
                   className="snap-start flex-shrink-0 relative"
-                  style={{ width: 'clamp(7rem, 18vw, 10rem)' }}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.5,
-                    delay: index * 0.08,
-                    ease: [0.16, 1, 0.3, 1],
+                  style={{
+                    width: 'clamp(7rem, 18vw, 10rem)',
+                    opacity: 0,
+                    animation: shouldReduceMotion
+                      ? 'none'
+                      : `fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.08}s forwards`,
                   }}
                 >
                   <div className="flex flex-col items-center">
@@ -84,6 +86,7 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
                             alt={movie.title}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
+                            decoding="async"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
@@ -112,7 +115,7 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )
             })}
           </div>
@@ -120,4 +123,4 @@ export function HistoryStrip({ movies }: HistoryStripProps) {
       )}
     </div>
   )
-}
+})

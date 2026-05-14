@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Clapperboard, Clock, Plus, Star, Ticket } from 'lucide-react'
@@ -135,7 +136,9 @@ function PolaroidBack({ movie }: { movie: MovieWithCredits }) {
   )
 }
 
-export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
+export const ShortlistStrip = memo(function ShortlistStrip({
+  shortlist,
+}: ShortlistStripProps) {
   const shouldReduceMotion = useReducedMotion()
   const movies = shortlist?.movies ?? []
 
@@ -291,29 +294,23 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
             const rotation = ROTATIONS[index % ROTATIONS.length]
 
             return (
-              <motion.div
+              <div
                 key={movie.id}
                 className="snap-start flex-shrink-0 relative group cursor-pointer hover:z-50 focus-within:z-50"
-                style={{ transformOrigin: 'top center' }}
-                initial={
-                  shouldReduceMotion ? false : { opacity: 0, y: 20, rotate: 0 }
-                }
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  rotate: rotation,
-                }}
-                transition={{
-                  duration: 0.55,
-                  delay: index * 0.07,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
+                style={{
+                  transformOrigin: 'top center',
+                  '--rotation': `${rotation}deg`,
+                  opacity: 0,
+                  animation: shouldReduceMotion
+                    ? 'none'
+                    : `fadeInRotate 0.55s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.07}s forwards`,
+                } as React.CSSProperties}
               >
                 <Clothespin />
                 <div className="polaroid-flip-container">
                   <div className="polaroid-flipper">
                     <div className="polaroid-front">
-                      <div className="w-40 sm:w-48 md:w-56 lg:w-64 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-shadow duration-300 group-hover:shadow-2xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
+                      <div className="w-40 sm:w-48 md:w-56 lg:w-64 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
                         <div className="aspect-[2/3] overflow-hidden rounded-[1px] bg-black/5">
                           {posterUrl ? (
                             <img
@@ -321,6 +318,7 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
                               alt={movie.title}
                               className="h-full w-full object-cover"
                               loading="lazy"
+                              decoding="async"
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">
@@ -343,11 +341,11 @@ export function ShortlistStrip({ shortlist }: ShortlistStripProps) {
                     <PolaroidBack movie={movie} />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )
           })}
         </div>
       </div>
     </div>
   )
-}
+})

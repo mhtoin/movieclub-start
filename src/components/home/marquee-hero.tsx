@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
@@ -41,7 +42,7 @@ function getProviderLink(
   return watchProviders[region]?.link ?? null
 }
 
-export function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
+export const MarqueeHero = memo(function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
   const shouldReduceMotion = useReducedMotion()
 
   if (!movie) {
@@ -175,6 +176,7 @@ export function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
                         alt={provider.provider_name}
                         className="h-full w-full object-cover"
                         loading="lazy"
+                        decoding="async"
                       />
                     </a>
                   ) : null,
@@ -247,6 +249,7 @@ export function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
                   alt={movie.title}
                   className="h-full w-full object-cover"
                   loading="eager"
+                  decoding="async"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -264,4 +267,4 @@ export function MarqueeHero({ movie, userId }: MarqueeHeroProps) {
       </div>
     </div>
   )
-}
+})

@@ -847,6 +847,17 @@
     }
   }
 
+  @keyframes fadeInRotate {
+    from {
+      opacity: 0;
+      transform: translateY(20px) rotate(0deg);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) rotate(var(--rotation, 0deg));
+    }
+  }
+
   @keyframes scaleIn {
     from {
       opacity: 0;

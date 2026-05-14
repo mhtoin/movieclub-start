@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'framer-motion'
 
@@ -32,7 +33,7 @@ const sectionVariants = {
   },
 }
 
-export function LandingPage({ userId }: { userId: string }) {
+export const LandingPage = memo(function LandingPage({ userId }: { userId: string }) {
   const shouldReduceMotion = useReducedMotion()
 
   const { data: latestMovieData } = useSuspenseQuery(movieQueries.latest())
@@ -44,7 +45,7 @@ export function LandingPage({ userId }: { userId: string }) {
   const { data: allWatched = [] } = useSuspenseQuery(movieQueries.allWatched())
 
   const latestMovie = latestMovieData?.movie ?? null
-  const recentWatches = allWatched.slice(0, 6)
+  const recentWatches = useMemo(() => allWatched.slice(0, 6), [allWatched])
 
   return (
     <div className="min-h-screen w-full pb-28 md:pb-16">
@@ -78,7 +79,7 @@ export function LandingPage({ userId }: { userId: string }) {
       </div>
     </div>
   )
-}
+})
 
 export function LandingSkeleton() {
   return (

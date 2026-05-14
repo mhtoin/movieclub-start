@@ -10,13 +10,19 @@ export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
     const userId = context.user.userId
 
-    await context.queryClient.ensureQueryData(movieQueries.latest())
-    await context.queryClient.ensureQueryData(shortlistQueries.all())
-    await context.queryClient.ensureQueryData(movieQueries.allWatched())
+    const baseQueries = [
+      context.queryClient.ensureQueryData(movieQueries.latest()),
+      context.queryClient.ensureQueryData(shortlistQueries.all()),
+      context.queryClient.ensureQueryData(movieQueries.allWatched()),
+    ]
+
+    await Promise.all(baseQueries)
 
     if (userId) {
-      await context.queryClient.ensureQueryData(shortlistQueries.byUser(userId))
-      await context.queryClient.ensureQueryData(dashboardQueries.stats(userId))
+      await Promise.all([
+        context.queryClient.ensureQueryData(shortlistQueries.byUser(userId)),
+        context.queryClient.ensureQueryData(dashboardQueries.stats(userId)),
+      ])
     }
   },
   component: Home,

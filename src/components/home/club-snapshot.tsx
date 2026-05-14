@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import {
@@ -37,12 +37,15 @@ function AnimatedCounter({
   const shouldReduceMotion = useReducedMotion()
   const ref = useRef<HTMLSpanElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
-  const [display, setDisplay] = useState(0)
+  const hasAnimated = useRef(false)
 
   useEffect(() => {
-    if (!isInView) return
+    if (!isInView || !ref.current || hasAnimated.current) return
+    hasAnimated.current = true
+
     if (shouldReduceMotion) {
-      setDisplay(value)
+      ref.current.textContent =
+        decimals > 0 ? value.toFixed(decimals) : String(Math.round(value))
       return
     }
 
@@ -55,7 +58,11 @@ function AnimatedCounter({
     const tick = (now: number) => {
       const progress = Math.min((now - start) / duration, 1)
       const eased = 1 - Math.pow(1 - progress, 4)
-      setDisplay(from + (to - from) * eased)
+      const current = from + (to - from) * eased
+      if (ref.current) {
+        ref.current.textContent =
+          decimals > 0 ? current.toFixed(decimals) : String(Math.round(current))
+      }
       if (progress < 1) {
         raf = requestAnimationFrame(tick)
       }
@@ -63,16 +70,16 @@ function AnimatedCounter({
 
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [isInView, value, shouldReduceMotion])
+  }, [isInView, value, decimals, shouldReduceMotion])
 
   return (
     <span ref={ref} className="tabular-nums">
-      {decimals > 0 ? display.toFixed(decimals) : Math.round(display)}
+      {decimals > 0 ? value.toFixed(decimals) : Math.round(value)}
     </span>
   )
 }
 
-export function ClubSnapshot({
+export const ClubSnapshot = memo(function ClubSnapshot({
   allShortlists,
   currentUserId,
   stats,
@@ -127,8 +134,9 @@ export function ClubSnapshot({
                 }}
                 className="transition-all duration-300 hover:-translate-y-1.5"
                 style={{
-                  filter:
-                    'drop-shadow(0 2px 4px rgba(0,0,0,0.04)) drop-shadow(0 8px 16px rgba(0,0,0,0.03))',
+                  // Using box-shadow instead of drop-shadow for better compositing performance
+                  boxShadow:
+                    '0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.03)',
                 }}
               >
                 <div
@@ -356,4 +364,4 @@ export function ClubSnapshot({
       </div>
     </div>
   )
-}
+})
