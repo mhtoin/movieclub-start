@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '../ui/button'
 import { ResponsiveDialog } from '../ui/responsive-dialog'
 import LoginForm from './login-form'
@@ -38,12 +38,10 @@ export default function LoginDialog() {
 
 function LoginDialogContent() {
   const { data: movies } = useQuery(tmdbQueries.backgroundMovies(12))
-  const [lastUsedMethod, setLastUsedMethod] = useState<LoginMethod | null>(null)
-
-  // react-doctor-disable-next-line react-doctor/rendering-hydration-no-flicker
-  useEffect(() => {
-    setLastUsedMethod(getLastUsedLoginMethodFromClient())
-  }, [])
+  const [lastUsedMethod, _] = useState<LoginMethod | null>(() => {
+    if (typeof window === 'undefined') return null
+    return getLastUsedLoginMethodFromClient()
+  })
 
   const displayMovies: Array<Movie> =
     movies && movies.length > 0 ? movies : FALLBACK_POSTERS

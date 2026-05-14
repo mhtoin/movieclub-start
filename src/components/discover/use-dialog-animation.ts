@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface UseDialogAnimationProps {
   open: boolean
@@ -15,21 +15,35 @@ export function useDialogAnimation({
   const [isClosing, setIsClosing] = useState(false)
   const [showImage, setShowImage] = useState(false)
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true)
+    setMounted(false)
+    setTimeout(() => {
+      setShowImage(false)
+      onClose()
+    }, 350)
+  }, [onClose])
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      handleClose()
+    }
+  }
+
   useEffect(() => {
     if (open && triggerRect) {
-      setIsClosing(false)
-      setMounted(false)
-      setShowImage(false)
-
       requestAnimationFrame(() => {
-        setShowImage(true)
+        setIsClosing(false)
+        setMounted(false)
+        setShowImage(false)
+
         requestAnimationFrame(() => {
-          setMounted(true)
+          setShowImage(true)
+          requestAnimationFrame(() => {
+            setMounted(true)
+          })
         })
       })
-    } else if (!open) {
-      setMounted(false)
-      setShowImage(false)
     }
   }, [open, triggerRect])
 
@@ -49,22 +63,7 @@ export function useDialogAnimation({
       document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = ''
     }
-  }, [open])
-
-  const handleClose = () => {
-    setIsClosing(true)
-    setMounted(false)
-    setTimeout(() => {
-      setShowImage(false)
-      onClose()
-    }, 350)
-  }
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose()
-    }
-  }
+  }, [open, handleClose])
 
   const backdropStyle: React.CSSProperties = {
     opacity: mounted && !isClosing ? 1 : 0,

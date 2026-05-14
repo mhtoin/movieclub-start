@@ -90,7 +90,9 @@ export function TierlistContent({
   const [studioOpen, setStudioOpen] = useState(false)
 
   const localTiersRef = useRef(localTiers)
-  localTiersRef.current = localTiers
+  useEffect(() => {
+    localTiersRef.current = localTiers
+  }, [localTiers])
 
   const containerMap = useMemo(() => {
     const map = new Map<string, string>()

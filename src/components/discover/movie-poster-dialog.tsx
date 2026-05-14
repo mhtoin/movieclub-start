@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Movie } from '@/lib/tmdb-api'
 import { getImageUrl } from '@/lib/tmdb-api'
@@ -21,21 +21,35 @@ export default function MoviePosterDialog({
   const [showImage, setShowImage] = useState(false)
   const posterUrl = movie ? getImageUrl(movie.poster_path, 'w500') : null
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true)
+    setMounted(false)
+    setTimeout(() => {
+      setShowImage(false)
+      onOpenChange(false)
+    }, 350)
+  }, [onOpenChange])
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      handleClose()
+    }
+  }
+
   useEffect(() => {
     if (open && triggerRect) {
-      setIsClosing(false)
-      setMounted(false)
-      setShowImage(false)
-
       requestAnimationFrame(() => {
-        setShowImage(true)
+        setIsClosing(false)
+        setMounted(false)
+        setShowImage(false)
+
         requestAnimationFrame(() => {
-          setMounted(true)
+          setShowImage(true)
+          requestAnimationFrame(() => {
+            setMounted(true)
+          })
         })
       })
-    } else if (!open) {
-      setMounted(false)
-      setShowImage(false)
     }
   }, [open, triggerRect])
 
@@ -55,21 +69,7 @@ export default function MoviePosterDialog({
       document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = ''
     }
-  }, [open])
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose()
-    }
-  }
-
-  const handleClose = () => {
-    setIsClosing(true)
-    setMounted(false)
-    setTimeout(() => {
-      setShowImage(false)
-      onOpenChange(false)
-    }, 350)
-  }
+  }, [open, handleClose])
 
   if (!movie || !open) return null
 

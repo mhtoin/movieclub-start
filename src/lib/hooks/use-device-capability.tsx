@@ -1,4 +1,4 @@
-import { createContext, use, useEffect, useState } from 'react'
+import { createContext, use, useState } from 'react'
 
 interface DeviceCapability {
   isLowEnd: boolean
@@ -18,14 +18,12 @@ export function DeviceCapabilityProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [isLowEnd, setIsLowEnd] = useState(false)
-
-  useEffect(() => {
+  const [isLowEnd] = useState(() => {
     const cores = navigator.hardwareConcurrency || 4
     const memory =
       (navigator as unknown as { deviceMemory?: number }).deviceMemory || 4
-    setIsLowEnd(cores <= 2 || memory <= 2)
-  }, [])
+    return cores <= 2 || memory <= 2
+  })
 
   return (
     <DeviceCapabilityContext.Provider value={{ isLowEnd }}>

@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
 export function useDebouncedValue<T>(value: T, delay: number): [T] {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
@@ -21,19 +27,21 @@ export function useDebouncedCallback<T extends (...args: Array<any>) => void>(
   delay: number,
 ): T {
   const callbackRef = useRef(callback)
-  callbackRef.current = callback
+  useEffect(() => {
+    callbackRef.current = callback
+  }, [callback])
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   return useCallback(
-    ((...args: Parameters<T>) => {
+    (...args: Parameters<T>) => {
       clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => {
         callbackRef.current(...args)
       }, delay)
-    }) as T,
+    },
     [delay],
-  )
+  ) as T
 }
 
 export function useElementInView(
@@ -68,29 +76,13 @@ export function useElementInView(
 }
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => {
-    // SSR-safe: default to desktop (false for mobile queries)
-    if (typeof window === 'undefined') {
-      return query.includes('min-width')
-    }
-    return window.matchMedia(query).matches
-  })
-
-  useEffect(() => {
-    const media = window.matchMedia(query)
-
-    // Update if value changed since initial render
-    if (media.matches !== matches) {
-      setMatches(media.matches)
-    }
-
-    const listener = (e: MediaQueryListEvent) => {
-      setMatches(e.matches)
-    }
-
-    media.addEventListener('change', listener)
-    return () => media.removeEventListener('change', listener)
-  }, [query, matches])
-
-  return matches
+  return useSyncExternalStore(
+    (callback) => {
+      const media = window.matchMedia(query)
+      media.addEventListener('change', callback)
+      return () => media.removeEventListener('change', callback)
+    },
+    () => window.matchMedia(query).matches,
+    () => query.includes('min-width'),
+  )
 }

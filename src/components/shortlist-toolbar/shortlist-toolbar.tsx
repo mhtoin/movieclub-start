@@ -288,7 +288,9 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
   const toggleIsReadyMutation = useToggleIsReadyMutation()
   const toggleParticipatingMutation = useToggleParticipatingMutation()
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 0)
+  }, [])
 
   const movieCount = data?.movies.length || 0
   const canAddMoreMovies = movieCount < 3

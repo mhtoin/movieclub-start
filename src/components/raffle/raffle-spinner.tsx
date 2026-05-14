@@ -153,20 +153,36 @@ const ReelStrip = memo(function ReelStrip({
   )
 })
 
+function seededRandom(seed: number, index: number): number {
+  let state = (seed + index * 374761393) >>> 0
+  state = state ^ 61 ^ (state >>> 16)
+  state = state + (state << 3)
+  state = state ^ (state >>> 4)
+  state = state * 668265261
+  state = state ^ (state >>> 15)
+  return (state >>> 0) / 4294967296
+}
+
 export function RaffleSpinner({
   movies,
   winningMovie,
   onSpinComplete,
   arrowColor = 'var(--primary)',
 }: Props) {
-  const spinParams = useMemo(
-    () => ({
-      laps: Math.floor(Math.random() * 3) + 6,
-      duration: 6000 + Math.random() * 3000,
-      landingJitter: (Math.random() - 0.5) * ITEM_HEIGHT * 0.6,
-    }),
-    [],
-  )
+  const spinParams = useMemo(() => {
+    let seed = 0
+    for (let i = 0; i < winningMovie.id.length; i++) {
+      seed = (seed << 5) - seed + winningMovie.id.charCodeAt(i)
+      seed |= 0
+    }
+    seed = Math.abs(seed) + movies.length
+
+    return {
+      laps: Math.floor(seededRandom(seed, 0) * 3) + 6,
+      duration: 6000 + seededRandom(seed, 1) * 3000,
+      landingJitter: (seededRandom(seed, 2) - 0.5) * ITEM_HEIGHT * 0.6,
+    }
+  }, [winningMovie.id, movies.length])
 
   const animFrameRef = useRef<number>(0)
   const settleTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
@@ -254,7 +270,15 @@ export function RaffleSpinner({
       cancelAnimationFrame(animFrameRef.current)
       if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current)
     }
-  }, [])
+  }, [
+    animateDrum,
+    drumRef,
+    movies,
+    movies.length,
+    speedProgress,
+    spinParams,
+    targetOffset,
+  ])
 
   return (
     <LazyMotion features={domAnimation}>

@@ -1,7 +1,7 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { Calendar, Clock, Users, X } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Avatar from '../ui/avatar'
 import { Button } from '../ui/button'
 import { ResponsiveDialog } from '../ui/responsive-dialog'
@@ -32,11 +32,10 @@ export function WatchedItem({
   )
 
   // Close dialog when search params change (e.g., when filtering by user)
-  const prevSearchRef = useRef(search)
-  if (search !== prevSearchRef.current) {
-    prevSearchRef.current = search
-    setOpen(false)
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => setOpen(false), 0)
+    return () => clearTimeout(timer)
+  }, [search])
   const posterUrl = movie.images?.posters?.[0]?.file_path
     ? `https://image.tmdb.org/t/p/w342${movie.images.posters[0].file_path}`
     : '/placeholder_movie_poster.png'

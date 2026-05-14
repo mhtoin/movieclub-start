@@ -6,7 +6,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -30,56 +30,58 @@ export function RaffleBlockersToast({
   totalCount,
   pendingSelectionsCount,
 }: Props) {
-  const [isOpen, setIsOpen] = useState(true)
-  const blockers: Array<Blocker> = []
+  const blockers = useMemo(() => {
+    const result: Array<Blocker> = []
 
-  if (!watchDate) {
-    blockers.push({
-      id: 'date',
-      icon: CalendarDays,
-      title: 'Pick a date',
-      description: 'Select a watch date to proceed',
-    })
-  }
+    if (!watchDate) {
+      result.push({
+        id: 'date',
+        icon: CalendarDays,
+        title: 'Pick a date',
+        description: 'Select a watch date to proceed',
+      })
+    }
 
-  if (totalCount === 0) {
-    blockers.push({
-      id: 'participants',
-      icon: Users,
-      title: 'No participants',
-      description: 'Someone must join first',
-    })
-  }
+    if (totalCount === 0) {
+      result.push({
+        id: 'participants',
+        icon: Users,
+        title: 'No participants',
+        description: 'Someone must join first',
+      })
+    }
 
-  if (readyCount < totalCount && totalCount > 0) {
-    const notReady = totalCount - readyCount
-    blockers.push({
-      id: 'ready',
-      icon: UserCheck2,
-      title: `${notReady} not ready`,
-      description: 'Everyone must mark ready',
-    })
-  }
+    if (readyCount < totalCount && totalCount > 0) {
+      const notReady = totalCount - readyCount
+      result.push({
+        id: 'ready',
+        icon: UserCheck2,
+        title: `${notReady} not ready`,
+        description: 'Everyone must mark ready',
+      })
+    }
 
-  if (pendingSelectionsCount > 0) {
-    blockers.push({
-      id: 'selection',
-      icon: FilmIcon,
-      title: 'Selection pending',
-      description: 'Someone must pick a film',
-    })
-  }
+    if (pendingSelectionsCount > 0) {
+      result.push({
+        id: 'selection',
+        icon: FilmIcon,
+        title: 'Selection pending',
+        description: 'Someone must pick a film',
+      })
+    }
+
+    return result
+  }, [watchDate, totalCount, readyCount, pendingSelectionsCount])
 
   const blockersSignature = useMemo(
     () => blockers.map((blocker) => blocker.id).join('|'),
     [blockers],
   )
 
-  useEffect(() => {
-    if (blockers.length > 0) {
-      setIsOpen(true)
-    }
-  }, [blockersSignature])
+  const [dismissedSignature, setDismissedSignature] = useState<string | null>(
+    null,
+  )
+  const isOpen = dismissedSignature !== blockersSignature
 
   if (blockers.length === 0) return null
 
@@ -119,7 +121,7 @@ export function RaffleBlockersToast({
 
                   <button
                     type="button"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => setDismissedSignature(blockersSignature)}
                     className="rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted"
                     aria-label="Dismiss blockers"
                   >
@@ -153,7 +155,11 @@ export function RaffleBlockersToast({
 
         <button
           type="button"
-          onClick={() => setIsOpen((open) => !open)}
+          onClick={() =>
+            setDismissedSignature((prev) =>
+              prev === blockersSignature ? null : blockersSignature,
+            )
+          }
           className={cn(
             'relative flex h-9 w-9 items-center justify-center rounded-full border border-warning/40',
             'bg-card/95 text-warning shadow-lg shadow-warning/15',

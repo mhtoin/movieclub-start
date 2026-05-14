@@ -197,7 +197,7 @@ function VerticalRaffleCarousel(props: RaffleCarouselProps) {
     return () => {
       clearTimeout(timeoutId)
     }
-  }, [emblaApi, raffleState, winningMovie, movies])
+  }, [emblaApi, raffleState, winningMovie, movies, onRaffleComplete])
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -435,7 +435,7 @@ function HorizontalRaffleCarousel({
     return () => {
       clearTimeout(timeoutId)
     }
-  }, [emblaApi, raffleState, winningMovie, movies])
+  }, [emblaApi, raffleState, winningMovie, movies, onRaffleComplete])
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
