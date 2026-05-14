@@ -79,10 +79,7 @@ function ScrollWrapper({
   maxHeight: number
 }) {
   return needsScroll ? (
-    <div
-      className="overflow-y-auto overscroll-contain"
-      style={{ maxHeight }}
-    >
+    <div className="overflow-y-auto overscroll-contain" style={{ maxHeight }}>
       {children}
     </div>
   ) : (

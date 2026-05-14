@@ -54,10 +54,7 @@ function LoginDialogContent() {
         <div className="absolute inset-0 z-0">
           <div className="grid grid-cols-3 lg:grid-cols-4 grid-rows-2 gap-1.5 p-5 h-full">
             {displayMovies.slice(0, 8).map((movie) => (
-              <div
-                key={movie.id}
-                className="rounded-sm overflow-hidden h-full"
-              >
+              <div key={movie.id} className="rounded-sm overflow-hidden h-full">
                 <MoviePosterCard movie={movie} />
               </div>
             ))}
