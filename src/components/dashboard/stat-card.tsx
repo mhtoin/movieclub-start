@@ -48,7 +48,7 @@ export function StatCard({
             {title}
           </p>
           <div className="mt-2 flex items-baseline gap-2">
-            <h3 className="text-3xl font-bold tracking-tight truncate">
+            <h3 className="text-3xl font-semibold tracking-tight truncate">
               {value}
             </h3>
             {trend && (

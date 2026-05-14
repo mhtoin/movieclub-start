@@ -35,9 +35,9 @@ export default function UserTabList({
     onMovieClick(movie, rect)
   }
 
-  const participatingMovies = shortlists
-    .filter((s) => s.participating)
-    .flatMap((s) => s.movies)
+  const participatingMovies = shortlists.flatMap((s) =>
+    s.participating ? s.movies : [],
+  )
 
   return (
     <TabsRoot variant="underlined" defaultValue="all" className="w-full">
@@ -47,7 +47,7 @@ export default function UserTabList({
           <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none sm:hidden" />
           <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none sm:hidden">
             <svg
-              className="w-4 h-4 text-muted-foreground/40"
+              className="size-4 text-muted-foreground/40"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -62,7 +62,7 @@ export default function UserTabList({
           </div>
           <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none sm:hidden">
             <svg
-              className="w-4 h-4 text-muted-foreground/40"
+              className="size-4 text-muted-foreground/40"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

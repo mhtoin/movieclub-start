@@ -52,11 +52,23 @@ export function ParticipantTicket({
             : 'Click to include in raffle'
         }
       >
-        <XCircle className="w-4 h-4" />
+        <XCircle className="size-4" />
       </button>
       <div
         className={`relative ${participating ? '' : 'opacity-60'} ${isUpdating ? 'opacity-80' : ''}`}
+        role={participating && !isReady ? 'button' : undefined}
+        tabIndex={participating && !isReady ? 0 : undefined}
         onClick={participating && !isReady ? onToggleReady : undefined}
+        onKeyDown={
+          participating && !isReady
+            ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onToggleReady()
+                }
+              }
+            : undefined
+        }
       >
         <TicketCard
           delay={delay}

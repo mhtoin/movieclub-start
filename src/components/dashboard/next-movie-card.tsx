@@ -59,7 +59,7 @@ export function NextMovieCard({ movieData }: NextMovieCardProps) {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h2 className="text-3xl font-bold text-foreground mb-2 line-clamp-2">
+              <h2 className="text-3xl font-semibold text-foreground mb-2 line-clamp-2">
                 {movie.title}
               </h2>
               {movie.tagline && (

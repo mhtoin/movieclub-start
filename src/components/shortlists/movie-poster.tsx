@@ -20,13 +20,20 @@ export default function MoviePoster({
   const posterPath = movie.images?.posters?.[0]?.file_path
   const posterImage = getResponsiveImageProps(posterPath, 'poster', 'w342')
   return (
-    <div
+    <button
+      type="button"
       key={movie.id}
-      className="relative group cursor-pointer animate-scale-in parallax__img touch-manipulation"
+      className="relative group cursor-pointer animate-scale-in parallax__img touch-manipulation text-left w-full bg-transparent border-none p-0 appearance-none"
       style={{
         animationDelay: `${movieIndex * 0.05}s`,
       }}
-      onClick={(e) => handleMovieClick && handleMovieClick(movie, e)}
+      onClick={(e) =>
+        handleMovieClick &&
+        handleMovieClick(
+          movie,
+          e as unknown as React.MouseEvent<HTMLDivElement>,
+        )
+      }
       onMouseEnter={() => setHoveredMovieId(movie.id)}
       onMouseLeave={() => setHoveredMovieId(null)}
     >
@@ -71,6 +78,6 @@ export default function MoviePoster({
           </div>
         </div>
       </div>
-    </div>
+    </button>
   )
 }

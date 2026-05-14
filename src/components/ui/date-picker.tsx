@@ -140,7 +140,6 @@ export function DatePicker({
             disabled={disabledMatcher}
             defaultMonth={value ?? minDate}
             captionLayout={captionLayout}
-            autoFocus
           />
         </div>
       </PopoverContent>

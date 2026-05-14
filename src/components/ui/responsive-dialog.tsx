@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { use } from 'react'
 import {
   DialogBackdrop,
   DialogClose,
@@ -70,7 +71,7 @@ function ResponsiveDialogTrigger({
   children,
   ...props
 }: ResponsiveDialogTriggerProps) {
-  const { isDesktop } = React.useContext(ResponsiveDialogContext)
+  const { isDesktop } = use(ResponsiveDialogContext)
 
   return isDesktop ? (
     <DialogTrigger {...props}>{children}</DialogTrigger>
@@ -97,7 +98,7 @@ function ResponsiveDialogContent({
   showHandle = true,
   ...props
 }: ResponsiveDialogContentProps) {
-  const { isDesktop, direction } = React.useContext(ResponsiveDialogContext)
+  const { isDesktop, direction } = use(ResponsiveDialogContext)
 
   if (isDesktop) {
     return (
@@ -140,7 +141,7 @@ function ResponsiveDialogClose({
   children,
   ...props
 }: ResponsiveDialogCloseProps) {
-  const { isDesktop } = React.useContext(ResponsiveDialogContext)
+  const { isDesktop } = use(ResponsiveDialogContext)
 
   return isDesktop ? (
     <DialogClose {...props}>{children}</DialogClose>

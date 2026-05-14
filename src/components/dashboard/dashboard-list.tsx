@@ -38,9 +38,11 @@ const defaultConfig: Required<DashboardListConfig> = {
   emptyMessage: 'No data yet',
 }
 
+const EMPTY_CONFIG = {}
+
 export function DashboardList<T>({
   data,
-  config = {},
+  config = EMPTY_CONFIG,
   renderer,
 }: DashboardListProps<T>) {
   const mergedConfig = { ...defaultConfig, ...config }

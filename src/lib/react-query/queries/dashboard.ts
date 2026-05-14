@@ -269,7 +269,7 @@ export const getDashboardStats = createServerFn({ method: 'GET' })
     }
   })
 
-export const getDashboardInsights = createServerFn({ method: 'GET' })
+export const getDashboardInsights = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator((data: { userId?: string }) => data)
   .handler(async ({ context, data }): Promise<DashboardInsights> => {
@@ -313,15 +313,15 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
       >()
       watchedMovies.forEach((m) => {
         if (Array.isArray(m.crew)) {
-          m.crew
-            .filter((c: any) => c.job === 'Director')
-            .forEach((d: any) => {
-              const existing = directorMap.get(d.name)
-              directorMap.set(d.name, {
+          for (const c of m.crew) {
+            if (c.job === 'Director') {
+              const existing = directorMap.get(c.name)
+              directorMap.set(c.name, {
                 count: (existing?.count || 0) + 1,
-                profilePath: d.profile_path || existing?.profilePath || null,
+                profilePath: c.profile_path || existing?.profilePath || null,
               })
-            })
+            }
+          }
         }
       })
       const topDirectors = Array.from(directorMap.entries())
@@ -408,15 +408,15 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
         .sort((a, b) => b.count - a.count)
 
       // Highest rated movies
-      const topRatedIds = [...watchedMovies]
-        .sort((a, b) => b.voteAverage - a.voteAverage)
+      const topRatedIds = watchedMovies
+        .toSorted((a, b) => b.voteAverage - a.voteAverage)
         .slice(0, 5)
         .map((m) => m.id)
 
       // Longest movies
-      const longestIds = [...watchedMovies]
+      const longestIds = watchedMovies
         .filter((m) => m.runtime && m.runtime > 0)
-        .sort((a, b) => (b.runtime || 0) - (a.runtime || 0))
+        .toSorted((a, b) => (b.runtime || 0) - (a.runtime || 0))
         .slice(0, 5)
         .map((m) => m.id)
       const posterIds = [...new Set([...topRatedIds, ...longestIds])]
@@ -520,11 +520,22 @@ export const getDashboardInsights = createServerFn({ method: 'GET' })
         }
       })
       const directorActorCollabs = Array.from(collabMap.entries())
-        .map(([key, { count, directorProfile, actorProfile }]) => {
-          const [director, actor] = key.split('|||')
-          return { director, actor, count, directorProfile, actorProfile }
-        })
-        .filter((c) => c.count >= 2)
+        .reduce<Array<DirectorActorCollab>>(
+          (acc, [key, { count, directorProfile, actorProfile }]) => {
+            const [director, actor] = key.split('|||')
+            if (count >= 2) {
+              acc.push({
+                director,
+                actor,
+                count,
+                directorProfile,
+                actorProfile,
+              })
+            }
+            return acc
+          },
+          [],
+        )
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
 
@@ -590,7 +601,7 @@ export const getNextMovieToWatch = createServerFn({ method: 'GET' })
     }
   })
 
-export const getMoviesByUser = createServerFn({ method: 'GET' })
+export const getMoviesByUser = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(
     (data: {

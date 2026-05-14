@@ -1,5 +1,5 @@
 import { useRouter } from '@tanstack/react-router'
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 import type { Theme } from '@/lib/theme'
 import type { PropsWithChildren } from 'react'
 import { setThemeServerFn } from '@/lib/theme'
@@ -24,7 +24,7 @@ export function ThemeProvider({ children, theme }: Props) {
 }
 
 export function useTheme() {
-  const val = useContext(ThemeContext)
+  const val = use(ThemeContext)
   if (!val) {
     // During SSR, return a default value instead of throwing
     if (typeof window === 'undefined') {

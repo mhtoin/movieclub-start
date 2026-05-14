@@ -55,15 +55,15 @@ function ArrowSvg(props: React.ComponentProps<'svg'>) {
   return (
     <svg width="20" height="10" viewBox="0 0 20 10" fill="none" {...props}>
       <path
-        d="M9.66437 2.60207L4.80758 6.97318C4.07308 7.63423 3.11989 8 2.13172 8H0V10H20V8H18.5349C17.5468 8 16.5936 7.63423 15.8591 6.97318L11.0023 2.60207C10.622 2.2598 10.0447 2.25979 9.66437 2.60207Z"
+        d="M9.66 2.6L4.81 6.97a4 4 0 0 1-2.68 1.03H0v2h20V8h-1.47a4 4 0 0 1-2.67-1.03L11 2.6a1 1 0 0 0-1.34 0Z"
         className="fill-popover"
       />
       <path
-        d="M8.99542 1.85876C9.75604 1.17425 10.9106 1.17422 11.6713 1.85878L16.5281 6.22989C17.0789 6.72568 17.7938 7.00001 18.5349 7.00001L15.89 7L11.0023 2.60207C10.622 2.2598 10.0447 2.2598 9.66436 2.60207L4.77734 7L2.13171 7.00001C2.87284 7.00001 3.58774 6.72568 4.13861 6.22989L8.99542 1.85876Z"
+        d="M9 1.86a2 2 0 0 1 2.67 0l4.86 4.37A2 2 0 0 0 18.53 7H15.9L11 2.6a1 1 0 0 0-1.34 0L4.78 7H2.13A2 2 0 0 0 4.14 6.23L9 1.86Z"
         className="fill-popover"
       />
       <path
-        d="M10.3333 3.34539L5.47654 7.71648C4.55842 8.54279 3.36693 9 2.13172 9H0V8H2.13172C3.11989 8 4.07308 7.63423 4.80758 6.97318L9.66437 2.60207C10.0447 2.25979 10.622 2.2598 11.0023 2.60207L15.8591 6.97318C16.5936 7.63423 17.5468 8 18.5349 8H20V9H18.5349C17.2998 9 16.1083 8.54278 15.1901 7.71648L10.3333 3.34539Z"
+        d="M10.33 3.35l-4.85 4.37A4 4 0 0 1 2.13 9H0V8h2.13a4 4 0 0 0 2.68-1.03l4.85-4.37a1 1 0 0 1 1.34 0l4.86 4.37A4 4 0 0 0 18.53 8H20v1h-1.47a4 4 0 0 1-2.67-1.03L10.33 3.35Z"
         className="fill-popover"
       />
     </svg>
@@ -72,35 +72,47 @@ function ArrowSvg(props: React.ComponentProps<'svg'>) {
 
 interface PopoverBackdropProps
   extends React.ComponentProps<typeof BasePopover.Backdrop>,
-    VariantProps<typeof popoverBackdropVariants> {}
+    VariantProps<typeof popoverBackdropVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BasePopover.Backdrop>>
+}
 
 interface PopoverPopupProps
   extends React.ComponentProps<typeof BasePopover.Popup>,
-    VariantProps<typeof popoverPopupVariants> {}
+    VariantProps<typeof popoverPopupVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BasePopover.Popup>>
+}
 
 interface PopoverArrowProps
   extends React.ComponentProps<typeof BasePopover.Arrow>,
-    VariantProps<typeof popoverArrowVariants> {}
+    VariantProps<typeof popoverArrowVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BasePopover.Arrow>>
+}
 
 const PopoverRoot = BasePopover.Root
 const PopoverPortal = BasePopover.Portal
 
-const PopoverPositioner = React.forwardRef<
-  React.ComponentRef<typeof BasePopover.Positioner>,
-  React.ComponentProps<typeof BasePopover.Positioner>
->(({ className, ...props }, ref) => (
+const PopoverPositioner = ({
+  ref,
+  className,
+  ...props
+}: React.ComponentProps<typeof BasePopover.Positioner> & {
+  ref?: React.Ref<React.ComponentRef<typeof BasePopover.Positioner>>
+}) => (
   <BasePopover.Positioner
     ref={ref}
     className={cn('z-50', className)}
     {...props}
   />
-))
+)
 PopoverPositioner.displayName = 'PopoverPositioner'
 
-const PopoverClose = React.forwardRef<
-  React.ComponentRef<typeof BasePopover.Close>,
-  React.ComponentProps<typeof BasePopover.Close>
->(({ children, ...props }, ref) => {
+const PopoverClose = ({
+  ref,
+  children,
+  ...props
+}: React.ComponentProps<typeof BasePopover.Close> & {
+  ref?: React.Ref<React.ComponentRef<typeof BasePopover.Close>>
+}) => {
   if (typeof children === 'function') {
     return (
       <BasePopover.Close ref={ref} {...props}>
@@ -118,13 +130,16 @@ const PopoverClose = React.forwardRef<
       {children}
     </BasePopover.Close>
   )
-})
+}
 PopoverClose.displayName = 'PopoverClose'
 
-const PopoverTrigger = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<typeof BasePopover.Trigger>
->(({ children, ...props }, ref) => {
+const PopoverTrigger = ({
+  ref,
+  children,
+  ...props
+}: React.ComponentProps<typeof BasePopover.Trigger> & {
+  ref?: React.Ref<HTMLButtonElement>
+}) => {
   if (typeof children === 'function') {
     return (
       <BasePopover.Trigger ref={ref} {...props}>
@@ -142,37 +157,43 @@ const PopoverTrigger = React.forwardRef<
       {children}
     </BasePopover.Trigger>
   )
-})
+}
 PopoverTrigger.displayName = 'PopoverTrigger'
 
-const PopoverBackdrop = React.forwardRef<
-  React.ComponentRef<typeof BasePopover.Backdrop>,
-  PopoverBackdropProps
->(({ className, opacity, ...props }, ref) => (
+const PopoverBackdrop = ({
+  ref,
+  className,
+  opacity,
+  ...props
+}: PopoverBackdropProps) => (
   <BasePopover.Backdrop
     ref={ref}
     className={cn(popoverBackdropVariants({ opacity }), className)}
     {...props}
   />
-))
+)
 PopoverBackdrop.displayName = 'PopoverBackdrop'
 
-const PopoverPopup = React.forwardRef<
-  React.ComponentRef<typeof BasePopover.Popup>,
-  PopoverPopupProps
->(({ className, size, ...props }, ref) => (
+const PopoverPopup = ({
+  ref,
+  className,
+  size,
+  ...props
+}: PopoverPopupProps) => (
   <BasePopover.Popup
     ref={ref}
     className={cn(popoverPopupVariants({ size }), className)}
     {...props}
   />
-))
+)
 PopoverPopup.displayName = 'PopoverPopup'
 
-const PopoverArrow = React.forwardRef<
-  React.ComponentRef<typeof BasePopover.Arrow>,
-  PopoverArrowProps
->(({ className, size, ...props }, ref) => (
+const PopoverArrow = ({
+  ref,
+  className,
+  size,
+  ...props
+}: PopoverArrowProps) => (
   <BasePopover.Arrow
     ref={ref}
     className={cn(
@@ -183,31 +204,37 @@ const PopoverArrow = React.forwardRef<
   >
     <ArrowSvg />
   </BasePopover.Arrow>
-))
+)
 PopoverArrow.displayName = 'PopoverArrow'
 
-const PopoverTitle = React.forwardRef<
-  React.ComponentRef<typeof BasePopover.Title>,
-  React.ComponentProps<typeof BasePopover.Title>
->(({ className, ...props }, ref) => (
+const PopoverTitle = ({
+  ref,
+  className,
+  ...props
+}: React.ComponentProps<typeof BasePopover.Title> & {
+  ref?: React.Ref<React.ComponentRef<typeof BasePopover.Title>>
+}) => (
   <BasePopover.Title
     ref={ref}
     className={cn('text-lg font-semibold text-foreground mb-2', className)}
     {...props}
   />
-))
+)
 PopoverTitle.displayName = 'PopoverTitle'
 
-const PopoverDescription = React.forwardRef<
-  React.ComponentRef<typeof BasePopover.Description>,
-  React.ComponentProps<typeof BasePopover.Description>
->(({ className, ...props }, ref) => (
+const PopoverDescription = ({
+  ref,
+  className,
+  ...props
+}: React.ComponentProps<typeof BasePopover.Description> & {
+  ref?: React.Ref<React.ComponentRef<typeof BasePopover.Description>>
+}) => (
   <BasePopover.Description
     ref={ref}
     className={cn('text-sm text-muted-foreground', className)}
     {...props}
   />
-))
+)
 PopoverDescription.displayName = 'PopoverDescription'
 
 const PopoverContent = ({

@@ -71,7 +71,7 @@ export default function RegisterView({ onSwitch }: RegisterViewProps) {
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col space-y-2 text-center sm:text-left mb-2">
+      <div className="flex flex-col gap-y-2 text-center sm:text-left mb-2">
         <h1 className="text-2xl font-semibold tracking-tight">
           Create an account
         </h1>

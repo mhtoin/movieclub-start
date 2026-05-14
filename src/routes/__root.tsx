@@ -22,7 +22,7 @@ function NotFound() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="max-w-md w-full space-y-8 text-center">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold text-foreground">404</h1>
+          <h1 className="text-4xl font-semibold text-foreground">404</h1>
           <p className="text-xl font-semibold text-foreground">
             Page not found
           </p>
@@ -88,6 +88,7 @@ export const Route = createRootRouteWithContext<{
 }>()({
   errorComponent: ErrorComponent,
   notFoundComponent: NotFound,
+  loader: async () => getThemeAndSchemeServerFn(),
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -111,7 +112,6 @@ export const Route = createRootRouteWithContext<{
       { rel: 'stylesheet', href: `${appCss}?v=${__BUILD_TIMESTAMP__}` },
     ],
   }),
-  loader: async () => getThemeAndSchemeServerFn(),
   shellComponent: RootDocument,
 })
 

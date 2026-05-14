@@ -80,7 +80,7 @@ export default function ShortlistItem({
               isSelected ? 'Selected for raffle' : 'Click to select for raffle'
             }
           >
-            <Check className="w-3.5 h-3.5" />
+            <Check className="size-3.5" />
           </button>
         )}
 
@@ -90,7 +90,7 @@ export default function ShortlistItem({
           className="absolute top-2 right-2 z-10 p-1 rounded-md bg-card/80 hover:bg-destructive/10 border border-border/40 hover:border-destructive/30 text-muted-foreground hover:text-destructive transition-all duration-200 opacity-0 group-hover:opacity-100"
           aria-label="Remove from shortlist"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="size-3.5" />
         </button>
 
         <div className="relative flex-shrink-0 w-12 h-[72px] rounded-md overflow-hidden bg-muted shadow-sm">
@@ -102,7 +102,7 @@ export default function ShortlistItem({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Film className="w-5 h-5 text-muted-foreground/40" />
+              <Film className="size-5 text-muted-foreground/40" />
             </div>
           )}
           <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-md" />
@@ -117,13 +117,13 @@ export default function ShortlistItem({
               {year && movie.runtime && <span className="text-border">·</span>}
               {movie.runtime && (
                 <span className="inline-flex items-center gap-0.5">
-                  <Clock className="w-3 h-3" />
+                  <Clock className="size-3" />
                   {movie.runtime}m
                 </span>
               )}
               <span className="text-border">·</span>
               <span className="inline-flex items-center gap-0.5">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <Star className="size-3 fill-yellow-400 text-yellow-400" />
                 {movie.voteAverage.toFixed(1)}
               </span>
             </div>
@@ -146,7 +146,7 @@ export default function ShortlistItem({
               className="p-1 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors duration-200"
               aria-label="View details"
             >
-              <Maximize2 className="w-3.5 h-3.5" />
+              <Maximize2 className="size-3.5" />
             </button>
           </div>
         </div>

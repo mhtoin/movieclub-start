@@ -46,25 +46,26 @@ async function getAppliedMigrations(): Promise<Set<string>> {
 }
 
 async function ensureMigrationsTable() {
-  await sql`CREATE SCHEMA IF NOT EXISTS drizzle`
-  await sql`
-    CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (
-      id SERIAL PRIMARY KEY,
-      hash text NOT NULL,
-      created_at bigint
-    )
-  `
-  // Add tag column if it doesn't exist (older drizzle schema)
-  await sql`
-    DO $$ BEGIN
-      IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_schema='drizzle' AND table_name='__drizzle_migrations' AND column_name='tag'
-      ) THEN
-        ALTER TABLE drizzle.__drizzle_migrations ADD COLUMN tag text;
-      END IF;
-    END $$
-  `
+  await Promise.all([
+    sql`CREATE SCHEMA IF NOT EXISTS drizzle`,
+    sql`
+      CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (
+        id SERIAL PRIMARY KEY,
+        hash text NOT NULL,
+        created_at bigint
+      )
+    `,
+    sql`
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_schema='drizzle' AND table_name='__drizzle_migrations' AND column_name='tag'
+        ) THEN
+          ALTER TABLE drizzle.__drizzle_migrations ADD COLUMN tag text;
+        END IF;
+      END $$
+    `,
+  ])
 }
 
 function hashMigration(filePath: string): string {
@@ -75,13 +76,18 @@ function hashMigration(filePath: string): string {
 function splitStatements(sqlText: string): Array<string> {
   // Split on drizzle's statement-breakpoint marker, or fall back to semicolons
   const parts = sqlText.split(/--> statement-breakpoint/g)
-  return parts.map((s) => s.trim()).filter((s) => s.length > 0)
+  return parts.reduce<Array<string>>((acc, s) => {
+    const trimmed = s.trim()
+    if (trimmed.length > 0) acc.push(trimmed)
+    return acc
+  }, [])
 }
 
 async function applyMigration(tag: string, filePath: string) {
   const hash = hashMigration(filePath)
   const content = readFileSync(filePath, 'utf-8')
   const statements = splitStatements(content)
+  const write = process.stdout.write.bind(process.stdout)
 
   console.log(`\nApplying migration: ${tag} (${statements.length} statements)`)
 
@@ -90,12 +96,12 @@ async function applyMigration(tag: string, filePath: string) {
     for (let i = 0; i < statements.length; i++) {
       const stmt = statements[i]
       if (!stmt) continue
-      process.stdout.write(`  [${i + 1}/${statements.length}] `)
+      write(`  [${i + 1}/${statements.length}] `)
       try {
         await tx.unsafe(stmt)
-        process.stdout.write('✓\n')
+        write('✓\n')
       } catch (err: unknown) {
-        process.stdout.write('✗\n')
+        write('✗\n')
         console.error(`  Statement failed:\n${stmt}\n`)
         throw err
       }

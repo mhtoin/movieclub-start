@@ -47,10 +47,12 @@ export function ProviderFilter({
   }
 
   const selectedLabels = providers
-    .filter((p: WatchProvider) =>
-      selectedProviders.includes(p.provider_id.toString()),
-    )
-    .map((p: WatchProvider) => p.provider_name)
+    .reduce<Array<string>>((acc, p: WatchProvider) => {
+      if (selectedProviders.includes(p.provider_id.toString())) {
+        acc.push(p.provider_name)
+      }
+      return acc
+    }, [])
     .join(', ')
 
   if (variant === 'mobile') {
@@ -139,9 +141,9 @@ export function ProviderFilter({
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium">
+      <p className="mb-2 block text-sm font-medium text-foreground">
         Streaming Providers
-      </label>
+      </p>
       <ComboboxRoot
         value={selectedProviders}
         onValueChange={(value) => onProvidersChange(value)}

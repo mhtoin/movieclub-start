@@ -100,7 +100,7 @@ function CreateTierlistButton({ currentUserId }: { currentUserId?: string }) {
       to={href}
       className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
     >
-      <Plus className="w-4 h-4" />
+      <Plus className="size-4" />
       <span>New Tierlist</span>
     </Link>
   )
@@ -162,7 +162,7 @@ function UserTierlistCard({ user }: { user: UserTierlistSummary }) {
           className="flex items-center justify-center gap-2 py-3 mt-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
         >
           <span>View {user.tierlists.length - 3} more</span>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="size-4" />
         </Link>
       )}
     </div>
@@ -194,7 +194,7 @@ function TierlistCard({
           <div className="flex h-full">
             {previewPosters.slice(0, 4).map((path, i) => (
               <div
-                key={i}
+                key={path}
                 className="flex-1 overflow-hidden"
                 style={{ marginLeft: i > 0 ? '-10%' : 0 }}
               >
@@ -215,7 +215,7 @@ function TierlistCard({
           <h3 className="font-semibold text-sm text-foreground truncate group-hover/paper:text-primary transition-colors">
             {tierlist.title || 'Untitled Tierlist'}
           </h3>
-          <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover/paper:opacity-100 -translate-x-1 group-hover/paper:translate-x-0 transition-all shrink-0 mt-0.5" />
+          <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover/paper:opacity-100 -translate-x-1 group-hover/paper:translate-x-0 transition-all shrink-0 mt-0.5" />
         </div>
 
         {tags.length > 0 && (
@@ -237,11 +237,11 @@ function TierlistCard({
 
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <Layers className="w-3 h-3" />
+            <Layers className="size-3" />
             <span>{tierlist.tierCount} tiers</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <Film className="w-3 h-3" />
+            <Film className="size-3" />
             <span>{movieCount} movies</span>
           </span>
         </div>

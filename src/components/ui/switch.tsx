@@ -41,18 +41,18 @@ export interface SwitchProps
       React.ComponentPropsWithoutRef<typeof BaseSwitch.Root>,
       'render'
     >,
-    VariantProps<typeof switchVariants> {}
+    VariantProps<typeof switchVariants> {
+  ref?: React.Ref<HTMLButtonElement>
+}
 
-const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
-  ({ className, size, ...props }, ref) => (
-    <BaseSwitch.Root
-      className={cn(switchVariants({ size, className }))}
-      ref={ref}
-      {...props}
-    >
-      <BaseSwitch.Thumb className={cn(thumbVariants({ size }))} />
-    </BaseSwitch.Root>
-  ),
+const Switch = ({ ref, className, size, ...props }: SwitchProps) => (
+  <BaseSwitch.Root
+    className={cn(switchVariants({ size, className }))}
+    ref={ref}
+    {...props}
+  >
+    <BaseSwitch.Thumb className={cn(thumbVariants({ size }))} />
+  </BaseSwitch.Root>
 )
 Switch.displayName = 'Switch'
 

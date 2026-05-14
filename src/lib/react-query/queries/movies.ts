@@ -57,15 +57,18 @@ export const getDistinctWatchedMonths = createServerFn({ method: 'GET' })
       .where(isNotNull(movie.watchDate))
       .orderBy(sql`to_char(${movie.watchDate}, 'YYYY-MM') desc`)
 
-    return rows
-      .filter((row) => row.month)
-      .map((row) => ({
-        value: row.month,
-        label: new Date(row.month + '-01').toLocaleString('default', {
-          month: 'long',
-          year: 'numeric',
-        }),
-      }))
+    return rows.reduce<Array<{ value: string; label: string }>>((acc, row) => {
+      if (row.month) {
+        acc.push({
+          value: row.month,
+          label: new Date(row.month + '-01').toLocaleString('default', {
+            month: 'long',
+            year: 'numeric',
+          }),
+        })
+      }
+      return acc
+    }, [])
   })
 
 const watchedByMonthSchema = z.object({

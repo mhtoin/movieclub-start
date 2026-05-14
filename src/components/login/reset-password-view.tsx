@@ -64,7 +64,7 @@ export default function ResetPasswordView({
   if (isSuccess) {
     return (
       <div className="flex w-full flex-col gap-6">
-        <div className="flex flex-col space-y-2 text-center sm:text-left mb-2">
+        <div className="flex flex-col gap-y-2 text-center sm:text-left mb-2">
           <h1 className="text-2xl font-semibold tracking-tight">
             Check your email
           </h1>
@@ -86,7 +86,7 @@ export default function ResetPasswordView({
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col space-y-2 text-center sm:text-left mb-2">
+      <div className="flex flex-col gap-y-2 text-center sm:text-left mb-2">
         <h1 className="text-2xl font-semibold tracking-tight">
           Reset Password
         </h1>

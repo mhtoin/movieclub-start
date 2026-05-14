@@ -1,16 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 export function ProjectorBackground() {
-  const [mounted, setMounted] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const mountedRef = useRef(false)
+  const isMobileRef = useRef(false)
 
   useEffect(() => {
-    setMounted(true)
-    setIsMobile(window.innerWidth < 768)
+    mountedRef.current = true
+    isMobileRef.current = window.innerWidth < 768
   }, [])
 
-  if (!mounted) return <div className="app-background-option" aria-hidden />
-  if (isMobile)
+  if (!mountedRef.current)
+    return <div className="app-background-option" aria-hidden />
+  if (isMobileRef.current)
     return (
       <div
         className="app-background-option"

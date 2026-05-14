@@ -176,7 +176,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                     </div>
                   </div>
 
-                  <div className="flex-1 min-w-0 flex items-center -space-x-3 py-1">
+                  <div className="flex-1 min-w-0 flex items-center -gap-x-3 py-1">
                     {shortlist.movies.slice(0, 5).map((movie, mIndex) => {
                       const posterPath =
                         (movie.images as any)?.posters?.[0]?.file_path ?? null

@@ -79,8 +79,10 @@ export function MovieDetailsDialog({
 
   return createPortal(
     <>
-      <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+      <button
+        type="button"
+        aria-label="Close dialog"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] appearance-none border-none p-0 cursor-pointer"
         style={backdropStyle}
         onClick={handleBackdropClick}
       />
@@ -133,7 +135,7 @@ export function MovieDetailsDialog({
               style={{ maxWidth: `calc(100% - ${posterWidth + contentGap}px)` }}
             >
               <div>
-                <h2 className="text-2xl font-bold tracking-tight leading-tight">
+                <h2 className="text-2xl font-semibold tracking-tight leading-tight">
                   {movie.title}
                 </h2>
                 {movie.originalTitle !== movie.title && (

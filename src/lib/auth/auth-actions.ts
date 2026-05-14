@@ -146,8 +146,10 @@ export const resetPasswordFn = createServerFn({ method: 'POST' })
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 12)
-    await updateUserPassword(user.email, hashedPassword)
-    await deletePasswordResetToken(resetToken.id)
+    await Promise.all([
+      updateUserPassword(user.email, hashedPassword),
+      deletePasswordResetToken(resetToken.id),
+    ])
     clearRateLimit(`reset-password:${data.token}`)
 
     return { success: true }
@@ -175,8 +177,10 @@ export const registerFn = createServerFn({ method: 'POST' })
       name: data.name.trim(),
     })
 
-    const session = await createSession(user.id)
-    const tanStackSession = await useAppSession()
+    const [session, tanStackSession] = await Promise.all([
+      createSession(user.id),
+      useAppSession(),
+    ])
     await tanStackSession.update({
       userId: user.id,
       email: user.email,
@@ -215,8 +219,10 @@ export const loginFn = createServerFn({ method: 'POST' })
       throw new Error('Invalid email or password')
     }
 
-    const session = await createSession(user.id)
-    const tanStackSession = await useAppSession()
+    const [session, tanStackSession] = await Promise.all([
+      createSession(user.id),
+      useAppSession(),
+    ])
     await tanStackSession.update({
       userId: user.id,
       email: user.email,

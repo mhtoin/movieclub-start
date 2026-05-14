@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import {
   ChevronLeft,
   ChevronRight,
@@ -37,8 +37,8 @@ interface Props {
 
 function formatRuntime(mins: number) {
   const h = Math.floor(mins / 60)
-  const m = mins % 60
-  return h > 0 ? `${h}h ${m}m` : `${m}m`
+  const min = mins % 60
+  return h > 0 ? `${h}h ${min}m` : `${min}m`
 }
 
 function getDirector(crew: Array<any> | null | undefined): string | null {
@@ -48,7 +48,7 @@ function getDirector(crew: Array<any> | null | undefined): string | null {
 
 function getTopCast(cast: Array<any> | null | undefined, n = 6): Array<any> {
   if (!cast) return []
-  return [...cast].sort((a, b) => a.order - b.order).slice(0, n)
+  return cast.toSorted((a, b) => a.order - b.order).slice(0, n)
 }
 
 function getProviders(watchProviders: Record<string, any> | null | undefined) {
@@ -122,7 +122,7 @@ const VictoryPage = memo(function VictoryPage({
   return (
     <div className="min-h-full flex items-center justify-center px-6 py-10">
       <div className="w-full max-w-4xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, scale: 0.85, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{
@@ -141,24 +141,24 @@ const VictoryPage = memo(function VictoryPage({
             />
           ) : (
             <div className="w-full aspect-[2/3] bg-muted flex items-center justify-center">
-              <Sparkles className="w-10 h-10 text-muted-foreground" />
+              <Sparkles className="size-10 text-muted-foreground" />
             </div>
           )}
-          <div className="absolute -top-3 -right-3 w-20 h-20 flex items-center justify-center">
+          <div className="absolute -top-3 -right-3 size-20 flex items-center justify-center">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-md" />
-              <div className="relative w-14 h-14 rounded-full bg-primary flex items-center justify-center border-4 border-primary/30">
+              <div className="relative size-14 rounded-full bg-primary flex items-center justify-center border-4 border-primary/30">
                 <Ticket
-                  className="w-7 h-7 text-primary-foreground"
+                  className="size-7 text-primary-foreground"
                   strokeWidth={2.5}
                 />
               </div>
             </div>
           </div>
-        </motion.div>
+        </m.div>
         <div className="flex flex-col items-center lg:items-start gap-5 text-center lg:text-left flex-1">
-          <motion.div
-            initial={{ scale: 0, rotate: -20 }}
+          <m.div
+            initial={{ scale: 0.95, opacity: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{
               delay: 0.2,
@@ -169,8 +169,8 @@ const VictoryPage = memo(function VictoryPage({
             className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-primary/20 border-2 border-primary/50 flex items-center justify-center shadow-xl shadow-primary/20 shrink-0"
           >
             <Ticket className="w-8 h-8 lg:w-10 lg:h-10 text-primary" />
-          </motion.div>
-          <motion.div
+          </m.div>
+          <m.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -178,7 +178,7 @@ const VictoryPage = memo(function VictoryPage({
             <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 mb-1">
               Next pick
             </p>
-            <h1 className="text-2xl sm:text-4xl lg:text-3xl xl:text-4xl font-black text-foreground leading-tight">
+            <h1 className="text-2xl sm:text-4xl lg:text-3xl xl:text-4xl font-semibold text-foreground leading-tight">
               {movie.title}
             </h1>
             {movie.releaseDate && (
@@ -187,8 +187,8 @@ const VictoryPage = memo(function VictoryPage({
                 {movie.tagline ? ` · ${movie.tagline}` : ''}
               </p>
             )}
-          </motion.div>
-          <motion.div
+          </m.div>
+          <m.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
@@ -200,7 +200,7 @@ const VictoryPage = memo(function VictoryPage({
                   <img
                     src={winnerUser.image}
                     alt={winnerUser.name}
-                    className="w-6 h-6 rounded-full border border-border"
+                    className="size-6 rounded-full border border-border"
                   />
                 )}
                 <span>
@@ -221,13 +221,13 @@ const VictoryPage = memo(function VictoryPage({
             )}
             {dryRun && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <div className="size-2 rounded-full bg-amber-500 animate-pulse" />
                 <span className="text-sm text-amber-500 font-medium">
-                  Dry run — result not saved
+                  Dry run - result not saved
                 </span>
               </div>
             )}
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </div>
@@ -271,7 +271,7 @@ const DetailsPage = memo(function DetailsPage({
             />
           )}
           <div className="flex-1 min-w-0 space-y-2 pt-1">
-            <h2 className="text-xl sm:text-2xl font-black leading-tight text-foreground">
+            <h2 className="text-xl sm:text-2xl font-semibold leading-tight text-foreground">
               {movie.title}
             </h2>
             {movie.tagline && (
@@ -283,13 +283,13 @@ const DetailsPage = memo(function DetailsPage({
               {year && <span>{year}</span>}
               {movie.runtime ? (
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" />
+                  <Clock className="size-3.5" />
                   {formatRuntime(movie.runtime)}
                 </span>
               ) : null}
               {movie.voteAverage > 0 && (
                 <span className="flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <Star className="size-3.5 fill-amber-400 text-amber-400" />
                   {movie.voteAverage.toFixed(1)}
                   {movie.voteCount > 0 && (
                     <span className="text-xs text-muted-foreground/60">
@@ -300,7 +300,7 @@ const DetailsPage = memo(function DetailsPage({
               )}
               {director && (
                 <span className="flex items-center gap-1">
-                  <Info className="w-3.5 h-3.5" />
+                  <Info className="size-3.5" />
                   {director}
                 </span>
               )}
@@ -322,7 +322,7 @@ const DetailsPage = memo(function DetailsPage({
 
         {movie.overview && (
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
               Overview
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -332,8 +332,8 @@ const DetailsPage = memo(function DetailsPage({
         )}
         {topCast.length > 0 && (
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2.5 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5" /> Cast
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2.5 flex items-center gap-1.5">
+              <Users className="size-3.5" /> Cast
             </h3>
             <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-8 gap-3">
               {topCast.map((member) => {
@@ -345,7 +345,7 @@ const DetailsPage = memo(function DetailsPage({
                     key={member.id}
                     className="flex flex-col items-center gap-1 text-center"
                   >
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-muted border border-border/40 shrink-0">
+                    <div className="size-12 rounded-full overflow-hidden bg-muted border border-border/40 shrink-0">
                       {profileUrl ? (
                         <img
                           src={profileUrl}
@@ -372,8 +372,8 @@ const DetailsPage = memo(function DetailsPage({
         )}
         {providers.length > 0 && (
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2.5 flex items-center gap-1.5">
-              <Tv className="w-3.5 h-3.5" /> Where to watch
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2.5 flex items-center gap-1.5">
+              <Tv className="size-3.5" /> Where to watch
             </h3>
             <div className="flex flex-wrap gap-2">
               {providers.map((p: any) => {
@@ -386,7 +386,7 @@ const DetailsPage = memo(function DetailsPage({
                       <img
                         src={logoUrl}
                         alt={p.provider_name}
-                        className="w-5 h-5 rounded object-cover"
+                        className="size-5 rounded object-cover"
                       />
                     )}
                     <span className="text-xs font-medium text-foreground">
@@ -453,125 +453,131 @@ export function RaffleWinner({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background"
-    >
-      {backdropUrl && (
-        <div className="absolute inset-0 pointer-events-none">
-          <img
-            src={backdropUrl}
-            alt=""
-            className="w-full h-full object-cover opacity-10 blur-sm scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/75 to-background" />
-        </div>
-      )}
-
-      <div className="relative z-10 flex items-center justify-center gap-1 pt-4 pb-2 shrink-0">
-        {PAGE_LABELS.map((label, i) => (
-          <Button
-            key={label}
-            variant={i === page ? 'primary' : 'ghost'}
-            size="sm"
-            onClick={() => goTo(i)}
-            className={`rounded-full text-xs font-semibold ${
-              i === page
-                ? 'shadow-md shadow-primary/30'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
-
-      <div className="relative z-10 flex-1 overflow-hidden">
-        <AnimatePresence initial={false} custom={direction} mode="popLayout">
-          <motion.div
-            key={page}
-            custom={direction}
-            variants={SLIDE_VARIANTS}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-            className="absolute inset-0 overflow-y-auto"
-          >
-            {page === 0 ? (
-              <VictoryPage
-                movie={movie}
-                winnerUser={winnerUser}
-                watchDate={watchDate}
-                dryRun={dryRun}
-                posterUrl={posterUrl}
-              />
-            ) : (
-              <DetailsPage
-                movie={movie}
-                posterUrl={posterUrl}
-                credits={credits}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="relative z-10 shrink-0 border-t border-border/30 bg-background/80 backdrop-blur-xs px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => goTo(Math.max(0, page - 1))}
-            disabled={page === 0}
-            className="w-8 h-8 rounded-full text-muted-foreground hover:text-foreground disabled:opacity-0"
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-
-          <div className="flex flex-col items-center gap-2.5 flex-1">
-            <PageDots page={page} count={PAGE_LABELS.length} onSelect={goTo} />
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-full gap-2 h-8 text-xs"
-                onClick={onRerun}
-                disabled={isLoading}
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Re-run
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                className="rounded-full gap-2 px-5 h-8 text-xs"
-                onClick={onFinalize}
-                loading={isLoading}
-                disabled={isLoading || (!dryRun && !watchDate)}
-              >
-                <Ticket className="w-3.5 h-3.5" />
-                {dryRun ? 'Done (dry run)' : 'Confirm & Finalize'}
-              </Button>
-            </div>
+    <LazyMotion features={domAnimation}>
+      <m.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background"
+      >
+        {backdropUrl && (
+          <div className="absolute inset-0 pointer-events-none">
+            <img
+              src={backdropUrl}
+              alt=""
+              className="w-full h-full object-cover opacity-10 blur-sm scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/75 to-background" />
           </div>
+        )}
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => goTo(Math.min(PAGE_LABELS.length - 1, page + 1))}
-            disabled={page === PAGE_LABELS.length - 1}
-            className="w-8 h-8 rounded-full text-muted-foreground hover:text-foreground disabled:opacity-0"
-            aria-label="Next page"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </Button>
+        <div className="relative z-10 flex items-center justify-center gap-1 pt-4 pb-2 shrink-0">
+          {PAGE_LABELS.map((label, i) => (
+            <Button
+              key={label}
+              variant={i === page ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => goTo(i)}
+              className={`rounded-full text-xs font-semibold ${
+                i === page
+                  ? 'shadow-md shadow-primary/30'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {label}
+            </Button>
+          ))}
         </div>
-      </div>
-    </motion.div>
+
+        <div className="relative z-10 flex-1 overflow-hidden">
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            <m.div
+              key={page}
+              custom={direction}
+              variants={SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+              className="absolute inset-0 overflow-y-auto"
+            >
+              {page === 0 ? (
+                <VictoryPage
+                  movie={movie}
+                  winnerUser={winnerUser}
+                  watchDate={watchDate}
+                  dryRun={dryRun}
+                  posterUrl={posterUrl}
+                />
+              ) : (
+                <DetailsPage
+                  movie={movie}
+                  posterUrl={posterUrl}
+                  credits={credits}
+                />
+              )}
+            </m.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="relative z-10 shrink-0 border-t border-border/30 bg-background/80 backdrop-blur-xs px-4 py-3">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => goTo(Math.max(0, page - 1))}
+              disabled={page === 0}
+              className="size-8 rounded-full text-muted-foreground hover:text-foreground disabled:opacity-0"
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="size-5" />
+            </Button>
+
+            <div className="flex flex-col items-center gap-2.5 flex-1">
+              <PageDots
+                page={page}
+                count={PAGE_LABELS.length}
+                onSelect={goTo}
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full gap-2 h-8 text-xs"
+                  onClick={onRerun}
+                  disabled={isLoading}
+                >
+                  <RefreshCw className="size-3.5" />
+                  Re-run
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="rounded-full gap-2 px-5 h-8 text-xs"
+                  onClick={onFinalize}
+                  loading={isLoading}
+                  disabled={isLoading || (!dryRun && !watchDate)}
+                >
+                  <Ticket className="size-3.5" />
+                  {dryRun ? 'Done (dry run)' : 'Confirm & Finalize'}
+                </Button>
+              </div>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => goTo(Math.min(PAGE_LABELS.length - 1, page + 1))}
+              disabled={page === PAGE_LABELS.length - 1}
+              className="size-8 rounded-full text-muted-foreground hover:text-foreground disabled:opacity-0"
+              aria-label="Next page"
+            >
+              <ChevronRight className="size-5" />
+            </Button>
+          </div>
+        </div>
+      </m.div>
+    </LazyMotion>
   )
 }

@@ -17,7 +17,7 @@ export function ShortlistsSkeleton() {
             <div className="flex items-stretch">
               <div className="w-[88px] flex-shrink-0 flex flex-col items-center justify-between p-4 border-r border-dashed border-border/25">
                 <div className="flex flex-col items-center gap-2">
-                  <Skeleton className="w-11 h-11 rounded-full" />
+                  <Skeleton className="size-11 rounded-full" />
                   <Skeleton className="h-3 w-14 rounded" />
                 </div>
                 <Skeleton className="h-5 w-12 rounded" />

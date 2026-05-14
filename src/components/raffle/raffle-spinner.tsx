@@ -1,4 +1,11 @@
-import { motion, useAnimate, useMotionValue, useTransform } from 'framer-motion'
+import {
+  LazyMotion,
+  domAnimation,
+  m,
+  useAnimate,
+  useMotionValue,
+  useTransform,
+} from 'framer-motion'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import type { Movie } from '@/db/schema/movies'
 import { getMovieBackdropUrl } from '@/lib/utils'
@@ -136,7 +143,7 @@ const ReelStrip = memo(function ReelStrip({
     <div ref={stripRef} className="will-change-transform">
       {movies.map((movie, i) => (
         <ReelFrame
-          key={`${movie.id}-${i}`}
+          key={movie.id}
           movie={movie}
           isWinner={movie.id === winningMovieId}
           frameNumber={i + 1}
@@ -181,7 +188,7 @@ export function RaffleSpinner({
     [movies, spinParams.laps],
   )
 
-  const winningIndex = movies.findIndex((m) => m.id === winningMovie.id)
+  const winningIndex = movies.findIndex((movie) => movie.id === winningMovie.id)
   const targetOffset =
     (spinParams.laps * movies.length + winningIndex) * ITEM_HEIGHT -
     WINDOW_HEIGHT / 2 +
@@ -246,181 +253,187 @@ export function RaffleSpinner({
   }, [])
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: 'var(--background)' }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
-        className="relative z-20 text-center mb-8 px-4"
-      >
-        <p
-          className="text-[11px] font-bold uppercase tracking-[0.3em] mb-2"
-          style={{ color: 'var(--primary)' }}
-        >
-          {locked
-            ? settling
-              ? '★ Winner Selected ★'
-              : '◆ Drawing'
-            : '◆ Drawing'}
-        </p>
-        <h2
-          className="text-3xl sm:text-4xl font-black tracking-tight"
-          style={{ color: 'var(--foreground)' }}
-        >
-          {locked ? (settling ? 'And the pick is…' : 'Spinning…') : 'Spinning…'}
-        </h2>
-      </motion.div>
-
-      <motion.div
-        ref={drumRef}
-        className="relative z-20"
-        animate={settling ? { scale: [1, 1.02, 1] } : {}}
+    <LazyMotion features={domAnimation}>
+      <m.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+        style={{ background: 'var(--background)' }}
       >
-        <div className="flex items-center gap-4">
-          <motion.div
-            className="pointer-events-none flex-shrink-0"
-            animate={{
-              x: locked ? [0, 8, -8, 6, -4, 2, 0] : [0, 4, -4, 3, -2, 0],
-              opacity: locked ? [1, 0.7, 1] : 1,
-            }}
-            transition={{
-              duration: locked ? 0.8 : 1.2,
-              repeat: locked ? 0 : Infinity,
-              ease: 'easeInOut',
-            }}
+        <m.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          className="relative z-20 text-center mb-8 px-4"
+        >
+          <p
+            className="text-[11px] font-bold uppercase tracking-[0.3em] mb-2"
+            style={{ color: 'var(--primary)' }}
           >
-            <svg width="16" height="28" viewBox="0 0 16 28" fill="none">
-              <path d="M0 0 L16 14 L0 28 Z" style={{ fill: arrowColor }} />
-            </svg>
-          </motion.div>
+            {locked
+              ? settling
+                ? '★ Winner Selected ★'
+                : '◆ Drawing'
+              : '◆ Drawing'}
+          </p>
+          <h2
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
+            style={{ color: 'var(--foreground)' }}
+          >
+            {locked
+              ? settling
+                ? 'And the pick is…'
+                : 'Spinning…'
+              : 'Spinning…'}
+          </h2>
+        </m.div>
 
-          <div className="relative">
-            <div
-              className="relative rounded-xl overflow-hidden"
-              style={{
-                width: REEL_WIDTH,
-                height: WINDOW_HEIGHT,
-                background: 'var(--card)',
-                boxShadow: `
+        <m.div
+          ref={drumRef}
+          className="relative z-20"
+          animate={settling ? { scale: [1, 1.02, 1] } : {}}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="flex items-center gap-4">
+            <m.div
+              className="pointer-events-none flex-shrink-0"
+              animate={{
+                x: locked ? [0, 8, -8, 6, -4, 2, 0] : [0, 4, -4, 3, -2, 0],
+                opacity: locked ? [1, 0.7, 1] : 1,
+              }}
+              transition={{
+                duration: locked ? 0.8 : 1.2,
+                repeat: locked ? 0 : Infinity,
+                ease: 'easeInOut',
+              }}
+            >
+              <svg width="16" height="28" viewBox="0 0 16 28" fill="none">
+                <path d="M0 0 L16 14 L0 28 Z" style={{ fill: arrowColor }} />
+              </svg>
+            </m.div>
+
+            <div className="relative">
+              <div
+                className="relative rounded-xl overflow-hidden"
+                style={{
+                  width: REEL_WIDTH,
+                  height: WINDOW_HEIGHT,
+                  background: 'var(--card)',
+                  boxShadow: `
                   inset 0 0 0 2px var(--border),
                   inset 0 0 30px rgba(0,0,0,0.3),
                   0 0 0 1px rgba(0,0,0,0.5),
                   0 20px 60px rgba(0,0,0,0.4)
                 `,
-              }}
-            >
+                }}
+              >
+                <div
+                  className="absolute inset-0 pointer-events-none z-10"
+                  style={{
+                    background:
+                      'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.15) 100%)',
+                  }}
+                />
+                <ReelStrip
+                  movies={repeated}
+                  winningMovieId={winningMovie.id}
+                  stripRef={stripRef}
+                />
+              </div>
+
               <div
-                className="absolute inset-0 pointer-events-none z-10"
+                className="absolute left-0 top-0 bottom-0 w-3 pointer-events-none"
                 style={{
                   background:
-                    'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.15) 100%)',
+                    'linear-gradient(to right, var(--background) 0%, transparent 100%)',
                 }}
               />
-              <ReelStrip
-                movies={repeated}
-                winningMovieId={winningMovie.id}
-                stripRef={stripRef}
+              <div
+                className="absolute right-0 top-0 bottom-0 w-3 pointer-events-none"
+                style={{
+                  background:
+                    'linear-gradient(to left, var(--background) 0%, transparent 100%)',
+                }}
+              />
+
+              <div
+                className="absolute top-1/2 left-0 right-0 h-0.5 pointer-events-none -translate-y-1/2 z-20"
+                style={{
+                  background:
+                    'linear-gradient(to right, transparent, var(--primary) 20%, var(--primary) 80%, transparent)',
+                  boxShadow: '0 0 8px var(--primary)',
+                }}
               />
             </div>
 
-            <div
-              className="absolute left-0 top-0 bottom-0 w-3 pointer-events-none"
-              style={{
-                background:
-                  'linear-gradient(to right, var(--background) 0%, transparent 100%)',
+            <m.div
+              className="pointer-events-none flex-shrink-0"
+              animate={{
+                x: locked ? [0, -8, 8, -6, 4, -2, 0] : [0, -4, 4, -3, 2, 0],
+                opacity: locked ? [1, 0.7, 1] : 1,
               }}
-            />
-            <div
-              className="absolute right-0 top-0 bottom-0 w-3 pointer-events-none"
-              style={{
-                background:
-                  'linear-gradient(to left, var(--background) 0%, transparent 100%)',
+              transition={{
+                duration: locked ? 0.8 : 1.2,
+                repeat: locked ? 0 : Infinity,
+                ease: 'easeInOut',
               }}
-            />
-
-            <div
-              className="absolute top-1/2 left-0 right-0 h-0.5 pointer-events-none -translate-y-1/2 z-20"
-              style={{
-                background:
-                  'linear-gradient(to right, transparent, var(--primary) 20%, var(--primary) 80%, transparent)',
-                boxShadow: '0 0 8px var(--primary)',
-              }}
-            />
+            >
+              <svg width="16" height="28" viewBox="0 0 16 28" fill="none">
+                <path d="M16 0 L0 14 L16 28 Z" style={{ fill: arrowColor }} />
+              </svg>
+            </m.div>
           </div>
 
-          <motion.div
-            className="pointer-events-none flex-shrink-0"
-            animate={{
-              x: locked ? [0, -8, 8, -6, 4, -2, 0] : [0, -4, 4, -3, 2, 0],
-              opacity: locked ? [1, 0.7, 1] : 1,
-            }}
-            transition={{
-              duration: locked ? 0.8 : 1.2,
-              repeat: locked ? 0 : Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            <svg width="16" height="28" viewBox="0 0 16 28" fill="none">
-              <path d="M16 0 L0 14 L16 28 Z" style={{ fill: arrowColor }} />
-            </svg>
-          </motion.div>
-        </div>
-
-        <div
-          className="mt-5 mx-2 h-1.5 rounded-full overflow-hidden"
-          style={{
-            background: 'var(--border)',
-            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)',
-          }}
-        >
-          <motion.div
-            className="h-full rounded-full"
-            style={{
-              background: `linear-gradient(90deg, color-mix(in oklch, var(--primary) 60%, transparent), var(--primary))`,
-              width: locked ? undefined : barWidth,
-            }}
-            animate={locked ? { opacity: [1, 0.6, 1] } : {}}
-            transition={{ duration: 0.4 }}
-          />
-        </div>
-
-        <p
-          className="text-center text-[10px] uppercase tracking-[0.2em] mt-2 font-medium"
-          style={{
-            color: 'var(--muted-foreground)',
-            letterSpacing: '0.15em',
-          }}
-        >
-          {locked ? (settling ? 'locked in' : 'settling…') : 'spinning'}
-        </p>
-      </motion.div>
-
-      {locked && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="absolute bottom-16 text-center"
-        >
           <div
-            className="px-4 py-2 rounded-full text-xs font-semibold"
+            className="mt-5 mx-2 h-1.5 rounded-full overflow-hidden"
             style={{
-              background: 'var(--primary)',
-              color: 'var(--primary-foreground)',
+              background: 'var(--border)',
+              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)',
             }}
           >
-            Watch the screen!
+            <m.div
+              className="h-full rounded-full"
+              style={{
+                background: `linear-gradient(90deg, color-mix(in oklch, var(--primary) 60%, transparent), var(--primary))`,
+                width: locked ? undefined : barWidth,
+              }}
+              animate={locked ? { opacity: [1, 0.6, 1] } : {}}
+              transition={{ duration: 0.4 }}
+            />
           </div>
-        </motion.div>
-      )}
-    </motion.div>
+
+          <p
+            className="text-center text-[10px] uppercase tracking-[0.2em] mt-2 font-medium"
+            style={{
+              color: 'var(--muted-foreground)',
+              letterSpacing: '0.05em',
+            }}
+          >
+            {locked ? (settling ? 'locked in' : 'settling…') : 'spinning'}
+          </p>
+        </m.div>
+
+        {locked && (
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="absolute bottom-16 text-center"
+          >
+            <div
+              className="px-4 py-2 rounded-full text-xs font-semibold"
+              style={{
+                background: 'var(--primary)',
+                color: 'var(--primary-foreground)',
+              }}
+            >
+              Watch the screen!
+            </div>
+          </m.div>
+        )}
+      </m.div>
+    </LazyMotion>
   )
 }

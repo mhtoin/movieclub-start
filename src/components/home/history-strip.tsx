@@ -104,7 +104,7 @@ export const HistoryStrip = memo(function HistoryStrip({
                       </div>
                     </div>
                     <div className="relative mt-4 flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full bg-primary/80 z-10" />
+                      <div className="size-2 rounded-full bg-primary/80 z-10" />
                       <p className="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 max-w-full">
                         {movie.title}
                       </p>

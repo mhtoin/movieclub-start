@@ -104,12 +104,12 @@ export function ColorSchemeSelector() {
                 >
                   <div className="flex gap-1">
                     <div
-                      className="w-6 h-6 rounded-full border border-border"
+                      className="size-6 rounded-full border border-border"
                       style={{ backgroundColor: scheme.colors.light }}
                       aria-label={`${scheme.label} light preview`}
                     />
                     <div
-                      className="w-6 h-6 rounded-full border border-border"
+                      className="size-6 rounded-full border border-border"
                       style={{ backgroundColor: scheme.colors.dark }}
                       aria-label={`${scheme.label} dark preview`}
                     />

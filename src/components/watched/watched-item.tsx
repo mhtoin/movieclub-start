@@ -116,7 +116,7 @@ export function WatchedItem({
                   />
                 </div>
                 <div className="flex-grow min-w-0 space-y-2">
-                  <h2 className="text-xl md:text-2xl font-bold leading-tight line-clamp-3">
+                  <h2 className="text-xl md:text-2xl font-semibold leading-tight line-clamp-3">
                     {movie.title}
                   </h2>
                   {movie.tagline && (
@@ -186,7 +186,7 @@ export function WatchedItem({
             {cast.length > 0 && (
               <div>
                 <h3 className="text-base md:text-lg font-semibold mb-3 flex items-center gap-1.5">
-                  <Users className="w-4 h-4" /> Cast
+                  <Users className="size-4" /> Cast
                 </h3>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
                   {cast.map((member: any) => {
@@ -198,7 +198,7 @@ export function WatchedItem({
                         key={member.id}
                         className="flex flex-col items-center gap-1 text-center"
                       >
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-muted border border-border/40">
+                        <div className="size-12 rounded-full overflow-hidden bg-muted border border-border/40">
                           {profileUrl ? (
                             <img
                               src={profileUrl}
@@ -333,7 +333,7 @@ export function WatchedItem({
                 />
               </div>
               <div className="flex-grow space-y-3">
-                <h2 className="text-3xl font-bold line-clamp-3">
+                <h2 className="text-3xl font-semibold line-clamp-3">
                   {movie.title}
                 </h2>
                 {movie.tagline && (
@@ -360,11 +360,12 @@ export function WatchedItem({
                 {movie.genres && movie.genres.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {movie.genres.map((genre) => (
-                      <routeApi.Link to="." search={{ genre: genre }}>
-                        <span
-                          key={genre}
-                          className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
-                        >
+                      <routeApi.Link
+                        key={genre}
+                        to="."
+                        search={{ genre: genre }}
+                      >
+                        <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
                           {genre}
                         </span>
                       </routeApi.Link>
@@ -401,7 +402,7 @@ export function WatchedItem({
             {cast.length > 0 && (
               <div>
                 <h3 className="text-xl font-semibold mb-3 flex items-center gap-1.5">
-                  <Users className="w-5 h-5" /> Cast
+                  <Users className="size-5" /> Cast
                 </h3>
                 <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-8 gap-3">
                   {cast.map((member: any) => {
@@ -413,7 +414,7 @@ export function WatchedItem({
                         key={member.id}
                         className="flex flex-col items-center gap-1 text-center"
                       >
-                        <div className="w-14 h-14 rounded-full overflow-hidden bg-muted border border-border/40">
+                        <div className="size-14 rounded-full overflow-hidden bg-muted border border-border/40">
                           {profileUrl ? (
                             <img
                               src={profileUrl}

@@ -152,7 +152,7 @@ export function OverviewInsights({ userId, scope }: OverviewInsightsProps) {
             Most Watched Director
           </p>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
               <Users className="h-5 w-5 text-primary" />
             </div>
             <div>

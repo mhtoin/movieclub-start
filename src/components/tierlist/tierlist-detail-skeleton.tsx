@@ -29,8 +29,8 @@ export function TierlistDetailSkeleton() {
       </div>
       <div className="flex-1 overflow-y-auto pr-20">
         <div className="p-6 space-y-4">
-          {TIER_CARD_COUNTS.map((count, i) => (
-            <div key={i} className="border-b border-border">
+          {TIER_CARD_COUNTS.map((count) => (
+            <div key={`tier-${count}`} className="border-b border-border">
               <div className="flex items-center justify-between gap-4 px-4 py-3">
                 <Skeleton
                   className="h-6 w-8"
@@ -50,9 +50,9 @@ export function TierlistDetailSkeleton() {
         </div>
       </div>
       <div className="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex items-stretch">
-        <div className="flex flex-col items-center justify-center gap-2 px-2 py-4 rounded-l-xl border-y-2 border-l-2 bg-background/95 border-border/70 backdrop-blur-md">
-          <Skeleton className="w-5 h-5 rounded" />
-          <Skeleton className="w-5 h-5 rounded" />
+        <div className="flex flex-col items-center justify-center gap-2 px-2 py-4 rounded-l-xl border bg-background/95 border-border/70 backdrop-blur-md">
+          <Skeleton className="size-5 rounded" />
+          <Skeleton className="size-5 rounded" />
           <Skeleton className="w-3 h-16 rounded" />
         </div>
       </div>

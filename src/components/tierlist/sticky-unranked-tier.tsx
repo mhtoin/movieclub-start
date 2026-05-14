@@ -49,12 +49,12 @@ function StickyUnrankedTier({
           } backdrop-blur-md`}
         >
           {isExpanded ? (
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            <ChevronRight className="size-5 text-muted-foreground" />
           ) : (
-            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+            <ChevronLeft className="size-5 text-muted-foreground" />
           )}
           <div className="flex flex-col items-center gap-1">
-            <Inbox className="w-5 h-5 text-muted-foreground" />
+            <Inbox className="size-5 text-muted-foreground" />
             {movieCount > 0 && (
               <span className="flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 text-xs font-bold rounded-full bg-primary text-primary-foreground">
                 {movieCount}
@@ -74,7 +74,7 @@ function StickyUnrankedTier({
         >
           <div className="px-4 py-3 border-b border-border/30">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center">
+              <div className="size-7 rounded-lg bg-muted flex items-center justify-center">
                 <span className="text-sm font-bold text-muted-foreground">
                   ?
                 </span>
@@ -98,8 +98,8 @@ function StickyUnrankedTier({
             >
               {movieCount === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                    <Inbox className="w-6 h-6 text-muted-foreground/50" />
+                  <div className="size-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                    <Inbox className="size-6 text-muted-foreground/50" />
                   </div>
                   <p className="text-sm text-muted-foreground">All ranked!</p>
                   <p className="text-xs text-muted-foreground/70">
@@ -134,7 +134,7 @@ function StickyUnrankedTier({
               <DrawerContent className="fixed inset-x-0 bottom-0 z-[60] max-h-[75vh] flex flex-col bg-background rounded-t-2xl shadow-2xl pb-safe">
                 <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-border/30">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center">
+                    <div className="size-7 rounded-lg bg-muted flex items-center justify-center">
                       <span className="text-sm font-bold text-muted-foreground">
                         ?
                       </span>
@@ -154,9 +154,9 @@ function StickyUnrankedTier({
                     )}
                     <button
                       onClick={() => setIsExpanded(false)}
-                      className="w-8 h-8 rounded-lg hover:bg-accent flex items-center justify-center"
+                      className="size-8 rounded-lg hover:bg-accent flex items-center justify-center"
                     >
-                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                      <ChevronDown className="size-5 text-muted-foreground" />
                     </button>
                   </div>
                 </div>
@@ -168,8 +168,8 @@ function StickyUnrankedTier({
                   <div ref={setNodeRef} className="flex-1 overflow-y-auto p-3">
                     {movieCount === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-                          <Inbox className="w-7 h-7 text-muted-foreground/50" />
+                        <div className="size-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                          <Inbox className="size-7 text-muted-foreground/50" />
                         </div>
                         <p className="text-sm font-medium text-foreground mb-1">
                           All ranked!
@@ -207,7 +207,7 @@ function StickyUnrankedTier({
                 : 'bg-card/95 backdrop-blur-md border border-border/40 text-foreground hover:bg-card'
             }`}
           >
-            <Inbox className="w-4 h-4" />
+            <Inbox className="size-4" />
             <span className="text-xs font-medium">Unranked</span>
             {movieCount > 0 && (
               <span

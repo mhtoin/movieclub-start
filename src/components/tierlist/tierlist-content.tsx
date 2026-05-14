@@ -12,7 +12,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import {
   Calendar,
   CalendarDays,
@@ -85,7 +85,7 @@ export function TierlistContent({
   const [localTiers, setLocalTiers] = useState<Array<TierWithMovies> | null>(
     null,
   )
-  const [isDragging, setIsDragging] = useState(false)
+  const isDragging = useRef(false)
   const [isSaving, setIsSaving] = useState(false)
   const [studioOpen, setStudioOpen] = useState(false)
 
@@ -99,7 +99,7 @@ export function TierlistContent({
 
     tiers.forEach((tier) => {
       map.set(tier.id, tier.id)
-      tier.movies.forEach((m) => map.set(m.id, tier.id))
+      tier.movies.forEach((movie) => map.set(movie.id, tier.id))
     })
     return map
   }, [localTiers, tierlistFromDb?.tiers])
@@ -136,13 +136,13 @@ export function TierlistContent({
   }, [tierlistFromDb, localTiers])
 
   useEffect(() => {
-    if (tierlistFromDb && !isDragging && !isSaving) {
+    if (tierlistFromDb && !isDragging.current && !isSaving) {
       setLocalTiers(tierlistFromDb.tiers)
     }
-  }, [tierlistFromDb, isDragging, isSaving])
+  }, [tierlistFromDb, isSaving])
 
   function handleDragStart() {
-    setIsDragging(true)
+    isDragging.current = true
   }
 
   const handleDragOver = useCallback(
@@ -179,7 +179,7 @@ export function TierlistContent({
         const overTier = prevTiers[overTierIndex]
 
         const activeMovieIndex = activeTier.movies.findIndex(
-          (m) => m.id === activeId,
+          (movie) => movie.id === activeId,
         )
         if (activeMovieIndex === -1) return prevTiers
 
@@ -189,7 +189,9 @@ export function TierlistContent({
         if (overId === overContainer) {
           newIndex = overTier.movies.length
         } else {
-          const overIndex = overTier.movies.findIndex((m) => m.id === overId)
+          const overIndex = overTier.movies.findIndex(
+            (movie) => movie.id === overId,
+          )
           newIndex = overIndex >= 0 ? overIndex : overTier.movies.length
         }
 
@@ -197,11 +199,13 @@ export function TierlistContent({
           if (index === activeTierIndex) {
             return {
               ...tier,
-              movies: tier.movies.filter((m) => m.id !== activeId),
+              movies: tier.movies.filter((movie) => movie.id !== activeId),
             }
           }
           if (index === overTierIndex) {
-            const newMovies = [...tier.movies.filter((m) => m.id !== activeId)]
+            const newMovies = [
+              ...tier.movies.filter((movie) => movie.id !== activeId),
+            ]
             newMovies.splice(newIndex, 0, movedMovie)
             return {
               ...tier,
@@ -222,7 +226,7 @@ export function TierlistContent({
     const currentLocalTiers = localTiersRef.current
 
     if (!over || !currentLocalTiers || !tierlistFromDb) {
-      setIsDragging(false)
+      isDragging.current = false
       return
     }
 
@@ -233,7 +237,7 @@ export function TierlistContent({
     const targetContainer = findContainer(overId)
 
     if (!currentContainer || !targetContainer) {
-      setIsDragging(false)
+      isDragging.current = false
       return
     }
 
@@ -241,8 +245,10 @@ export function TierlistContent({
     if (currentContainer === targetContainer) {
       const tier = currentLocalTiers.find((t) => t.id === currentContainer)
       if (tier) {
-        const activeIndex = tier.movies.findIndex((m) => m.id === activeId)
-        const overIndex = tier.movies.findIndex((m) => m.id === overId)
+        const activeIndex = tier.movies.findIndex(
+          (movie) => movie.id === activeId,
+        )
+        const overIndex = tier.movies.findIndex((movie) => movie.id === overId)
 
         if (
           activeIndex !== -1 &&
@@ -263,11 +269,11 @@ export function TierlistContent({
       { tierId: string; position: number; movieOnTierId: string }
     >()
     tierlistFromDb.tiers.forEach((tier) => {
-      tier.movies.forEach((m) => {
-        originalMovieData.set(m.id, {
+      tier.movies.forEach((movie) => {
+        originalMovieData.set(movie.id, {
           tierId: tier.id,
-          position: m.position,
-          movieOnTierId: m.movieOnTierId,
+          position: movie.position,
+          movieOnTierId: movie.movieOnTierId,
         })
       })
     })
@@ -286,12 +292,12 @@ export function TierlistContent({
 
     finalTiers.forEach((tier) => {
       if (tier.id === 'unranked') return
-      tier.movies.forEach((m, index) => {
-        const original = originalMovieData.get(m.id)
+      tier.movies.forEach((movie, index) => {
+        const original = originalMovieData.get(movie.id)
 
         if (!original || original.movieOnTierId.startsWith('unranked-')) {
           inserts.push({
-            movieId: m.id,
+            movieId: movie.id,
             tierId: tier.id,
             position: index,
           })
@@ -328,7 +334,7 @@ export function TierlistContent({
       })()
     }
 
-    setIsDragging(false)
+    isDragging.current = false
   }
 
   if (!tierlist) {
@@ -381,121 +387,123 @@ export function TierlistContent({
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-2 relative overflow-hidden md:pl-[72px]">
-      <PageTitleBar
-        title={tierlist.title || 'Untitled Tierlist'}
-        kicker={`${rankedTiers.length} ${
-          rankedTiers.length === 1 ? 'tier' : 'tiers'
-        }, ${totalRanked} ${
-          totalRanked === 1 ? 'ranked movie' : 'ranked movies'
-        }${
-          totalUnranked > 0
-            ? `, ${totalUnranked} ${
-                totalUnranked === 1 ? 'unranked movie' : 'unranked movies'
-              }`
-            : ''
-        }`}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => setStudioOpen(true)}
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              Share
-            </Button>
-            {isOwner && (
-              <EditTierlistDialog
-                tierlist={tierlist}
-                onEdit={handleEdit}
-                isPending={editMutation.isPending}
-              />
+    <LazyMotion features={domAnimation}>
+      <div className="container mx-auto px-2 sm:px-4 py-2 relative overflow-hidden md:pl-[72px]">
+        <PageTitleBar
+          title={tierlist.title || 'Untitled Tierlist'}
+          kicker={`${rankedTiers.length} ${
+            rankedTiers.length === 1 ? 'tier' : 'tiers'
+          }, ${totalRanked} ${
+            totalRanked === 1 ? 'ranked movie' : 'ranked movies'
+          }${
+            totalUnranked > 0
+              ? `, ${totalUnranked} ${
+                  totalUnranked === 1 ? 'unranked movie' : 'unranked movies'
+                }`
+              : ''
+          }`}
+          actions={
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setStudioOpen(true)}
+              >
+                <Share2 className="size-3.5" />
+                Share
+              </Button>
+              {isOwner && (
+                <EditTierlistDialog
+                  tierlist={tierlist}
+                  onEdit={handleEdit}
+                  isPending={editMutation.isPending}
+                />
+              )}
+            </div>
+          }
+        />
+        {(dateRangeText || (tierlist.genres && tierlist.genres.length > 0)) && (
+          <div className="flex flex-wrap items-center gap-3 mb-4 px-6">
+            {dateRangeText && (
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 rounded-full px-3 py-1.5">
+                <Calendar className="size-3.5" />
+                <span>{dateRangeText}</span>
+              </div>
+            )}
+            {tierlist.genres && tierlist.genres.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Tag className="size-3.5 text-muted-foreground" />
+                <div className="flex flex-wrap gap-1.5">
+                  {tierlist.genres.slice(0, 5).map((genre) => (
+                    <span
+                      key={genre}
+                      className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                  {tierlist.genres.length > 5 && (
+                    <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                      +{tierlist.genres.length - 5}
+                    </span>
+                  )}
+                </div>
+              </div>
             )}
           </div>
-        }
-      />
-      {(dateRangeText || (tierlist.genres && tierlist.genres.length > 0)) && (
-        <div className="flex flex-wrap items-center gap-3 mb-4 px-6">
-          {dateRangeText && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 rounded-full px-3 py-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              <span>{dateRangeText}</span>
-            </div>
-          )}
-          {tierlist.genres && tierlist.genres.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Tag className="w-3.5 h-3.5 text-muted-foreground" />
-              <div className="flex flex-wrap gap-1.5">
-                {tierlist.genres.slice(0, 5).map((genre) => (
-                  <span
-                    key={genre}
-                    className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
-                  >
-                    {genre}
-                  </span>
-                ))}
-                {tierlist.genres.length > 5 && (
-                  <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                    +{tierlist.genres.length - 5}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="relative flex-1 overflow-y-auto pr-4 md:pr-20">
-        {isSaving && (
-          <>
-            <div className="absolute inset-0 z-20 cursor-wait" />
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-4 py-2 text-sm font-medium shadow-lg backdrop-blur-sm">
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              Saving…
-            </div>
-          </>
         )}
-        <div className="p-6">
-          <DndContext
-            sensors={isSaving ? noSensors : sensors}
-            collisionDetection={collisionDetectionStrategy}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-          >
-            <div
-              className={`space-y-4 transition-opacity duration-200 ${isSaving ? 'opacity-50' : ''}`}
-            >
-              {rankedTiers.map((tier) => (
-                <TierContainer
-                  key={tier.id}
-                  id={tier.id}
-                  tier={tier}
-                  isOwner={isOwner}
-                />
-              ))}
-            </div>
-            {unrankedTier && (
-              <StickyUnrankedTier
-                tier={unrankedTier}
-                isOwner={isOwner}
-                disabled={isSaving}
-              />
-            )}
-            <DragOverlayPortal />
-          </DndContext>
-        </div>
-      </div>
 
-      <TierlistShareStudio
-        tierlist={tierlist}
-        userName={userName}
-        open={studioOpen}
-        onOpenChange={setStudioOpen}
-      />
-    </div>
+        <div className="relative flex-1 overflow-y-auto pr-4 md:pr-20">
+          {isSaving && (
+            <>
+              <div className="absolute inset-0 z-20 cursor-wait" />
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-4 py-2 text-sm font-medium shadow-lg backdrop-blur-sm">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Saving…
+              </div>
+            </>
+          )}
+          <div className="p-6">
+            <DndContext
+              sensors={isSaving ? noSensors : sensors}
+              collisionDetection={collisionDetectionStrategy}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+            >
+              <div
+                className={`space-y-4 transition-opacity duration-200 ${isSaving ? 'opacity-50' : ''}`}
+              >
+                {rankedTiers.map((tier) => (
+                  <TierContainer
+                    key={tier.id}
+                    id={tier.id}
+                    tier={tier}
+                    isOwner={isOwner}
+                  />
+                ))}
+              </div>
+              {unrankedTier && (
+                <StickyUnrankedTier
+                  tier={unrankedTier}
+                  isOwner={isOwner}
+                  disabled={isSaving}
+                />
+              )}
+              <DragOverlayPortal />
+            </DndContext>
+          </div>
+        </div>
+
+        <TierlistShareStudio
+          tierlist={tierlist}
+          userName={userName}
+          open={studioOpen}
+          onOpenChange={setStudioOpen}
+        />
+      </div>
+    </LazyMotion>
   )
 }
 
@@ -518,7 +526,7 @@ function EditTierlistDialog({
     <DialogRoot open={open} onOpenChange={setOpen}>
       <DialogTrigger>
         <Button variant="outline" size="sm" className="gap-2">
-          <Pencil className="w-3.5 h-3.5" />
+          <Pencil className="size-3.5" />
           Edit
         </Button>
       </DialogTrigger>
@@ -678,15 +686,14 @@ function EditTierlistForm({
             setTitle(e.target.value)
           }
           placeholder="Tierlist name"
-          autoFocus
         />
       </div>
 
       <div className="space-y-3">
-        <label className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
           <CalendarRange className="h-4 w-4" />
           Time Period
-        </label>
+        </span>
         <div className="grid grid-cols-2 gap-3">
           {(
             [
@@ -730,7 +737,7 @@ function EditTierlistForm({
                 />
                 <span className="text-sm font-medium">{preset.label}</span>
                 {active && (
-                  <motion.div
+                  <m.div
                     layoutId="edit-time-preset-glow"
                     className="absolute inset-0 rounded-xl ring-1 ring-primary/20"
                     transition={{ duration: 0.2 }}
@@ -743,7 +750,7 @@ function EditTierlistForm({
 
         <AnimatePresence>
           {datePreset === 'custom-range' && (
-            <motion.div
+            <m.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -786,7 +793,7 @@ function EditTierlistForm({
                   </SelectPopup>
                 </SelectRoot>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

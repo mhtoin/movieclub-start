@@ -69,9 +69,9 @@ export function ShortlistCard({
             <img
               src={shortlist.user.image}
               alt={shortlist.user.name}
-              className="w-10 h-10 rounded-full border-2 border-border shadow-md"
+              className="size-10 rounded-full border-2 border-border shadow-md"
             />
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-card" />
+            <div className="absolute -bottom-0.5 -right-0.5 size-3 bg-primary rounded-full border-2 border-card" />
           </div>
           <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold text-foreground truncate max-w-[120px]">
@@ -91,9 +91,9 @@ export function ShortlistCard({
                 <img
                   src={shortlist.user.image}
                   alt={shortlist.user.name}
-                  className="w-10 h-10 rounded-full border-2 border-border shadow-md"
+                  className="size-10 rounded-full border-2 border-border shadow-md"
                 />
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-card" />
+                <div className="absolute -bottom-0.5 -right-0.5 size-3 bg-primary rounded-full border-2 border-card" />
               </div>
               <div className="min-w-0">
                 <h3 className="text-base font-semibold text-foreground truncate">

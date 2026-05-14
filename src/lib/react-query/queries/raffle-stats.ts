@@ -19,7 +19,7 @@ export interface RaffleParticipationBucket {
   wins: number
 }
 
-export const getRaffleStats = createServerFn({ method: 'GET' })
+export const getRaffleStats = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<RaffleStats> => {
     if (!context.user) throw new Error('Unauthorized')

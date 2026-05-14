@@ -35,7 +35,7 @@ export function OverviewCards({ userId, scope }: OverviewCardsProps) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {topMovie ? (
         <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Trophy className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
@@ -66,7 +66,7 @@ export function OverviewCards({ userId, scope }: OverviewCardsProps) {
       ) : null}
       {topGenre ? (
         <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
             <svg
               className="h-5 w-5 text-primary"
               viewBox="0 0 24 24"
@@ -93,7 +93,7 @@ export function OverviewCards({ userId, scope }: OverviewCardsProps) {
 
       {totalMovies > 0 ? (
         <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
             <svg
               className="h-5 w-5 text-primary"
               viewBox="0 0 24 24"

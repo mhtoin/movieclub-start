@@ -69,7 +69,7 @@ export default function LoginView({
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col space-y-2 text-center sm:text-left mb-2">
+      <div className="flex flex-col gap-y-2 text-center sm:text-left mb-2">
         <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
         <p className="text-sm text-muted-foreground">
           Enter your email and password to sign in to your account.
@@ -128,7 +128,7 @@ export default function LoginView({
           {isPending ? 'Signing in...' : 'Sign In'}
           {lastUsedMethod === 'password' && !isPending && (
             <span className="absolute right-4 inline-flex items-center gap-1 text-xs font-medium text-primary-foreground/70">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
+              <svg className="size-3" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
                   className="stroke-current"

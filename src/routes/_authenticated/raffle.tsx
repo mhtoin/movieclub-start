@@ -37,7 +37,7 @@ function RafflePage() {
         to="/shortlists"
         className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"
       >
-        <ArrowLeft className="w-3.5 h-3.5" />
+        <ArrowLeft className="size-3.5" />
         Back to Shortlists
       </Link>
       <PageTitleBar title="Raffle" description="Draw next time's movie" />
@@ -73,7 +73,7 @@ function RaffleSetup() {
 
   const { data: shortlists = [] } = useSuspenseQuery(shortlistQueries.all())
   const participatingMovies = useMemo(
-    () => shortlists.filter((s) => s.participating).flatMap((s) => s.movies),
+    () => shortlists.flatMap((s) => (s.participating ? s.movies : [])),
     [shortlists],
   )
   const winnerUser = useMemo(

@@ -93,8 +93,10 @@ export const Route = createFileRoute('/login/discord/callback')({
           })
         }
 
-        const session = await createSession(user.id)
-        const tanStackSession = await useAppSession()
+        const [session, tanStackSession] = await Promise.all([
+          createSession(user.id),
+          useAppSession(),
+        ])
         await tanStackSession.update({
           userId: user.id,
           email: user.email,

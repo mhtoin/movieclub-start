@@ -9,8 +9,8 @@ export default function WatchedSkeleton() {
           <div key={monthIndex} className="space-y-8">
             <div className="relative">
               <div className="flex items-center gap-4 my-6">
-                <div className="relative z-10 bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center">
-                  <Skeleton className="w-4 h-4" />
+                <div className="relative z-10 bg-primary text-primary-foreground rounded-full size-8 flex items-center justify-center">
+                  <Skeleton className="size-4" />
                 </div>
                 <div className="bg-background border rounded-lg px-4 py-2">
                   <Skeleton className="h-6 w-32 mb-2" />

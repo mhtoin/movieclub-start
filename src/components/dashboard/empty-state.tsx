@@ -17,7 +17,7 @@ export function EmptyState({
     <div className="min-h-[400px] flex items-center justify-center">
       <div className="max-w-sm text-center space-y-6">
         <div className="relative">
-          <div className="w-24 h-24 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center border-2 border-dashed border-primary/30">
+          <div className="size-24 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center border-2 border-dashed border-primary/30">
             <Clapperboard className="h-10 w-10 text-primary opacity-60" />
           </div>
         </div>

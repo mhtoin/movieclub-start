@@ -7,7 +7,7 @@ import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { authMiddleware } from '@/middleware/auth'
 
-export const getParticipatingShortlists = createServerFn({ method: 'GET' })
+export const getParticipatingShortlists = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
     if (!context.user) throw new Error('Unauthorized')
@@ -79,18 +79,25 @@ export const getRaffleHistory = createServerFn({ method: 'GET' })
         .leftJoin(user, eq(raffleToUser.b, user.id))
         .orderBy(desc(raffle.raffledAt))
       const seen = new Set<string>()
-      return rows
-        .filter((r) => {
-          if (seen.has(r.raffle.id)) return false
+      return rows.reduce<
+        Array<{
+          id: string
+          date: Date | null
+          movie: (typeof rows)[number]['movie']
+          winner: (typeof rows)[number]['user']
+        }>
+      >((acc, r) => {
+        if (!seen.has(r.raffle.id)) {
           seen.add(r.raffle.id)
-          return true
-        })
-        .map((r) => ({
-          id: r.raffle.id,
-          date: r.raffle.raffledAt,
-          movie: r.movie ?? null,
-          winner: r.user ?? null,
-        }))
+          acc.push({
+            id: r.raffle.id,
+            date: r.raffle.raffledAt,
+            movie: r.movie ?? null,
+            winner: r.user ?? null,
+          })
+        }
+        return acc
+      }, [])
     } catch (error) {
       console.error('Error fetching raffle history:', error)
       return []

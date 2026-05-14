@@ -34,7 +34,7 @@ function ResetPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="max-w-md w-full space-y-8 text-center">
-          <h1 className="text-2xl font-bold">Invalid Reset Link</h1>
+          <h1 className="text-2xl font-semibold">Invalid Reset Link</h1>
           <p className="text-muted-foreground">
             This password reset link is invalid or missing a token.
           </p>
@@ -87,7 +87,7 @@ function ResetPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="max-w-md w-full space-y-8 text-center">
-          <h1 className="text-2xl font-bold">Password Reset Successful</h1>
+          <h1 className="text-2xl font-semibold">Password Reset Successful</h1>
           <p className="text-muted-foreground">
             Your password has been successfully reset. You can now sign in with
             your new password.
@@ -104,7 +104,7 @@ function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="max-w-md w-full space-y-8 bg-card p-8 rounded-xl border shadow-sm">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Set New Password</h1>
+          <h1 className="text-2xl font-semibold">Set New Password</h1>
           <p className="text-muted-foreground mt-2">
             Enter your new password below.
           </p>

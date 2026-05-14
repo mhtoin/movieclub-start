@@ -19,16 +19,23 @@ export default function RaffleSettings({
   return (
     <PopoverRoot>
       <PopoverTrigger>
-        <EllipsisVertical className="w-4 h-4" />
+        <EllipsisVertical className="size-4" />
       </PopoverTrigger>
       <PopoverPortal>
         <PopoverPositioner side="bottom" align="center" sideOffset={8}>
           <PopoverPopup size={'auto'}>
             <PopoverArrow />
             <div className="flex flex-col gap-3">
-              <label className="flex items-center justify-between w-full gap-2">
+              <label
+                htmlFor="raffle-settings-dry-run"
+                className="flex items-center justify-between w-full gap-2"
+              >
                 <span className="text-sm text-foreground">Dry Run</span>
-                <Switch checked={dryRun} onCheckedChange={onDryRunChange} />
+                <Switch
+                  id="raffle-settings-dry-run"
+                  checked={dryRun}
+                  onCheckedChange={onDryRunChange}
+                />
               </label>
             </div>
           </PopoverPopup>

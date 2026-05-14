@@ -11,7 +11,7 @@ export interface MovieCardProps {
 export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
   const posterUrl = getImageUrl(movie.poster_path, compact ? 'w342' : 'w500')
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleOpenMovie = (e: React.MouseEvent<HTMLElement>) => {
     if (onClick) {
       const rect = e.currentTarget.getBoundingClientRect()
       onClick(movie, rect)
@@ -20,9 +20,10 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
 
   if (compact) {
     return (
-      <div
-        className="overflow-hidden rounded-md bg-card h-full"
-        onClick={handleClick}
+      <button
+        type="button"
+        className="overflow-hidden rounded-md bg-card h-full w-full text-left"
+        onClick={handleOpenMovie}
       >
         <div className="h-full overflow-hidden">
           {posterUrl ? (
@@ -39,12 +40,16 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
             </div>
           )}
         </div>
-      </div>
+      </button>
     )
   }
 
   return (
-    <div className="cursor-pointer" onClick={handleClick}>
+    <button
+      type="button"
+      className="cursor-pointer text-left w-full bg-transparent border-none p-0 appearance-none"
+      onClick={handleOpenMovie}
+    >
       <div className="relative overflow-hidden rounded-lg bg-card">
         <div className="aspect-[2/3] overflow-hidden">
           {posterUrl ? (
@@ -82,7 +87,7 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </button>
   )
 }
 

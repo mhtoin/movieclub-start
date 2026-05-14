@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, use, useEffect, useState } from 'react'
 
 interface DeviceCapability {
   isLowEnd: boolean
@@ -39,5 +39,5 @@ export function DeviceCapabilityProvider({
  * Must be used inside a DeviceCapabilityProvider.
  */
 export function useIsLowEndDevice() {
-  return useContext(DeviceCapabilityContext).isLowEnd
+  return use(DeviceCapabilityContext).isLowEnd
 }

@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { Calendar, Check, Film, User } from 'lucide-react'
-import { useEffect } from 'react'
 import FilterCombobox from './filter-combobox'
 import FilterSelect from './filter-select'
 import { Route } from '@/routes/_authenticated/watched'
@@ -59,16 +58,15 @@ export default function Filters({
       }),
     })
     onFilterApply?.()
-  }
-
-  useEffect(() => {
-    if (month) {
-      const element = document.getElementById(month)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
+    if (selectedMonth?.value) {
+      requestAnimationFrame(() => {
+        const element = document.getElementById(selectedMonth.value)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      })
     }
-  }, [month])
+  }
 
   if (variant === 'mobile') {
     return (

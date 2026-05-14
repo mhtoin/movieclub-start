@@ -134,7 +134,7 @@ function BrowseMoviesList({
 
       {movies.length === 0 && (
         <div className="py-16 flex flex-col items-center text-center">
-          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+          <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-4">
             <Film size={20} className="text-muted-foreground/50" />
           </div>
           <p className="text-base font-medium text-foreground/80">
@@ -283,7 +283,7 @@ function SearchMoviesList({
 
       {movies.length === 0 && (
         <div className="py-16 flex flex-col items-center text-center">
-          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+          <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-4">
             <Film size={20} className="text-muted-foreground/50" />
           </div>
           <p className="text-base font-medium text-foreground/80">

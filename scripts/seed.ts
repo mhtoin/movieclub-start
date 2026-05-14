@@ -192,12 +192,15 @@ async function seed() {
     console.log('Fetching movies from TMDB...')
     const allTmdbMovies: Array<TMDBMovie> = []
 
-    for (let page = 1; page <= 7; page++) {
-      const movies = await fetchPopularMovies(page)
+    const moviePages = await Promise.all(
+      Array.from({ length: 7 }, (_, i) => i + 1).map(async (page) => {
+        const movies = await fetchPopularMovies(page)
+        console.log(`Fetched page ${page}: ${movies.length} movies`)
+        return movies
+      }),
+    )
+    for (const movies of moviePages) {
       allTmdbMovies.push(...movies)
-      console.log(`Fetched page ${page}: ${movies.length} movies`)
-
-      await new Promise((resolve) => setTimeout(resolve, 150))
     }
 
     console.log(`Total movies fetched: ${allTmdbMovies.length}`)
@@ -208,30 +211,31 @@ async function seed() {
     console.log('Creating watched movies with historical data...')
     const watchedMovieIds: Array<string> = []
 
-    for (let i = 0; i < historyMovies.length; i++) {
-      const tmdbMovie = historyMovies[i]
-      const userIndex = i % testUsers.length // Distribute movies evenly
-      const weeksAgo = i // Week 0 (this week) to week 99
+    const historyMovieIds = await Promise.all(
+      historyMovies.map(async (tmdbMovie, i) => {
+        const userIndex = i % testUsers.length
+        const weeksAgo = i
 
-      const movieDetails = await fetchMovieDetails(tmdbMovie.id)
-      const movieData = await createDbMovie(movieDetails)
+        const movieDetails = await fetchMovieDetails(tmdbMovie.id)
+        const movieData = await createDbMovie(movieDetails)
 
-      const movieId = generateId('movie')
-      watchedMovieIds.push(movieId)
+        const movieId = generateId('movie')
 
-      await db.insert(movie).values({
-        id: movieId,
-        watchDate: getWatchDate(weeksAgo),
-        userId: testUsers[userIndex].id,
-        ...movieData,
-      })
+        await db.insert(movie).values({
+          id: movieId,
+          watchDate: getWatchDate(weeksAgo),
+          userId: testUsers[userIndex].id,
+          ...movieData,
+        })
 
-      if ((i + 1) % 10 === 0) {
-        console.log(`Created ${i + 1}/100 watched movies`)
-      }
+        if ((i + 1) % 10 === 0) {
+          console.log(`Created ${i + 1}/100 watched movies`)
+        }
 
-      await new Promise((resolve) => setTimeout(resolve, 150))
-    }
+        return movieId
+      }),
+    )
+    watchedMovieIds.push(...historyMovieIds)
 
     console.log('✅ Created 100 watched movies')
 
@@ -261,29 +265,34 @@ async function seed() {
       const shortlistItem = shortlistData[i]
       const numMovies = i === 0 || i === 1 ? 3 : i === 2 ? 2 : 1
 
-      for (let j = 0; j < numMovies; j++) {
-        const movieIndex = i * 3 + j
-        if (movieIndex >= shortlistMovies.length) break
+      const movieEntries = await Promise.all(
+        Array.from({ length: numMovies }, async (_, j) => {
+          const movieIndex = i * 3 + j
+          if (movieIndex >= shortlistMovies.length) return null
 
-        const tmdbMovie = shortlistMovies[movieIndex]
-        const movieDetails = await fetchMovieDetails(tmdbMovie.id)
-        const movieData = await createDbMovie(movieDetails)
+          const tmdbMovie = shortlistMovies[movieIndex]
+          const movieDetails = await fetchMovieDetails(tmdbMovie.id)
+          const movieData = await createDbMovie(movieDetails)
 
-        const movieId = generateId('movie')
-        shortlistMovieIds.push(movieId)
+          const movieId = generateId('movie')
 
-        await db.insert(movie).values({
-          id: movieId,
-          ...movieData,
-        })
+          await db.insert(movie).values({
+            id: movieId,
+            ...movieData,
+          })
 
-        shortlistMovieData.push({
-          a: movieId, // movie id
-          b: shortlistItem.id, // shortlist id
-        })
+          return { movieId, shortlistId: shortlistItem.id }
+        }),
+      )
 
-        // Rate limit
-        await new Promise((resolve) => setTimeout(resolve, 250))
+      for (const entry of movieEntries) {
+        if (entry) {
+          shortlistMovieIds.push(entry.movieId)
+          shortlistMovieData.push({
+            a: entry.movieId,
+            b: entry.shortlistId,
+          })
+        }
       }
 
       console.log(
@@ -305,81 +314,83 @@ async function seed() {
     ]
     const tierValues = [5, 4, 3, 2, 1]
 
-    for (let userIndex = 0; userIndex < testUsers.length; userIndex++) {
-      const testUser = testUsers[userIndex]
-      const tierlistId = generateId('tierlist')
+    await Promise.all(
+      testUsers.map(async (testUser, userIndex) => {
+        const tierlistId = generateId('tierlist')
 
-      await db.insert(tierlist).values({
-        id: tierlistId,
-        userId: testUser.id,
-        title: `${testUser.name}'s Rankings`,
-        genres: null,
-      })
-
-      // Create 5 tiers
-      const tierIds: Array<string> = []
-      for (let i = 0; i < 5; i++) {
-        const tierId = generateId('tier')
-        tierIds.push(tierId)
-
-        await db.insert(tier).values({
-          id: tierId,
-          label: tierLabels[i],
-          value: tierValues[i],
-          tierlistId: tierlistId,
+        await db.insert(tierlist).values({
+          id: tierlistId,
+          userId: testUser.id,
+          title: `${testUser.name}'s Rankings`,
+          genres: null,
         })
-      }
 
-      // All users rate the same movies, but with different tier placements
-      // Shuffle the movies differently for each user to simulate different opinions
-      const shuffledMovieIds = [...watchedMovieIds].sort(() => {
-        // Use userIndex as part of the seed for consistent but different orderings
-        return Math.sin(userIndex * 1000 + Math.random()) - 0.5
-      })
-
-      // Leave some movies unranked (15-25% depending on user)
-      const unrankedPercentage = 0.15 + userIndex * 0.03 // 15%, 18%, 21%, 24%
-      const moviesToRank = shuffledMovieIds.slice(
-        0,
-        Math.floor(shuffledMovieIds.length * (1 - unrankedPercentage)),
-      )
-      const unrankedCount = shuffledMovieIds.length - moviesToRank.length
-
-      // Distribute movies across tiers (more in middle tiers)
-      const moviesPerTier = [
-        Math.floor(moviesToRank.length * 0.1), // S tier - 10%
-        Math.floor(moviesToRank.length * 0.2), // A tier - 20%
-        Math.floor(moviesToRank.length * 0.4), // B tier - 40%
-        Math.floor(moviesToRank.length * 0.2), // C tier - 20%
-        0, // D tier - will get the rest
-      ]
-      moviesPerTier[4] =
-        moviesToRank.length -
-        moviesPerTier.slice(0, 4).reduce((a, b) => a + b, 0)
-
-      let movieOffset = 0
-      for (let tierIndex = 0; tierIndex < 5; tierIndex++) {
-        const moviesInThisTier = moviesPerTier[tierIndex]
-        const tierId = tierIds[tierIndex]
-
-        for (let position = 0; position < moviesInThisTier; position++) {
-          const movieId = shuffledMovieIds[movieOffset + position]
-
-          await db.insert(moviesOnTiers).values({
-            id: generateId('movieOnTier'),
-            position: position,
-            movieId: movieId,
-            tierId: tierId,
-          })
+        const tierIds: Array<string> = []
+        for (let i = 0; i < 5; i++) {
+          tierIds.push(generateId('tier'))
         }
 
-        movieOffset += moviesInThisTier
-      }
+        await Promise.all(
+          tierIds.map((tierId, i) =>
+            db.insert(tier).values({
+              id: tierId,
+              label: tierLabels[i],
+              value: tierValues[i],
+              tierlistId: tierlistId,
+            }),
+          ),
+        )
 
-      console.log(
-        `✅ Created tierlist for ${testUser.name} with ${moviesToRank.length} ranked movies (${unrankedCount} unranked)`,
-      )
-    }
+        const shuffledMovieIds = watchedMovieIds.toSorted(() => {
+          return Math.sin(userIndex * 1000 + Math.random()) - 0.5
+        })
+
+        const unrankedPercentage = 0.15 + userIndex * 0.03
+        const moviesToRank = shuffledMovieIds.slice(
+          0,
+          Math.floor(shuffledMovieIds.length * (1 - unrankedPercentage)),
+        )
+        const unrankedCount = shuffledMovieIds.length - moviesToRank.length
+
+        const moviesPerTier = [
+          Math.floor(moviesToRank.length * 0.1),
+          Math.floor(moviesToRank.length * 0.2),
+          Math.floor(moviesToRank.length * 0.4),
+          Math.floor(moviesToRank.length * 0.2),
+          0,
+        ]
+        moviesPerTier[4] =
+          moviesToRank.length -
+          moviesPerTier.slice(0, 4).reduce((a, b) => a + b, 0)
+
+        const movieInsertPromises: Array<Promise<unknown>> = []
+        let movieOffset = 0
+        for (let tierIndex = 0; tierIndex < 5; tierIndex++) {
+          const moviesInThisTier = moviesPerTier[tierIndex]
+          const tierId = tierIds[tierIndex]
+
+          for (let position = 0; position < moviesInThisTier; position++) {
+            const movieId = shuffledMovieIds[movieOffset + position]
+            movieInsertPromises.push(
+              db.insert(moviesOnTiers).values({
+                id: generateId('movieOnTier'),
+                position: position,
+                movieId: movieId,
+                tierId: tierId,
+              }),
+            )
+          }
+
+          movieOffset += moviesInThisTier
+        }
+
+        await Promise.all(movieInsertPromises)
+
+        console.log(
+          `✅ Created tierlist for ${testUser.name} with ${moviesToRank.length} ranked movies (${unrankedCount} unranked)`,
+        )
+      }),
+    )
 
     console.log('\n🎉 Database seeding completed successfully!')
     console.log('\nTest users:')

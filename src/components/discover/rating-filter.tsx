@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   PopoverPopup,
   PopoverPortal,
@@ -29,10 +29,6 @@ export function RatingFilter({
 }: RatingFilterProps) {
   const [localVoteRange, setLocalVoteRange] = useState(voteRange)
   const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    setLocalVoteRange(voteRange)
-  }, [voteRange])
 
   const sliderContent = (
     <SliderRoot

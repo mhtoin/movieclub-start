@@ -46,20 +46,26 @@ const dialogPopupVariants = cva(
 
 interface DialogBackdropProps
   extends React.ComponentProps<typeof BaseDialog.Backdrop>,
-    VariantProps<typeof dialogBackdropVariants> {}
+    VariantProps<typeof dialogBackdropVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseDialog.Backdrop>>
+}
 
 interface DialogPopupProps
   extends React.ComponentProps<typeof BaseDialog.Popup>,
-    VariantProps<typeof dialogPopupVariants> {}
+    VariantProps<typeof dialogPopupVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseDialog.Popup>>
+}
 
 const DialogRoot = BaseDialog.Root
 const DialogPortal = BaseDialog.Portal
-const DialogClose = React.forwardRef<
-  React.ComponentRef<typeof BaseDialog.Close>,
-  React.ComponentProps<typeof BaseDialog.Close>
->(({ children, ...props }, ref) => {
+const DialogClose = ({
+  ref,
+  children,
+  ...props
+}: React.ComponentProps<typeof BaseDialog.Close> & {
+  ref?: React.Ref<React.ComponentRef<typeof BaseDialog.Close>>
+}) => {
   if (typeof children === 'function') {
-    // Render prop pattern
     return (
       <BaseDialog.Close ref={ref} {...props}>
         {children}
@@ -67,26 +73,28 @@ const DialogClose = React.forwardRef<
     )
   }
 
-  // Regular children - use element-based render for stable ref handling
   if (React.isValidElement(children)) {
     return <BaseDialog.Close ref={ref} render={children} {...props} />
   }
 
-  // Fallback for text content
   return (
     <BaseDialog.Close ref={ref} {...props}>
       {children}
     </BaseDialog.Close>
   )
-})
+}
 DialogClose.displayName = 'DialogClose'
 
-const DialogTrigger = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<typeof BaseDialog.Trigger> & { asChild?: boolean }
->(({ children, asChild, ...props }, ref) => {
+const DialogTrigger = ({
+  ref,
+  children,
+  asChild,
+  ...props
+}: React.ComponentProps<typeof BaseDialog.Trigger> & {
+  asChild?: boolean
+  ref?: React.Ref<HTMLButtonElement>
+}) => {
   if (typeof children === 'function') {
-    // Render prop pattern
     return (
       <BaseDialog.Trigger ref={ref} {...props}>
         {children}
@@ -94,47 +102,49 @@ const DialogTrigger = React.forwardRef<
     )
   }
 
-  // asChild: Use render prop to forward trigger props to single child
   if (asChild && React.isValidElement(children)) {
     return <BaseDialog.Trigger render={children} {...props} />
   }
 
-  // Regular children - use element-based render for stable ref handling
   if (React.isValidElement(children)) {
     return <BaseDialog.Trigger ref={ref} render={children} {...props} />
   }
 
-  // Fallback for text content
   return (
     <BaseDialog.Trigger ref={ref} {...props}>
       {children}
     </BaseDialog.Trigger>
   )
-})
+}
 DialogTrigger.displayName = 'DialogTrigger'
 
-const DialogBackdrop = React.forwardRef<
-  React.ComponentRef<typeof BaseDialog.Backdrop>,
-  DialogBackdropProps
->(({ className, opacity, ...props }, ref) => (
+const DialogBackdrop = ({
+  ref,
+  className,
+  opacity,
+  ...props
+}: DialogBackdropProps) => (
   <BaseDialog.Backdrop
     ref={ref}
     className={cn(dialogBackdropVariants({ opacity }), className)}
     {...props}
   />
-))
+)
 DialogBackdrop.displayName = 'DialogBackdrop'
 
-const DialogPopup = React.forwardRef<
-  React.ComponentRef<typeof BaseDialog.Popup>,
-  DialogPopupProps
->(({ className, size, position, ...props }, ref) => (
+const DialogPopup = ({
+  ref,
+  className,
+  size,
+  position,
+  ...props
+}: DialogPopupProps) => (
   <BaseDialog.Popup
     ref={ref}
     className={cn(dialogPopupVariants({ size, position }), className)}
     {...props}
   />
-))
+)
 DialogPopup.displayName = 'DialogPopup'
 
 export {

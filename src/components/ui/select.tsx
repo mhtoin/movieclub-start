@@ -57,39 +57,50 @@ interface SelectTriggerProps
   extends React.ComponentProps<typeof BaseSelect.Trigger>,
     VariantProps<typeof selectTriggerVariants> {
   placeholder?: string
+  ref?: React.Ref<React.ComponentRef<typeof BaseSelect.Trigger>>
 }
 
 interface SelectPopupProps
   extends React.ComponentProps<typeof BaseSelect.Popup>,
     VariantProps<typeof selectPopupVariants> {
   positionerClassName?: string
+  ref?: React.Ref<React.ComponentRef<typeof BaseSelect.Popup>>
 }
 
 interface SelectItemProps
   extends React.ComponentProps<typeof BaseSelect.Item>,
-    VariantProps<typeof selectItemVariants> {}
+    VariantProps<typeof selectItemVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseSelect.Item>>
+}
 
 const SelectRoot = BaseSelect.Root
 const SelectPositioner = BaseSelect.Positioner
 const SelectValue = BaseSelect.Value
 const SelectGroup = BaseSelect.Group
 const SelectList = BaseSelect.List
-const SelectGroupLabel = React.forwardRef<
-  React.ComponentRef<typeof BaseSelect.GroupLabel>,
-  React.ComponentProps<typeof BaseSelect.GroupLabel>
->(({ className, ...props }, ref) => (
+const SelectGroupLabel = ({
+  ref,
+  className,
+  ...props
+}: React.ComponentProps<typeof BaseSelect.GroupLabel> & {
+  ref?: React.Ref<React.ComponentRef<typeof BaseSelect.GroupLabel>>
+}) => (
   <BaseSelect.GroupLabel
     ref={ref}
     className={cn('px-2 py-1.5 text-xs font-semibold text-gray-500', className)}
     {...props}
   />
-))
+)
 SelectGroupLabel.displayName = 'SelectGroupLabel'
 
-const SelectTrigger = React.forwardRef<
-  React.ComponentRef<typeof BaseSelect.Trigger>,
-  SelectTriggerProps
->(({ className, size, placeholder, children, ...props }, ref) => (
+const SelectTrigger = ({
+  ref,
+  className,
+  size,
+  placeholder,
+  children,
+  ...props
+}: SelectTriggerProps) => (
   <BaseSelect.Trigger
     ref={ref}
     className={cn(selectTriggerVariants({ size, className }))}
@@ -106,13 +117,17 @@ const SelectTrigger = React.forwardRef<
       </>
     )}
   </BaseSelect.Trigger>
-))
+)
 SelectTrigger.displayName = 'SelectTrigger'
 
-const SelectPopup = React.forwardRef<
-  React.ComponentRef<typeof BaseSelect.Popup>,
-  SelectPopupProps
->(({ className, size, positionerClassName, children, ...props }, ref) => (
+const SelectPopup = ({
+  ref,
+  className,
+  size,
+  positionerClassName,
+  children,
+  ...props
+}: SelectPopupProps) => (
   <BaseSelect.Portal>
     <BaseSelect.Positioner
       sideOffset={4}
@@ -128,13 +143,16 @@ const SelectPopup = React.forwardRef<
       </BaseSelect.Popup>
     </BaseSelect.Positioner>
   </BaseSelect.Portal>
-))
+)
 SelectPopup.displayName = 'SelectPopup'
 
-const SelectItem = React.forwardRef<
-  React.ComponentRef<typeof BaseSelect.Item>,
-  SelectItemProps
->(({ className, size, children, ...props }, ref) => (
+const SelectItem = ({
+  ref,
+  className,
+  size,
+  children,
+  ...props
+}: SelectItemProps) => (
   <BaseSelect.Item
     ref={ref}
     className={cn(selectItemVariants({ size, className }))}
@@ -145,13 +163,16 @@ const SelectItem = React.forwardRef<
       <Check className="h-4 w-4" />
     </BaseSelect.ItemIndicator>
   </BaseSelect.Item>
-))
+)
 SelectItem.displayName = 'SelectItem'
 
-const SelectScrollUpArrow = React.forwardRef<
-  React.ComponentRef<typeof BaseSelect.ScrollUpArrow>,
-  React.ComponentProps<typeof BaseSelect.ScrollUpArrow>
->(({ className, ...props }, ref) => (
+const SelectScrollUpArrow = ({
+  ref,
+  className,
+  ...props
+}: React.ComponentProps<typeof BaseSelect.ScrollUpArrow> & {
+  ref?: React.Ref<React.ComponentRef<typeof BaseSelect.ScrollUpArrow>>
+}) => (
   <BaseSelect.ScrollUpArrow
     ref={ref}
     className={cn(
@@ -162,13 +183,16 @@ const SelectScrollUpArrow = React.forwardRef<
   >
     <ChevronDown className="h-4 w-4 rotate-180" />
   </BaseSelect.ScrollUpArrow>
-))
+)
 SelectScrollUpArrow.displayName = 'SelectScrollUpArrow'
 
-const SelectScrollDownArrow = React.forwardRef<
-  React.ComponentRef<typeof BaseSelect.ScrollDownArrow>,
-  React.ComponentProps<typeof BaseSelect.ScrollDownArrow>
->(({ className, ...props }, ref) => (
+const SelectScrollDownArrow = ({
+  ref,
+  className,
+  ...props
+}: React.ComponentProps<typeof BaseSelect.ScrollDownArrow> & {
+  ref?: React.Ref<React.ComponentRef<typeof BaseSelect.ScrollDownArrow>>
+}) => (
   <BaseSelect.ScrollDownArrow
     ref={ref}
     className={cn(
@@ -179,7 +203,7 @@ const SelectScrollDownArrow = React.forwardRef<
   >
     <ChevronDown className="h-4 w-4" />
   </BaseSelect.ScrollDownArrow>
-))
+)
 SelectScrollDownArrow.displayName = 'SelectScrollDownArrow'
 
 export {

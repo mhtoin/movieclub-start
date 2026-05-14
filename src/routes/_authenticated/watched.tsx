@@ -158,7 +158,7 @@ function WatchedMoviesList({
                     <div key={movieData.movie.id} className="relative">
                       <div className="absolute -left-[1.9rem] top-6">
                         <div className="flex flex-col items-center gap-0.5">
-                          <div className="w-2 h-2 rounded-full bg-primary/40 ring-1 ring-background" />
+                          <div className="size-2 rounded-full bg-primary/40 ring-1 ring-background" />
                           {watchDate && (
                             <span className="text-[9px] font-semibold text-primary/70 whitespace-nowrap">
                               {format(watchDate, 'd')}
@@ -246,7 +246,7 @@ function WatchedMoviesList({
                   <div key={movieData.movie.id} className="relative">
                     <div className="absolute -left-[5.5rem] top-1/2 -translate-y-1/2">
                       <div className="flex flex-col items-center">
-                        <div className="w-4 h-4 rounded-full bg-primary ring-2 ring-background" />
+                        <div className="size-4 rounded-full bg-primary ring-2 ring-background" />
                         {watchDate && (
                           <span className="text-[10px] font-semibold text-primary mt-1 whitespace-nowrap">
                             {format(watchDate, 'd')}
@@ -337,7 +337,7 @@ function RouteComponent() {
                     >
                       <Filter className="h-4 w-4" />
                       {activeFiltersCount > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
+                        <span className="absolute -top-1 -right-1 size-5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
                           {activeFiltersCount}
                         </span>
                       )}
@@ -419,7 +419,7 @@ function RouteComponent() {
             )}
 
             {localSearch.trim() && (
-              <div className="border-l-4 border-primary pl-4 my-4 md:my-6 ml-0 md:ml-4">
+              <div className="border-l pl-4 my-4 md:my-6 ml-0 md:ml-4 border-primary/40">
                 <h2 className="text-base md:text-lg font-semibold">
                   Search Results
                 </h2>

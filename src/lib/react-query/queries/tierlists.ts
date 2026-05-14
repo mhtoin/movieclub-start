@@ -140,8 +140,10 @@ export const updateTierMoviePosition = createServerFn({ method: 'POST' })
     const { movieOnTierId, newPosition, tierId } = data
     const id = movieOnTierId
 
-    await assertOwnedMovieOnTierIds(currentUser.userId, [movieOnTierId])
-    await assertOwnedTierIds(currentUser.userId, tierId ? [tierId] : [])
+    await Promise.all([
+      assertOwnedMovieOnTierIds(currentUser.userId, [movieOnTierId]),
+      assertOwnedTierIds(currentUser.userId, tierId ? [tierId] : []),
+    ])
 
     const txid = await db.transaction(async (tx) => {
       const updateData: { position: number; tierId?: string } = {
@@ -174,23 +176,26 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
     if (!context.user) throw new Error('Unauthorized')
     const currentUser = context.user
 
-    await assertOwnedMovieOnTierIds(
-      currentUser.userId,
-      data.map((update) => update.movieOnTierId),
-    )
-    await assertOwnedTierIds(
-      currentUser.userId,
-      data.map((update) => update.tierId),
-    )
+    await Promise.all([
+      assertOwnedMovieOnTierIds(
+        currentUser.userId,
+        data.map((update) => update.movieOnTierId),
+      ),
+      assertOwnedTierIds(
+        currentUser.userId,
+        data.map((update) => update.tierId),
+      ),
+    ])
 
     const txid = await db.transaction(async (tx) => {
-      for (const update of data) {
-        const id = update.movieOnTierId
-        await tx
-          .update(moviesOnTiers)
-          .set({ position: update.newPosition, tierId: update.tierId })
-          .where(dbEq(moviesOnTiers.id, id))
-      }
+      await Promise.all(
+        data.map((update) =>
+          tx
+            .update(moviesOnTiers)
+            .set({ position: update.newPosition, tierId: update.tierId })
+            .where(dbEq(moviesOnTiers.id, update.movieOnTierId)),
+        ),
+      )
 
       const [result] = (await tx.execute(
         sql`select txid_current() as txid`,
@@ -216,14 +221,16 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
     )
 
     const txid = await db.transaction(async (tx) => {
-      for (const insert of data) {
-        await tx.insert(moviesOnTiers).values({
-          id: `movieOnTier-${crypto.randomUUID()}`,
-          movieId: insert.movieId,
-          tierId: insert.tierId,
-          position: insert.position,
-        })
-      }
+      await Promise.all(
+        data.map((insert) =>
+          tx.insert(moviesOnTiers).values({
+            id: `movieOnTier-${crypto.randomUUID()}`,
+            movieId: insert.movieId,
+            tierId: insert.tierId,
+            position: insert.position,
+          }),
+        ),
+      )
 
       const [result] = (await tx.execute(
         sql`select txid_current() as txid`,
@@ -292,7 +299,7 @@ export const getTierlists = createServerFn({ method: 'GET' })
     }
   })
 
-export const getTierlistIndex = createServerFn({ method: 'GET' })
+export const getTierlistIndex = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .handler(async () => {
     const users = await db
@@ -345,6 +352,7 @@ export const getTierlistIndex = createServerFn({ method: 'GET' })
     }
 
     const userMap = new Map<string, UserTierlistSummary>()
+    const tierlistSeenMap = new Map<string, Set<string>>()
 
     for (const row of users) {
       if (!userMap.has(row.id)) {
@@ -354,14 +362,14 @@ export const getTierlistIndex = createServerFn({ method: 'GET' })
           image: row.image,
           tierlists: [],
         })
+        tierlistSeenMap.set(row.id, new Set())
       }
 
       const existing = userMap.get(row.id)!
-      const existingTierlist = existing.tierlists.find(
-        (t) => t.id === row.tierlistId,
-      )
+      const seenTierlists = tierlistSeenMap.get(row.id)!
 
-      if (!existingTierlist) {
+      if (!seenTierlists.has(row.tierlistId)) {
+        seenTierlists.add(row.tierlistId)
         existing.tierlists.push({
           id: row.tierlistId,
           title: row.tierlistTitle,

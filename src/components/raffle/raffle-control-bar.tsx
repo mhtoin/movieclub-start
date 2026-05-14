@@ -58,7 +58,7 @@ export function RaffleControlBar({
               <div className="w-px h-6 bg-border" />
 
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users className="w-4 h-4" />
+                <Users className="size-4" />
                 <span className="font-medium">
                   <span className="text-foreground">{readyCount}</span>/
                   {totalCount}
@@ -75,14 +75,18 @@ export function RaffleControlBar({
                 onClick={onStartRaffle}
                 disabled={!canStart}
               >
-                <Dices className="w-4 h-4" />
+                <Dices className="size-4" />
                 <span className="font-medium">Start Raffle</span>
               </Button>
 
               <div className="w-px h-6 bg-border" />
 
-              <label className="flex items-center gap-2 cursor-pointer select-none">
+              <label
+                htmlFor="raffle-dry-run-desktop"
+                className="flex items-center gap-2 cursor-pointer select-none"
+              >
                 <Switch
+                  id="raffle-dry-run-desktop"
                   checked={dryRun}
                   onCheckedChange={onDryRunChange}
                   size="sm"
@@ -107,15 +111,19 @@ export function RaffleControlBar({
           />
 
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-shrink-0">
-            <Users className="w-3.5 h-3.5" />
+            <Users className="size-3.5" />
             <span className="font-medium text-foreground">{readyCount}</span>
             <span className="text-[10px]">/{totalCount}</span>
           </div>
 
           <div className="flex-1" />
 
-          <label className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0">
+          <label
+            htmlFor="raffle-dry-run-mobile"
+            className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0"
+          >
             <Switch
+              id="raffle-dry-run-mobile"
               checked={dryRun}
               onCheckedChange={onDryRunChange}
               size="sm"
@@ -130,7 +138,7 @@ export function RaffleControlBar({
             onClick={onStartRaffle}
             disabled={!canStart}
           >
-            <Dices className="w-3.5 h-3.5" />
+            <Dices className="size-3.5" />
             <span className="font-medium">Raffle</span>
           </Button>
         </div>

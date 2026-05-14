@@ -39,7 +39,7 @@ export function UserTierlistsSkeleton() {
                   </div>
                 </div>
                 <div className="w-px self-stretch border-l border-dashed border-border/50 my-3" />
-                <div className="flex-1 p-4 space-y-2 flex flex-col justify-center">
+                <div className="flex-1 p-4 gap-y-2 flex flex-col justify-center">
                   <Skeleton className="h-5 w-3/4" />
                   <Skeleton className="h-3 w-16" />
                   <div className="flex gap-1 pt-1">

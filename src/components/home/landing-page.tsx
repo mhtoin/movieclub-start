@@ -147,7 +147,7 @@ export function LandingSkeleton() {
                     <div className="h-12 w-12 rounded-full animate-pulse bg-muted flex-shrink-0" />
                     <div className="hidden sm:block h-4 w-24 animate-pulse rounded bg-muted" />
                   </div>
-                  <div className="flex-1 flex items-center -space-x-3 overflow-hidden">
+                  <div className="flex-1 flex items-center -gap-x-3 overflow-hidden">
                     {Array.from({ length: 5 }).map((_item, j) => (
                       <div
                         key={j}

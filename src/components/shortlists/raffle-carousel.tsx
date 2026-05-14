@@ -42,6 +42,11 @@ function VerticalRaffleCarousel({
   winningMovie,
   onRaffleComplete,
 }: RaffleCarouselProps) {
+  const onRaffleCompleteRef = useRef(onRaffleComplete)
+  useEffect(() => {
+    onRaffleCompleteRef.current = onRaffleComplete
+  })
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'center',
@@ -103,11 +108,10 @@ function VerticalRaffleCarousel({
           const opacity = Math.max(0.2, 1 - distanceFromCenter * 1.6)
           const glowOpacity = Math.max(0, 1 - distanceFromCenter * 2.5)
 
-          tweenNode.style.transform = `translate3d(0, ${translate}%, 0) scale(${scale})`
-          tweenNode.style.opacity = `${opacity}`
+          tweenNode.style.cssText = `transform: translate3d(0, ${translate}%, 0) scale(${scale}); opacity: ${opacity}`
 
           const glowElement = glowNodes.current[slideIndex]
-          glowElement.style.opacity = `${glowOpacity}`
+          glowElement.style.cssText = `opacity: ${glowOpacity}`
         })
       })
     },
@@ -188,7 +192,7 @@ function VerticalRaffleCarousel({
     return () => {
       clearTimeout(timeoutId)
     }
-  }, [emblaApi, raffleState, winningMovie, movies, onRaffleComplete])
+  }, [emblaApi, raffleState, winningMovie, movies])
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -224,7 +228,7 @@ function VerticalRaffleCarousel({
       <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 pointer-events-none z-20">
         <div className="flex items-center gap-3 px-2">
           <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-primary/60 to-primary rounded-full shadow-sm shadow-primary/30" />
-          <div className="w-4 h-4 rounded-full bg-primary shadow-lg shadow-primary/50 animate-pulse ring-2 ring-primary/30 ring-offset-2 ring-offset-background" />
+          <div className="size-4 rounded-full bg-primary shadow-lg shadow-primary/50 animate-pulse ring-2 ring-primary/30 ring-offset-2 ring-offset-background" />
           <div className="flex-1 h-1 bg-gradient-to-l from-transparent via-primary/60 to-primary rounded-full shadow-sm shadow-primary/30" />
         </div>
       </div>
@@ -233,14 +237,14 @@ function VerticalRaffleCarousel({
         className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 hover:bg-black/80 active:scale-95 text-white rounded-full p-3 transition-all z-30 backdrop-blur-sm shadow-lg touch-manipulation"
         aria-label="Previous movie"
       >
-        <ChevronUp className="w-6 h-6" />
+        <ChevronUp className="size-6" />
       </button>
       <button
         onClick={scrollNext}
         className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 hover:bg-black/80 active:scale-95 text-white rounded-full p-3 transition-all z-30 backdrop-blur-sm shadow-lg touch-manipulation"
         aria-label="Next movie"
       >
-        <ChevronDown className="w-6 h-6" />
+        <ChevronDown className="size-6" />
       </button>
     </div>
   )
@@ -252,6 +256,11 @@ function HorizontalRaffleCarousel({
   winningMovie,
   onRaffleComplete,
 }: RaffleCarouselProps) {
+  const onRaffleCompleteRef = useRef(onRaffleComplete)
+  useEffect(() => {
+    onRaffleCompleteRef.current = onRaffleComplete
+  })
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'center',
@@ -312,11 +321,10 @@ function HorizontalRaffleCarousel({
           const opacity = Math.max(0.4, 1 - distanceFromCenter * 1.2)
           const glowOpacity = Math.max(0, 1 - distanceFromCenter * 3)
 
-          tweenNode.style.transform = `translate3d(${translate}%, 0, 0) scale(${scale})`
-          tweenNode.style.opacity = `${opacity}`
+          tweenNode.style.cssText = `transform: translate3d(${translate}%, 0, 0) scale(${scale}); opacity: ${opacity}`
 
           const glowElement = glowNodes.current[slideIndex]
-          glowElement.style.opacity = `${glowOpacity}`
+          glowElement.style.cssText = `opacity: ${glowOpacity}`
         })
       })
     },
@@ -367,7 +375,7 @@ function HorizontalRaffleCarousel({
 
       if (progress >= 1 || elapsed >= totalDuration) {
         if (distanceToWinner === 0) {
-          onRaffleComplete()
+          onRaffleCompleteRef.current()
           return
         } else if (distanceToWinner <= 5) {
           let finalScrolls = distanceToWinner
@@ -381,7 +389,7 @@ function HorizontalRaffleCarousel({
               const delay = Math.max(200, baseDelay + randomVariation)
               setTimeout(doFinalScroll, delay)
             } else {
-              onRaffleComplete()
+              onRaffleCompleteRef.current()
             }
           }
           doFinalScroll()
@@ -413,7 +421,7 @@ function HorizontalRaffleCarousel({
     return () => {
       clearTimeout(timeoutId)
     }
-  }, [emblaApi, raffleState, winningMovie, movies, onRaffleComplete])
+  }, [emblaApi, raffleState, winningMovie, movies])
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -453,14 +461,14 @@ function HorizontalRaffleCarousel({
         className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
         aria-label="Previous slide"
       >
-        <ChevronLeft className="w-6 h-6" />
+        <ChevronLeft className="size-6" />
       </button>
       <button
         onClick={scrollNext}
         className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
         aria-label="Next slide"
       >
-        <ChevronRight className="w-6 h-6" />
+        <ChevronRight className="size-6" />
       </button>
     </div>
   )

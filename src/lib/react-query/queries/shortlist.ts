@@ -47,7 +47,7 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
     }
   })
 
-export const getAllShortlists = createServerFn({ method: 'GET' })
+export const getAllShortlists = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<Array<ShortlistWithUserMovies>> => {
     if (!context.user) throw new Error('Unauthorized')

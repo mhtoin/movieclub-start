@@ -67,73 +67,81 @@ const sliderThumbVariants = cva(
 
 interface SliderRootProps
   extends Omit<React.ComponentProps<typeof BaseSlider.Root>, 'size'>,
-    VariantProps<typeof sliderRootVariants> {}
+    VariantProps<typeof sliderRootVariants> {
+  ref?: React.Ref<HTMLDivElement>
+}
 
 interface SliderTrackProps
   extends React.ComponentProps<typeof BaseSlider.Track>,
-    VariantProps<typeof sliderTrackVariants> {}
+    VariantProps<typeof sliderTrackVariants> {
+  ref?: React.Ref<HTMLSpanElement>
+}
 
 interface SliderIndicatorProps
   extends React.ComponentProps<typeof BaseSlider.Indicator>,
-    VariantProps<typeof sliderIndicatorVariants> {}
+    VariantProps<typeof sliderIndicatorVariants> {
+  ref?: React.Ref<HTMLSpanElement>
+}
 
 interface SliderThumbProps
   extends React.ComponentProps<typeof BaseSlider.Thumb>,
-    VariantProps<typeof sliderThumbVariants> {}
+    VariantProps<typeof sliderThumbVariants> {
+  ref?: React.Ref<HTMLSpanElement>
+}
 
-const SliderRoot = React.forwardRef<HTMLDivElement, SliderRootProps>(
-  ({ className, size, ...props }, ref) => (
-    <BaseSlider.Root
-      ref={ref as any}
-      className={cn(sliderRootVariants({ size }), className)}
-      {...props}
-    />
-  ),
+const SliderRoot = ({ ref, className, size, ...props }: SliderRootProps) => (
+  <BaseSlider.Root
+    ref={ref as any}
+    className={cn(sliderRootVariants({ size }), className)}
+    {...props}
+  />
 )
 SliderRoot.displayName = 'SliderRoot'
 
-const SliderControl = React.forwardRef<
-  HTMLSpanElement,
-  React.ComponentProps<typeof BaseSlider.Control>
->(({ className, ...props }, ref) => (
+const SliderControl = ({
+  ref,
+  className,
+  ...props
+}: React.ComponentProps<typeof BaseSlider.Control> & {
+  ref?: React.Ref<HTMLSpanElement>
+}) => (
   <BaseSlider.Control
     ref={ref as any}
     className={cn('relative flex items-center flex-1', className)}
     {...props}
   />
-))
+)
 SliderControl.displayName = 'SliderControl'
 
-const SliderTrack = React.forwardRef<HTMLSpanElement, SliderTrackProps>(
-  ({ className, size, ...props }, ref) => (
-    <BaseSlider.Track
-      ref={ref as any}
-      className={cn(sliderTrackVariants({ size }), className)}
-      {...props}
-    />
-  ),
+const SliderTrack = ({ ref, className, size, ...props }: SliderTrackProps) => (
+  <BaseSlider.Track
+    ref={ref as any}
+    className={cn(sliderTrackVariants({ size }), className)}
+    {...props}
+  />
 )
 SliderTrack.displayName = 'SliderTrack'
 
-const SliderIndicator = React.forwardRef<HTMLSpanElement, SliderIndicatorProps>(
-  ({ className, size, ...props }, ref) => (
-    <BaseSlider.Indicator
-      ref={ref as any}
-      className={cn(sliderIndicatorVariants({ size }), className)}
-      {...props}
-    />
-  ),
+const SliderIndicator = ({
+  ref,
+  className,
+  size,
+  ...props
+}: SliderIndicatorProps) => (
+  <BaseSlider.Indicator
+    ref={ref as any}
+    className={cn(sliderIndicatorVariants({ size }), className)}
+    {...props}
+  />
 )
 SliderIndicator.displayName = 'SliderIndicator'
 
-const SliderThumb = React.forwardRef<HTMLSpanElement, SliderThumbProps>(
-  ({ className, size, ...props }, ref) => (
-    <BaseSlider.Thumb
-      ref={ref as any}
-      className={cn(sliderThumbVariants({ size }), className)}
-      {...props}
-    />
-  ),
+const SliderThumb = ({ ref, className, size, ...props }: SliderThumbProps) => (
+  <BaseSlider.Thumb
+    ref={ref as any}
+    className={cn(sliderThumbVariants({ size }), className)}
+    {...props}
+  />
 )
 SliderThumb.displayName = 'SliderThumb'
 

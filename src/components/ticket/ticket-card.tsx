@@ -28,6 +28,18 @@ export function TicketCard({
       } ${className}`}
       style={{ animationDelay: `${delay}s` }}
       onClick={interactive ? onClick : undefined}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onKeyDown={
+        interactive
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onClick?.()
+              }
+            }
+          : undefined
+      }
     >
       {children}
     </div>

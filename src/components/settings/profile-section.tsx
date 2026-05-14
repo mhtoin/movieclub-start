@@ -65,7 +65,7 @@ export function ProfileSection({ user }: ProfileSectionProps) {
           className="group flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border border-accent/20 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/10 transition-all duration-300"
           viewTransition
         >
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center ring-2 ring-accent/30 group-hover:ring-accent/50 transition-all">
+          <div className="flex-shrink-0 size-10 rounded-full bg-accent/20 flex items-center justify-center ring-2 ring-accent/30 group-hover:ring-accent/50 transition-all">
             <LayoutDashboard size={20} className="text-accent-foreground" />
           </div>
           <div className="flex-1 min-w-0">

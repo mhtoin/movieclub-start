@@ -223,9 +223,14 @@ async function importTable(
   }
 
   // Transform rows
-  const transformedRows = rows
-    .map((row) => transformRow(oldTableName, row))
-    .filter((row): row is Record<string, unknown> => row !== null)
+  const transformedRows = rows.reduce<Array<Record<string, unknown>>>(
+    (acc, row) => {
+      const transformed = transformRow(oldTableName, row)
+      if (transformed !== null) acc.push(transformed)
+      return acc
+    },
+    [],
+  )
 
   if (transformedRows.length === 0) {
     console.log(`    → No rows after transformation (skipping)`)
@@ -240,32 +245,37 @@ async function importTable(
   let insertedCount = 0
   const failedRows: Array<{ row: Record<string, unknown>; error: string }> = []
 
-  for (const row of transformedRows) {
-    try {
+  const results = await Promise.allSettled(
+    transformedRows.map(async (row) => {
       const values = columns.map((col) => {
         const value = row[col]
-        // Handle arrays - PostgreSQL needs them in a specific format
         if (Array.isArray(value)) {
           return value
         }
-        // Handle objects/JSONB
         if (typeof value === 'object' && value !== null) {
           return JSON.stringify(value)
         }
         return value
       }) as Array<postgres.ParameterOrJSON<never>>
 
-      // Build parameterized query
       const columnList = columns.map((c) => `"${c}"`).join(', ')
       const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ')
       const query = `INSERT INTO "${newTableName}" (${columnList}) VALUES (${placeholders})`
 
       await sql.unsafe(query, values)
+    }),
+  )
+
+  let insertedCount = 0
+  for (let i = 0; i < results.length; i++) {
+    if (results[i].status === 'fulfilled') {
       insertedCount++
-    } catch (error) {
+    } else {
       failedRows.push({
-        row,
-        error: (error as Error).message,
+        row: transformedRows[i],
+        error:
+          (results[i] as PromiseRejectedResult).reason?.message ??
+          'Unknown error',
       })
     }
   }
@@ -297,13 +307,22 @@ async function importMovieCredits(sql: postgres.Sql): Promise<number> {
     return 0
   }
 
-  const creditsRows = rows
-    .filter((row) => row.cast != null || row.crew != null)
-    .map((row) => ({
-      id: row.id as string,
-      cast: row.cast ?? null,
-      crew: row.crew ?? null,
-    }))
+  const creditsRows = rows.reduce<
+    Array<{
+      id: string
+      cast: unknown
+      crew: unknown
+    }>
+  >((acc, row) => {
+    if (row.cast != null || row.crew != null) {
+      acc.push({
+        id: row.id as string,
+        cast: row.cast ?? null,
+        crew: row.crew ?? null,
+      })
+    }
+    return acc
+  }, [])
 
   if (creditsRows.length === 0) {
     console.log('    → No rows with cast/crew data (skipping)')
@@ -313,23 +332,35 @@ async function importMovieCredits(sql: postgres.Sql): Promise<number> {
   let insertedCount = 0
   const failedRows: Array<{ id: string; error: string }> = []
 
-  for (const row of creditsRows) {
-    const cast =
-      typeof row.cast === 'object' && row.cast !== null
-        ? JSON.stringify(row.cast)
-        : row.cast
-    const crew =
-      typeof row.crew === 'object' && row.crew !== null
-        ? JSON.stringify(row.crew)
-        : row.crew
-    try {
+  const creditResults = await Promise.allSettled(
+    creditsRows.map(async (row) => {
+      const cast =
+        typeof row.cast === 'object' && row.cast !== null
+          ? JSON.stringify(row.cast)
+          : row.cast
+      const crew =
+        typeof row.crew === 'object' && row.crew !== null
+          ? JSON.stringify(row.crew)
+          : row.crew
+
       await sql.unsafe(
         `INSERT INTO "movie_credits" ("id", "cast", "crew") VALUES ($1, $2, $3) ON CONFLICT ("id") DO NOTHING`,
         [row.id, cast, crew] as Array<postgres.ParameterOrJSON<never>>,
       )
+    }),
+  )
+
+  let insertedCount = 0
+  for (let i = 0; i < creditResults.length; i++) {
+    if (creditResults[i].status === 'fulfilled') {
       insertedCount++
-    } catch (error) {
-      failedRows.push({ id: row.id, error: (error as Error).message })
+    } else {
+      failedRows.push({
+        id: creditsRows[i].id,
+        error:
+          (creditResults[i] as PromiseRejectedResult).reason?.message ??
+          'Unknown error',
+      })
     }
   }
 
@@ -386,10 +417,10 @@ async function main() {
     let totalRows = 0
 
     // Import each table in order
-    for (const table of IMPORT_ORDER) {
-      const count = await importTable(sql, table)
-      totalRows += count
-    }
+    const importCounts = await Promise.all(
+      IMPORT_ORDER.map((table) => importTable(sql, table)),
+    )
+    totalRows = importCounts.reduce((a, b) => a + b, 0)
 
     // Import movie_credits (cast/crew split from movie table)
     const creditsCount = await importMovieCredits(sql)

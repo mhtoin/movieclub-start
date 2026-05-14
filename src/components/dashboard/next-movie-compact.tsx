@@ -18,7 +18,7 @@ export function NextMovieCompact({ movieData }: NextMovieCompactProps) {
   return (
     <div className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border">
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <div className="size-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Play className="h-4 w-4 text-primary ml-0.5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -45,7 +45,7 @@ export function NextMovieCompact({ movieData }: NextMovieCompactProps) {
             {watchProviders.providers.slice(0, 3).map((p: any) => (
               <div
                 key={p.provider_id}
-                className="w-6 h-6 rounded overflow-hidden"
+                className="size-6 rounded overflow-hidden"
                 title={p.provider_name}
               >
                 {p.logo_path && (

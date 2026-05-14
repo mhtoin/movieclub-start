@@ -1,5 +1,5 @@
 import { Search, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import Input from '@/components/ui/input'
 import { useDebouncedCallback } from '@/lib/hooks'
 

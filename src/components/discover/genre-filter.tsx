@@ -43,8 +43,12 @@ export function GenreFilter({
   }
 
   const selectedLabels = genres
-    .filter((g) => selectedGenres.includes(g.value))
-    .map((g) => g.label)
+    .reduce<Array<string>>((acc, g) => {
+      if (selectedGenres.includes(g.value)) {
+        acc.push(g.label)
+      }
+      return acc
+    }, [])
     .join(', ')
 
   if (variant === 'mobile') {
@@ -119,7 +123,7 @@ export function GenreFilter({
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium">Genre</label>
+      <p className="mb-2 block text-sm font-medium text-foreground">Genre</p>
       <ComboboxRoot
         value={selectedGenres}
         onValueChange={(value) => onGenresChange(value)}

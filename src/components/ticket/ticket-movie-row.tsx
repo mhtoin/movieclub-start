@@ -40,7 +40,7 @@ export function TicketMovieRow({
   const selectedClass =
     showSelection && isSelected ? 'border-primary/30 bg-primary/3' : ''
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleRowClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (showSelection && onSelect && !isLoading) {
       onSelect()
     } else if (onMovieClick) {
@@ -51,7 +51,13 @@ export function TicketMovieRow({
   return (
     <div
       className={`${baseClass} ${selectedClass} relative`}
-      onClick={handleClick}
+      onClick={handleRowClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick(e as unknown as React.MouseEvent<HTMLDivElement>)
+        }
+      }}
     >
       {showSelection && (
         <button
@@ -71,7 +77,7 @@ export function TicketMovieRow({
             isSelected ? 'Selected for raffle' : 'Click to select for raffle'
           }
         >
-          <Check className="w-3.5 h-3.5" />
+          <Check className="size-3.5" />
         </button>
       )}
       <div
@@ -91,7 +97,7 @@ export function TicketMovieRow({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Film className="w-4 h-4 opacity-40" />
+            <Film className="size-4 opacity-40" />
           </div>
         )}
         <div className="absolute inset-0 rounded-sm shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] pointer-events-none" />
@@ -105,7 +111,7 @@ export function TicketMovieRow({
           {runtime && <span>{runtime}</span>}
           {rating !== null && (
             <span className="flex items-center gap-0.5 font-medium text-warning">
-              <Star className="w-3 h-3 fill-current" />
+              <Star className="size-3 fill-current" />
               {rating.toFixed(1)}
             </span>
           )}

@@ -46,7 +46,7 @@ function LandingPage() {
           const config = POSTER_CONFIG[i]
           return (
             <div
-              key={`poster-${i}`}
+              key={movie.id}
               className="absolute"
               style={{
                 left: config.x,
@@ -76,7 +76,7 @@ function LandingPage() {
         <main className="flex-1 flex items-center px-6 sm:px-12">
           <div className="max-w-2xl">
             <div className="space-y-8">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-left leading-[1.1]">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-left leading-[1.1]">
                 Watch together.
                 <br />
                 <span className="text-primary">Decide together.</span>

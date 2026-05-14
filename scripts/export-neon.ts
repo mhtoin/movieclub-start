@@ -152,10 +152,10 @@ async function main() {
     let totalRows = 0
 
     // Export each table
-    for (const table of TABLES_TO_EXPORT) {
-      const count = await exportTable(sql, table)
-      totalRows += count
-    }
+    const exportCounts = await Promise.all(
+      TABLES_TO_EXPORT.map((table) => exportTable(sql, table)),
+    )
+    totalRows = exportCounts.reduce((a, b) => a + b, 0)
 
     console.log(`\n✅ Export complete! Total rows: ${totalRows}`)
     console.log(`   Files saved to: ${EXPORT_DIR}`)

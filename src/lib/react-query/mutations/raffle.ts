@@ -96,14 +96,15 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
           winningMovieId: movieId,
           raffledAt: new Date(watchDate),
         })
-        await tx.insert(raffleToUser).values({ a: raffleId, b: userId })
 
-        await tx
-          .update(movie)
-          .set({ watchDate: new Date(watchDate), userId: userId })
-          .where(eq(movie.id, movieId))
-
-        await tx.delete(movieToShortlist).where(eq(movieToShortlist.a, movieId))
+        await Promise.all([
+          tx.insert(raffleToUser).values({ a: raffleId, b: userId }),
+          tx
+            .update(movie)
+            .set({ watchDate: new Date(watchDate), userId: userId })
+            .where(eq(movie.id, movieId)),
+          tx.delete(movieToShortlist).where(eq(movieToShortlist.a, movieId)),
+        ])
 
         await tx
           .update(shortlist)

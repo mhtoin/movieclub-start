@@ -89,8 +89,8 @@ function AddMovieLink({
       className="block w-full h-auto py-2.5 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all bg-transparent"
     >
       <div className="flex items-center gap-2.5">
-        <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Plus className="w-4 h-4 text-primary" />
+        <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <Plus className="size-4 text-primary" />
         </div>
         <div className="text-left">
           <p className="text-xs font-medium text-foreground">Add Movie</p>
@@ -124,7 +124,7 @@ function ShortlistPanelContent({
     <>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <Film className="w-[18px] h-[18px] text-primary" />
           </div>
           <div>
@@ -140,10 +140,10 @@ function ShortlistPanelContent({
         </div>
         <button
           onClick={onClose}
-          className="w-8 h-8 rounded-lg hover:bg-accent flex items-center justify-center transition-colors"
+          className="size-8 rounded-lg hover:bg-accent flex items-center justify-center transition-colors"
           aria-label="Close"
         >
-          <X className="w-4 h-4 text-muted-foreground" />
+          <X className="size-4 text-muted-foreground" />
         </button>
       </div>
       <AnimatePresence mode="wait">
@@ -172,8 +172,8 @@ function ShortlistPanelContent({
             exit="exit"
             className="flex flex-col items-center py-8 text-center"
           >
-            <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
-              <Film className="w-6 h-6 text-muted-foreground/40" />
+            <div className="size-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
+              <Film className="size-6 text-muted-foreground/40" />
             </div>
             <p className="text-sm font-medium text-foreground mb-1">
               No movies yet
@@ -390,7 +390,7 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                   exit={{ rotate: 90, opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <X className="w-5 h-5" />
+                  <X className="size-5" />
                 </motion.div>
               ) : (
                 <motion.div
@@ -400,7 +400,7 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                   exit={{ rotate: -90, opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <Film className="w-6 h-6" />
+                  <Film className="size-6" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -412,7 +412,7 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     transition={{ type: 'spring', damping: 15, stiffness: 400 }}
-                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-background"
+                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full size-5 flex items-center justify-center ring-2 ring-background"
                   >
                     {movieCount}
                   </motion.span>

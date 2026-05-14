@@ -30,7 +30,7 @@ function ShortlistsPage() {
               'rounded-full gap-2',
             )}
           >
-            <Dices className="w-4 h-4" />
+            <Dices className="size-4" />
             Go to Raffle
           </Link>
         }

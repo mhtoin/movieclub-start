@@ -195,11 +195,11 @@ export function AppearanceSection({
               >
                 <div className="flex gap-1">
                   <div
-                    className="w-6 h-6 rounded-full shadow-sm ring-1 ring-black/10"
+                    className="size-6 rounded-full shadow-sm ring-1 ring-black/10"
                     style={{ backgroundColor: scheme.colors.light }}
                   />
                   <div
-                    className="w-6 h-6 rounded-full shadow-sm ring-1 ring-black/10 -ml-2"
+                    className="size-6 rounded-full shadow-sm ring-1 ring-black/10 -ml-2"
                     style={{ backgroundColor: scheme.colors.dark }}
                   />
                 </div>

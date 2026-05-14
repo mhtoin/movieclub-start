@@ -71,41 +71,55 @@ const comboboxItemVariants = cva(
 
 interface ComboboxTriggerProps
   extends React.ComponentProps<typeof BaseCombobox.Trigger>,
-    VariantProps<typeof comboboxTriggerVariants> {}
+    VariantProps<typeof comboboxTriggerVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseCombobox.Trigger>>
+}
 
 interface ComboboxInputProps
   extends Omit<React.ComponentProps<typeof BaseCombobox.Input>, 'size'>,
-    VariantProps<typeof comboboxInputVariants> {}
+    VariantProps<typeof comboboxInputVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseCombobox.Input>>
+}
 
 interface ComboboxPopupProps
   extends React.ComponentProps<typeof BaseCombobox.Popup>,
-    VariantProps<typeof comboboxPopupVariants> {}
+    VariantProps<typeof comboboxPopupVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseCombobox.Popup>>
+}
 
 interface ComboboxItemProps
   extends React.ComponentProps<typeof BaseCombobox.Item>,
-    VariantProps<typeof comboboxItemVariants> {}
+    VariantProps<typeof comboboxItemVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseCombobox.Item>>
+}
 
 const ComboboxRoot = BaseCombobox.Root
 const ComboboxPositioner = BaseCombobox.Positioner
 const ComboboxValue = BaseCombobox.Value
 const ComboboxList = BaseCombobox.List
 const ComboboxGroup = BaseCombobox.Group
-const ComboboxGroupLabel = React.forwardRef<
-  React.ComponentRef<typeof BaseCombobox.GroupLabel>,
-  React.ComponentProps<typeof BaseCombobox.GroupLabel>
->(({ className, ...props }, ref) => (
+const ComboboxGroupLabel = ({
+  ref,
+  className,
+  ...props
+}: React.ComponentProps<typeof BaseCombobox.GroupLabel> & {
+  ref?: React.Ref<React.ComponentRef<typeof BaseCombobox.GroupLabel>>
+}) => (
   <BaseCombobox.GroupLabel
     ref={ref}
     className={cn('px-2 py-1.5 text-xs font-semibold text-gray-500', className)}
     {...props}
   />
-))
+)
 ComboboxGroupLabel.displayName = 'ComboboxGroupLabel'
 
-const ComboboxTrigger = React.forwardRef<
-  React.ComponentRef<typeof BaseCombobox.Trigger>,
-  ComboboxTriggerProps
->(({ className, size, children, ...props }, ref) => (
+const ComboboxTrigger = ({
+  ref,
+  className,
+  size,
+  children,
+  ...props
+}: ComboboxTriggerProps) => (
   <BaseCombobox.Trigger
     ref={ref}
     className={cn(comboboxTriggerVariants({ size, className }))}
@@ -120,25 +134,30 @@ const ComboboxTrigger = React.forwardRef<
       </>
     )}
   </BaseCombobox.Trigger>
-))
+)
 ComboboxTrigger.displayName = 'ComboboxTrigger'
 
-const ComboboxInput = React.forwardRef<
-  React.ComponentRef<typeof BaseCombobox.Input>,
-  ComboboxInputProps
->(({ className, inputSize, ...props }, ref) => (
+const ComboboxInput = ({
+  ref,
+  className,
+  inputSize,
+  ...props
+}: ComboboxInputProps) => (
   <BaseCombobox.Input
     ref={ref}
     className={cn(comboboxInputVariants({ inputSize, className }))}
     {...props}
   />
-))
+)
 ComboboxInput.displayName = 'ComboboxInput'
 
-const ComboboxPopup = React.forwardRef<
-  React.ComponentRef<typeof BaseCombobox.Popup>,
-  ComboboxPopupProps
->(({ className, size, children, ...props }, ref) => (
+const ComboboxPopup = ({
+  ref,
+  className,
+  size,
+  children,
+  ...props
+}: ComboboxPopupProps) => (
   <BaseCombobox.Portal>
     <BaseCombobox.Positioner sideOffset={4} className="z-50">
       <BaseCombobox.Popup
@@ -150,13 +169,16 @@ const ComboboxPopup = React.forwardRef<
       </BaseCombobox.Popup>
     </BaseCombobox.Positioner>
   </BaseCombobox.Portal>
-))
+)
 ComboboxPopup.displayName = 'ComboboxPopup'
 
-const ComboboxItem = React.forwardRef<
-  React.ComponentRef<typeof BaseCombobox.Item>,
-  ComboboxItemProps
->(({ className, size, children, ...props }, ref) => (
+const ComboboxItem = ({
+  ref,
+  className,
+  size,
+  children,
+  ...props
+}: ComboboxItemProps) => (
   <BaseCombobox.Item
     ref={ref}
     className={cn(comboboxItemVariants({ size, className }))}
@@ -167,13 +189,17 @@ const ComboboxItem = React.forwardRef<
       <Check className="h-4 w-4" />
     </BaseCombobox.ItemIndicator>
   </BaseCombobox.Item>
-))
+)
 ComboboxItem.displayName = 'ComboboxItem'
 
-const ComboboxEmpty = React.forwardRef<
-  React.ComponentRef<typeof BaseCombobox.Empty>,
-  React.ComponentProps<typeof BaseCombobox.Empty>
->(({ className, children, ...props }, ref) => (
+const ComboboxEmpty = ({
+  ref,
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof BaseCombobox.Empty> & {
+  ref?: React.Ref<React.ComponentRef<typeof BaseCombobox.Empty>>
+}) => (
   <BaseCombobox.Empty
     ref={ref}
     className={cn('px-2 py-1.5 text-sm text-gray-500', className)}
@@ -181,7 +207,7 @@ const ComboboxEmpty = React.forwardRef<
   >
     {children || 'No results found'}
   </BaseCombobox.Empty>
-))
+)
 ComboboxEmpty.displayName = 'ComboboxEmpty'
 
 export {

@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { motion, useReducedMotion } from 'framer-motion'
+import { LazyMotion, domAnimation, m, useReducedMotion } from 'framer-motion'
 import { ChevronRight, Layers } from 'lucide-react'
 import { DeleteButton } from './delete-button'
 import type { TierlistPreview } from '@/lib/react-query/queries/tierlists'
@@ -96,7 +96,7 @@ function LobbyWall({
           const url = getImageUrl(path, 'w342')
           return (
             <div
-              key={i}
+              key={path}
               className="relative overflow-hidden"
               style={{
                 transform: `rotate(${s.rotate}deg) translate(${s.x}px, ${s.y}px) scale(${s.scale})`,
@@ -156,179 +156,183 @@ export function FeaturedTierlist({
   )
 
   return (
-    <Link
-      to="/tierlist/$userId/$tierlistId"
-      params={{ userId, tierlistId: tierlist.id }}
-      className="group block"
-    >
-      <motion.article
-        layout
-        className="relative overflow-hidden rounded-2xl bg-card"
+    <LazyMotion features={domAnimation}>
+      <Link
+        to="/tierlist/$userId/$tierlistId"
+        params={{ userId, tierlistId: tierlist.id }}
+        className="group block"
       >
-        <LobbyWall
-          posterPaths={tierlist.posterPaths}
-          shouldReduceMotion={shouldReduceMotion}
-        />
+        <m.article
+          layout
+          className="relative overflow-hidden rounded-2xl bg-card"
+        >
+          <LobbyWall
+            posterPaths={tierlist.posterPaths}
+            shouldReduceMotion={shouldReduceMotion}
+          />
 
-        {posterPaths.length > 0 && (
-          <div className="relative z-10 pt-6 md:pt-8 pb-2">
-            <motion.div
-              className="flex items-end justify-center px-4"
-              initial="initial"
-              animate="animate"
-            >
-              <div className="flex items-end">
-                {posterPaths.map((path, idx) => {
-                  const posterUrl = getImageUrl(path, 'w342')
-                  const t = posterTransforms[idx] ?? posterTransforms[0]
-                  return (
-                    <motion.div
-                      key={idx}
-                      custom={idx}
-                      variants={shouldReduceMotion ? undefined : posterVariants}
-                      initial={shouldReduceMotion ? undefined : 'initial'}
-                      animate={shouldReduceMotion ? undefined : 'animate'}
-                      className={
-                        'relative shrink-0 featured-poster-item' +
-                        (idx > 0 ? ' featured-poster-item--offset' : '')
-                      }
-                      style={{
-                        marginLeft: idx === 0 ? 0 : `${t.overlap}px`,
-                        zIndex: t.z,
-                        ['--fp-rotate' as string]: `${t.rotate}deg`,
-                        ['--fp-lift' as string]: `${t.lift}px`,
-                        ['--fp-overlap' as string]:
-                          idx === 0 ? '0px' : `${t.overlap}px`,
-                        transform: shouldReduceMotion
-                          ? undefined
-                          : `rotate(${t.rotate}deg) translateY(${t.lift}px)`,
-                      }}
-                    >
-                      <div
-                        className="w-[72px] md:w-[100px] aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-white/10 transition-all duration-500 group-hover:ring-white/20"
+          {posterPaths.length > 0 && (
+            <div className="relative z-10 pt-6 md:pt-8 pb-2">
+              <m.div
+                className="flex items-end justify-center px-4"
+                initial="initial"
+                animate="animate"
+              >
+                <div className="flex items-end">
+                  {posterPaths.map((path, idx) => {
+                    const posterUrl = getImageUrl(path, 'w342')
+                    const t = posterTransforms[idx] ?? posterTransforms[0]
+                    return (
+                      <m.div
+                        key={path}
+                        custom={idx}
+                        variants={
+                          shouldReduceMotion ? undefined : posterVariants
+                        }
+                        initial={shouldReduceMotion ? undefined : 'initial'}
+                        animate={shouldReduceMotion ? undefined : 'animate'}
+                        className={
+                          'relative shrink-0 featured-poster-item' +
+                          (idx > 0 ? ' featured-poster-item--offset' : '')
+                        }
                         style={{
-                          boxShadow:
-                            '0 8px 32px oklch(0 0 0 / 0.5), 0 2px 8px oklch(0 0 0 / 0.35)',
+                          marginLeft: idx === 0 ? 0 : `${t.overlap}px`,
+                          zIndex: t.z,
+                          ['--fp-rotate' as string]: `${t.rotate}deg`,
+                          ['--fp-lift' as string]: `${t.lift}px`,
+                          ['--fp-overlap' as string]:
+                            idx === 0 ? '0px' : `${t.overlap}px`,
+                          transform: shouldReduceMotion
+                            ? undefined
+                            : `rotate(${t.rotate}deg) translateY(${t.lift}px)`,
                         }}
                       >
-                        {posterUrl ? (
-                          <img
-                            src={posterUrl}
-                            alt=""
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-muted" />
-                        )}
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </div>
-            </motion.div>
-          </div>
-        )}
-        <motion.div
-          className="relative z-10 px-6 pt-4 pb-6 md:px-8 md:pt-5 md:pb-8"
-          variants={shouldReduceMotion ? undefined : contentVariants}
-          initial={shouldReduceMotion ? undefined : 'initial'}
-          animate={shouldReduceMotion ? undefined : 'animate'}
-        >
-          <div className="flex items-start justify-between gap-4">
-            <h2
-              className="flex-1 font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[0.95] uppercase"
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                letterSpacing: '0.03em',
-                color: 'var(--foreground)',
-              }}
-            >
-              {tierlist.title || 'Untitled'}
-            </h2>
-            <div className="flex items-center gap-2 pt-2 shrink-0">
-              {isOwner && (
-                <DeleteButton tierlistId={tierlist.id} userId={userId} />
-              )}
-              <div
-                className="flex items-center gap-1 text-sm font-semibold opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-all duration-300"
-                style={{ color: 'var(--foreground)' }}
-              >
-                <span>Open</span>
-                <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </div>
+                        <div
+                          className="w-[72px] md:w-[100px] aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-white/10 transition-all duration-500 group-hover:ring-white/20"
+                          style={{
+                            boxShadow:
+                              '0 8px 32px oklch(0 0 0 / 0.5), 0 2px 8px oklch(0 0 0 / 0.35)',
+                          }}
+                        >
+                          {posterUrl ? (
+                            <img
+                              src={posterUrl}
+                              alt=""
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-muted" />
+                          )}
+                        </div>
+                      </m.div>
+                    )
+                  })}
+                </div>
+              </m.div>
             </div>
-          </div>
-          {dateRange && (
-            <p className="text-xs tracking-widest uppercase mt-2 font-medium opacity-60">
-              {dateRange}
-            </p>
           )}
-          <div className="flex items-center gap-5 mt-5">
-            <div className="flex items-baseline gap-2">
-              <span
-                className="text-2xl md:text-3xl font-bold leading-none"
+          <m.div
+            className="relative z-10 px-6 pt-4 pb-6 md:px-8 md:pt-5 md:pb-8"
+            variants={shouldReduceMotion ? undefined : contentVariants}
+            initial={shouldReduceMotion ? undefined : 'initial'}
+            animate={shouldReduceMotion ? undefined : 'animate'}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <h2
+                className="flex-1 font-semibold text-[clamp(2rem,5vw,3.5rem)] leading-[0.95] uppercase"
                 style={{
                   fontFamily: "'Bebas Neue', sans-serif",
+                  letterSpacing: '0.03em',
                   color: 'var(--foreground)',
                 }}
               >
-                {tierlist.movieCount}
-              </span>
-              <span className="text-xs uppercase tracking-wider font-medium opacity-60">
-                films
-              </span>
+                {tierlist.title || 'Untitled'}
+              </h2>
+              <div className="flex items-center gap-2 pt-2 shrink-0">
+                {isOwner && (
+                  <DeleteButton tierlistId={tierlist.id} userId={userId} />
+                )}
+                <div
+                  className="flex items-center gap-1 text-sm font-semibold opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-all duration-300"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  <span>Open</span>
+                  <ChevronRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+              </div>
             </div>
-
-            <div
-              className="w-px h-6"
-              style={{
-                background:
-                  'linear-gradient(to bottom, transparent, oklch(from var(--foreground) l c h / 0.15), transparent)',
-              }}
-            />
-
-            <div className="flex items-center gap-2">
-              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/15 text-primary">
-                <Layers className="w-4 h-4" />
-              </span>
-              <span
-                className="text-sm font-semibold"
-                style={{ color: 'var(--foreground)' }}
-              >
-                {tierlist.tierCount}
-              </span>
-              <span className="text-xs uppercase tracking-wider font-medium opacity-60">
-                tiers
-              </span>
-            </div>
-          </div>
-          {tierlist.genres && tierlist.genres.length > 0 && (
-            <motion.div
-              className="flex flex-wrap gap-2 mt-6"
-              initial="initial"
-              animate="animate"
-            >
-              {tierlist.genres.map((genre, i) => (
-                <motion.span
-                  key={genre}
-                  custom={i}
-                  variants={shouldReduceMotion ? undefined : tagVariants}
-                  className="px-3 py-1.5 text-xs font-semibold tracking-wide rounded-md border transition-colors duration-200"
+            {dateRange && (
+              <p className="text-xs tracking-widest uppercase mt-2 font-medium opacity-60">
+                {dateRange}
+              </p>
+            )}
+            <div className="flex items-center gap-5 mt-5">
+              <div className="flex items-baseline gap-2">
+                <span
+                  className="text-2xl md:text-3xl font-bold leading-none"
                   style={{
-                    background: 'oklch(from var(--primary) l c h / 0.1)',
-                    borderColor: 'oklch(from var(--primary) l c h / 0.2)',
+                    fontFamily: "'Bebas Neue', sans-serif",
                     color: 'var(--foreground)',
                   }}
                 >
-                  {genre}
-                </motion.span>
-              ))}
-            </motion.div>
-          )}
-        </motion.div>
-      </motion.article>
-    </Link>
+                  {tierlist.movieCount}
+                </span>
+                <span className="text-xs uppercase tracking-wider font-medium opacity-60">
+                  films
+                </span>
+              </div>
+
+              <div
+                className="w-px h-6"
+                style={{
+                  background:
+                    'linear-gradient(to bottom, transparent, oklch(from var(--foreground) l c h / 0.15), transparent)',
+                }}
+              />
+
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center size-8 rounded-lg bg-primary/15 text-primary">
+                  <Layers className="size-4" />
+                </span>
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  {tierlist.tierCount}
+                </span>
+                <span className="text-xs uppercase tracking-wider font-medium opacity-60">
+                  tiers
+                </span>
+              </div>
+            </div>
+            {tierlist.genres && tierlist.genres.length > 0 && (
+              <m.div
+                className="flex flex-wrap gap-2 mt-6"
+                initial="initial"
+                animate="animate"
+              >
+                {tierlist.genres.map((genre, i) => (
+                  <m.span
+                    key={genre}
+                    custom={i}
+                    variants={shouldReduceMotion ? undefined : tagVariants}
+                    className="px-3 py-1.5 text-xs font-semibold tracking-wide rounded-md border transition-colors duration-200"
+                    style={{
+                      background: 'oklch(from var(--primary) l c h / 0.1)',
+                      borderColor: 'oklch(from var(--primary) l c h / 0.2)',
+                      color: 'var(--foreground)',
+                    }}
+                  >
+                    {genre}
+                  </m.span>
+                ))}
+              </m.div>
+            )}
+          </m.div>
+        </m.article>
+      </Link>
+    </LazyMotion>
   )
 }
 

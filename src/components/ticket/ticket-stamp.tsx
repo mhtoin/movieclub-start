@@ -21,7 +21,8 @@ export function TicketStamp({
     : getStaticStampClass(participating, isReady)
 
   return (
-    <div
+    <button
+      type="button"
       className={stampClass}
       style={{
         writingMode: 'vertical-rl',
@@ -32,6 +33,6 @@ export function TicketStamp({
       onClick={onClick}
     >
       {getStampText(participating, isReady)}
-    </div>
+    </button>
   )
 }

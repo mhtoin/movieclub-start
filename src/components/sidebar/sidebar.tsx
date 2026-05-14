@@ -154,7 +154,7 @@ export default function Sidebar() {
             }`}
             viewTransition
           >
-            <div className="relative flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center group-hover/profile:scale-110 group-hover/profile:rotate-12 transition-all duration-200">
+            <div className="relative flex-shrink-0 size-6 rounded-full bg-primary/10 flex items-center justify-center group-hover/profile:scale-110 group-hover/profile:rotate-12 transition-all duration-200">
               <User size={12} className="text-primary" />
             </div>
             <div className="flex flex-col opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 delay-75">
@@ -209,8 +209,8 @@ export default function Sidebar() {
 
           <div className="border-t border-sidebar-border/20 py-2 px-1">
             <PopoverRoot open={schemeOpen} onOpenChange={setSchemeOpen}>
-              <PopoverTrigger className="group/theme flex items-center gap-3 px-2 py-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-all duration-200 hover:translate-x-0.5">
-                <div className="relative flex-shrink-0 w-6 h-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/theme:scale-110 group-hover/theme:rotate-12 transition-all duration-200">
+              <PopoverTrigger className="group/theme flex items-center gap-3 p-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-all duration-200 hover:translate-x-0.5">
+                <div className="relative flex-shrink-0 size-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/theme:scale-110 group-hover/theme:rotate-12 transition-all duration-200">
                   <Palette
                     size={14}
                     className="text-sidebar-foreground/60 group-hover/theme:text-sidebar-foreground transition-colors"
@@ -240,11 +240,11 @@ export default function Sidebar() {
                         >
                           <div className="flex gap-1">
                             <div
-                              className="w-5 h-5 rounded-full border border-border shadow-sm"
+                              className="size-5 rounded-full border border-border shadow-sm"
                               style={{ backgroundColor: scheme.colors.light }}
                             />
                             <div
-                              className="w-5 h-5 rounded-full border border-border shadow-sm"
+                              className="size-5 rounded-full border border-border shadow-sm"
                               style={{ backgroundColor: scheme.colors.dark }}
                             />
                           </div>
@@ -259,9 +259,9 @@ export default function Sidebar() {
 
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="group/mode flex items-center gap-3 px-2 py-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-all duration-200 hover:translate-x-0.5"
+              className="group/mode flex items-center gap-3 p-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 transition-all duration-200 hover:translate-x-0.5"
             >
-              <div className="relative flex-shrink-0 w-6 h-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/mode:scale-110 group-hover/mode:rotate-12 transition-all duration-200 overflow-hidden">
+              <div className="relative flex-shrink-0 size-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/mode:scale-110 group-hover/mode:rotate-12 transition-all duration-200 overflow-hidden">
                 {theme === 'dark' ? (
                   <Sun
                     size={14}
@@ -281,9 +281,9 @@ export default function Sidebar() {
 
             <button
               onClick={handleLogout}
-              className="group/logout flex items-center gap-3 px-2 py-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hover:translate-x-0.5"
+              className="group/logout flex items-center gap-3 p-2 rounded-lg w-full text-sidebar-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hover:translate-x-0.5"
             >
-              <div className="relative flex-shrink-0 w-6 h-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/logout:scale-110 group-hover/logout:rotate-12 transition-all duration-200">
+              <div className="relative flex-shrink-0 size-6 rounded-lg bg-sidebar-accent/40 flex items-center justify-center group-hover/logout:scale-110 group-hover/logout:rotate-12 transition-all duration-200">
                 <LogOut
                   size={14}
                   className="text-sidebar-foreground/60 group-hover/logout:text-destructive group-hover/logout:-rotate-12 transition-transform"
@@ -320,14 +320,14 @@ export default function Sidebar() {
               >
                 {active && <div className="absolute inset-0 bg-primary/5" />}
 
-                <div className="relative flex items-center justify-center w-10 h-10">
+                <div className="relative flex items-center justify-center size-10">
                   <Icon
                     size={22}
                     strokeWidth={active ? 2.5 : 1.5}
                     className={active ? 'drop-shadow-sm' : ''}
                   />
                   {active && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 size-1 bg-primary rounded-full" />
                   )}
                 </div>
                 <span
@@ -347,13 +347,13 @@ export default function Sidebar() {
             }`}
           >
             {isMoreActive && <div className="absolute inset-0 bg-primary/5" />}
-            <div className="relative flex items-center justify-center w-10 h-10">
+            <div className="relative flex items-center justify-center size-10">
               <MoreHorizontal
                 size={22}
                 strokeWidth={isMoreActive ? 2.5 : 1.5}
               />
               {isMoreActive && (
-                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 size-1 bg-primary rounded-full" />
               )}
             </div>
             <span
@@ -410,7 +410,7 @@ export default function Sidebar() {
                         </span>
                       </div>
                       {active && (
-                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                        <span className="size-2 rounded-full bg-primary flex-shrink-0" />
                       )}
                     </Link>
                   )
@@ -503,13 +503,13 @@ export default function Sidebar() {
                                 >
                                   <div className="flex gap-1">
                                     <div
-                                      className="w-4 h-4 rounded-full border border-border shadow-sm"
+                                      className="size-4 rounded-full border border-border shadow-sm"
                                       style={{
                                         backgroundColor: scheme.colors.light,
                                       }}
                                     />
                                     <div
-                                      className="w-4 h-4 rounded-full border border-border shadow-sm"
+                                      className="size-4 rounded-full border border-border shadow-sm"
                                       style={{
                                         backgroundColor: scheme.colors.dark,
                                       }}
@@ -549,7 +549,7 @@ export default function Sidebar() {
                   }}
                   className="w-full flex items-center gap-4 p-3.5 rounded-xl text-destructive hover:bg-destructive/10 transition-colors active:scale-[0.98]"
                 >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-destructive/10">
+                  <div className="size-10 rounded-xl flex items-center justify-center bg-destructive/10">
                     <LogOut size={20} />
                   </div>
                   <span className="text-sm font-medium">Exit theater</span>

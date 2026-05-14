@@ -35,9 +35,9 @@ export function ThemeSwatches({
               <div className="flex gap-1 mt-1">
                 {Object.values(def.tierColors)
                   .slice(0, 4)
-                  .map((c, i) => (
+                  .map((c) => (
                     <div
-                      key={i}
+                      key={c}
                       className="h-1.5 w-1.5 rounded-full"
                       style={{ background: c }}
                     />

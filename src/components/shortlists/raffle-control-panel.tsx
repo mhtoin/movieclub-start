@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Calendar, Dices, Users, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import {
   PopoverArrow,
@@ -35,6 +35,10 @@ export function RaffleControlPanel({
   isSpinning,
   hasWinner,
 }: RaffleControlPanelProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const [showDatePicker, setShowDatePicker] = useState(false)
   const { data: shortlists } = useSuspenseQuery(shortlistQueries.all())
   const updateStatusMutation = useUpdateUserShortlistStatusMutation()
@@ -47,6 +51,7 @@ export function RaffleControlPanel({
     updateStatusMutation.mutate({ userId, participating: !currentValue })
   }
 
+  if (!mounted) return null
   return (
     <div className="flex items-center gap-2 sm:gap-3 bg-card/95 backdrop-blur-md border border-border rounded-full px-3 sm:px-4 py-2.5 sm:py-3 shadow-2xl overflow-x-auto">
       <div className="relative">
@@ -115,7 +120,7 @@ export function RaffleControlPanel({
                           <img
                             src={shortlist.user.image}
                             alt={shortlist.user.name.charAt(0)}
-                            className="w-6 h-6 rounded-full flex-shrink-0 border border-border flex items-center justify-center bg-background"
+                            className="size-6 rounded-full flex-shrink-0 border border-border flex items-center justify-center bg-background"
                           />
                         )}
                         <span className="text-sm font-medium truncate">

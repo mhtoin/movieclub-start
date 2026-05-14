@@ -106,7 +106,7 @@ export function ShareCanvas({
           <h1
             style={{
               fontSize: settings.displayMode === 'compact-posters' ? 44 : 52,
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: '-0.02em',
               lineHeight: 1.1,
               margin: 0,

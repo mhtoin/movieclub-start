@@ -264,7 +264,7 @@ export function ShortlistItemDialog({
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#F5C518]/10 hover:bg-[#F5C518]/20 border border-[#F5C518]/30 text-foreground text-sm font-medium transition-colors group"
                           >
-                            <ExternalLink className="w-4 h-4 text-[#F5C518]" />
+                            <ExternalLink className="size-4 text-[#F5C518]" />
                             <span>IMDb</span>
                           </a>
                         )}
@@ -275,7 +275,7 @@ export function ShortlistItemDialog({
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#01D277]/10 hover:bg-[#01D277]/20 border border-[#01D277]/30 text-foreground text-sm font-medium transition-colors group"
                           >
-                            <ExternalLink className="w-4 h-4 text-[#01D277]" />
+                            <ExternalLink className="size-4 text-[#01D277]" />
                             <span>TMDb</span>
                           </a>
                         )}
@@ -287,7 +287,7 @@ export function ShortlistItemDialog({
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF0000]/10 hover:bg-[#FF0000]/20 border border-[#FF0000]/30 text-foreground text-sm font-medium transition-colors group"
                           >
-                            <Play className="w-4 h-4 text-[#FF0000]" />
+                            <Play className="size-4 text-[#FF0000]" />
                             <span>{trailer.name}</span>
                           </a>
                         ))}
@@ -312,10 +312,10 @@ export function ShortlistItemDialog({
                               <img
                                 src={`https://image.tmdb.org/t/p/w92${member.profile_path}`}
                                 alt={member.name}
-                                className="w-10 h-10 rounded-full object-cover ring-2 ring-border/30"
+                                className="size-10 rounded-full object-cover ring-2 ring-border/30"
                               />
                             ) : (
-                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center ring-2 ring-border/30">
+                              <div className="size-10 rounded-full bg-muted flex items-center justify-center ring-2 ring-border/30">
                                 <span className="text-xs text-muted-foreground font-medium">
                                   {member.name.charAt(0)}
                                 </span>
@@ -345,7 +345,7 @@ export function ShortlistItemDialog({
                             : 'bg-accent text-foreground hover:bg-accent/80 border border-border'
                         }`}
                       >
-                        <Check className="w-4 h-4" />
+                        <Check className="size-4" />
                         {isSelected
                           ? 'Selected for Raffle'
                           : 'Select for Raffle'}
@@ -356,7 +356,7 @@ export function ShortlistItemDialog({
                       disabled={isRemoving}
                       className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 border border-destructive/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="size-4" />
                       Remove
                     </button>
                   </div>

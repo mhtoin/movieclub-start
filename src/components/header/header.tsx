@@ -80,7 +80,7 @@ export default function Header() {
             viewTransition
           >
             <div className="flex items-center gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all">
+              <div className="flex-shrink-0 size-10 rounded-full bg-primary/20 flex items-center justify-center ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all">
                 <User size={20} className="text-primary" />
               </div>
               <div className="flex-1 min-w-0">
@@ -100,7 +100,7 @@ export default function Header() {
             viewTransition
           >
             <div className="flex items-center gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center ring-2 ring-accent/30 group-hover:ring-accent/50 transition-all">
+              <div className="flex-shrink-0 size-10 rounded-full bg-accent/20 flex items-center justify-center ring-2 ring-accent/30 group-hover:ring-accent/50 transition-all">
                 <LayoutDashboard size={20} className="text-accent-foreground" />
               </div>
               <div className="flex-1 min-w-0">

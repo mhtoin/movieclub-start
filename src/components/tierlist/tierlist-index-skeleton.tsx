@@ -7,7 +7,7 @@ export function TierlistIndexSkeleton() {
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="break-inside-avoid">
             <div className="flex items-center gap-3 mb-3">
-              <Skeleton className="w-10 h-10 rounded-full" />
+              <Skeleton className="size-10 rounded-full" />
               <div className="space-y-1.5">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-3 w-16" />

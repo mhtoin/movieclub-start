@@ -33,48 +33,44 @@ const toggleVariants = cva(
 export interface ToggleProps
   extends Omit<React.ComponentPropsWithoutRef<typeof BaseToggle>, 'render'>,
     VariantProps<typeof toggleVariants> {
+  ref?: React.Ref<HTMLButtonElement>
   pressedIcon?: React.ReactNode
   unpressedIcon?: React.ReactNode
   children?: React.ReactNode
 }
 
-const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
-  (
-    {
-      className,
-      variant,
-      size,
-      pressedIcon,
-      unpressedIcon,
-      children,
-      ...props
-    },
-    ref,
-  ) => {
-    return (
-      <BaseToggle
-        ref={ref}
-        className={cn(toggleVariants({ variant, size, className }))}
-        render={(toggleProps, state) => {
-          // If custom icons are provided, use them based on pressed state
-          const icon =
-            pressedIcon || unpressedIcon
-              ? state.pressed
-                ? pressedIcon
-                : unpressedIcon
-              : children
+const Toggle = ({
+  ref,
+  className,
+  variant,
+  size,
+  pressedIcon,
+  unpressedIcon,
+  children,
+  ...props
+}: ToggleProps) => {
+  return (
+    <BaseToggle
+      ref={ref}
+      className={cn(toggleVariants({ variant, size, className }))}
+      render={(toggleProps, state) => {
+        const icon =
+          pressedIcon || unpressedIcon
+            ? state.pressed
+              ? pressedIcon
+              : unpressedIcon
+            : children
 
-          return (
-            <button type="button" {...toggleProps}>
-              {icon}
-            </button>
-          )
-        }}
-        {...props}
-      />
-    )
-  },
-)
+        return (
+          <button type="button" {...toggleProps}>
+            {icon}
+          </button>
+        )
+      }}
+      {...props}
+    />
+  )
+}
 
 Toggle.displayName = 'Toggle'
 

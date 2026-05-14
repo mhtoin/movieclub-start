@@ -97,81 +97,82 @@ const tabsPanelVariants = cva(
 
 interface TabsRootProps
   extends React.ComponentProps<typeof BaseTabs.Root>,
-    VariantProps<typeof tabsRootVariants> {}
+    VariantProps<typeof tabsRootVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseTabs.Root>>
+}
 
 interface TabsListProps
   extends React.ComponentProps<typeof BaseTabs.List>,
-    VariantProps<typeof tabsListVariants> {}
+    VariantProps<typeof tabsListVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseTabs.List>>
+}
 
 interface TabProps
   extends React.ComponentProps<typeof BaseTabs.Tab>,
-    VariantProps<typeof tabVariants> {}
+    VariantProps<typeof tabVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseTabs.Tab>>
+}
 
 interface TabsIndicatorProps
   extends React.ComponentProps<typeof BaseTabs.Indicator>,
-    VariantProps<typeof tabsIndicatorVariants> {}
+    VariantProps<typeof tabsIndicatorVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseTabs.Indicator>>
+}
 
 interface TabsPanelProps
   extends React.ComponentProps<typeof BaseTabs.Panel>,
-    VariantProps<typeof tabsPanelVariants> {}
+    VariantProps<typeof tabsPanelVariants> {
+  ref?: React.Ref<React.ComponentRef<typeof BaseTabs.Panel>>
+}
 
-const TabsRoot = React.forwardRef<
-  React.ComponentRef<typeof BaseTabs.Root>,
-  TabsRootProps
->(({ className, variant, ...props }, ref) => (
+const TabsRoot = ({ ref, className, variant, ...props }: TabsRootProps) => (
   <BaseTabs.Root
     ref={ref}
     className={cn(tabsRootVariants({ variant }), className)}
     {...props}
   />
-))
+)
 TabsRoot.displayName = 'TabsRoot'
 
-const TabsList = React.forwardRef<
-  React.ComponentRef<typeof BaseTabs.List>,
-  TabsListProps
->(({ className, variant, ...props }, ref) => (
+const TabsList = ({ ref, className, variant, ...props }: TabsListProps) => (
   <BaseTabs.List
     ref={ref}
     className={cn(tabsListVariants({ variant }), className)}
     {...props}
   />
-))
+)
 TabsList.displayName = 'TabsList'
 
-const Tab = React.forwardRef<React.ComponentRef<typeof BaseTabs.Tab>, TabProps>(
-  ({ className, variant, size, ...props }, ref) => (
-    <BaseTabs.Tab
-      ref={ref}
-      className={cn(tabVariants({ variant, size }), className)}
-      {...props}
-    />
-  ),
+const Tab = ({ ref, className, variant, size, ...props }: TabProps) => (
+  <BaseTabs.Tab
+    ref={ref}
+    className={cn(tabVariants({ variant, size }), className)}
+    {...props}
+  />
 )
 Tab.displayName = 'Tab'
 
-const TabsIndicator = React.forwardRef<
-  React.ComponentRef<typeof BaseTabs.Indicator>,
-  TabsIndicatorProps
->(({ className, variant, ...props }, ref) => (
+const TabsIndicator = ({
+  ref,
+  className,
+  variant,
+  ...props
+}: TabsIndicatorProps) => (
   <BaseTabs.Indicator
     ref={ref}
     className={cn(tabsIndicatorVariants({ variant }), className)}
     {...props}
   />
-))
+)
 TabsIndicator.displayName = 'TabsIndicator'
 
-const TabsPanel = React.forwardRef<
-  React.ComponentRef<typeof BaseTabs.Panel>,
-  TabsPanelProps
->(({ className, variant, ...props }, ref) => (
+const TabsPanel = ({ ref, className, variant, ...props }: TabsPanelProps) => (
   <BaseTabs.Panel
     ref={ref}
     className={cn(tabsPanelVariants({ variant }), className)}
     {...props}
   />
-))
+)
 TabsPanel.displayName = 'TabsPanel'
 
 export { Tab, TabsIndicator, TabsList, TabsPanel, TabsRoot }

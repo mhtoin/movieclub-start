@@ -2,7 +2,7 @@ import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
 import { format } from 'date-fns'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import {
   CalendarDays,
   CalendarRange,
@@ -226,9 +226,11 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const genreLabels = selectedGenres
-      .map((id) => genreIdToLabel.get(id))
-      .filter((label): label is string => label !== undefined)
+    const genreLabels = selectedGenres.reduce<Array<string>>((acc, id) => {
+      const label = genreIdToLabel.get(id)
+      if (label !== undefined) acc.push(label)
+      return acc
+    }, [])
 
     createMutation.mutate({
       data: {
@@ -246,12 +248,15 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
   }
 
   const addTier = () => {
-    setTiers([...tiers, { label: 'New Tier', value: tiers.length }])
+    setTiers((prev) => [...prev, { label: 'New Tier', value: prev.length }])
   }
 
   const removeTier = (index: number) => {
     setTiers(
-      tiers.filter((_, i) => i !== index).map((t, i) => ({ ...t, value: i })),
+      tiers.reduce<Array<{ label: string; value: number }>>((acc, t, i) => {
+        if (i !== index) acc.push({ ...t, value: acc.length })
+        return acc
+      }, []),
     )
   }
 
@@ -262,135 +267,141 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
   }
 
   return (
-    <DialogRoot open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          New Tierlist
-        </Button>
-      </DialogTrigger>
-      <DialogPortal>
-        <DialogBackdrop className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPopup className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 max-w-[calc(100vw-2rem)] w-[580px]">
-          <div className="relative overflow-hidden rounded-t-lg">
-            <div className="flex items-center justify-between px-8 pt-8 pb-5">
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Clapperboard className="h-5 w-5" />
+    <LazyMotion features={domAnimation}>
+      <DialogRoot open={open} onOpenChange={setOpen}>
+        <DialogTrigger>
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            New Tierlist
+          </Button>
+        </DialogTrigger>
+        <DialogPortal>
+          <DialogBackdrop className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+          <DialogPopup className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 max-w-[calc(100vw-2rem)] w-[580px]">
+            <div className="relative overflow-hidden rounded-t-lg">
+              <div className="flex items-center justify-between px-8 pt-8 pb-5">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Clapperboard className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2
+                      className="text-xl font-semibold tracking-tight text-foreground"
+                      style={{ fontFamily: "'Oswald', sans-serif" }}
+                    >
+                      New Tierlist
+                    </h2>
+                    <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mt-0.5">
+                      {step === 1
+                        ? 'Scene 1 — The Program'
+                        : 'Scene 2 — The Rating Board'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2
-                    className="text-xl font-bold tracking-tight text-foreground"
-                    style={{ fontFamily: "'Oswald', sans-serif" }}
-                  >
-                    New Tierlist
-                  </h2>
-                  <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mt-0.5">
-                    {step === 1
-                      ? 'Scene 1 — The Program'
-                      : 'Scene 2 — The Rating Board'}
-                  </p>
-                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClose}
+                  className="h-9 w-9 rounded-xl"
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close</span>
+                </Button>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={handleClose}
-                className="h-9 w-9 rounded-xl"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
-              </Button>
+              <div className="flex items-center gap-3 px-8 pb-6">
+                <Button
+                  type="button"
+                  variant={step === 1 ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => goToStep(1)}
+                  className={`rounded-full h-auto px-3 py-1 text-xs font-semibold gap-2 ${
+                    step !== 1 &&
+                    'bg-muted text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-current/15 text-[10px] font-bold">
+                    1
+                  </span>
+                  Program
+                </Button>
+                <div className="flex-1 h-px bg-border/60" />
+                <Button
+                  type="button"
+                  variant={step === 2 ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => title.trim() && goToStep(2)}
+                  disabled={!title.trim()}
+                  className={`rounded-full h-auto px-3 py-1 text-xs font-semibold gap-2 ${
+                    step !== 2 &&
+                    'bg-muted text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-current/15 text-[10px] font-bold">
+                    2
+                  </span>
+                  Tiers
+                </Button>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1">
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{
+                      background: 'var(--dialog-background)',
+                      marginBottom: '-3px',
+                    }}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-3 px-8 pb-6">
-              <Button
-                type="button"
-                variant={step === 1 ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => goToStep(1)}
-                className={`rounded-full h-auto px-3 py-1 text-xs font-semibold gap-2 ${
-                  step !== 1 &&
-                  'bg-muted text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-current/15 text-[10px] font-bold">
-                  1
-                </span>
-                Program
-              </Button>
-              <div className="flex-1 h-px bg-border/60" />
-              <Button
-                type="button"
-                variant={step === 2 ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => title.trim() && goToStep(2)}
-                disabled={!title.trim()}
-                className={`rounded-full h-auto px-3 py-1 text-xs font-semibold gap-2 ${
-                  step !== 2 &&
-                  'bg-muted text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-current/15 text-[10px] font-bold">
-                  2
-                </span>
-                Tiers
-              </Button>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1">
-              {Array.from({ length: 24 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{
-                    background: 'var(--dialog-background)',
-                    marginBottom: '-3px',
-                  }}
-                />
-              ))}
-            </div>
-          </div>
 
-          <div className="px-8 pb-8 pt-4">
-            <form onSubmit={handleSubmit}>
-              <div className="relative min-h-[380px]">
-                <AnimatePresence mode="wait" custom={direction} initial={false}>
-                  {step === 1 ? (
-                    <StepOne
-                      key="step1"
-                      direction={direction}
-                      title={title}
-                      setTitle={setTitle}
-                      datePreset={datePreset}
-                      handleDatePreset={handleDatePreset}
-                      fromYear={fromYear}
-                      toYear={toYear}
-                      handleFromYearChange={handleFromYearChange}
-                      handleToYearChange={handleToYearChange}
-                      genresData={genresData}
-                      selectedGenres={selectedGenres}
-                      setSelectedGenres={setSelectedGenres}
-                      onNext={() => goToStep(2)}
-                    />
-                  ) : (
-                    <StepTwo
-                      key="step2"
-                      direction={direction}
-                      tiers={tiers}
-                      updateTierLabel={updateTierLabel}
-                      removeTier={removeTier}
-                      addTier={addTier}
-                      onBack={() => goToStep(1)}
-                      isPending={createMutation.isPending}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-            </form>
-          </div>
-        </DialogPopup>
-      </DialogPortal>
-    </DialogRoot>
+            <div className="px-8 pb-8 pt-4">
+              <form onSubmit={handleSubmit}>
+                <div className="relative min-h-[380px]">
+                  <AnimatePresence
+                    mode="wait"
+                    custom={direction}
+                    initial={false}
+                  >
+                    {step === 1 ? (
+                      <StepOne
+                        key="step1"
+                        direction={direction}
+                        title={title}
+                        setTitle={setTitle}
+                        datePreset={datePreset}
+                        handleDatePreset={handleDatePreset}
+                        fromYear={fromYear}
+                        toYear={toYear}
+                        handleFromYearChange={handleFromYearChange}
+                        handleToYearChange={handleToYearChange}
+                        genresData={genresData}
+                        selectedGenres={selectedGenres}
+                        setSelectedGenres={setSelectedGenres}
+                        onNext={() => goToStep(2)}
+                      />
+                    ) : (
+                      <StepTwo
+                        key="step2"
+                        direction={direction}
+                        tiers={tiers}
+                        updateTierLabel={updateTierLabel}
+                        removeTier={removeTier}
+                        addTier={addTier}
+                        onBack={() => goToStep(1)}
+                        isPending={createMutation.isPending}
+                      />
+                    )}
+                  </AnimatePresence>
+                </div>
+              </form>
+            </div>
+          </DialogPopup>
+        </DialogPortal>
+      </DialogRoot>
+    </LazyMotion>
   )
 }
 
@@ -432,7 +443,7 @@ function StepOne({
   )
 
   return (
-    <motion.div
+    <m.div
       custom={direction}
       variants={slideVariants}
       initial="enter"
@@ -441,8 +452,8 @@ function StepOne({
       transition={{ duration: 0.3, ease: easeOut }}
       className="space-y-7"
     >
-      <motion.div variants={staggerContainer} initial="hidden" animate="show">
-        <motion.div variants={staggerItem} className="space-y-3">
+      <m.div variants={staggerContainer} initial="hidden" animate="show">
+        <m.div variants={staggerItem} className="space-y-3">
           <label
             htmlFor="tierlist-title"
             className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground"
@@ -453,7 +464,6 @@ function StepOne({
           <Input
             id="tierlist-title"
             required
-            autoFocus
             value={title}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setTitle(e.target.value)
@@ -466,12 +476,12 @@ function StepOne({
               letterSpacing: '0.01em',
             }}
           />
-        </motion.div>
-        <motion.div variants={staggerItem} className="space-y-3 pt-4">
-          <label className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        </m.div>
+        <m.div variants={staggerItem} className="space-y-3 pt-4">
+          <span className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             <CalendarRange className="h-4 w-4" />
             Time Period
-          </label>
+          </span>
           <div className="grid grid-cols-2 gap-3">
             {(
               [
@@ -515,7 +525,7 @@ function StepOne({
                   />
                   <span className="text-sm font-medium">{preset.label}</span>
                   {active && (
-                    <motion.div
+                    <m.div
                       layoutId="time-preset-glow"
                       className="absolute inset-0 rounded-xl ring-1 ring-primary/20"
                       transition={{ duration: 0.2 }}
@@ -528,7 +538,7 @@ function StepOne({
 
           <AnimatePresence>
             {datePreset === 'custom-range' && (
-              <motion.div
+              <m.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -571,15 +581,15 @@ function StepOne({
                     </SelectPopup>
                   </SelectRoot>
                 </div>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
-        </motion.div>
-        <motion.div variants={staggerItem} className="space-y-3 pt-4">
-          <label className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        </m.div>
+        <m.div variants={staggerItem} className="space-y-3 pt-4">
+          <span className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             <Film className="h-4 w-4" />
             Genres
-          </label>
+          </span>
           <div className="flex flex-wrap gap-2.5">
             {genresData.map((genre) => {
               const active = selectedGenres.includes(genre.value)
@@ -591,11 +601,11 @@ function StepOne({
                   size="sm"
                   onClick={() => {
                     if (active) {
-                      setSelectedGenres(
-                        selectedGenres.filter((g) => g !== genre.value),
+                      setSelectedGenres((prev) =>
+                        prev.filter((g) => g !== genre.value),
                       )
                     } else {
-                      setSelectedGenres([...selectedGenres, genre.value])
+                      setSelectedGenres((prev) => [...prev, genre.value])
                     }
                   }}
                   className={`rounded-full h-auto px-3.5 py-1.5 text-xs font-semibold tracking-wide ${
@@ -608,8 +618,8 @@ function StepOne({
               )
             })}
           </div>
-        </motion.div>
-        <motion.div variants={staggerItem} className="flex justify-end pt-4">
+        </m.div>
+        <m.div variants={staggerItem} className="flex justify-end pt-4">
           <Button
             type="button"
             onClick={onNext}
@@ -619,9 +629,9 @@ function StepOne({
             Next Scene
             <ChevronRight className="h-4 w-4" />
           </Button>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+        </m.div>
+      </m.div>
+    </m.div>
   )
 }
 
@@ -653,7 +663,7 @@ function StepTwo({
   }, [tiers.length])
 
   return (
-    <motion.div
+    <m.div
       custom={direction}
       variants={slideVariants}
       initial="enter"
@@ -662,23 +672,20 @@ function StepTwo({
       transition={{ duration: 0.3, ease: easeOut }}
       className="space-y-6"
     >
-      <motion.div
+      <m.div
         variants={staggerContainer}
         initial="hidden"
         animate="show"
         className="space-y-6"
       >
-        <motion.div
-          variants={staggerItem}
-          className="flex items-center gap-2.5"
-        >
+        <m.div variants={staggerItem} className="flex items-center gap-2.5">
           <Sparkles className="h-4 w-4 text-primary" />
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
             Customize your scoring board
           </p>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           ref={scrollRef}
           variants={staggerItem}
           className="space-y-3 max-h-[280px] overflow-y-auto pr-1 no-scrollbar"
@@ -687,8 +694,8 @@ function StepTwo({
             {tiers.map((tier, index) => {
               const swatch = TIER_SWATCHES[index % TIER_SWATCHES.length]
               return (
-                <motion.div
-                  key={index}
+                <m.div
+                  key={tier.value}
                   layout
                   initial={{ opacity: 0, y: 12, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -741,12 +748,12 @@ function StepTwo({
                   >
                     <X className="h-3.5 w-3.5" />
                   </Button>
-                </motion.div>
+                </m.div>
               )
             })}
           </AnimatePresence>
-        </motion.div>
-        <motion.div variants={staggerItem}>
+        </m.div>
+        <m.div variants={staggerItem}>
           <Button
             type="button"
             variant="ghost"
@@ -757,8 +764,8 @@ function StepTwo({
             <Plus className="h-4 w-4" />
             Add Tier
           </Button>
-        </motion.div>
-        <motion.div
+        </m.div>
+        <m.div
           variants={staggerItem}
           className="flex items-center justify-between pt-4 border-t border-border/40"
         >
@@ -788,8 +795,8 @@ function StepTwo({
               </>
             )}
           </Button>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+        </m.div>
+      </m.div>
+    </m.div>
   )
 }

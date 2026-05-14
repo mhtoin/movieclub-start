@@ -207,8 +207,8 @@ function RouteComponent() {
         <div className="h-full flex flex-col">
           {isAdding && (
             <div className="mx-4 mt-3 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
-              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-                <Film className="w-4 h-4 text-primary" />
+              <div className="size-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                <Film className="size-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">
@@ -226,7 +226,7 @@ function RouteComponent() {
                 onClick={handleExitAdding}
                 className="flex-shrink-0 text-muted-foreground hover:text-foreground"
               >
-                Done
+                Done adding
               </Button>
             </div>
           )}

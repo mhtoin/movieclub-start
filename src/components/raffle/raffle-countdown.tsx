@@ -1,5 +1,5 @@
 import { Clapperboard, Film, Star } from 'lucide-react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
 interface Props {
@@ -24,7 +24,7 @@ function FilmFrame({
   isPast: boolean
 }) {
   return (
-    <motion.div
+    <m.div
       initial={false}
       animate={{
         scale: isActive ? 1 : 0.85,
@@ -79,7 +79,7 @@ function FilmFrame({
           ))}
         </div>
       </div>
-      <motion.span
+      <m.span
         initial={false}
         animate={{
           opacity: isActive ? 1 : 0.5,
@@ -91,21 +91,21 @@ function FilmFrame({
         }`}
       >
         {label}
-      </motion.span>
-    </motion.div>
+      </m.span>
+    </m.div>
   )
 }
 
 function NowShowing() {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}
       className="flex flex-col items-center"
     >
-      <motion.div
+      <m.div
         initial={{ width: 0 }}
         animate={{ width: '100%' }}
         transition={{ delay: 0.1, duration: 0.3 }}
@@ -114,13 +114,13 @@ function NowShowing() {
         <span className="text-[2rem] sm:text-[3rem] font-black tracking-wider text-primary whitespace-nowrap">
           NOW SHOWING
         </span>
-      </motion.div>
+      </m.div>
       <div className="flex items-center gap-3 mt-3">
-        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-        <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.15s]" />
-        <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.3s]" />
+        <div className="size-2 rounded-full bg-primary animate-pulse" />
+        <div className="size-2 rounded-full bg-primary animate-pulse [animation-delay:0.15s]" />
+        <div className="size-2 rounded-full bg-primary animate-pulse [animation-delay:0.3s]" />
       </div>
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -166,40 +166,42 @@ export function RaffleCountdown({ onComplete }: Props) {
   }, [])
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background"
-    >
-      <AnimatePresence mode="wait">
-        {phase === 'countdown' ? (
-          <motion.div
-            key="countdown"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex items-center gap-8 sm:gap-12"
-          >
-            {COUNTDOWN_ITEMS.map((item, i) => (
-              <FilmFrame
-                key={item.value}
-                icon={item.icon}
-                label={item.label}
-                isActive={i === activeIndex}
-                isPast={i < activeIndex}
-              />
-            ))}
-          </motion.div>
-        ) : (
-          <NowShowing key="showing" />
-        )}
-      </AnimatePresence>
+    <LazyMotion features={domAnimation}>
+      <m.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-background"
+      >
+        <AnimatePresence mode="wait">
+          {phase === 'countdown' ? (
+            <m.div
+              key="countdown"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-8 sm:gap-12"
+            >
+              {COUNTDOWN_ITEMS.map((item, i) => (
+                <FilmFrame
+                  key={item.value}
+                  icon={item.icon}
+                  label={item.label}
+                  isActive={i === activeIndex}
+                  isPast={i < activeIndex}
+                />
+              ))}
+            </m.div>
+          ) : (
+            <NowShowing key="showing" />
+          )}
+        </AnimatePresence>
 
-      <p className="absolute bottom-16 text-xs text-muted-foreground tracking-wide">
-        Selecting tonight's feature presentation
-      </p>
-    </motion.div>
+        <p className="absolute bottom-16 text-xs text-muted-foreground tracking-wide">
+          Selecting tonight's feature presentation
+        </p>
+      </m.div>
+    </LazyMotion>
   )
 }

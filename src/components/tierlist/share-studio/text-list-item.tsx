@@ -47,7 +47,7 @@ export function TextListItem({
       {metaItems.length > 0 && (
         <span
           style={{
-            fontSize: 11,
+            fontSize: 12,
             color: theme.muted,
             fontFamily: 'var(--font-mono, monospace)',
             letterSpacing: '0.02em',

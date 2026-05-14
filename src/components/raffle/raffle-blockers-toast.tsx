@@ -106,9 +106,9 @@ export function RaffleBlockersToast({
               <div className="px-4 py-3 w-80 max-w-[calc(100vw-2rem)] sm:w-[22rem]">
                 <div className="flex items-center justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-warning/15 flex items-center justify-center">
+                    <div className="size-6 rounded-lg bg-warning/15 flex items-center justify-center">
                       <AlertTriangle
-                        className="w-3.5 h-3.5 text-warning"
+                        className="size-3.5 text-warning"
                         strokeWidth={2.5}
                       />
                     </div>
@@ -123,7 +123,7 @@ export function RaffleBlockersToast({
                     className="rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted"
                     aria-label="Dismiss blockers"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="size-3.5" />
                   </button>
                 </div>
 
@@ -133,8 +133,8 @@ export function RaffleBlockersToast({
                       key={blocker.id}
                       className="flex items-start gap-2 text-xs"
                     >
-                      <div className="flex items-center justify-center w-4 h-4 rounded-sm bg-warning/10 mt-0.5 shrink-0">
-                        <blocker.icon className="w-2.5 h-2.5 text-warning/80" />
+                      <div className="flex items-center justify-center size-4 rounded-sm bg-warning/10 mt-0.5 shrink-0">
+                        <blocker.icon className="size-2.5 text-warning/80" />
                       </div>
                       <span className="text-muted-foreground">
                         <span className="text-foreground/90 font-medium">

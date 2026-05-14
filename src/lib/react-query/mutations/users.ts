@@ -31,24 +31,14 @@ export const deleteUser = createServerFn({ method: 'POST' })
           await deleteSessionById(id)
         }
       }
-
-      // Redirect to home page
-      throw redirect({
-        to: '/',
-      })
     } catch (error) {
-      // Re-throw redirect errors
-      if (
-        error instanceof Response &&
-        error.status >= 300 &&
-        error.status < 400
-      ) {
-        throw error
-      }
-
       console.error('Error deleting user:', error)
       throw new Error('Failed to delete account. Please try again later.')
     }
+
+    throw redirect({
+      to: '/',
+    })
   })
 
 export const useDeleteUserMutation = () => {
