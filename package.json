@@ -11,8 +11,9 @@
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "pnpm generate:routes && tsc --noEmit",
     "check:ci": "prettier --check . && eslint",
+    "generate:routes": "tsx scripts/generate-route-tree.ts",
     "db:start": "docker-compose up -d",
     "db:stop": "docker-compose down",
     "db:reset": "docker-compose down -v && docker-compose up -d",
@@ -72,6 +73,7 @@
   },
   "devDependencies": {
     "@tanstack/eslint-config": "^0.3.0",
+    "@tanstack/router-generator": "1.166.7",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/canvas-confetti": "^1.9.0",
