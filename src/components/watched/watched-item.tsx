@@ -1,7 +1,7 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { Calendar, Clock, Users, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Avatar from '../ui/avatar'
 import { Button } from '../ui/button'
 import { ResponsiveDialog } from '../ui/responsive-dialog'

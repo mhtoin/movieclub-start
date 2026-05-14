@@ -73,21 +73,15 @@ interface SliderRootProps
 
 interface SliderTrackProps
   extends React.ComponentProps<typeof BaseSlider.Track>,
-    VariantProps<typeof sliderTrackVariants> {
-  ref?: React.Ref<HTMLSpanElement>
-}
+    VariantProps<typeof sliderTrackVariants> {}
 
 interface SliderIndicatorProps
   extends React.ComponentProps<typeof BaseSlider.Indicator>,
-    VariantProps<typeof sliderIndicatorVariants> {
-  ref?: React.Ref<HTMLSpanElement>
-}
+    VariantProps<typeof sliderIndicatorVariants> {}
 
 interface SliderThumbProps
   extends React.ComponentProps<typeof BaseSlider.Thumb>,
-    VariantProps<typeof sliderThumbVariants> {
-  ref?: React.Ref<HTMLSpanElement>
-}
+    VariantProps<typeof sliderThumbVariants> {}
 
 const SliderRoot = ({ ref, className, size, ...props }: SliderRootProps) => (
   <BaseSlider.Root

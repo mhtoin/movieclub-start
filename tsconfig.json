@@ -12,7 +12,6 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
-    "ignoreDeprecations": "6.0",
     "types": ["vite/client"],
     "allowJs": true,
     "checkJs": true,
@@ -30,7 +29,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

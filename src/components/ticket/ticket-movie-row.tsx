@@ -55,7 +55,7 @@ export function TicketMovieRow({
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          handleClick(e as unknown as React.MouseEvent<HTMLDivElement>)
+          handleRowClick(e as unknown as React.MouseEvent<HTMLDivElement>)
         }
       }}
     >

@@ -121,7 +121,7 @@ function readCsvFile(tableName: string): Array<Record<string, unknown>> | null {
     },
   })
 
-  return records
+  return records as Array<Record<string, unknown>>
 }
 
 function transformRow(
@@ -266,7 +266,6 @@ async function importTable(
     }),
   )
 
-  let insertedCount = 0
   for (let i = 0; i < results.length; i++) {
     if (results[i].status === 'fulfilled') {
       insertedCount++
@@ -350,7 +349,6 @@ async function importMovieCredits(sql: postgres.Sql): Promise<number> {
     }),
   )
 
-  let insertedCount = 0
   for (let i = 0; i < creditResults.length; i++) {
     if (creditResults[i].status === 'fulfilled') {
       insertedCount++

@@ -601,11 +601,11 @@ function StepOne({
                   size="sm"
                   onClick={() => {
                     if (active) {
-                      setSelectedGenres((prev) =>
-                        prev.filter((g) => g !== genre.value),
+                      setSelectedGenres(
+                        selectedGenres.filter((g) => g !== genre.value),
                       )
                     } else {
-                      setSelectedGenres((prev) => [...prev, genre.value])
+                      setSelectedGenres([...selectedGenres, genre.value])
                     }
                   }}
                   className={`rounded-full h-auto px-3.5 py-1.5 text-xs font-semibold tracking-wide ${

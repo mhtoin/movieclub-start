@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import {

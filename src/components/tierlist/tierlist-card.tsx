@@ -57,7 +57,7 @@ export function TierlistCard({
             <div className="shrink-0 w-[88px] p-3 flex items-center justify-center bg-muted/30">
               {posterPaths.length > 0 ? (
                 <div className="flex gap-0.5 h-[72px] w-full rounded overflow-hidden ring-1 ring-black/5">
-                  {posterPaths.map((path, idx) => {
+                  {posterPaths.map((path) => {
                     const posterUrl = getImageUrl(path, 'w92')
                     return (
                       <div key={path} className="flex-1 overflow-hidden">
