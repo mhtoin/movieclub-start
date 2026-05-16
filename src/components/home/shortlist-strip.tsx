@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import '@/styles/polaroid.css'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Clapperboard, Clock, Plus, Star, Ticket } from 'lucide-react'

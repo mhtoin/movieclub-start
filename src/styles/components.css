@@ -1,0 +1,67 @@
+@reference "../styles.css";
+
+@layer components {
+  .page-titlebar {
+    @apply flex flex-col gap-1 pb-4 mb-6 border-b border-border/60;
+  }
+
+  .page-titlebar__kicker {
+    @apply text-xs font-medium tracking-wider uppercase text-muted-foreground;
+  }
+
+  .page-titlebar__title {
+    @apply text-2xl md:text-3xl font-bold tracking-tight text-foreground;
+  }
+
+  .page-titlebar__description {
+    @apply text-sm md:text-base text-muted-foreground;
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(12, 1fr);
+
+    .title-section {
+      grid-column: 2 / 6;
+      grid-row: 4 / 6;
+    }
+
+    .overview-section {
+      grid-column: 9 / 12;
+      grid-row: 9 / 12;
+
+      .overview {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        font-size: 0.875rem;
+        border-radius: var(--radius);
+        background-color: var(--card);
+        opacity: 80%;
+        backdrop-filter: blur(8px);
+      }
+    }
+  }
+  .slide {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .parallax {
+    border-radius: 1.8rem;
+    height: 100%;
+    overflow: hidden;
+  }
+  .parallax__layer {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .parallax__img {
+    max-width: none;
+    flex: 0 0 calc(115% + (5px) * 2);
+    object-fit: cover;
+  }
+}

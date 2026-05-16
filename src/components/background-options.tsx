@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import '@/styles/projector.css'
 
 export function ProjectorBackground() {
   const [mounted, setMounted] = useState(false)

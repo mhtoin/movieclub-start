@@ -9,7 +9,11 @@ import {
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Home, Search } from 'lucide-react'
 import { Suspense, lazy } from 'react'
-import appCss from '../styles.css?url'
+import '@/styles.css'
+import '@/styles/themes.css'
+import '@/styles/utilities.css'
+import '@/styles/components.css'
+import '@/styles/ticket.css'
 import type { QueryClient } from '@tanstack/react-query'
 import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -104,12 +108,6 @@ export const Route = createRootRouteWithContext<{
       { rel: 'preconnect', href: 'https://api.themoviedb.org' },
       { rel: 'dns-prefetch', href: 'https://image.tmdb.org' },
       { rel: 'dns-prefetch', href: 'https://api.themoviedb.org' },
-      {
-        rel: 'preload',
-        href: `${appCss}?v=${__BUILD_TIMESTAMP__}`,
-        as: 'style',
-      },
-      { rel: 'stylesheet', href: `${appCss}?v=${__BUILD_TIMESTAMP__}` },
     ],
   }),
   shellComponent: RootDocument,

@@ -1,3 +1,4 @@
+import '@/styles/lobby-wall.css'
 import { Link } from '@tanstack/react-router'
 import { LazyMotion, domAnimation, m, useReducedMotion } from 'framer-motion'
 import { ChevronRight, Layers } from 'lucide-react'

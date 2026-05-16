@@ -1,0 +1,106 @@
+.ticket-card {
+  -webkit-mask-image:
+    radial-gradient(
+      circle at 0px 50%,
+      transparent calc(var(--ticket-notch-size) / 2),
+      black calc(var(--ticket-notch-size) / 2)
+    ),
+    radial-gradient(
+      circle at 100% 50%,
+      transparent calc(var(--ticket-notch-size) / 2),
+      black calc(var(--ticket-notch-size) / 2)
+    );
+  mask-image:
+    radial-gradient(
+      circle at 0px 50%,
+      transparent calc(var(--ticket-notch-size) / 2),
+      black calc(var(--ticket-notch-size) / 2)
+    ),
+    radial-gradient(
+      circle at 100% 50%,
+      transparent calc(var(--ticket-notch-size) / 2),
+      black calc(var(--ticket-notch-size) / 2)
+    );
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+@keyframes ticket-punch {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ticket-lift {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+  100% {
+    transform: translateY(-4px) rotate(-0.25deg);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@keyframes ticket-print {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scaleY(0.97);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scaleY(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@keyframes stamp-wiggle {
+  0% {
+    transform: rotate(0deg) scale(1.5);
+    opacity: 0;
+  }
+  50% {
+    transform: rotate(-15deg) scale(1.2);
+    opacity: 0.8;
+  }
+  70% {
+    transform: rotate(10deg) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-5deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-ticket-print {
+  animation: ticket-print 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-ticket-lift {
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s ease;
+}
+
+.animate-ticket-lift:hover {
+  transform: translateY(-4px) rotate(-0.25deg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.animate-ticket-punch:active {
+  animation: ticket-punch 0.15s ease-out;
+}
+
+.animate-stamp {
+  animation: stamp-wiggle 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
