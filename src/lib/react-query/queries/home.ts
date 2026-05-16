@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
+import { setResponseHeaders } from '@tanstack/react-start/server'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { movie, moviesOnTiers, tier, tierlist } from '@/db/schema'
 import { db } from '@/db/db'
@@ -51,6 +52,12 @@ export const getTrendingMovies = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<Array<TMDBMovie>> => {
     if (!context.user) throw new Error('Unauthorized')
+
+    setResponseHeaders(
+      new Headers({
+        'Cache-Control': 'private, max-age=300',
+      }),
+    )
 
     if (!TMDB_CONFIG.API_KEY) {
       console.error('TMDB API key is not configured')
@@ -283,20 +290,20 @@ export const getRecommendationsForSeed = createServerFn({ method: 'GET' })
     return results
   })
 
-const ONE_WEEK = 1000 * 60 * 60 * 24 * 7
+const THIRTY_MINUTES = 1000 * 60 * 30
 
 export const homeQueries = {
   trending: () =>
     queryOptions({
       queryKey: ['home', 'trending'],
       queryFn: getTrendingMovies,
-      staleTime: ONE_WEEK,
+      staleTime: THIRTY_MINUTES,
     }),
   seeds: (userId: string) =>
     queryOptions({
       queryKey: ['home', 'recommendation-seeds', userId],
       queryFn: () => getRecommendationSeeds({ data: userId }),
-      staleTime: ONE_WEEK,
+      staleTime: THIRTY_MINUTES,
       enabled: !!userId,
     }),
   forSeed: (seed: RecommendationSeed, excludeTmdbIds: Array<number>) =>
@@ -316,7 +323,7 @@ export const homeQueries = {
             excludeTmdbIds,
           },
         }),
-      staleTime: ONE_WEEK,
+      staleTime: THIRTY_MINUTES,
       enabled: seed.tmdbId > 0,
     }),
 }

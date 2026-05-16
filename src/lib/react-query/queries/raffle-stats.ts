@@ -104,10 +104,13 @@ export const getRaffleStats = createServerFn({ method: 'POST' })
     }
   })
 
+const THIRTY_MINUTES = 1000 * 60 * 30
+
 export const raffleStatsQueries = {
   stats: () =>
     queryOptions({
       queryKey: ['raffle', 'stats'],
       queryFn: getRaffleStats,
+      staleTime: THIRTY_MINUTES,
     }),
 }

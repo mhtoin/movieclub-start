@@ -269,6 +269,8 @@ export const getSingleTierlist = createServerFn({ method: 'GET' })
     }
   })
 
+const TIERLISTS_USER_CAP = 50
+
 export const getTierlists = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
@@ -276,6 +278,7 @@ export const getTierlists = createServerFn({ method: 'GET' })
 
     try {
       const users = await (db as any).query.user.findMany({
+        limit: TIERLISTS_USER_CAP,
         with: {
           tierlists: {
             with: {
@@ -507,31 +510,38 @@ export const getUserTierlistsSummary = createServerFn({ method: 'GET' })
     }
   })
 
+const THIRTY_MINUTES = 1000 * 60 * 30
+
 export const tierlistQueries = {
   all: () =>
     queryOptions({
       queryKey: ['tierlists', 'all'],
       queryFn: getTierlists,
+      staleTime: THIRTY_MINUTES,
     }),
   index: () =>
     queryOptions<Array<UserTierlistSummary>>({
       queryKey: ['tierlists', 'index'],
       queryFn: getTierlistIndex,
+      staleTime: THIRTY_MINUTES,
     }),
   user: (userId: string) =>
     queryOptions<Array<TierlistWithDetails>>({
       queryKey: ['tierlists', 'user', userId],
       queryFn: () => getUserTierlists({ data: userId }),
+      staleTime: THIRTY_MINUTES,
     }),
   single: (tierlistId: string) =>
     queryOptions<TierlistWithDetails | null>({
       queryKey: ['tierlists', 'single', tierlistId],
       queryFn: () => getSingleTierlist({ data: tierlistId }),
+      staleTime: THIRTY_MINUTES,
     }),
   userSummary: (userId: string) =>
     queryOptions<Array<TierlistPreview>>({
       queryKey: ['tierlists', 'user', userId, 'summary'],
       queryFn: () => getUserTierlistsSummary({ data: userId }),
+      staleTime: THIRTY_MINUTES,
     }),
 }
 

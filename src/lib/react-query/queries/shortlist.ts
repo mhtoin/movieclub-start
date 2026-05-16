@@ -86,6 +86,8 @@ export const getAllShortlists = createServerFn({ method: 'POST' })
     }
   })
 
+const THIRTY_MINUTES = 1000 * 60 * 30
+
 export const shortlistQueries = {
   byUser: (userId: string) =>
     queryOptions({
@@ -95,7 +97,7 @@ export const shortlistQueries = {
         return result
       },
       enabled: !!userId,
-      staleTime: 1000 * 60 * 5,
+      staleTime: THIRTY_MINUTES,
     }),
   all: () =>
     queryOptions({
@@ -104,6 +106,6 @@ export const shortlistQueries = {
         const result = await getAllShortlists()
         return result
       },
-      staleTime: 1000 * 60 * 5,
+      staleTime: THIRTY_MINUTES,
     }),
 }

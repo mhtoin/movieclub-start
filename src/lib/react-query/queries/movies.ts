@@ -136,6 +136,8 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
     )
   })
 
+const WATCHED_MOVIES_CAP = 200
+
 export const getAllWatchedMovies = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
@@ -146,7 +148,10 @@ export const getAllWatchedMovies = createServerFn({ method: 'GET' })
       .from(movie)
       .where(isNotNull(movie.watchDate))
       .orderBy(desc(movie.watchDate))
+      .limit(WATCHED_MOVIES_CAP)
   })
+
+const THIRTY_MINUTES = 1000 * 60 * 30
 
 export const movieQueries = {
   all: () => ['movies'],
@@ -154,7 +159,7 @@ export const movieQueries = {
     queryOptions({
       queryKey: [...movieQueries.all(), 'latest'],
       queryFn: getLatestMovies,
-      staleTime: 1000 * 60 * 5,
+      staleTime: THIRTY_MINUTES,
     }),
   watched: (
     search?: string,
@@ -177,16 +182,19 @@ export const movieQueries = {
         })
         return result
       },
+      staleTime: THIRTY_MINUTES,
     }),
   months: () =>
     queryOptions({
       queryKey: [...movieQueries.all(), 'months'],
       queryFn: getDistinctWatchedMonths,
+      staleTime: THIRTY_MINUTES,
     }),
   allWatched: () =>
     queryOptions({
       queryKey: [...movieQueries.all(), 'allWatched'],
       queryFn: getAllWatchedMovies,
+      staleTime: THIRTY_MINUTES,
     }),
 
   /* For now, we use simple query instead of infinite query

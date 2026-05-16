@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * Maps each Postgres table name to the React Query key prefixes that should
@@ -45,6 +45,8 @@ const TABLE_TO_QUERY_KEYS: Record<
   ],
 }
 
+export type SSEConnectionStatus = 'connecting' | 'open' | 'error' | 'closed'
+
 /**
  * Opens a single SSE connection to /api/sse for the lifetime of the
  * authenticated layout. On every NOTIFY from Postgres parse the
@@ -53,33 +55,77 @@ const TABLE_TO_QUERY_KEYS: Record<
  *
  * Uses `refetchActive: true` so only queries currently rendered on screen
  * are refetched – queries for routes the user isn't viewing are skipped.
+ *
+ * Returns the current connection status so UI can surface disconnections.
  */
 export function useSSEInvalidation() {
   const queryClient = useQueryClient()
+  const [status, setStatus] = useState<SSEConnectionStatus>('connecting')
+  const reconnectAttempts = useRef(0)
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    const es = new EventSource('/api/sse')
+    let es: EventSource | null = null
+    let isCancelled = false
 
-    es.onmessage = (event: MessageEvent<string>) => {
-      try {
-        const { table } = JSON.parse(event.data) as {
-          table: string
-          op: string
-        }
-        const keys = TABLE_TO_QUERY_KEYS[table]
-        for (const queryKey of keys) {
-          queryClient.invalidateQueries({
-            queryKey: queryKey as Array<string>,
-            refetchType: 'active',
-          })
-        }
-      } catch {}
+    const connect = () => {
+      if (isCancelled) return
+
+      setStatus('connecting')
+      es = new EventSource('/api/sse')
+
+      es.onopen = () => {
+        if (isCancelled) return
+        reconnectAttempts.current = 0
+        setStatus('open')
+      }
+
+      es.onmessage = (event: MessageEvent<string>) => {
+        try {
+          const { table } = JSON.parse(event.data) as {
+            table: string
+            op: string
+          }
+          const keys = TABLE_TO_QUERY_KEYS[table]
+          for (const queryKey of keys) {
+            queryClient.invalidateQueries({
+              queryKey: queryKey as Array<string>,
+              refetchType: 'active',
+            })
+          }
+        } catch {}
+      }
+
+      es.onerror = () => {
+        if (isCancelled) return
+        setStatus('error')
+        es?.close()
+        es = null
+
+        // Exponential backoff with jitter, capped at 30s
+        const delay = Math.min(
+          1000 * 2 ** reconnectAttempts.current + Math.random() * 1000,
+          30000,
+        )
+        reconnectAttempts.current++
+
+        reconnectTimer.current = setTimeout(() => {
+          if (!isCancelled) connect()
+        }, delay)
+      }
     }
 
-    es.onerror = () => {}
+    connect()
 
     return () => {
-      es.close()
+      isCancelled = true
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current)
+        reconnectTimer.current = null
+      }
+      es?.close()
     }
   }, [queryClient])
+
+  return status
 }

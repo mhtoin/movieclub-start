@@ -46,6 +46,8 @@ export const getParticipatingShortlists = createServerFn({ method: 'POST' })
     }
   })
 
+const THIRTY_MINUTES = 1000 * 60 * 30
+
 export const raffleQueries = {
   participating: () =>
     queryOptions({
@@ -54,6 +56,7 @@ export const raffleQueries = {
         const result = await getParticipatingShortlists()
         return result
       },
+      staleTime: THIRTY_MINUTES,
     }),
   history: () =>
     queryOptions({
@@ -62,6 +65,7 @@ export const raffleQueries = {
         const result = await getRaffleHistory()
         return result
       },
+      staleTime: THIRTY_MINUTES,
     }),
 }
 

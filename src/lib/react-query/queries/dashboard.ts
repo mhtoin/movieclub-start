@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
+import { setResponseHeaders } from '@tanstack/react-start/server'
 import { and, desc, eq, gte, inArray, isNotNull, lte, sql } from 'drizzle-orm'
 import { db } from '@/db/db'
 import { movie, movieCredits } from '@/db/schema/movies'
@@ -202,6 +203,12 @@ export const getDashboardStats = createServerFn({ method: 'GET' })
     if (!context.user || context.user.userId !== data.userId)
       throw new Error('Forbidden')
 
+    setResponseHeaders(
+      new Headers({
+        'Cache-Control': 'private, max-age=30',
+      }),
+    )
+
     try {
       const allMovies = await getWatchedMoviesForDashboard()
       const userMovies = data.userId
@@ -279,6 +286,12 @@ export const getDashboardInsights = createServerFn({ method: 'POST' })
     } else {
       if (!context.user) throw new Error('Unauthorized')
     }
+
+    setResponseHeaders(
+      new Headers({
+        'Cache-Control': 'private, max-age=30',
+      }),
+    )
 
     try {
       const watchedMovies = await getWatchedMoviesForDashboard(data.userId)
@@ -679,6 +692,8 @@ export const getMoviesByUser = createServerFn({ method: 'POST' })
     },
   )
 
+const THIRTY_MINUTES = 1000 * 60 * 30
+
 export const dashboardQueries = {
   all: () => ['dashboard'],
   stats: (userId: string) =>
@@ -688,16 +703,19 @@ export const dashboardQueries = {
         const result = await getDashboardStats({ data: { userId } })
         return result
       },
+      staleTime: THIRTY_MINUTES,
     }),
   insights: (userId?: string) =>
     queryOptions({
       queryKey: [...dashboardQueries.all(), 'insights', userId ?? 'all'],
       queryFn: () => getDashboardInsights({ data: { userId } }),
+      staleTime: THIRTY_MINUTES,
     }),
   nextMovie: () =>
     queryOptions({
       queryKey: [...dashboardQueries.all(), 'nextMovie'],
       queryFn: getNextMovieToWatch,
+      staleTime: THIRTY_MINUTES,
     }),
   moviesByUser: (
     scope: 'everyone' | 'mine',
@@ -713,5 +731,6 @@ export const dashboardQueries = {
         preset,
       ],
       queryFn: () => getMoviesByUser({ data: { scope, userId, preset } }),
+      staleTime: THIRTY_MINUTES,
     }),
 }

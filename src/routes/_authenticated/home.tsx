@@ -10,19 +10,19 @@ export const Route = createFileRoute('/_authenticated/home')({
   loader: async ({ context }) => {
     const userId = context.user.userId
 
-    const baseQueries = [
-      context.queryClient.ensureQueryData(movieQueries.latest()),
-      context.queryClient.ensureQueryData(shortlistQueries.all()),
-      context.queryClient.ensureQueryData(movieQueries.allWatched()),
-    ]
-
-    await Promise.all(baseQueries)
+    // Only block on the query needed for the above-the-fold hero.
+    // Everything else can stream in via prefetchQuery.
+    await context.queryClient.ensureQueryData(movieQueries.latest())
 
     if (userId) {
-      await Promise.all([
-        context.queryClient.ensureQueryData(shortlistQueries.byUser(userId)),
-        context.queryClient.ensureQueryData(dashboardQueries.stats(userId)),
-      ])
+      await context.queryClient.ensureQueryData(shortlistQueries.byUser(userId))
+    }
+
+    // Fire-and-forget secondary data so the page can start rendering sooner.
+    context.queryClient.prefetchQuery(shortlistQueries.all())
+    context.queryClient.prefetchQuery(movieQueries.allWatched())
+    if (userId) {
+      context.queryClient.prefetchQuery(dashboardQueries.stats(userId))
     }
   },
   component: Home,
