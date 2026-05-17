@@ -1,4 +1,4 @@
-import { Dices, Users } from 'lucide-react'
+import { CheckCheck, Dices, Loader, Users } from 'lucide-react'
 import { useMemo } from 'react'
 import { RaffleBlockersToast } from '@/components/raffle/raffle-blockers-toast'
 import { Button } from '@/components/ui/button'
@@ -11,10 +11,13 @@ interface Props {
   dryRun: boolean
   onDryRunChange: (val: boolean) => void
   onStartRaffle: () => void
+  onSetAllReady?: () => void
   canStart: boolean
   readyCount: number
   totalCount: number
-  pendingSelectionsCount?: number
+  hasUnreadyParticipants?: boolean
+  isSettingAllReady?: boolean
+  pendingUsers?: Array<{ name: string }>
 }
 
 export function RaffleControlBar({
@@ -23,10 +26,13 @@ export function RaffleControlBar({
   dryRun,
   onDryRunChange,
   onStartRaffle,
+  onSetAllReady,
   canStart,
   readyCount,
   totalCount,
-  pendingSelectionsCount = 0,
+  hasUnreadyParticipants = false,
+  isSettingAllReady = false,
+  pendingUsers = [],
 }: Props) {
   const today = useMemo(() => new Date(), [])
 
@@ -40,7 +46,7 @@ export function RaffleControlBar({
               watchDate={watchDate}
               readyCount={readyCount}
               totalCount={totalCount}
-              pendingSelectionsCount={pendingSelectionsCount}
+              pendingUsers={pendingUsers}
             />
 
             <div className="inline-flex items-center gap-3 bg-card/95 backdrop-blur-md border border-border rounded-full px-5 py-3 shadow-2xl pointer-events-auto">
@@ -66,6 +72,26 @@ export function RaffleControlBar({
                 <span>ready</span>
               </div>
 
+              {hasUnreadyParticipants && (
+                <>
+                  <div className="w-px h-6 bg-border" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full gap-2 px-4"
+                    onClick={onSetAllReady}
+                    disabled={isSettingAllReady}
+                  >
+                    {isSettingAllReady ? (
+                      <Loader className="size-3.5 animate-spin" />
+                    ) : (
+                      <CheckCheck className="size-3.5" />
+                    )}
+                    <span className="font-medium text-xs">Mark all ready</span>
+                  </Button>
+                </>
+              )}
+
               <div className="w-px h-6 bg-border" />
 
               <Button
@@ -79,20 +105,23 @@ export function RaffleControlBar({
                 <span className="font-medium">Start Raffle</span>
               </Button>
 
-              <div className="w-px h-6 bg-border" />
-
-              <label
-                htmlFor="raffle-dry-run-desktop"
-                className="flex items-center gap-2 cursor-pointer select-none"
-              >
-                <Switch
-                  id="raffle-dry-run-desktop"
-                  checked={dryRun}
-                  onCheckedChange={onDryRunChange}
-                  size="sm"
-                />
-                <span className="text-xs text-muted-foreground">Test</span>
-              </label>
+              {import.meta.env.DEV && (
+                <>
+                  <div className="w-px h-6 bg-border" />
+                  <label
+                    htmlFor="raffle-dry-run-desktop"
+                    className="flex items-center gap-2 cursor-pointer select-none"
+                  >
+                    <Switch
+                      id="raffle-dry-run-desktop"
+                      checked={dryRun}
+                      onCheckedChange={onDryRunChange}
+                      size="sm"
+                    />
+                    <span className="text-xs text-muted-foreground">Test</span>
+                  </label>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -118,18 +147,37 @@ export function RaffleControlBar({
 
           <div className="flex-1" />
 
-          <label
-            htmlFor="raffle-dry-run-mobile"
-            className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0"
-          >
-            <Switch
-              id="raffle-dry-run-mobile"
-              checked={dryRun}
-              onCheckedChange={onDryRunChange}
+          {hasUnreadyParticipants && (
+            <Button
+              variant="outline"
               size="sm"
-            />
-            <span className="text-[10px] text-muted-foreground">Test</span>
-          </label>
+              className="rounded-full gap-1 px-2.5 py-1.5 text-[10px] flex-shrink-0"
+              onClick={onSetAllReady}
+              disabled={isSettingAllReady}
+            >
+              {isSettingAllReady ? (
+                <Loader className="size-3 animate-spin" />
+              ) : (
+                <CheckCheck className="size-3" />
+              )}
+              <span className="font-medium">Ready</span>
+            </Button>
+          )}
+
+          {import.meta.env.DEV && (
+            <label
+              htmlFor="raffle-dry-run-mobile"
+              className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0"
+            >
+              <Switch
+                id="raffle-dry-run-mobile"
+                checked={dryRun}
+                onCheckedChange={onDryRunChange}
+                size="sm"
+              />
+              <span className="text-[10px] text-muted-foreground">Test</span>
+            </label>
+          )}
 
           <Button
             variant="primary"

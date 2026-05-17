@@ -916,3 +916,90 @@ export const useUpdateUserSelectedIndexMutation = () => {
     },
   })
 }
+
+export const setAllParticipatingReady = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
+  .inputValidator((data: Record<string, never>) => data)
+  .handler(async ({ context }) => {
+    const sessionUser = context.user
+    if (!sessionUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const targetShortlists = await db
+      .select()
+      .from(shortlist)
+      .where(
+        and(eq(shortlist.participating, true), eq(shortlist.isReady, false)),
+      )
+
+    if (targetShortlists.length === 0) {
+      return { updated: 0 }
+    }
+
+    const ids = targetShortlists.map((s) => s.id)
+    await db
+      .update(shortlist)
+      .set({ isReady: true })
+      .where(
+        and(eq(shortlist.participating, true), eq(shortlist.isReady, false)),
+      )
+
+    return { updated: ids.length }
+  })
+
+export const useSetAllReadyMutation = () => {
+  const queryClient = useQueryClient()
+  const toastManager = Toast.useToastManager()
+  return useMutation({
+    mutationFn: async () => {
+      const response = await setAllParticipatingReady({ data: {} })
+      return response
+    },
+    onMutate: () => {
+      const previousAllShortlists = queryClient.getQueryData<
+        Array<ShortlistWithUserMovies>
+      >(['shortlists', 'all'])
+
+      if (previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          (old: Array<ShortlistWithUserMovies> | undefined) => {
+            if (!old) return old
+            return old.map((s) =>
+              s.participating && !s.isReady ? { ...s, isReady: true } : s,
+            )
+          },
+        )
+      }
+
+      return { previousAllShortlists }
+    },
+    onError: (_error, _vars, context) => {
+      if (context?.previousAllShortlists) {
+        queryClient.setQueryData(
+          ['shortlists', 'all'],
+          context.previousAllShortlists,
+        )
+      }
+      toastManager.add({
+        title: 'Error',
+        description: 'Failed to mark all as ready',
+        type: 'error',
+      })
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
+      queryClient.invalidateQueries({ queryKey: ['shortlist'] })
+    },
+    onSuccess: (result) => {
+      if (result.updated > 0) {
+        toastManager.add({
+          title: 'Success',
+          description: `${result.updated} participant(s) marked as ready`,
+          type: 'success',
+        })
+      }
+    },
+  })
+}

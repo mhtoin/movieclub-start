@@ -14,7 +14,7 @@ interface Props {
   watchDate: Date | undefined
   readyCount: number
   totalCount: number
-  pendingSelectionsCount: number
+  pendingUsers: Array<{ name: string }>
 }
 
 interface Blocker {
@@ -28,7 +28,7 @@ export function RaffleBlockersToast({
   watchDate,
   readyCount,
   totalCount,
-  pendingSelectionsCount,
+  pendingUsers,
 }: Props) {
   const blockers = useMemo(() => {
     const result: Array<Blocker> = []
@@ -61,17 +61,23 @@ export function RaffleBlockersToast({
       })
     }
 
-    if (pendingSelectionsCount > 0) {
+    if (pendingUsers.length > 0) {
+      const names = pendingUsers.map((u) => u.name)
+      const description =
+        names.length === 1
+          ? `${names[0]} must pick a film`
+          : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]} must pick a film`
+
       result.push({
         id: 'selection',
         icon: FilmIcon,
         title: 'Selection pending',
-        description: 'Someone must pick a film',
+        description,
       })
     }
 
     return result
-  }, [watchDate, totalCount, readyCount, pendingSelectionsCount])
+  }, [watchDate, totalCount, readyCount, pendingUsers])
 
   const blockersSignature = useMemo(
     () => blockers.map((blocker) => blocker.id).join('|'),

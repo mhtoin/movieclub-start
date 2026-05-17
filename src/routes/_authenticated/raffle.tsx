@@ -16,6 +16,7 @@ import {
   useStartRaffleMutation,
 } from '@/lib/react-query/mutations/raffle'
 import {
+  useSetAllReadyMutation,
   useUpdateUserSelectedIndexMutation,
   useUpdateUserShortlistStatusMutation,
 } from '@/lib/react-query/mutations/shortlist'
@@ -63,6 +64,7 @@ function RaffleSetup() {
   const finalizeMutation = useFinalizeRaffleMutation()
   const updateStatusMutation = useUpdateUserShortlistStatusMutation()
   const updateSelectedIndexMutation = useUpdateUserSelectedIndexMutation()
+  const setAllReadyMutation = useSetAllReadyMutation()
 
   const pendingDraw = useRef<Promise<{
     movie: Movie
@@ -91,6 +93,11 @@ function RaffleSetup() {
   const readyCount = useMemo(
     () => shortlists.filter((s) => s.isReady && s.participating).length,
     [shortlists],
+  )
+
+  const hasUnreadyParticipants = useMemo(
+    () => readyCount < participating.length && participating.length > 0,
+    [readyCount, participating.length],
   )
 
   const pendingSelections = useMemo(
@@ -141,19 +148,17 @@ function RaffleSetup() {
   }
 
   const handleSpinComplete = () => {
-    setPhase('winner')
-  }
-
-  const handleFinalize = async () => {
-    if (!winningMovie || !winningUserId) return
-    if (!dryRun) {
-      if (!watchDate) return
-      await finalizeMutation.mutateAsync({
+    if (!dryRun && winningMovie && winningUserId && watchDate) {
+      finalizeMutation.mutateAsync({
         movieId: winningMovie.id,
         watchDate,
         userId: winningUserId,
       })
     }
+    setPhase('winner')
+  }
+
+  const handleFinalize = () => {
     setPhase('setup')
     setWinningMovie(null)
     setWinningUserId(null)
@@ -169,6 +174,10 @@ function RaffleSetup() {
 
   const handleSelectMovie = (userId: string, index: number) => {
     updateSelectedIndexMutation.mutate({ userId, selectedIndex: index })
+  }
+
+  const handleSetAllReady = () => {
+    setAllReadyMutation.mutate()
   }
 
   return (
@@ -212,10 +221,13 @@ function RaffleSetup() {
             dryRun={dryRun}
             onDryRunChange={setDryRun}
             onStartRaffle={handleStartRaffle}
+            onSetAllReady={handleSetAllReady}
             canStart={canStart}
             readyCount={readyCount}
             totalCount={participating.length}
-            pendingSelectionsCount={pendingSelections.length}
+            hasUnreadyParticipants={hasUnreadyParticipants}
+            isSettingAllReady={setAllReadyMutation.isPending}
+            pendingUsers={pendingSelections.map((s) => ({ name: s.user.name }))}
           />
         </>
       )}
@@ -246,7 +258,7 @@ function RaffleSetup() {
             dryRun={dryRun}
             onFinalize={handleFinalize}
             onRerun={handleRerun}
-            isLoading={finalizeMutation.isPending}
+            isLoading={finalizeMutation.isPending && !dryRun}
           />
         )}
       </AnimatePresence>
