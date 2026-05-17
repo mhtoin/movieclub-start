@@ -30,7 +30,7 @@ interface Props {
   winnerUser: WinnerUser | null
   watchDate: Date | undefined
   dryRun: boolean
-  onFinalize: () => Promise<void>
+  onFinalize: () => void
   onRerun: () => void
   isLoading: boolean
 }
@@ -560,7 +560,7 @@ export function RaffleWinner({
                   disabled={isLoading || (!dryRun && !watchDate)}
                 >
                   <Ticket className="size-3.5" />
-                  {dryRun ? 'Done (dry run)' : 'Confirm & Finalize'}
+                  {dryRun ? 'Done (dry run)' : 'Done'}
                 </Button>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, ne } from 'drizzle-orm'
 import { authMiddleware } from '@/middleware/auth'
 import {
   movie,
@@ -104,12 +104,29 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
             .set({ watchDate: new Date(watchDate), userId: userId })
             .where(eq(movie.id, movieId)),
           tx.delete(movieToShortlist).where(eq(movieToShortlist.a, movieId)),
+          tx
+            .update(shortlist)
+            .set({ isReady: false })
+            .where(eq(shortlist.participating, true)),
+          tx
+            .update(shortlist)
+            .set({ requiresSelection: true, selectedIndex: null })
+            .where(
+              and(
+                eq(shortlist.userId, userId),
+                eq(shortlist.participating, true),
+              ),
+            ),
+          tx
+            .update(shortlist)
+            .set({ requiresSelection: false, selectedIndex: null })
+            .where(
+              and(
+                ne(shortlist.userId, userId),
+                eq(shortlist.participating, true),
+              ),
+            ),
         ])
-
-        await tx
-          .update(shortlist)
-          .set({ isReady: false })
-          .where(eq(shortlist.participating, true))
       })
 
       return { success: true }
