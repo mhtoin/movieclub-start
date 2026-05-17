@@ -1,8 +1,10 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useReducedMotion } from 'framer-motion'
 import { ArrowRight, Calendar, Film, Ticket } from 'lucide-react'
 import type { Movie } from '@/db/schema/movies'
+import { movieQueries } from '@/lib/react-query/queries/movies'
 
 interface HistoryStripProps {
   movies: Array<Movie>
@@ -18,7 +20,7 @@ export const HistoryStrip = memo(function HistoryStrip({
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="h-px w-8 bg-primary" />
-          <Film className="h-4 w-4 text-primary flex-shrink-0" />
+          <Film className="size-4 text-primary flex-shrink-0" />
           <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
             Recently Watched
           </span>
@@ -28,13 +30,13 @@ export const HistoryStrip = memo(function HistoryStrip({
           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
         >
           View all
-          <ArrowRight className="h-3 w-3" />
+          <ArrowRight className="size-3" />
         </Link>
       </div>
 
       {movies.length === 0 ? (
         <div className="flex items-center justify-center gap-4 py-14 px-6 rounded-2xl border-2 border-dashed border-border/30 bg-muted/10">
-          <Ticket className="h-6 w-6 text-muted-foreground/30" />
+          <Ticket className="size-6 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground font-medium">
             No movies watched yet. Run your first raffle to get started.
           </p>
@@ -65,6 +67,7 @@ export const HistoryStrip = memo(function HistoryStrip({
               return (
                 <div
                   key={movie.id}
+                  suppressHydrationWarning
                   className="snap-start flex-shrink-0 relative"
                   style={{
                     width: 'clamp(7rem, 18vw, 10rem)',
@@ -90,14 +93,14 @@ export const HistoryStrip = memo(function HistoryStrip({
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
-                            <Ticket className="h-8 w-8 text-muted-foreground/25" />
+                            <Ticket className="size-8 text-muted-foreground/25" />
                           </div>
                         )}
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2.5">
                         {watchDate && (
                           <span className="text-[10px] font-medium text-white/90 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
+                            <Calendar className="size-3" />
                             {watchDate}
                           </span>
                         )}
@@ -109,7 +112,10 @@ export const HistoryStrip = memo(function HistoryStrip({
                         {movie.title}
                       </p>
                       {movie.releaseDate && (
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                        <p
+                          suppressHydrationWarning
+                          className="text-[10px] text-muted-foreground mt-0.5"
+                        >
                           {new Date(movie.releaseDate).getFullYear()}
                         </p>
                       )}
@@ -124,3 +130,35 @@ export const HistoryStrip = memo(function HistoryStrip({
     </div>
   )
 })
+
+export function HistoryStripSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="h-px w-8 animate-pulse rounded bg-muted" />
+          <div className="h-5 w-36 animate-pulse rounded bg-muted" />
+        </div>
+        <div className="h-4 w-16 animate-pulse rounded bg-muted" />
+      </div>
+      <div className="flex gap-5 md:gap-7 overflow-hidden pb-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex-shrink-0 space-y-2"
+            style={{ width: 'clamp(7rem, 18vw, 10rem)' }}
+          >
+            <div className="aspect-[2/3] rounded-lg animate-pulse bg-muted" />
+            <div className="h-3 w-20 mx-auto animate-pulse rounded bg-muted" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function HistoryStripSuspense() {
+  const { data: allWatched = [] } = useSuspenseQuery(movieQueries.allWatched())
+  const recentWatches = useMemo(() => allWatched.slice(0, 6), [allWatched])
+  return <HistoryStrip movies={recentWatches} />
+}

@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef } from 'react'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { motion, useInView, useReducedMotion } from 'framer-motion'
+import { m, useInView, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
   Clock,
@@ -13,6 +14,8 @@ import {
 } from 'lucide-react'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import type { DashboardStats } from '@/lib/react-query/queries/dashboard'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
+import { dashboardQueries } from '@/lib/react-query/queries/dashboard'
 import Avatar from '@/components/ui/avatar'
 
 interface ClubSnapshotProps {
@@ -98,7 +101,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
       <div className="lg:col-span-6 xl:col-span-7">
         <div className="flex items-center gap-3 mb-8">
           <div className="h-px w-8 bg-primary" />
-          <Ticket className="h-4 w-4 text-primary flex-shrink-0" />
+          <Ticket className="size-4 text-primary flex-shrink-0" />
           <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
             The Club
           </span>
@@ -107,8 +110,8 @@ export const ClubSnapshot = memo(function ClubSnapshot({
 
         {otherShortlists.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 rounded-2xl border-2 border-dashed border-border/30 bg-muted/10">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-              <Users className="h-7 w-7 text-muted-foreground/30" />
+            <div className="flex size-16 items-center justify-center rounded-full bg-muted">
+              <Users className="size-7 text-muted-foreground/30" />
             </div>
             <p className="text-sm text-muted-foreground font-medium">
               No other members have shortlists yet.
@@ -117,7 +120,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
         ) : (
           <div className="space-y-6">
             {otherShortlists.slice(0, 4).map((shortlist, index) => (
-              <motion.div
+              <m.div
                 key={shortlist.id}
                 initial={
                   shouldReduceMotion ? false : { opacity: 0, x: -24, rotate: 0 }
@@ -134,7 +137,6 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                 }}
                 className="transition-all duration-300 hover:-translate-y-1.5"
                 style={{
-                  // Using box-shadow instead of drop-shadow for better compositing performance
                   boxShadow:
                     '0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.03)',
                 }}
@@ -202,7 +204,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">
-                              <Ticket className="h-5 w-5 text-muted-foreground/30" />
+                              <Ticket className="size-5 text-muted-foreground/30" />
                             </div>
                           )}
                         </div>
@@ -219,11 +221,11 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
 
             {otherShortlists.length > 4 && (
-              <motion.div
+              <m.div
                 initial={shouldReduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
@@ -233,9 +235,9 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                   className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors pl-2"
                 >
                   View all {otherShortlists.length} members
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </Link>
-              </motion.div>
+              </m.div>
             )}
           </div>
         )}
@@ -255,13 +257,13 @@ export const ClubSnapshot = memo(function ClubSnapshot({
             hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10"
           >
             <div className="flex items-center justify-center w-20 flex-shrink-0 bg-primary/15 transition-all duration-300 group-hover:bg-primary/25">
-              <motion.div
+              <m.div
                 className="text-primary"
                 whileHover={shouldReduceMotion ? undefined : { rotate: 25 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 12 }}
               >
-                <Dices className="h-7 w-7" />
-              </motion.div>
+                <Dices className="size-7" />
+              </m.div>
             </div>
             <div className="flex-1 flex items-center justify-between p-5 min-w-0">
               <div>
@@ -272,7 +274,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                   {readyCount} of {allShortlists.length} members ready
                 </p>
               </div>
-              <ArrowRight className="h-5 w-5 text-primary transition-all group-hover:translate-x-1 flex-shrink-0 ml-3" />
+              <ArrowRight className="size-5 text-primary transition-all group-hover:translate-x-1 flex-shrink-0 ml-3" />
             </div>
           </Link>
 
@@ -282,13 +284,13 @@ export const ClubSnapshot = memo(function ClubSnapshot({
             hover:border-border/40 hover:bg-card/60"
           >
             <div className="flex items-center justify-center w-16 flex-shrink-0 bg-muted/50 transition-all duration-300 group-hover:bg-muted">
-              <motion.div
+              <m.div
                 className="text-muted-foreground"
                 whileHover={shouldReduceMotion ? undefined : { rotate: -15 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 12 }}
               >
-                <Trophy className="h-5 w-5" />
-              </motion.div>
+                <Trophy className="size-5" />
+              </m.div>
             </div>
             <div className="flex-1 flex items-center justify-between p-4 min-w-0">
               <div>
@@ -299,7 +301,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                   Update your tierlists
                 </p>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-all group-hover:translate-x-1 group-hover:text-muted-foreground flex-shrink-0 ml-3" />
+              <ArrowRight className="size-4 text-muted-foreground/50 transition-all group-hover:translate-x-1 group-hover:text-muted-foreground flex-shrink-0 ml-3" />
             </div>
           </Link>
         </div>
@@ -314,7 +316,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
                 <div className="flex items-center gap-2 mb-3">
-                  <Film className="h-3.5 w-3.5 text-primary/70" />
+                  <Film className="size-3.5 text-primary/70" />
                   <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     Watched
                   </span>
@@ -325,7 +327,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
               </div>
               <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
                 <div className="flex items-center gap-2 mb-3">
-                  <Clock className="h-3.5 w-3.5 text-primary/70" />
+                  <Clock className="size-3.5 text-primary/70" />
                   <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     Hours
                   </span>
@@ -338,7 +340,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
               </div>
               <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
                 <div className="flex items-center gap-2 mb-3">
-                  <Users className="h-3.5 w-3.5 text-primary/70" />
+                  <Users className="size-3.5 text-primary/70" />
                   <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     In Raffle
                   </span>
@@ -349,7 +351,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
               </div>
               <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
                 <div className="flex items-center gap-2 mb-3">
-                  <Star className="h-3.5 w-3.5 text-primary/70" />
+                  <Star className="size-3.5 text-primary/70" />
                   <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                     Avg Rating
                   </span>
@@ -365,3 +367,64 @@ export const ClubSnapshot = memo(function ClubSnapshot({
     </div>
   )
 })
+
+export function ClubSnapshotSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+      <div className="lg:col-span-6 xl:col-span-7 space-y-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px w-8 animate-pulse rounded bg-muted" />
+          <div className="h-5 w-24 animate-pulse rounded bg-muted" />
+          <div className="h-px flex-1 animate-pulse rounded bg-muted" />
+        </div>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 sm:gap-5 p-4 sm:p-5 rounded-xl border border-border/10 bg-muted/50"
+          >
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 pr-0 sm:pr-4 border-r-0 sm:border-r-2 border-dashed border-border/20">
+              <div className="size-12 rounded-full animate-pulse bg-muted flex-shrink-0" />
+              <div className="hidden sm:block h-4 w-24 animate-pulse rounded bg-muted" />
+            </div>
+            <div className="flex-1 flex items-center -gap-x-3 overflow-hidden">
+              {Array.from({ length: 5 }).map((_item, j) => (
+                <div
+                  key={j}
+                  className="h-20 w-12 sm:h-24 sm:w-14 md:h-28 md:w-[4.5rem] lg:h-32 lg:w-20 rounded-lg animate-pulse bg-muted flex-shrink-0 border-2 border-white/50"
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="lg:col-span-6 xl:col-span-5 space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px w-8 animate-pulse rounded bg-muted" />
+          <div className="h-5 w-28 animate-pulse rounded bg-muted" />
+        </div>
+        <div className="flex h-20 animate-pulse rounded-xl bg-muted" />
+        <div className="flex h-20 animate-pulse rounded-xl bg-muted" />
+        <div className="grid grid-cols-2 gap-3 mt-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-24 rounded-xl animate-pulse bg-muted border border-border/10"
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function ClubSnapshotSuspense({ userId }: { userId: string }) {
+  const { data: allShortlists = [] } = useSuspenseQuery(shortlistQueries.all())
+  const { data: stats } = useSuspenseQuery(dashboardQueries.stats(userId))
+  return (
+    <ClubSnapshot
+      allShortlists={allShortlists}
+      currentUserId={userId}
+      stats={stats}
+    />
+  )
+}

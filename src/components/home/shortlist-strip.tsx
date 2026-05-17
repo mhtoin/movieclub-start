@@ -1,10 +1,12 @@
 import { memo } from 'react'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import '@/styles/polaroid.css'
 import { Link } from '@tanstack/react-router'
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { Clapperboard, Clock, Plus, Star, Ticket } from 'lucide-react'
 import type { Shortlist } from '@/db/schema/shortlists'
 import type { MovieWithCredits } from '@/db/schema/movies'
+import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 
 type ShortlistWithMovies = Shortlist & {
   movies: Array<MovieWithCredits>
@@ -45,8 +47,7 @@ function PolaroidBack({ movie }: { movie: MovieWithCredits }) {
   const castArray = Array.isArray(movie.cast) ? movie.cast : []
   const topCast = castArray
     .slice(0, 3)
-    .map((c: any) => c.name)
-    .filter(Boolean)
+    .flatMap((c: any) => (c.name ? [c.name] : []))
 
   const genres = movie.genres ?? []
   const runtime = movie.runtime
@@ -61,14 +62,14 @@ function PolaroidBack({ movie }: { movie: MovieWithCredits }) {
         <div className="aspect-[2/3] flex flex-col gap-3 p-3 overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
-              <Star className="h-3 w-3 text-amber-600 fill-amber-500" />
+              <Star className="size-3 text-amber-600 fill-amber-500" />
               <span className="text-sm font-bold text-black/80">
                 {rating > 0 ? rating.toFixed(1) : '—'}
               </span>
             </div>
             {runtime && runtime > 0 && (
               <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-black/30" />
+                <Clock className="size-3 text-black/30" />
                 <span className="text-[10px] text-black/50 font-medium">
                   {Math.floor(runtime / 60)}h {runtime % 60}m
                 </span>
@@ -148,7 +149,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
       <div>
         <div className="flex items-center gap-3 mb-6">
           <div className="h-px w-8 bg-primary" />
-          <Clapperboard className="h-4 w-4 text-primary flex-shrink-0" />
+          <Clapperboard className="size-4 text-primary flex-shrink-0" />
           <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
             Your Shortlist
           </span>
@@ -163,7 +164,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
           }}
         >
           <div className="flex gap-6 md:gap-8">
-            <motion.div
+            <m.div
               initial={
                 shouldReduceMotion ? false : { opacity: 0, y: 16, rotate: 0 }
               }
@@ -188,7 +189,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
               <Clothespin />
               <div className="w-44 sm:w-48 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-shadow duration-300 hover:shadow-xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
                 <div className="aspect-[2/3] flex flex-col items-center justify-center gap-3 bg-black/5 rounded-[1px]">
-                  <Ticket className="h-10 w-10 text-black/20" />
+                  <Ticket className="size-10 text-black/20" />
                   <p className="text-xs text-[color-mix(in_oklch,black_70%,var(--primary)_30%)] font-medium">
                     Empty
                   </p>
@@ -199,9 +200,9 @@ export const ShortlistStrip = memo(function ShortlistStrip({
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={
                 shouldReduceMotion ? false : { opacity: 0, y: 16, rotate: 0 }
               }
@@ -233,7 +234,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
                 className="block w-44 sm:w-48 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-shadow duration-300 hover:shadow-xl bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]"
               >
                 <div className="aspect-[2/3] flex flex-col items-center justify-center gap-2 bg-black/5 rounded-[1px] border-2 border-dashed border-black/15">
-                  <Plus className="h-8 w-8 text-[color-mix(in_oklch,black_50%,var(--primary)_50%)]" />
+                  <Plus className="size-8 text-[color-mix(in_oklch,black_50%,var(--primary)_50%)]" />
                   <span className="font-cinema-caps text-xs tracking-wider uppercase text-[color-mix(in_oklch,black_50%,var(--primary)_50%)]">
                     Discover
                   </span>
@@ -244,7 +245,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
                   </p>
                 </div>
               </Link>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </div>
@@ -256,7 +257,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="h-px w-8 bg-primary" />
-          <Clapperboard className="h-4 w-4 text-primary flex-shrink-0" />
+          <Clapperboard className="size-4 text-primary flex-shrink-0" />
           <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
             Your Shortlist
           </span>
@@ -269,7 +270,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
             to="/discover"
             className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="size-3.5" />
             Add more
           </Link>
         )}
@@ -297,6 +298,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
             return (
               <div
                 key={movie.id}
+                suppressHydrationWarning
                 className="snap-start flex-shrink-0 relative group cursor-pointer hover:z-50 focus-within:z-50"
                 style={
                   {
@@ -325,7 +327,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">
-                              <Ticket className="h-8 w-8 text-black/20" />
+                              <Ticket className="size-8 text-black/20" />
                             </div>
                           )}
                         </div>
@@ -352,3 +354,40 @@ export const ShortlistStrip = memo(function ShortlistStrip({
     </div>
   )
 })
+
+export function ShortlistStripSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="h-px w-8 animate-pulse rounded bg-muted" />
+        <div className="h-5 w-32 animate-pulse rounded bg-muted" />
+        <div className="h-px flex-1 animate-pulse rounded bg-muted" />
+      </div>
+      <div
+        className="flex gap-6 md:gap-8 overflow-hidden pb-8 pt-10"
+        style={{
+          backgroundImage:
+            'linear-gradient(to bottom, transparent 30px, var(--border) 30px, var(--border) 31px, transparent 31px)',
+        }}
+      >
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="w-40 sm:w-48 flex-shrink-0 pt-2.5 px-2.5 pb-10 rounded-sm animate-pulse bg-muted"
+            style={{
+              transform: `rotate(${[-2.5, 1.8, -1.2, 3.0, -0.8][i]}deg)`,
+            }}
+          >
+            <div className="aspect-[2/3] rounded-[1px] bg-muted-foreground/10" />
+            <div className="mt-2.5 h-3 w-20 mx-auto rounded bg-muted-foreground/10" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function ShortlistStripSuspense({ userId }: { userId: string }) {
+  const { data: shortlist } = useSuspenseQuery(shortlistQueries.byUser(userId))
+  return <ShortlistStrip shortlist={shortlist} />
+}

@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { Link } from '@tanstack/react-router'
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
   Calendar,
@@ -55,7 +55,7 @@ export const MarqueeHero = memo(function MarqueeHero({
           <span className="text-sm font-semibold tracking-widest text-muted-foreground uppercase">
             Welcome to MovieClub
           </span>
-          <h2 className="mt-3 font-cinema text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+          <h2 className="mt-3 font-cinema text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
             Start your journey
           </h2>
           <p className="mt-4 text-base text-muted-foreground leading-relaxed max-w-md">
@@ -67,7 +67,7 @@ export const MarqueeHero = memo(function MarqueeHero({
               to="/discover"
               className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              <Ticket className="h-4 w-4" />
+              <Ticket className="size-4" />
               Discover movies
             </Link>
             <Link
@@ -107,7 +107,7 @@ export const MarqueeHero = memo(function MarqueeHero({
   return (
     <div className="relative">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        <motion.div
+        <m.div
           className="lg:col-span-5 xl:col-span-5 order-2 lg:order-1"
           initial={shouldReduceMotion ? false : { opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -120,7 +120,7 @@ export const MarqueeHero = memo(function MarqueeHero({
             </span>
           </div>
 
-          <h1 className="font-cinema text-4xl md:text-5xl xl:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+          <h1 className="font-cinema text-4xl md:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground leading-[1.05]">
             {movie.title}
           </h1>
 
@@ -133,18 +133,18 @@ export const MarqueeHero = memo(function MarqueeHero({
           <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-foreground/70">
             {releaseYear && (
               <span className="inline-flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 text-primary/70" />
+                <Calendar className="size-3.5 text-primary/70" />
                 {releaseYear}
               </span>
             )}
             {formattedRuntime && (
               <span className="inline-flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-primary/70" />
+                <Clock className="size-3.5 text-primary/70" />
                 {formattedRuntime}
               </span>
             )}
             <span className="inline-flex items-center gap-1.5 font-medium text-foreground/80">
-              <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+              <Star className="size-3.5 fill-warning text-warning" />
               {movie.voteAverage.toFixed(1)}
             </span>
           </div>
@@ -172,7 +172,7 @@ export const MarqueeHero = memo(function MarqueeHero({
                       target="_blank"
                       rel="noopener noreferrer"
                       title={provider.provider_name}
-                      className="h-7 w-7 rounded-md overflow-hidden bg-background border border-border/40 shadow-sm hover:scale-110 transition-transform"
+                      className="size-7 rounded-md overflow-hidden bg-background border border-border/40 shadow-sm hover:scale-110 transition-transform"
                     >
                       <img
                         src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
@@ -196,7 +196,7 @@ export const MarqueeHero = memo(function MarqueeHero({
                   className="inline-flex items-center gap-1.5 rounded-md bg-[#01b4e4]/10 px-2.5 py-1 text-xs font-semibold text-[#01b4e4] hover:bg-[#01b4e4]/15 transition-colors"
                 >
                   <span>TMDb</span>
-                  <ExternalLink className="h-3 w-3" />
+                  <ExternalLink className="size-3" />
                 </a>
               )}
               {imdbLink && (
@@ -207,7 +207,7 @@ export const MarqueeHero = memo(function MarqueeHero({
                   className="inline-flex items-center gap-1.5 rounded-md bg-[#F5C518]/10 px-2.5 py-1 text-xs font-semibold text-[#c4a000] hover:bg-[#F5C518]/15 transition-colors"
                 >
                   <span>IMDb</span>
-                  <ExternalLink className="h-3 w-3" />
+                  <ExternalLink className="size-3" />
                 </a>
               )}
             </div>
@@ -219,20 +219,20 @@ export const MarqueeHero = memo(function MarqueeHero({
               params={{ userId }}
               className="group inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
             >
-              <Trophy className="h-4 w-4" />
+              <Trophy className="size-4" />
               Rank it
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               to="/watched"
               className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent active:scale-[0.98]"
             >
-              <Film className="h-4 w-4 text-foreground/60" />
+              <Film className="size-4 text-foreground/60" />
               Watch history
             </Link>
           </div>
-        </motion.div>
-        <motion.div
+        </m.div>
+        <m.div
           className="lg:col-span-7 xl:col-span-7 order-1 lg:order-2"
           initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -256,7 +256,7 @@ export const MarqueeHero = memo(function MarqueeHero({
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-muted">
-                  <Ticket className="h-16 w-16 text-muted-foreground/25" />
+                  <Ticket className="size-16 text-muted-foreground/25" />
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
@@ -266,8 +266,25 @@ export const MarqueeHero = memo(function MarqueeHero({
               aria-hidden="true"
             />
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </div>
   )
 })
+
+export function HeroSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <div className="space-y-6">
+        <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+        <div className="h-12 w-3/4 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+        <div className="flex gap-3 pt-2">
+          <div className="h-10 w-32 animate-pulse rounded-full bg-muted" />
+          <div className="h-10 w-28 animate-pulse rounded-full bg-muted" />
+        </div>
+      </div>
+      <div className="aspect-[2/3] max-h-[480px] animate-pulse rounded-2xl bg-muted" />
+    </div>
+  )
+}
