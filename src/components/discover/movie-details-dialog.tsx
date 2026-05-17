@@ -25,8 +25,6 @@ interface MovieDetailsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   triggerRect: DOMRect | null
-  addingMode?: boolean
-  onAdded?: () => void
 }
 
 export function MovieDetailsDialog({
@@ -34,8 +32,6 @@ export function MovieDetailsDialog({
   open,
   onOpenChange,
   triggerRect,
-  addingMode = false,
-  onAdded,
 }: MovieDetailsDialogProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { mutate: addToShortlist, isPending } = useAddToShortlistMutation()
@@ -93,16 +89,7 @@ export function MovieDetailsDialog({
 
   const handleAddToShortlist = () => {
     if (!movie) return
-    addToShortlist(movie.id, {
-      onSuccess: () => {
-        if (addingMode) {
-          setTimeout(() => {
-            onOpenChange(false)
-            onAdded?.()
-          }, 400)
-        }
-      },
-    })
+    addToShortlist(movie.id)
   }
 
   if (!movie) return null

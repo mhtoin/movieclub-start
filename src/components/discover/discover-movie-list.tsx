@@ -9,8 +9,6 @@ import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
 interface DiscoverMoviesListProps {
   onTotalResults?: (count: number) => void
-  addingMode?: boolean
-  onAdded?: () => void
   searchQuery?: string
 }
 
@@ -23,15 +21,9 @@ export default function DiscoverMoviesList(props: DiscoverMoviesListProps) {
 
 interface MovieListSharedProps {
   onTotalResults?: (count: number) => void
-  addingMode?: boolean
-  onAdded?: () => void
 }
 
-function BrowseMoviesList({
-  onTotalResults,
-  addingMode = false,
-  onAdded,
-}: MovieListSharedProps) {
+function BrowseMoviesList({ onTotalResults }: MovieListSharedProps) {
   const routeApi = getRouteApi('/_authenticated/discover')
   const search = routeApi.useSearch()
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
@@ -112,8 +104,6 @@ function BrowseMoviesList({
         open={dialogOpen}
         onOpenChange={handleDialogOpenChange}
         triggerRect={triggerRect}
-        addingMode={addingMode}
-        onAdded={onAdded}
       />
 
       <div ref={observerTarget} className="py-8">
@@ -151,8 +141,6 @@ function BrowseMoviesList({
 
 function SearchMoviesList({
   onTotalResults,
-  addingMode = false,
-  onAdded,
   searchQuery,
 }: MovieListSharedProps & { searchQuery: string }) {
   const routeApi = getRouteApi('/_authenticated/discover')
@@ -261,8 +249,6 @@ function SearchMoviesList({
         open={dialogOpen}
         onOpenChange={handleDialogOpenChange}
         triggerRect={triggerRect}
-        addingMode={addingMode}
-        onAdded={onAdded}
       />
 
       <div ref={observerTarget} className="py-8">

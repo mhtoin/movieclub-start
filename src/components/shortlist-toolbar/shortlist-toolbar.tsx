@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Film, Plus, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Film, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ShortlistSearch } from './shortlist-search'
 import ShortlistItem from './shortlist-item'
 import type { Variants } from 'framer-motion'
 import { useMediaQuery } from '@/lib/hooks'
@@ -74,32 +74,28 @@ const itemVariants: Variants = {
   exit: { opacity: 0, y: -4, transition: { duration: 0.12 } },
 }
 
-function AddMovieLink({
+function ShortlistAddSection({
   movieCount,
-  onClick,
+  shortlistMovieIds,
+  onSearchActiveChange,
 }: {
   movieCount: number
-  onClick?: () => void
+  shortlistMovieIds: Set<number>
+  onSearchActiveChange: (active: boolean) => void
 }) {
   return (
-    <Link
-      to="/discover"
-      search={{ adding: true }}
-      onClick={onClick}
-      className="block w-full h-auto py-2.5 px-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all bg-transparent"
+    <motion.div
+      variants={itemVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
     >
-      <div className="flex items-center gap-2.5">
-        <div className="size-7 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Plus className="size-4 text-primary" />
-        </div>
-        <div className="text-left">
-          <p className="text-xs font-medium text-foreground">Add Movie</p>
-          <p className="text-[10px] text-muted-foreground leading-tight">
-            {3 - movieCount} slot{3 - movieCount === 1 ? '' : 's'} left
-          </p>
-        </div>
-      </div>
-    </Link>
+      <ShortlistSearch
+        movieCount={movieCount}
+        shortlistMovieIds={shortlistMovieIds}
+        onSearchActiveChange={onSearchActiveChange}
+      />
+    </motion.div>
   )
 }
 
@@ -111,6 +107,8 @@ function ShortlistPanelContent({
   handleToggleReady,
   handleToggleParticipating,
   onClose,
+  shortlistMovieIds,
+  onSearchActiveChange,
 }: {
   data: ShortlistData | null | undefined
   isLoading: boolean
@@ -119,6 +117,8 @@ function ShortlistPanelContent({
   handleToggleReady: () => void
   handleToggleParticipating: () => void
   onClose: () => void
+  shortlistMovieIds: Set<number>
+  onSearchActiveChange: (active: boolean) => void
 }) {
   return (
     <>
@@ -170,7 +170,7 @@ function ShortlistPanelContent({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="flex flex-col items-center py-8 text-center"
+            className="flex flex-col items-center py-6 text-center"
           >
             <div className="size-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
               <Film className="size-6 text-muted-foreground/40" />
@@ -178,10 +178,14 @@ function ShortlistPanelContent({
             <p className="text-sm font-medium text-foreground mb-1">
               No movies yet
             </p>
-            <p className="text-xs text-muted-foreground mb-4">
+            <p className="text-xs text-muted-foreground mb-5">
               Add up to 3 movies to your shortlist
             </p>
-            <AddMovieLink movieCount={movieCount} onClick={onClose} />
+            <ShortlistAddSection
+              movieCount={movieCount}
+              shortlistMovieIds={shortlistMovieIds}
+              onSearchActiveChange={onSearchActiveChange}
+            />
           </motion.div>
         ) : (
           <motion.div
@@ -238,7 +242,11 @@ function ShortlistPanelContent({
                 initial="hidden"
                 animate="visible"
               >
-                <AddMovieLink movieCount={movieCount} onClick={onClose} />
+                <ShortlistAddSection
+                  movieCount={movieCount}
+                  shortlistMovieIds={shortlistMovieIds}
+                  onSearchActiveChange={onSearchActiveChange}
+                />
               </motion.div>
             )}
           </motion.div>
@@ -283,17 +291,28 @@ function ShortlistPanelContent({
 export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [isSearchActive, setIsSearchActive] = useState(false)
   const isMobile = !useMediaQuery('(min-width: 768px)')
   const { data, isLoading } = useQuery(shortlistQueries.byUser(userId))
   const toggleIsReadyMutation = useToggleIsReadyMutation()
   const toggleParticipatingMutation = useToggleParticipatingMutation()
 
+  const movieCount = data?.movies.length || 0
+  const canAddMoreMovies = movieCount < 3
+
+  const shortlistMovieIds = useMemo(() => {
+    const ids = new Set<number>()
+    if (!data?.movies) return ids
+    for (const m of data.movies) {
+      const tmdbId = (m as { tmdbId?: number }).tmdbId
+      if (tmdbId != null) ids.add(tmdbId)
+    }
+    return ids
+  }, [data])
+
   useEffect(() => {
     setTimeout(() => setMounted(true), 0)
   }, [])
-
-  const movieCount = data?.movies.length || 0
-  const canAddMoreMovies = movieCount < 3
 
   const handleToggleReady = () => {
     if (data) {
@@ -314,7 +333,11 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
         <DrawerRoot open={isExpanded} onOpenChange={setIsExpanded}>
           <DrawerPortal>
             <DrawerOverlay className="fixed inset-0 bg-black/40 z-[55]" />
-            <DrawerContent className="fixed inset-x-0 bottom-0 z-[60] max-h-[80vh] flex flex-col bg-background rounded-t-2xl shadow-2xl pb-safe">
+            <DrawerContent
+              className={`fixed inset-x-0 bottom-0 z-[60] flex flex-col bg-background rounded-t-2xl shadow-2xl pb-safe ${
+                isSearchActive ? 'max-h-[92vh]' : 'max-h-[80vh]'
+              }`}
+            >
               <div className="flex-shrink-0 flex items-center justify-center py-3">
                 <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
               </div>
@@ -327,6 +350,8 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
                   handleToggleReady={handleToggleReady}
                   handleToggleParticipating={handleToggleParticipating}
                   onClose={() => setIsExpanded(false)}
+                  shortlistMovieIds={shortlistMovieIds}
+                  onSearchActiveChange={setIsSearchActive}
                 />
               </div>
             </DrawerContent>
@@ -352,23 +377,34 @@ export function ShortlistToolbar({ userId }: ShortlistToolbarProps) {
           <AnimatePresence mode="wait">
             {isExpanded && (
               <motion.div
-                className="absolute bottom-[calc(100%+0.75rem)] right-0 w-[380px] bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl origin-bottom-right"
+                className="absolute bottom-[calc(100%+0.75rem)] right-0 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl origin-bottom-right"
                 variants={panelVariants}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
               >
-                <div className="p-5">
-                  <ShortlistPanelContent
-                    data={data}
-                    isLoading={isLoading}
-                    movieCount={movieCount}
-                    canAddMoreMovies={canAddMoreMovies}
-                    handleToggleReady={handleToggleReady}
-                    handleToggleParticipating={handleToggleParticipating}
-                    onClose={() => setIsExpanded(false)}
-                  />
-                </div>
+                <motion.div
+                  animate={{ width: isSearchActive ? 560 : 380 }}
+                  transition={{
+                    type: 'spring',
+                    damping: 28,
+                    stiffness: 380,
+                  }}
+                >
+                  <div className="p-5">
+                    <ShortlistPanelContent
+                      data={data}
+                      isLoading={isLoading}
+                      movieCount={movieCount}
+                      canAddMoreMovies={canAddMoreMovies}
+                      handleToggleReady={handleToggleReady}
+                      handleToggleParticipating={handleToggleParticipating}
+                      onClose={() => setIsExpanded(false)}
+                      shortlistMovieIds={shortlistMovieIds}
+                      onSearchActiveChange={setIsSearchActive}
+                    />
+                  </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
