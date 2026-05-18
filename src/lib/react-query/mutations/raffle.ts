@@ -169,7 +169,6 @@ export const useStartRaffleMutation = () => {
 
 export const useFinalizeRaffleMutation = () => {
   const queryClient = useQueryClient()
-  const toastManager = Toast.useToastManager()
 
   return useMutation({
     mutationFn: async ({
@@ -189,24 +188,11 @@ export const useFinalizeRaffleMutation = () => {
     },
     onError: (error) => {
       console.error('Error finalizing raffle:', error)
-      toastManager.add({
-        title: 'Error',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Failed to finalize raffle. Please refresh the page.',
-        type: 'error',
-      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shortlists'] })
       queryClient.invalidateQueries({ queryKey: ['movies'] })
       queryClient.invalidateQueries({ queryKey: ['raffle', 'history'] })
-      toastManager.add({
-        title: 'Raffle Complete!',
-        description: 'The winning movie has been added to your watched list.',
-        type: 'success',
-      })
     },
   })
 }

@@ -950,7 +950,6 @@ export const setAllParticipatingReady = createServerFn({ method: 'POST' })
 
 export const useSetAllReadyMutation = () => {
   const queryClient = useQueryClient()
-  const toastManager = Toast.useToastManager()
   return useMutation({
     mutationFn: async () => {
       const response = await setAllParticipatingReady({ data: {} })
@@ -982,24 +981,10 @@ export const useSetAllReadyMutation = () => {
           context.previousAllShortlists,
         )
       }
-      toastManager.add({
-        title: 'Error',
-        description: 'Failed to mark all as ready',
-        type: 'error',
-      })
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
       queryClient.invalidateQueries({ queryKey: ['shortlist'] })
-    },
-    onSuccess: (result) => {
-      if (result.updated > 0) {
-        toastManager.add({
-          title: 'Success',
-          description: `${result.updated} participant(s) marked as ready`,
-          type: 'success',
-        })
-      }
     },
   })
 }
