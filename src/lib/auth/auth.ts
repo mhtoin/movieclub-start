@@ -205,6 +205,7 @@ export async function getSessionUser(
     name: user.name,
     image: user.image,
     colorScheme: user.colorScheme as UserSession['colorScheme'],
+    role: user.role,
   }
 
   sessionUserCache.set(sessionToken, {

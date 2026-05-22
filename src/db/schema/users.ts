@@ -26,6 +26,7 @@ export const user = pgTable(
     radarrRootFolder: text(),
     radarrUrl: text(),
     colorScheme: text().default('default').notNull(),
+    role: text().default('user').notNull(),
   },
   (table) => [
     uniqueIndex('User_email_key').using(

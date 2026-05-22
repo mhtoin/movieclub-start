@@ -23,4 +23,5 @@ export type UserSession = {
   image: string
   sessionToken?: string
   colorScheme: ColorScheme
+  role: string
 }

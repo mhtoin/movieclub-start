@@ -414,10 +414,12 @@ async function main() {
 
     let totalRows = 0
 
-    // Import each table in order
-    const importCounts = await Promise.all(
-      IMPORT_ORDER.map((table) => importTable(sql, table)),
-    )
+    // Import each table in order (sequentially to respect foreign keys)
+    const importCounts: Array<number> = []
+    for (const table of IMPORT_ORDER) {
+      const count = await importTable(sql, table)
+      importCounts.push(count)
+    }
     totalRows = importCounts.reduce((a, b) => a + b, 0)
 
     // Import movie_credits (cast/crew split from movie table)

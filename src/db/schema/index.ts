@@ -1,4 +1,5 @@
 // Export all tables
+export * from './announcements'
 export * from './movies'
 export * from './raffles'
 export * from './sessions'

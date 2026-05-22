@@ -1,0 +1,1 @@
+ALTER TABLE "announcement" ADD COLUMN "slides" jsonb;

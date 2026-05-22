@@ -6,15 +6,23 @@ import {
 } from '@tanstack/react-router'
 import { createIsomorphicFn, createServerFn } from '@tanstack/react-start'
 import { Suspense, lazy } from 'react'
+import { AnnouncementBanners } from '@/components/announcements/announcement-banners'
 import { ProjectorBackground } from '@/components/background-options'
 import { ErrorComponent } from '@/components/error-component'
 import Sidebar from '@/components/sidebar/sidebar'
 import { DeviceCapabilityProvider } from '@/lib/hooks/use-device-capability'
 import { useSSEInvalidation } from '@/lib/hooks/use-sse-invalidation'
+import { announcementQueries } from '@/lib/react-query/queries/announcements'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { authMiddleware } from '@/middleware/auth'
+
+const WhatsNewDialog = lazy(() =>
+  import('@/components/onboarding/whats-new-dialog').then((m) => ({
+    default: m.WhatsNewDialog,
+  })),
+)
 
 const ShortlistToolbar = lazy(() =>
   import('@/components/shortlist-toolbar/shortlist-toolbar').then((m) => ({
@@ -63,6 +71,7 @@ export const Route = createFileRoute('/_authenticated')({
     if (user.userId) {
       context.queryClient.prefetchQuery(shortlistQueries.byUser(user.userId))
       context.queryClient.prefetchQuery(movieQueries.latest())
+      context.queryClient.prefetchQuery(announcementQueries.active())
     }
     context.queryClient.prefetchQuery(tmdbQueries.genres())
     context.queryClient.prefetchQuery(tmdbQueries.watchProviders())
@@ -81,7 +90,7 @@ function AuthenticatedLayout() {
   return (
     <DeviceCapabilityProvider>
       <div className="h-screen flex flex-col overflow-hidden relative">
-        <Sidebar />
+        <Sidebar userRole={user.role} />
         <ProjectorBackground />
         <div
           className={
@@ -90,9 +99,15 @@ function AuthenticatedLayout() {
               : 'pt-4 pb-24 md:pb-4 px-4 flex-1 overflow-auto relative z-10 isolate'
           }
         >
-          <Outlet />
+          <div className={isHomePage ? '' : 'max-w-6xl mx-auto space-y-4'}>
+            <AnnouncementBanners />
+            <Outlet />
+          </div>
           <Suspense fallback={null}>
             <ShortlistToolbar userId={user.userId} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <WhatsNewDialog />
           </Suspense>
         </div>
       </div>

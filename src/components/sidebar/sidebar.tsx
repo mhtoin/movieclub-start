@@ -9,6 +9,7 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   Moon,
   MoreHorizontal,
   Palette,
@@ -71,7 +72,12 @@ const navItems = [
 const mobileNavItems = navItems.slice(0, 4)
 const mobileMoreItems = navItems.slice(4)
 
-export default function Sidebar() {
+interface SidebarProps {
+  userRole?: string
+}
+
+export default function Sidebar({ userRole }: SidebarProps) {
+  const isAdmin = userRole === 'admin'
   const { theme, setTheme } = useTheme()
   const routerState = useRouterState()
   const router = useRouter()
@@ -206,6 +212,42 @@ export default function Sidebar() {
               )
             })}
           </div>
+
+          {isAdmin && (
+            <>
+              <div className="h-px bg-sidebar-border/20 mx-1 my-1" />
+              <Link
+                to="/admin"
+                className={`group/nav group/item relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 ${
+                  isActive('/admin')
+                    ? 'text-primary bg-gradient-to-r from-primary/10 to-transparent font-medium'
+                    : 'text-sidebar-foreground/50 hover:text-sidebar-foreground/90 hover:bg-sidebar-accent/40 hover:translate-x-0.5'
+                }`}
+                viewTransition
+              >
+                <div
+                  className={`relative flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                    isActive('/admin')
+                      ? 'bg-primary/15'
+                      : 'bg-sidebar-accent/40 group-hover/item:bg-sidebar-accent/60'
+                  }`}
+                >
+                  <Megaphone
+                    size={14}
+                    className={`transition-transform duration-200 ${isActive('/admin') ? '' : 'group-hover/item:rotate-12 group-hover/item:scale-110'}`}
+                  />
+                </div>
+                <div className="flex flex-col opacity-0 group-hover/sidebar:opacity-100 transition-all duration-200 delay-75 translate-x-[-4px] group-hover/sidebar:translate-x-0">
+                  <span className="text-xs font-medium whitespace-nowrap">
+                    Announcements
+                  </span>
+                  <span className="text-[10px] text-sidebar-foreground/50 whitespace-nowrap">
+                    Manage bulletins
+                  </span>
+                </div>
+              </Link>
+            </>
+          )}
 
           <div className="border-t border-sidebar-border/20 py-2 px-1">
             <PopoverRoot open={schemeOpen} onOpenChange={setSchemeOpen}>
@@ -467,6 +509,38 @@ export default function Sidebar() {
                     </span>
                   </div>
                 </Link>
+
+                {isAdmin && (
+                  <>
+                    <div className="h-px bg-border/50 my-2" />
+                    <Link
+                      to="/admin"
+                      onClick={() => setMobileMoreOpen(false)}
+                      className={`flex items-center gap-4 p-3.5 rounded-xl transition-colors active:scale-[0.98] ${
+                        isActive('/admin')
+                          ? 'text-primary bg-primary/10'
+                          : 'text-foreground/80 hover:bg-accent active:bg-accent/60'
+                      }`}
+                      viewTransition
+                    >
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          isActive('/admin') ? 'bg-primary/15' : 'bg-muted/50'
+                        }`}
+                      >
+                        <Megaphone size={20} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium block">
+                          Announcements
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Manage bulletins
+                        </span>
+                      </div>
+                    </Link>
+                  </>
+                )}
 
                 <div className="h-px bg-border/50 my-2" />
 
