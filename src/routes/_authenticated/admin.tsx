@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { AnimatePresence, m } from 'framer-motion'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 
 import {
   ChevronRight,
@@ -104,8 +104,8 @@ function AdminPage() {
                 Announcements
               </h1>
               <p className="text-muted-foreground mt-2 text-base md:text-lg max-w-lg leading-relaxed">
-                Manage notices and bulletins for your crew. What&apos;s on the
-                marquee?
+                Manage What&apos;s New announcements for your crew. What&apos;s
+                on the marquee?
               </p>
             </div>
             <Button
@@ -146,32 +146,34 @@ function AdminPage() {
         </header>
 
         {/* List */}
-        <AnimatePresence mode="popLayout">
-          {announcements.length > 0 ? (
-            <div className="space-y-4">
-              {announcements.map((announcement) => (
-                <m.div
-                  key={announcement.id}
-                  layout
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                >
-                  <AnnouncementCard
-                    announcement={announcement}
-                    onEdit={() => handleEdit(announcement)}
-                    onDelete={() =>
-                      deleteMutation.mutate({ id: announcement.id })
-                    }
-                  />
-                </m.div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState onCreate={handleNew} />
-          )}
-        </AnimatePresence>
+        <LazyMotion features={domAnimation}>
+          <AnimatePresence mode="popLayout">
+            {announcements.length > 0 ? (
+              <div className="space-y-4">
+                {announcements.map((announcement) => (
+                  <m.div
+                    key={announcement.id}
+                    layout
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
+                    <AnnouncementCard
+                      announcement={announcement}
+                      onEdit={() => handleEdit(announcement)}
+                      onDelete={() =>
+                        deleteMutation.mutate({ id: announcement.id })
+                      }
+                    />
+                  </m.div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState onCreate={handleNew} />
+            )}
+          </AnimatePresence>
+        </LazyMotion>
       </div>
 
       <AdminForm
@@ -284,7 +286,7 @@ function AnnouncementCard({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <Button
               variant="ghost"
               size="icon"
