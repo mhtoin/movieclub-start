@@ -360,18 +360,11 @@ function AdminForm({
   const createMutation = useCreateAnnouncement()
   const updateMutation = useUpdateAnnouncement()
 
-  const [type, setType] = useState<'whats-new' | 'bulletin'>(
-    (editing?.type ?? 'bulletin') as 'whats-new' | 'bulletin',
+  const [slides, setSlides] = useState<Array<Slide>>(
+    editing?.slides && editing.slides.length > 0
+      ? editing.slides
+      : [{ title: '', description: '' }],
   )
-  const [slides, setSlides] = useState<Array<Slide>>(editing?.slides ?? [])
-  const [bulletinContent, setBulletinContent] = useState(editing?.content ?? '')
-
-  const handleTypeChange = (newType: 'whats-new' | 'bulletin') => {
-    setType(newType)
-    if (newType === 'whats-new' && slides.length === 0) {
-      setSlides([{ title: '', description: '' }])
-    }
-  }
 
   const addSlide = () => {
     setSlides((prev) => [...prev, { title: '', description: '' }])
@@ -397,22 +390,24 @@ function AdminForm({
     const title = formData.get('title') as string
     const isPublished = formData.get('isPublished') === 'on'
     const priority = Number(formData.get('priority')) || 0
+    const content = slides
+      .map((s) => `${s.title}\n${s.description.replace(/<[^>]*>/g, '')}`)
+      .join('\n\n')
 
-    const isWhatsNew = type === 'whats-new'
-    const content = isWhatsNew
-      ? slides
-          .map((s) => `${s.title}\n${s.description.replace(/<[^>]*>/g, '')}`)
-          .join('\n\n')
-      : bulletinContent
-
-    const base = { title, content, type, isPublished, priority }
+    const base = {
+      title,
+      content,
+      type: 'whats-new' as const,
+      isPublished,
+      priority,
+    }
 
     if (editing) {
       updateMutation.mutate(
         {
           id: editing.id,
           ...base,
-          ...(isWhatsNew && slides.length > 0 ? { slides } : {}),
+          ...(slides.length > 0 ? { slides } : {}),
         } as any,
         { onSuccess: onSaved },
       )
@@ -420,7 +415,7 @@ function AdminForm({
       createMutation.mutate(
         {
           ...base,
-          ...(isWhatsNew && slides.length > 0 ? { slides } : {}),
+          ...(slides.length > 0 ? { slides } : {}),
         } as any,
         { onSuccess: onSaved },
       )
@@ -452,122 +447,83 @@ function AdminForm({
               handleSubmit(new FormData(e.currentTarget))
             }}
           >
-            {/* Title + Type row */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="title">
-                  Title
-                </label>
-                <Input
-                  id="title"
-                  name="title"
-                  defaultValue={editing?.title ?? ''}
-                  placeholder="Give it a headline..."
-                  required
-                />
-              </div>
-
-              <div className="space-y-2 md:w-44">
-                <label className="text-sm font-medium" htmlFor="type">
-                  Type
-                </label>
-                <select
-                  id="type"
-                  name="type"
-                  value={type}
-                  onChange={(e) =>
-                    handleTypeChange(e.target.value as 'whats-new' | 'bulletin')
-                  }
-                  className="w-full rounded-md border border-border bg-background text-foreground h-10 px-3.5 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary"
-                >
-                  <option value="bulletin">Bulletin</option>
-                  <option value="whats-new">What&apos;s New</option>
-                </select>
-              </div>
+            {/* Title */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="title">
+                Title
+              </label>
+              <Input
+                id="title"
+                name="title"
+                defaultValue={editing?.title ?? ''}
+                placeholder="Give it a headline..."
+                required
+              />
             </div>
 
-            {/* Bulletin content */}
-            {type === 'bulletin' && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Content</label>
-                <RichTextEditor
-                  value={bulletinContent}
-                  onChange={setBulletinContent}
-                  placeholder="Write your announcement..."
-                  minHeight="180px"
-                />
+            {/* Slides */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Slides</label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  onClick={addSlide}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  Add slide
+                </Button>
               </div>
-            )}
 
-            {/* Whats New slides */}
-            {type === 'whats-new' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Slides</label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="xs"
-                    onClick={addSlide}
+                {slides.map((slide, i) => (
+                  <div
+                    key={i}
+                    className="rounded-xl border border-border/40 bg-muted/20 p-4 md:p-5 space-y-3 relative"
                   >
-                    <Plus className="h-3.5 w-3.5 mr-1.5" />
-                    Add slide
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  {slides.map((slide, i) => (
-                    <div
-                      key={i}
-                      className="rounded-xl border border-border/40 bg-muted/20 p-4 md:p-5 space-y-3 relative"
-                    >
-                      {/* Slide number badge */}
-                      <div className="absolute -top-2.5 left-4 bg-background border border-border/50 rounded-full px-2.5 py-0.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          Slide {i + 1}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-xs font-medium text-muted-foreground/60">
-                          {slides.length > 1 ? `${slides.length} total` : ''}
-                        </span>
-                        {slides.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeSlide(i)}
-                            className="flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-destructive transition-colors"
-                            aria-label="Remove slide"
-                          >
-                            <X className="h-3 w-3" />
-                            Remove
-                          </button>
-                        )}
-                      </div>
-
-                      <input
-                        type="text"
-                        placeholder="Slide headline"
-                        value={slide.title}
-                        onChange={(e) =>
-                          updateSlide(i, 'title', e.target.value)
-                        }
-                        required
-                        className="w-full rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground/40 h-10 px-4 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary transition-colors"
-                      />
-                      <RichTextEditor
-                        value={slide.description}
-                        onChange={(value) =>
-                          updateSlide(i, 'description', value)
-                        }
-                        placeholder="What should people know about this feature?"
-                        minHeight="120px"
-                      />
+                    {/* Slide number badge */}
+                    <div className="absolute -top-2.5 left-4 bg-background border border-border/50 rounded-full px-2.5 py-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Slide {i + 1}
+                      </span>
                     </div>
-                  ))}
-                </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-xs font-medium text-muted-foreground/60">
+                        {slides.length > 1 ? `${slides.length} total` : ''}
+                      </span>
+                      {slides.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeSlide(i)}
+                          className="flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-destructive transition-colors"
+                          aria-label="Remove slide"
+                        >
+                          <X className="h-3 w-3" />
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Slide headline"
+                      value={slide.title}
+                      onChange={(e) => updateSlide(i, 'title', e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground/40 h-10 px-4 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-primary transition-colors"
+                    />
+                    <RichTextEditor
+                      value={slide.description}
+                      onChange={(value) => updateSlide(i, 'description', value)}
+                      placeholder="What should people know about this feature?"
+                      minHeight="120px"
+                    />
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
 
             {/* Settings row */}
             <div className="flex flex-col sm:flex-row sm:items-end gap-4 pt-2">

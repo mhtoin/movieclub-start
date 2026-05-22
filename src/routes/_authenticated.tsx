@@ -6,7 +6,6 @@ import {
 } from '@tanstack/react-router'
 import { createIsomorphicFn, createServerFn } from '@tanstack/react-start'
 import { Suspense, lazy } from 'react'
-import { AnnouncementBanners } from '@/components/announcements/announcement-banners'
 import { ProjectorBackground } from '@/components/background-options'
 import { ErrorComponent } from '@/components/error-component'
 import Sidebar from '@/components/sidebar/sidebar'
@@ -99,10 +98,7 @@ function AuthenticatedLayout() {
               : 'pt-4 pb-24 md:pb-4 px-4 flex-1 overflow-auto relative z-10 isolate'
           }
         >
-          <div className={isHomePage ? '' : 'max-w-6xl mx-auto space-y-4'}>
-            <AnnouncementBanners />
-            <Outlet />
-          </div>
+          <Outlet />
           <Suspense fallback={null}>
             <ShortlistToolbar userId={user.userId} />
           </Suspense>
