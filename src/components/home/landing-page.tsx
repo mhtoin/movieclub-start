@@ -8,6 +8,10 @@ import {
   ShortlistStripSuspense,
 } from './shortlist-strip'
 import { ClubSnapshotSkeleton, ClubSnapshotSuspense } from './club-snapshot'
+import {
+  RecommendationsStripSkeleton,
+  RecommendationsStripSuspense,
+} from './recommendations-strip'
 import { HistoryStripSkeleton, HistoryStripSuspense } from './history-strip'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 
@@ -66,6 +70,16 @@ export const LandingPage = memo(function LandingPage({
               </m.section>
             </Suspense>
 
+            <Suspense fallback={<RecommendationsStripSkeleton />}>
+              <m.section
+                initial={shouldReduceMotion ? false : 'hidden'}
+                animate="show"
+                variants={sectionVariants}
+              >
+                <RecommendationsStripSuspense userId={userId} />
+              </m.section>
+            </Suspense>
+
             <Suspense fallback={<HistoryStripSkeleton />}>
               <m.section
                 initial={shouldReduceMotion ? false : 'hidden'}
@@ -91,6 +105,7 @@ export function LandingSkeleton() {
           <HeroSkeleton />
           <ShortlistStripSkeleton />
           <ClubSnapshotSkeleton />
+          <RecommendationsStripSkeleton />
           <HistoryStripSkeleton />
         </div>
       </div>
