@@ -52,15 +52,21 @@ export const MarqueeHero = memo(function MarqueeHero({
     return (
       <div className="relative overflow-hidden rounded-2xl bg-muted/40 border border-border/20 p-8 md:p-12">
         <div className="max-w-lg">
-          <span className="text-sm font-semibold tracking-widest text-muted-foreground uppercase">
-            Welcome to MovieClub
-          </span>
-          <h2 className="mt-3 font-cinema text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
-            Start your journey
+          <div className="flex items-center gap-3 mb-5">
+            <span className="relative flex size-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/40" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-primary/60" />
+            </span>
+            <span className="text-xs font-semibold tracking-widest text-primary uppercase">
+              Getting Started
+            </span>
+          </div>
+          <h2 className="font-cinema text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+            Your next movie night awaits
           </h2>
           <p className="mt-4 text-base text-muted-foreground leading-relaxed max-w-md">
-            Discover movies, build your shortlist, and watch together with
-            friends.
+            Discover movies, build your shortlist, and pick what to watch
+            together.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
@@ -114,9 +120,12 @@ export const MarqueeHero = memo(function MarqueeHero({
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="flex items-center gap-3 mb-5">
-            <div className="h-px w-8 bg-primary/60" />
+            <span className="relative flex size-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/50" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-primary" />
+            </span>
             <span className="text-xs font-semibold tracking-widest text-primary uppercase">
-              Last Watched
+              Next Up
             </span>
           </div>
 
@@ -240,10 +249,14 @@ export const MarqueeHero = memo(function MarqueeHero({
         >
           <div className="relative mx-auto lg:mx-0 lg:ml-auto max-w-sm lg:max-w-md">
             <div
-              className="relative aspect-[2/3] overflow-hidden rounded-2xl shadow-2xl"
+              className="absolute -z-10 -inset-8 rounded-full bg-primary/8 blur-3xl"
+              aria-hidden="true"
+            />
+            <div
+              className="relative aspect-[2/3] overflow-hidden rounded-2xl"
               style={{
                 boxShadow:
-                  '0 25px 60px -12px color-mix(in oklch, var(--foreground) 25%, transparent)',
+                  '0 30px 70px -20px color-mix(in oklch, var(--color-primary) 35%, transparent), 0 10px 30px -10px color-mix(in oklch, var(--foreground) 20%, transparent)',
               }}
             >
               {posterUrl ? (
@@ -259,12 +272,8 @@ export const MarqueeHero = memo(function MarqueeHero({
                   <Ticket className="size-16 text-muted-foreground/25" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
             </div>
-            <div
-              className="absolute -z-10 -bottom-4 -right-4 w-full h-full rounded-2xl border border-primary/20 bg-primary/5"
-              aria-hidden="true"
-            />
           </div>
         </m.div>
       </div>

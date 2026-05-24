@@ -31,6 +31,60 @@
     transform: translateZ(0);
   }
 
+  /* Corner peel affordance — visual cue that the polaroid has a back side */
+  .polaroid-peek {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 18px 18px;
+    border-color: transparent transparent
+      color-mix(in oklch, var(--muted-foreground) 12%, transparent) transparent;
+    border-radius: 0 0 2px 0;
+    z-index: 5;
+    pointer-events: none;
+    transition:
+      border-width 0.3s ease,
+      opacity 0.3s ease;
+  }
+
+  .group:hover .polaroid-peek {
+    border-width: 0 0 24px 24px;
+    border-color: transparent transparent
+      color-mix(in oklch, var(--primary) 18%, transparent) transparent;
+  }
+
+  /* Flip hint text — appears briefly on hover of the group, fades as flip starts */
+  .polaroid-hint {
+    position: absolute;
+    bottom: -6px;
+    right: 4px;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in oklch, var(--muted-foreground) 40%, transparent);
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+    pointer-events: none;
+    z-index: 6;
+  }
+
+  .group:hover .polaroid-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Dim the hint when the flip has occurred (after first hover) */
+  .polaroid-flip-container.flipped .polaroid-hint {
+    opacity: 0;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .polaroid-flipper {
       transition: none;

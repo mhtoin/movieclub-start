@@ -345,13 +345,17 @@ export const RecommendationsStrip = memo(function RecommendationsStrip({
   if (isRecsLoading || (seeds.length > 0 && seedQueries.length === 0)) {
     return (
       <div>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px w-8 bg-primary" />
-          <Sparkles className="size-4 text-primary flex-shrink-0" />
-          <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
-            Picked for You
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-primary/40 to-transparent" />
+        <div className="mb-10">
+          <div className="flex items-baseline gap-3 mb-2">
+            <div className="h-px w-6 bg-primary/50" />
+            <Sparkles className="size-4 text-primary/70 flex-shrink-0" />
+            <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary/80 uppercase">
+              Picked for You
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground pl-[calc(1.5rem+0.75rem+1rem)]">
+            Based on your tierlist
+          </p>
         </div>
         <div className="space-y-10">
           {seeds.map((seed) => (
@@ -395,13 +399,17 @@ export const RecommendationsStrip = memo(function RecommendationsStrip({
   if (seedGroups.length === 0) {
     return (
       <div>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-px w-8 bg-primary" />
-          <Sparkles className="size-4 text-primary flex-shrink-0" />
-          <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
-            Picked for You
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-primary/40 to-transparent" />
+        <div className="mb-10">
+          <div className="flex items-baseline gap-3 mb-2">
+            <div className="h-px w-6 bg-primary/50" />
+            <Sparkles className="size-4 text-primary/70 flex-shrink-0" />
+            <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary/80 uppercase">
+              Picked for You
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground pl-[calc(1.5rem+0.75rem+1rem)]">
+            Based on your tierlist
+          </p>
         </div>
         <m.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
@@ -440,19 +448,23 @@ export const RecommendationsStrip = memo(function RecommendationsStrip({
     <LazyMotion features={domAnimation}>
       <div>
         {/* Section header */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px w-8 bg-primary" />
-          <Sparkles className="size-4 text-primary flex-shrink-0" />
-          <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
-            Picked for You
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-primary/40 to-transparent" />
+        <div className="mb-10">
+          <div className="flex items-baseline gap-3 mb-2">
+            <div className="h-px w-6 bg-primary/50" />
+            <Sparkles className="size-4 text-primary/70 flex-shrink-0" />
+            <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary/80 uppercase">
+              Picked for You
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground pl-[calc(1.5rem+0.75rem+1rem)]">
+            Based on your tierlist
+          </p>
         </div>
 
         {/* Warm background accent */}
         <div className="relative">
           <div
-            className="absolute -inset-y-8 -left-8 -right-8 rounded-3xl bg-primary/[0.02] -z-10"
+            className="absolute -inset-y-8 -left-8 -right-8 rounded-3xl bg-muted/30 -z-10"
             aria-hidden="true"
           />
 
@@ -489,10 +501,12 @@ export const RecommendationsStrip = memo(function RecommendationsStrip({
 export function RecommendationsStripSkeleton() {
   return (
     <div>
-      <div className="flex items-center gap-3 mb-8">
-        <div className="h-px w-8 animate-pulse rounded bg-muted" />
-        <div className="h-5 w-36 animate-pulse rounded bg-muted" />
-        <div className="h-px flex-1 animate-pulse rounded bg-muted" />
+      <div className="mb-10">
+        <div className="flex items-baseline gap-3 mb-2">
+          <div className="h-px w-6 animate-pulse rounded bg-muted" />
+          <div className="h-5 w-36 animate-pulse rounded bg-muted" />
+        </div>
+        <div className="h-3 w-24 animate-pulse rounded bg-muted ml-[calc(1.5rem+0.75rem+1rem)]" />
       </div>
 
       <div className="space-y-10">

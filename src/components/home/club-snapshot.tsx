@@ -5,7 +5,6 @@ import { m, useInView, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
   Clock,
-  Dices,
   Film,
   Star,
   Ticket,
@@ -27,8 +26,6 @@ interface ClubSnapshotProps {
 function getUserTierlistHref(userId: string): string {
   return `/tierlist/${userId}`
 }
-
-const ROTATIONS = [0.5, -0.7, 0.4, -0.6]
 
 function AnimatedCounter({
   value,
@@ -92,326 +89,245 @@ export const ClubSnapshot = memo(function ClubSnapshot({
     (s) => s.user.id !== currentUserId,
   )
   const totalMovies = allShortlists.reduce((acc, s) => acc + s.movies.length, 0)
-  const readyCount = allShortlists.filter(
-    (s) => s.isReady && s.participating,
-  ).length
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
-      <div className="lg:col-span-6 xl:col-span-7">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px w-8 bg-primary" />
-          <Ticket className="size-4 text-primary flex-shrink-0" />
-          <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
+    <div>
+      <div className="mb-8">
+        <div className="inline-flex items-center gap-2.5 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-1.5">
+          <Users className="size-4 text-primary flex-shrink-0" />
+          <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase leading-none">
             The Club
           </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-primary/40 to-transparent" />
         </div>
+      </div>
 
-        {otherShortlists.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 rounded-2xl border-2 border-dashed border-border/30 bg-muted/10">
-            <div className="flex size-16 items-center justify-center rounded-full bg-muted">
-              <Users className="size-7 text-muted-foreground/30" />
-            </div>
-            <p className="text-sm text-muted-foreground font-medium">
-              No other members have shortlists yet.
-            </p>
+      {otherShortlists.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 rounded-2xl border-2 border-dashed border-border/30 bg-muted/10">
+          <div className="flex size-16 items-center justify-center rounded-full bg-muted">
+            <Users className="size-7 text-muted-foreground/30" />
           </div>
-        ) : (
-          <div className="space-y-6">
+          <p className="text-sm text-muted-foreground font-medium">
+            No other members have shortlists yet.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {otherShortlists.slice(0, 4).map((shortlist, index) => (
               <m.div
                 key={shortlist.id}
-                initial={
-                  shouldReduceMotion ? false : { opacity: 0, x: -24, rotate: 0 }
-                }
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                  rotate: ROTATIONS[index] ?? 0,
-                }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.6,
+                  duration: 0.5,
                   delay: index * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="transition-all duration-300 hover:-translate-y-1.5"
-                style={{
-                  boxShadow:
-                    '0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.03)',
-                }}
+                className="transition-all duration-300 hover:-translate-y-1"
               >
                 <div
-                  className="ticket-card group flex items-center gap-3 sm:gap-5 pl-5 sm:pl-7 pr-4 sm:pr-6 py-4 sm:py-5 rounded-xl
-                  bg-[color-mix(in_oklch,var(--card)_92%,var(--primary)_8%)]
-                  border border-[color-mix(in_oklch,var(--border)_80%,var(--primary)_20%)]"
+                  className="ticket-card group flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl
+                  bg-[color-mix(in_oklch,var(--card)_96%,var(--primary)_4%)]
+                  border border-[color-mix(in_oklch,var(--border)_90%,var(--primary)_10%)]"
+                  style={{
+                    boxShadow:
+                      '0 1px 3px rgba(0,0,0,0.03), 0 4px 8px rgba(0,0,0,0.02)',
+                  }}
                 >
-                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 md:gap-4 pr-0 sm:pr-4 md:pr-6 border-r-0 sm:border-r-[3px] border-dashed border-border min-w-[4rem] sm:min-w-0">
-                    <div className="hidden lg:flex flex-col gap-2.5 mr-2">
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-2 h-2.5 rounded-[3px]
-                          bg-[color-mix(in_oklch,var(--card)_40%,black)]
-                          shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]
-                          dark:shadow-[inset_0_1px_2px_rgba(255,255,255,0.08),0_1px_0_rgba(255,255,255,0.04)]"
-                        />
-                      ))}
-                    </div>
+                  {/* Ticket punch holes — vertical */}
+                  <div className="flex flex-col gap-2 flex-shrink-0">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-2 h-2.5 rounded-[3px]
+                        bg-[color-mix(in_oklch,var(--card)_40%,black)]
+                        shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]
+                        dark:shadow-[inset_0_1px_2px_rgba(255,255,255,0.08),0_1px_0_rgba(255,255,255,0.04)]"
+                      />
+                    ))}
+                  </div>
 
-                    <Avatar
-                      src={shortlist.user.image}
-                      alt={shortlist.user.name}
-                      name={shortlist.user.name}
-                      size={48}
-                    />
+                  {/* Avatar + name */}
+                  <Avatar
+                    src={shortlist.user.image}
+                    alt={shortlist.user.name}
+                    name={shortlist.user.name}
+                    size={40}
+                  />
 
-                    <div className="text-center sm:text-left min-w-0">
-                      <span className="text-sm sm:text-base md:text-lg font-bold text-foreground truncate block max-w-[8rem] sm:max-w-[10rem]">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-foreground truncate">
                         {shortlist.user.name}
                       </span>
                       {shortlist.isReady && shortlist.participating && (
-                        <span className="inline-flex items-center mt-1 sm:mt-1.5 bg-[color-mix(in_oklch,var(--warning)_85%,var(--primary)_15%)] text-[color-mix(in_oklch,var(--warning-foreground)_90%,var(--foreground)_10%)] px-2.5 py-1 text-[11px] tracking-wider uppercase font-bold animate-stamp -rotate-3 origin-top-left shadow-sm">
+                        <span className="inline-flex items-center bg-[color-mix(in_oklch,var(--warning)_85%,var(--primary)_15%)] text-[color-mix(in_oklch,var(--warning-foreground)_90%,var(--foreground)_10%)] px-1.5 py-0.5 text-[10px] tracking-wider uppercase font-bold animate-stamp -rotate-3 shadow-sm flex-shrink-0">
                           Ready
                         </span>
                       )}
                     </div>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground/60">
+                      {shortlist.movies.length}{' '}
+                      {shortlist.movies.length === 1 ? 'pick' : 'picks'}
+                    </p>
                   </div>
 
-                  <div className="flex-1 min-w-0 flex items-center -gap-x-3 py-1">
-                    {shortlist.movies.slice(0, 5).map((movie, mIndex) => {
+                  {/* Mini poster stack */}
+                  <div className="flex items-center -space-x-2 flex-shrink-0">
+                    {shortlist.movies.slice(0, 3).map((movie) => {
                       const posterPath =
                         (movie.images as any)?.posters?.[0]?.file_path ?? null
                       const posterUrl = posterPath
-                        ? `https://image.tmdb.org/t/p/w154${posterPath}`
+                        ? `https://image.tmdb.org/t/p/w92${posterPath}`
                         : null
 
                       return (
                         <div
                           key={movie.id}
-                          className="relative h-20 w-12 sm:h-24 sm:w-14 md:h-28 md:w-[4.5rem] lg:h-32 lg:w-20 flex-shrink-0 rounded-md bg-muted
-                          border-2 border-white/70 dark:border-white/10 shadow-sm
-                          transition-all duration-300 hover:z-10 hover:scale-110 hover:shadow-xl hover:-translate-y-2 cursor-pointer"
-                          style={{ zIndex: shortlist.movies.length - mIndex }}
+                          className="relative h-12 w-8 rounded-sm bg-muted border border-white/60 dark:border-white/10 shadow-sm
+                          transition-all duration-200 hover:z-10 hover:scale-125 hover:-translate-y-1 hover:shadow-md cursor-pointer flex-shrink-0"
                           title={movie.title}
                         >
                           {posterUrl ? (
                             <img
                               src={posterUrl}
                               alt={movie.title}
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-cover rounded-sm"
                               loading="lazy"
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">
-                              <Ticket className="size-5 text-muted-foreground/30" />
+                              <Ticket className="size-3 text-muted-foreground/25" />
                             </div>
                           )}
                         </div>
                       )
                     })}
-                    {shortlist.movies.length > 5 && (
-                      <div
-                        className="relative z-10 flex h-20 w-12 sm:h-24 sm:w-14 md:h-28 md:w-[4.5rem] lg:h-32 lg:w-20 flex-shrink-0 items-center justify-center rounded-md
-                        bg-muted/90 dark:bg-muted/80 border-2 border-white/70 dark:border-white/10 backdrop-blur-sm
-                        text-xs font-bold text-muted-foreground shadow-sm"
-                      >
-                        +{shortlist.movies.length - 5}
+                    {shortlist.movies.length > 3 && (
+                      <div className="relative z-10 flex h-12 w-8 flex-shrink-0 items-center justify-center rounded-sm bg-muted/80 border border-white/60 dark:border-white/10 shadow-sm">
+                        <span className="text-[10px] font-bold text-muted-foreground">
+                          +{shortlist.movies.length - 3}
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
               </m.div>
             ))}
-
-            {otherShortlists.length > 4 && (
-              <m.div
-                initial={shouldReduceMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Link
-                  to="/shortlists"
-                  className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors pl-2"
-                >
-                  View all {otherShortlists.length} members
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </m.div>
-            )}
           </div>
-        )}
-      </div>
 
-      <div className="lg:col-span-6 xl:col-span-5">
-        <div className="mb-6">
-          <span className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
-            Quick Actions
-          </span>
-        </div>
-
-        <div className="space-y-4">
-          <Link
-            to="/raffle"
-            className="group flex items-stretch rounded-xl overflow-hidden border-2 border-primary/20 bg-[color-mix(in_oklch,var(--card)_95%,var(--primary)_5%)] transition-all
-            hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10"
-          >
-            <div className="flex items-center justify-center w-20 flex-shrink-0 bg-primary/15 transition-all duration-300 group-hover:bg-primary/25">
-              <m.div
-                className="text-primary"
-                whileHover={shouldReduceMotion ? undefined : { rotate: 25 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 12 }}
+          {otherShortlists.length > 4 && (
+            <m.div
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mt-4"
+            >
+              <Link
+                to="/shortlists"
+                className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors pl-2"
               >
-                <Dices className="size-7" />
-              </m.div>
-            </div>
-            <div className="flex-1 flex items-center justify-between p-5 min-w-0">
-              <div>
-                <p className="text-base font-bold text-foreground">
-                  Run the Raffle
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5 font-medium">
-                  {readyCount} of {allShortlists.length} members ready
-                </p>
-              </div>
-              <ArrowRight className="size-5 text-primary transition-all group-hover:translate-x-1 flex-shrink-0 ml-3" />
-            </div>
-          </Link>
+                View all {otherShortlists.length} members
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </m.div>
+          )}
+        </>
+      )}
+
+      {/* Compact stats bar */}
+      {stats && (
+        <div className="mt-8 flex items-center gap-2 sm:gap-4 flex-wrap">
+          <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2">
+            <Film className="size-3.5 text-muted-foreground/45" />
+            <span className="text-xs text-muted-foreground/70">Watched</span>
+            <span className="text-sm font-bold text-foreground tabular-nums">
+              <AnimatedCounter value={stats.totalWatchedMovies} />
+            </span>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2">
+            <Clock className="size-3.5 text-muted-foreground/45" />
+            <span className="text-xs text-muted-foreground/70">Hours</span>
+            <span className="text-sm font-bold text-foreground tabular-nums">
+              <AnimatedCounter value={Math.round(stats.totalWatchTime / 60)} />
+            </span>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2">
+            <Users className="size-3.5 text-muted-foreground/45" />
+            <span className="text-xs text-muted-foreground/70">In Raffle</span>
+            <span className="text-sm font-bold text-foreground tabular-nums">
+              <AnimatedCounter value={totalMovies} />
+            </span>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2">
+            <Star className="size-3.5 text-muted-foreground/45" />
+            <span className="text-xs text-muted-foreground/70">Avg Rating</span>
+            <span className="text-sm font-bold text-foreground tabular-nums">
+              <AnimatedCounter value={stats.averageRating} decimals={1} />
+            </span>
+          </div>
 
           <Link
             to={getUserTierlistHref(currentUserId)}
-            className="group flex items-stretch rounded-xl overflow-hidden border border-border/20 bg-card/40 transition-all
-            hover:border-border/40 hover:bg-card/60"
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
           >
-            <div className="flex items-center justify-center w-16 flex-shrink-0 bg-muted/50 transition-all duration-300 group-hover:bg-muted">
-              <m.div
-                className="text-muted-foreground"
-                whileHover={shouldReduceMotion ? undefined : { rotate: -15 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 12 }}
-              >
-                <Trophy className="size-5" />
-              </m.div>
-            </div>
-            <div className="flex-1 flex items-center justify-between p-4 min-w-0">
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  Rank Movies
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5 font-medium">
-                  Update your tierlists
-                </p>
-              </div>
-              <ArrowRight className="size-4 text-muted-foreground/50 transition-all group-hover:translate-x-1 group-hover:text-muted-foreground flex-shrink-0 ml-3" />
-            </div>
+            <Trophy className="size-3.5" />
+            Rank movies
+            <ArrowRight className="size-3" />
           </Link>
         </div>
-
-        {stats && (
-          <div className="mt-10">
-            <div className="mb-5">
-              <span className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
-                Club Stats
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-3">
-                  <Film className="size-3.5 text-primary/70" />
-                  <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-                    Watched
-                  </span>
-                </div>
-                <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  <AnimatedCounter value={stats.totalWatchedMovies} />
-                </p>
-              </div>
-              <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-3">
-                  <Clock className="size-3.5 text-primary/70" />
-                  <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-                    Hours
-                  </span>
-                </div>
-                <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  <AnimatedCounter
-                    value={Math.round(stats.totalWatchTime / 60)}
-                  />
-                </p>
-              </div>
-              <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-3">
-                  <Users className="size-3.5 text-primary/70" />
-                  <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-                    In Raffle
-                  </span>
-                </div>
-                <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  <AnimatedCounter value={totalMovies} />
-                </p>
-              </div>
-              <div className="rounded-xl bg-card/60 border border-border/10 p-4 transition-colors hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-3">
-                  <Star className="size-3.5 text-primary/70" />
-                  <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-                    Avg Rating
-                  </span>
-                </div>
-                <p className="font-cinema text-3xl md:text-4xl font-bold text-foreground leading-none">
-                  <AnimatedCounter value={stats.averageRating} decimals={1} />
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   )
 })
 
 export function ClubSnapshotSkeleton() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
-      <div className="lg:col-span-6 xl:col-span-7 space-y-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px w-8 animate-pulse rounded bg-muted" />
+    <div>
+      <div className="mb-4">
+        <div className="inline-flex items-center gap-2.5 rounded-full border border-border/10 bg-muted/30 px-4 py-1.5">
+          <div className="size-4 rounded-full animate-pulse bg-muted" />
           <div className="h-5 w-24 animate-pulse rounded bg-muted" />
-          <div className="h-px flex-1 animate-pulse rounded bg-muted" />
         </div>
-        {Array.from({ length: 3 }).map((_, i) => (
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center gap-3 sm:gap-5 p-4 sm:p-5 rounded-xl border border-border/10 bg-muted/50"
+            className="flex items-center gap-3 px-3 py-3 rounded-xl border border-border/10 bg-muted/30"
           >
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 pr-0 sm:pr-4 border-r-0 sm:border-r-2 border-dashed border-border/20">
-              <div className="size-12 rounded-full animate-pulse bg-muted flex-shrink-0" />
-              <div className="hidden sm:block h-4 w-24 animate-pulse rounded bg-muted" />
-            </div>
-            <div className="flex-1 flex items-center -gap-x-3 overflow-hidden">
-              {Array.from({ length: 5 }).map((_item, j) => (
+            <div className="flex flex-col gap-2">
+              {Array.from({ length: 3 }).map((_, j) => (
                 <div
                   key={j}
-                  className="h-20 w-12 sm:h-24 sm:w-14 md:h-28 md:w-[4.5rem] lg:h-32 lg:w-20 rounded-lg animate-pulse bg-muted flex-shrink-0 border-2 border-white/50"
+                  className="w-2 h-2.5 rounded-[3px] animate-pulse bg-muted"
+                />
+              ))}
+            </div>
+            <div className="size-10 rounded-full animate-pulse bg-muted flex-shrink-0" />
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <div className="h-3.5 w-24 animate-pulse rounded bg-muted" />
+              <div className="h-2.5 w-12 animate-pulse rounded bg-muted" />
+            </div>
+            <div className="flex items-center -space-x-2">
+              {Array.from({ length: 3 }).map((_, j) => (
+                <div
+                  key={j}
+                  className="h-12 w-8 rounded-sm animate-pulse bg-muted flex-shrink-0 border border-white/50"
                 />
               ))}
             </div>
           </div>
         ))}
       </div>
-      <div className="lg:col-span-6 xl:col-span-5 space-y-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px w-8 animate-pulse rounded bg-muted" />
-          <div className="h-5 w-28 animate-pulse rounded bg-muted" />
-        </div>
-        <div className="flex h-20 animate-pulse rounded-xl bg-muted" />
-        <div className="flex h-20 animate-pulse rounded-xl bg-muted" />
-        <div className="grid grid-cols-2 gap-3 mt-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-24 rounded-xl animate-pulse bg-muted border border-border/10"
-            />
-          ))}
-        </div>
+      <div className="mt-10 flex h-16 animate-pulse rounded-2xl bg-muted/50 border border-border/10" />
+      <div className="mt-8 flex items-center gap-2 sm:gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-9 w-28 rounded-lg animate-pulse bg-muted/50 border border-border/10"
+          />
+        ))}
       </div>
     </div>
   )

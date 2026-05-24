@@ -314,7 +314,9 @@ export const ShortlistStrip = memo(function ShortlistStrip({
                 <Clothespin />
                 <div className="polaroid-flip-container">
                   <div className="polaroid-flipper">
-                    <div className="polaroid-front">
+                    <div className="polaroid-front relative">
+                      <div className="polaroid-peek" />
+                      <span className="polaroid-hint">Flip</span>
                       <div className="w-40 sm:w-48 md:w-56 lg:w-64 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
                         <div className="aspect-[2/3] overflow-hidden rounded-[1px] bg-black/5">
                           {posterUrl ? (

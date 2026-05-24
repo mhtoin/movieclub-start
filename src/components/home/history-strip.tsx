@@ -19,9 +19,9 @@ export const HistoryStrip = memo(function HistoryStrip({
     <div>
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-px w-8 bg-primary" />
-          <Film className="size-4 text-primary flex-shrink-0" />
-          <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase">
+          <div className="h-px w-5 bg-muted-foreground/30" />
+          <Film className="size-3.5 text-muted-foreground/50 flex-shrink-0" />
+          <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             Recently Watched
           </span>
         </div>
@@ -136,8 +136,8 @@ export function HistoryStripSkeleton() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-px w-8 animate-pulse rounded bg-muted" />
-          <div className="h-5 w-36 animate-pulse rounded bg-muted" />
+          <div className="h-px w-5 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-36 animate-pulse rounded bg-muted" />
         </div>
         <div className="h-4 w-16 animate-pulse rounded bg-muted" />
       </div>

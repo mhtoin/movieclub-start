@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { LazyMotion, domAnimation, m, useReducedMotion } from 'framer-motion'
 
 import { HeroSkeleton, MarqueeHero } from './marquee-hero'
+import { RaffleCTASkeleton, RaffleCTASuspense } from './raffle-cta'
 import {
   ShortlistStripSkeleton,
   ShortlistStripSuspense,
@@ -49,6 +50,16 @@ export const LandingPage = memo(function LandingPage({
             >
               <MarqueeHero movie={latestMovie} userId={userId} />
             </m.section>
+
+            <Suspense fallback={<RaffleCTASkeleton />}>
+              <m.section
+                initial={shouldReduceMotion ? false : 'hidden'}
+                animate="show"
+                variants={sectionVariants}
+              >
+                <RaffleCTASuspense />
+              </m.section>
+            </Suspense>
 
             <Suspense fallback={<ShortlistStripSkeleton />}>
               <m.section
@@ -103,6 +114,7 @@ export function LandingSkeleton() {
       <div className="relative md:pl-[72px] lg:pl-20 md:pr-10 lg:pr-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 pt-6 md:pt-10 space-y-16 md:space-y-24">
           <HeroSkeleton />
+          <RaffleCTASkeleton />
           <ShortlistStripSkeleton />
           <ClubSnapshotSkeleton />
           <RecommendationsStripSkeleton />
