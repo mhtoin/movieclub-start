@@ -13,7 +13,7 @@ export default function FilterSelect({
   options?: Array<{ value: string; label: string }>
   onChange: (value: string) => void
 }) {
-  const routeApi = getRouteApi('/_authenticated/watched')
+  const routeApi = getRouteApi('/_authenticated/watched/')
   const { user } = routeApi.useSearch()
 
   return (

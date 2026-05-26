@@ -7,6 +7,7 @@ import {
   Clock,
   ExternalLink,
   Film,
+  MessageCircle,
   Star,
   Ticket,
   Trophy,
@@ -233,6 +234,15 @@ export const MarqueeHero = memo(function MarqueeHero({
               <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
+              to="/watched/$movieId"
+              params={{ movieId: movie.id }}
+              className="group inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-6 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-primary/10 hover:border-primary/50 active:scale-[0.98]"
+            >
+              <MessageCircle className="size-4" />
+              Club reviews
+              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
               to="/watched"
               className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent active:scale-[0.98]"
             >
@@ -260,13 +270,15 @@ export const MarqueeHero = memo(function MarqueeHero({
               }}
             >
               {posterUrl ? (
-                <img
-                  src={posterUrl}
-                  alt={movie.title}
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                />
+                <Link to="/watched/$movieId" params={{ movieId: movie.id }}>
+                  <img
+                    src={posterUrl}
+                    alt={movie.title}
+                    className="h-full w-full object-cover hover:scale-[1.02] transition-transform duration-500"
+                    loading="eager"
+                    decoding="async"
+                  />
+                </Link>
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-muted">
                   <Ticket className="size-16 text-muted-foreground/25" />

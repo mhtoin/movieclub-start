@@ -3,7 +3,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import { Calendar, Check, Film, User } from 'lucide-react'
 import FilterCombobox from './filter-combobox'
 import FilterSelect from './filter-select'
-import { Route } from '@/routes/_authenticated/watched'
+import { Route } from '@/routes/_authenticated/watched/index'
 import { cn } from '@/lib/utils'
 import { userQueries } from '@/lib/react-query/queries/users'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
@@ -18,7 +18,7 @@ export default function Filters({
   variant = 'default',
   onFilterApply,
 }: FiltersProps) {
-  const routeApi = getRouteApi('/_authenticated/watched')
+  const routeApi = getRouteApi('/_authenticated/watched/')
   const { data: users } = useQuery(userQueries.all())
   const usersOptions = users?.map((user) => ({
     value: user.name,

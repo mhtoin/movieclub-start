@@ -32,7 +32,9 @@ export function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: false,
+        heading: {
+          levels: [1, 2, 3],
+        },
         code: false,
         codeBlock: false,
         blockquote: false,
@@ -61,6 +63,12 @@ export function RichTextEditor({
     immediatelyRender: false,
   })
 
+  const toggleHeading = useCallback(
+    (level: 1 | 2 | 3) => {
+      editor?.chain().focus().toggleHeading({ level }).run()
+    },
+    [editor],
+  )
   const toggleBold = useCallback(
     () => editor?.chain().focus().toggleBold().run(),
     [editor],
@@ -100,6 +108,9 @@ export function RichTextEditor({
 
   if (!editor) return null
 
+  const isH1 = editor.isActive('heading', { level: 1 })
+  const isH2 = editor.isActive('heading', { level: 2 })
+  const isH3 = editor.isActive('heading', { level: 3 })
   const isBold = editor.isActive('bold')
   const isItalic = editor.isActive('italic')
   const isUnderline = editor.isActive('underline')
@@ -110,18 +121,43 @@ export function RichTextEditor({
   return (
     <div className="rounded-md border border-border bg-background overflow-hidden focus-within:outline focus-within:outline-2 focus-within:-outline-offset-1 focus-within:outline-primary transition-colors">
       <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border bg-muted/30 flex-wrap">
+        <ToolbarButton
+          active={isH1}
+          onClick={() => toggleHeading(1)}
+          label="Heading 1"
+          text
+        >
+          H1
+        </ToolbarButton>
+        <ToolbarButton
+          active={isH2}
+          onClick={() => toggleHeading(2)}
+          label="Heading 2"
+          text
+        >
+          H2
+        </ToolbarButton>
+        <ToolbarButton
+          active={isH3}
+          onClick={() => toggleHeading(3)}
+          label="Heading 3"
+          text
+        >
+          H3
+        </ToolbarButton>
+        <span className="w-px h-4 bg-border mx-1" />
         <ToolbarButton active={isBold} onClick={toggleBold} label="Bold">
-          <Bold className="h-3.5 w-3.5" />
+          <Bold className="size-3.5" />
         </ToolbarButton>
         <ToolbarButton active={isItalic} onClick={toggleItalic} label="Italic">
-          <Italic className="h-3.5 w-3.5" />
+          <Italic className="size-3.5" />
         </ToolbarButton>
         <ToolbarButton
           active={isUnderline}
           onClick={toggleUnderline}
           label="Underline"
         >
-          <UnderlineIcon className="h-3.5 w-3.5" />
+          <UnderlineIcon className="size-3.5" />
         </ToolbarButton>
         <span className="w-px h-4 bg-border mx-1" />
         <ToolbarButton
@@ -129,14 +165,14 @@ export function RichTextEditor({
           onClick={toggleBulletList}
           label="Bullet list"
         >
-          <List className="h-3.5 w-3.5" />
+          <List className="size-3.5" />
         </ToolbarButton>
         <ToolbarButton
           active={isOrderedList}
           onClick={toggleOrderedList}
           label="Ordered list"
         >
-          <ListOrdered className="h-3.5 w-3.5" />
+          <ListOrdered className="size-3.5" />
         </ToolbarButton>
         <span className="w-px h-4 bg-border mx-1" />
         <ToolbarButton
@@ -145,9 +181,9 @@ export function RichTextEditor({
           label={hasLink ? 'Remove link' : 'Add link'}
         >
           {hasLink ? (
-            <Unlink className="h-3.5 w-3.5" />
+            <Unlink className="size-3.5" />
           ) : (
-            <Link className="h-3.5 w-3.5" />
+            <Link className="size-3.5" />
           )}
         </ToolbarButton>
       </div>
@@ -163,11 +199,13 @@ function ToolbarButton({
   onClick,
   label,
   children,
+  text,
 }: {
   active: boolean
   onClick: () => void
   label: string
   children: React.ReactNode
+  text?: boolean
 }) {
   return (
     <button
@@ -176,10 +214,11 @@ function ToolbarButton({
       aria-label={label}
       title={label}
       className={cn(
-        'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
+        'flex items-center justify-center rounded-md transition-colors',
+        text ? 'h-7 w-7 text-[11px] font-bold' : 'h-7 w-7',
         active
-          ? 'bg-primary/15 text-primary'
-          : 'text-muted-foreground/70 hover:text-foreground hover:bg-accent',
+          ? 'bg-foreground/15 text-foreground'
+          : 'text-muted-foreground/50 hover:text-foreground hover:bg-foreground/5',
       )}
     >
       {children}

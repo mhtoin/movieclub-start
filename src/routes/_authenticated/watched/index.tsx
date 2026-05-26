@@ -45,7 +45,7 @@ const watchedSearchSchema = z.object({
   month: fallback(z.string(), '').default(defaultValues.month),
 })
 
-export const Route = createFileRoute('/_authenticated/watched')({
+export const Route = createFileRoute('/_authenticated/watched/')({
   validateSearch: zodValidator(watchedSearchSchema),
   search: {
     middlewares: [
@@ -272,16 +272,11 @@ function WatchedMoviesList({
 
 function RouteComponent() {
   const { search: urlSearch, user, genre, month } = Route.useSearch()
-  // Local state for the input — stays snappy on every keystroke.
-  // The URL param (urlSearch) is the debounced, committed value used for
-  // data-fetching; it only updates after the user pauses typing.
   const [localSearch, setLocalSearch] = useState(urlSearch)
   const navigate = Route.useNavigate()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const isMobile = !useMediaQuery('(min-width: 768px)')
 
-  // Debounce URL updates so the loader only re-runs after the user pauses
-  // typing.  No useEffect needed — the callback fires on user action.
   const debouncedNavigate = useDebouncedCallback((value: string) => {
     navigate({
       search: (prev) => {
