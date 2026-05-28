@@ -126,7 +126,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                 className="transition-all duration-300 hover:-translate-y-1"
               >
                 <div
-                  className="ticket-card group flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl
+                  className="ticket-card group flex items-center gap-4 pl-3 pr-4 py-4 rounded-xl
                   bg-[color-mix(in_oklch,var(--card)_96%,var(--primary)_4%)]
                   border border-[color-mix(in_oklch,var(--border)_90%,var(--primary)_10%)]"
                   style={{
@@ -152,12 +152,12 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                     src={shortlist.user.image}
                     alt={shortlist.user.name}
                     name={shortlist.user.name}
-                    size={40}
+                    size={48}
                   />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-foreground truncate">
+                      <span className="text-base font-bold text-foreground truncate">
                         {shortlist.user.name}
                       </span>
                       {shortlist.isReady && shortlist.participating && (
@@ -166,7 +166,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                         </span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground/60">
+                    <p className="mt-0.5 text-xs text-muted-foreground/60">
                       {shortlist.movies.length}{' '}
                       {shortlist.movies.length === 1 ? 'pick' : 'picks'}
                     </p>
@@ -178,13 +178,13 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                       const posterPath =
                         (movie.images as any)?.posters?.[0]?.file_path ?? null
                       const posterUrl = posterPath
-                        ? `https://image.tmdb.org/t/p/w92${posterPath}`
+                        ? `https://image.tmdb.org/t/p/w154${posterPath}`
                         : null
 
                       return (
                         <div
                           key={movie.id}
-                          className="relative h-12 w-8 rounded-sm bg-muted border border-white/60 dark:border-white/10 shadow-sm
+                          className="relative h-24 w-16 rounded-sm bg-muted border border-white/60 dark:border-white/10 shadow-sm
                           transition-all duration-200 hover:z-10 hover:scale-125 hover:-translate-y-1 hover:shadow-md cursor-pointer flex-shrink-0"
                           title={movie.title}
                         >
@@ -197,15 +197,15 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">
-                              <Ticket className="size-3 text-muted-foreground/25" />
+                              <Ticket className="size-4 text-muted-foreground/25" />
                             </div>
                           )}
                         </div>
                       )
                     })}
                     {shortlist.movies.length > 3 && (
-                      <div className="relative z-10 flex h-12 w-8 flex-shrink-0 items-center justify-center rounded-sm bg-muted/80 border border-white/60 dark:border-white/10 shadow-sm">
-                        <span className="text-[10px] font-bold text-muted-foreground">
+                      <div className="relative z-10 flex h-24 w-16 flex-shrink-0 items-center justify-center rounded-sm bg-muted/80 border border-white/60 dark:border-white/10 shadow-sm">
+                        <span className="text-sm font-bold text-muted-foreground">
                           +{shortlist.movies.length - 3}
                         </span>
                       </div>
@@ -294,7 +294,7 @@ export function ClubSnapshotSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center gap-3 px-3 py-3 rounded-xl border border-border/10 bg-muted/30"
+            className="flex items-center gap-4 px-3 py-4 rounded-xl border border-border/10 bg-muted/30"
           >
             <div className="flex flex-col gap-2">
               {Array.from({ length: 3 }).map((_, j) => (
@@ -304,16 +304,16 @@ export function ClubSnapshotSkeleton() {
                 />
               ))}
             </div>
-            <div className="size-10 rounded-full animate-pulse bg-muted flex-shrink-0" />
+            <div className="size-12 rounded-full animate-pulse bg-muted flex-shrink-0" />
             <div className="flex-1 min-w-0 space-y-1.5">
-              <div className="h-3.5 w-24 animate-pulse rounded bg-muted" />
-              <div className="h-2.5 w-12 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-12 animate-pulse rounded bg-muted" />
             </div>
             <div className="flex items-center -space-x-2">
               {Array.from({ length: 3 }).map((_, j) => (
                 <div
                   key={j}
-                  className="h-12 w-8 rounded-sm animate-pulse bg-muted flex-shrink-0 border border-white/50"
+                  className="h-24 w-16 rounded-sm animate-pulse bg-muted flex-shrink-0 border border-white/50"
                 />
               ))}
             </div>
