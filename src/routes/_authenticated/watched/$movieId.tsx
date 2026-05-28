@@ -1,7 +1,15 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { format } from 'date-fns'
-import { ArrowLeft, Clock } from 'lucide-react'
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  ExternalLink,
+  Globe,
+  Play,
+  Star,
+} from 'lucide-react'
 import { Suspense, useMemo, useState } from 'react'
 import { ReviewForm } from '@/components/reviews/review-form'
 import { ReviewList } from '@/components/reviews/review-list'
@@ -136,6 +144,62 @@ function MovieDetailContent({
 
   const cast = Array.isArray(movie.cast) ? movie.cast.slice(0, 6) : []
 
+  const releaseYear = movie.releaseDate
+    ? new Date(movie.releaseDate).getFullYear()
+    : null
+  const formattedRuntime = movie.runtime
+    ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
+    : null
+
+  const tmdbLink = movie.tmdbId
+    ? `https://www.themoviedb.org/movie/${movie.tmdbId}`
+    : null
+  const imdbLink = movie.imdbId
+    ? `https://www.imdb.com/title/${movie.imdbId}`
+    : null
+
+  const watchProviderLink =
+    typeof movie.watchProviders?.link === 'string' && movie.watchProviders.link
+      ? movie.watchProviders.link
+      : null
+  const watchProviders = Array.isArray(movie.watchProviders?.providers)
+    ? movie.watchProviders.providers.slice(0, 6)
+    : []
+
+  const trailers = Array.isArray(movie.videos) ? movie.videos.slice(0, 3) : []
+
+  const languageNames: Record<string, string> = {
+    en: 'English',
+    fi: 'Finnish',
+    sv: 'Swedish',
+    no: 'Norwegian',
+    da: 'Danish',
+    de: 'German',
+    fr: 'French',
+    es: 'Spanish',
+    it: 'Italian',
+    ja: 'Japanese',
+    ko: 'Korean',
+    zh: 'Chinese',
+    ru: 'Russian',
+    pt: 'Portuguese',
+    nl: 'Dutch',
+    pl: 'Polish',
+    tr: 'Turkish',
+    ar: 'Arabic',
+    hi: 'Hindi',
+    th: 'Thai',
+    vi: 'Vietnamese',
+    id: 'Indonesian',
+    ta: 'Tamil',
+    te: 'Telugu',
+    ml: 'Malayalam',
+  }
+  const languageName = movie.originalLanguage
+    ? (languageNames[movie.originalLanguage] ??
+      movie.originalLanguage.toUpperCase())
+    : null
+
   return (
     <div className="min-h-full">
       {backdropUrl && !isMobile && (
@@ -143,7 +207,7 @@ function MovieDetailContent({
           <img
             src={backdropUrl}
             alt=""
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-top"
           />
           <div className="absolute inset-0 bg-black/35" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
@@ -172,11 +236,15 @@ function MovieDetailContent({
           <div
             className={
               isMobile
-                ? 'space-y-6'
-                : 'grid grid-cols-[280px_1fr] gap-10 items-start'
+                ? 'space-y-8'
+                : 'grid grid-cols-[280px_1fr] gap-12 items-start'
             }
           >
-            <div className="space-y-4">
+            <div
+              className={
+                isMobile ? 'space-y-4' : 'sticky top-6 self-start space-y-5'
+              }
+            >
               <div className="relative">
                 <img
                   src={posterUrl}
@@ -199,13 +267,35 @@ function MovieDetailContent({
               </div>
 
               {!isMobile && (
-                <div className="rounded-xl p-5 mt-4 bg-card border border-border/50">
-                  <div className="space-y-3">
+                <div className="rounded-xl p-5 bg-card border border-border/50">
+                  {/* Core Info */}
+                  <div className="space-y-2.5">
+                    {releaseYear && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="size-3.5 text-muted-foreground" />
+                        <span className="text-muted-foreground">
+                          {releaseYear}
+                        </span>
+                      </div>
+                    )}
                     {movie.runtime && (
                       <div className="flex items-center gap-2 text-sm">
                         <Clock className="size-3.5 text-muted-foreground" />
                         <span className="text-muted-foreground">
-                          {movie.runtime} min
+                          {formattedRuntime ?? `${movie.runtime} min`}
+                        </span>
+                      </div>
+                    )}
+                    {movie.voteAverage > 0 && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Star className="size-3.5 fill-warning text-warning" />
+                        <span className="text-muted-foreground">
+                          {movie.voteAverage.toFixed(1)}
+                          {movie.voteCount > 0 && (
+                            <span className="text-muted-foreground/60 text-xs ml-1">
+                              ({movie.voteCount.toLocaleString()} votes)
+                            </span>
+                          )}
                         </span>
                       </div>
                     )}
@@ -219,30 +309,131 @@ function MovieDetailContent({
                         </span>
                       </div>
                     )}
-                    {picker && (
-                      <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-                        <Avatar
-                          src={picker.image}
-                          name={picker.name}
-                          size={28}
-                          alt={`${picker.name}'s avatar`}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/50">
-                            Chosen by
-                          </p>
-                          <p className="text-sm font-medium truncate">
-                            {picker.name}
-                          </p>
+                    {movie.originalTitle &&
+                      movie.originalTitle !== movie.title && (
+                        <div className="flex items-start gap-2">
+                          <span className="text-xs text-muted-foreground/60 mt-0.5">
+                            Orig.
+                          </span>
+                          <span className="text-sm text-foreground/80">
+                            {movie.originalTitle}
+                          </span>
                         </div>
+                      )}
+                    {languageName && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Globe className="size-3.5 text-muted-foreground" />
+                        <span className="text-muted-foreground">
+                          {languageName}
+                        </span>
                       </div>
                     )}
                   </div>
+
+                  {picker && (
+                    <div className="flex items-center gap-2 pt-4 mt-4 border-t border-border/50">
+                      <Avatar
+                        src={picker.image}
+                        name={picker.name}
+                        size={28}
+                        alt={`${picker.name}'s avatar`}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground/50">
+                          Chosen by
+                        </p>
+                        <p className="text-sm font-medium truncate">
+                          {picker.name}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(tmdbLink ||
+                    imdbLink ||
+                    watchProviders.length > 0 ||
+                    trailers.length > 0) && (
+                    <div className="pt-4 mt-4 border-t border-border/50 space-y-4">
+                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50">
+                        Watch & Explore
+                      </p>
+
+                      {(tmdbLink || imdbLink) && (
+                        <div className="flex flex-wrap gap-2">
+                          {tmdbLink && (
+                            <a
+                              href={tmdbLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-md bg-[--tmdb] text-[--tmdb-foreground] px-2 py-1 text-xs font-semibold hover:opacity-90 transition-opacity"
+                            >
+                              <span>TMDb</span>
+                              <ExternalLink className="size-3" />
+                            </a>
+                          )}
+                          {imdbLink && (
+                            <a
+                              href={imdbLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-md bg-[--imdb] text-[--imdb-foreground] px-2 py-1 text-xs font-semibold hover:opacity-90 transition-opacity"
+                            >
+                              <span>IMDb</span>
+                              <ExternalLink className="size-3" />
+                            </a>
+                          )}
+                        </div>
+                      )}
+
+                      {watchProviders.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {watchProviders.map((provider: any) =>
+                            provider.logo_path ? (
+                              <a
+                                key={provider.provider_id}
+                                href={watchProviderLink ?? '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={provider.provider_name}
+                                className="size-8 rounded-md overflow-hidden bg-background border border-border/40 shadow-sm hover:scale-110 transition-transform"
+                              >
+                                <img
+                                  src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
+                                  alt={provider.provider_name}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                              </a>
+                            ) : null,
+                          )}
+                        </div>
+                      )}
+
+                      {trailers.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                          {trailers.map((trailer: any) => (
+                            <a
+                              key={trailer.key}
+                              href={`https://www.youtube.com/watch?v=${trailer.key}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-foreground/80 hover:text-primary transition-colors"
+                            >
+                              <Play className="size-3 text-primary" />
+                              <span className="truncate">{trailer.name}</span>
+                              <ExternalLink className="size-3 text-muted-foreground/50 flex-shrink-0" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            <div className="space-y-6 min-w-0">
+            <div className="space-y-8 min-w-0">
               <div>
                 {movie.tagline && !isMobile && (
                   <p
@@ -259,17 +450,63 @@ function MovieDetailContent({
                   {movie.title}
                 </h1>
 
-                {isMobile && (
-                  <div className="flex flex-wrap items-center gap-3 mt-3">
+                {!isMobile && (
+                  <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
+                    {releaseYear && (
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="size-3.5" />
+                        <span>{releaseYear}</span>
+                      </div>
+                    )}
                     {movie.runtime && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="size-3" />
-                        <span>{movie.runtime} min</span>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="size-3.5" />
+                        <span>
+                          {formattedRuntime ?? `${movie.runtime} min`}
+                        </span>
                       </div>
                     )}
                     {movie.voteAverage > 0 && (
-                      <div className="text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary">
-                        TMDB {movie.voteAverage.toFixed(1)}
+                      <div className="flex items-center gap-1.5">
+                        <Star className="size-3.5 fill-warning text-warning" />
+                        <span className="font-medium text-foreground/80">
+                          {movie.voteAverage.toFixed(1)}
+                        </span>
+                        {movie.voteCount > 0 && (
+                          <span className="text-muted-foreground/60 text-xs">
+                            ({movie.voteCount.toLocaleString()} votes)
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {isMobile && (
+                  <div className="flex flex-wrap items-center gap-3 mt-3">
+                    {releaseYear && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="size-3" />
+                        <span>{releaseYear}</span>
+                      </div>
+                    )}
+                    {movie.runtime && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="size-3" />
+                        <span>
+                          {formattedRuntime ?? `${movie.runtime} min`}
+                        </span>
+                      </div>
+                    )}
+                    {movie.voteAverage > 0 && (
+                      <div className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary">
+                        <Star className="size-3 fill-warning text-warning" />
+                        <span>{movie.voteAverage.toFixed(1)}</span>
+                        {movie.voteCount > 0 && (
+                          <span className="text-primary/60 text-[10px]">
+                            ({movie.voteCount.toLocaleString()})
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -320,6 +557,95 @@ function MovieDetailContent({
                 </div>
               )}
 
+              {isMobile && (
+                <div className="rounded-xl p-4 bg-card border border-border/50 space-y-4">
+                  {(tmdbLink || imdbLink) && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 mb-2">
+                        External Links
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {tmdbLink && (
+                          <a
+                            href={tmdbLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-md bg-[--tmdb] text-[--tmdb-foreground] px-2.5 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity"
+                          >
+                            <span>TMDb</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        )}
+                        {imdbLink && (
+                          <a
+                            href={imdbLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-md bg-[--imdb] text-[--imdb-foreground] px-2.5 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity"
+                          >
+                            <span>IMDb</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {watchProviders.length > 0 && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 mb-2">
+                        Watch On
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {watchProviders.map((provider: any) =>
+                          provider.logo_path ? (
+                            <a
+                              key={provider.provider_id}
+                              href={watchProviderLink ?? '#'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={provider.provider_name}
+                              className="size-8 rounded-md overflow-hidden bg-background border border-border/40 shadow-sm hover:scale-110 transition-transform"
+                            >
+                              <img
+                                src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`}
+                                alt={provider.provider_name}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            </a>
+                          ) : null,
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {trailers.length > 0 && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 mb-2">
+                        Trailers
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        {trailers.map((trailer: any) => (
+                          <a
+                            key={trailer.key}
+                            href={`https://www.youtube.com/watch?v=${trailer.key}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-foreground/80 hover:text-primary transition-colors"
+                          >
+                            <Play className="size-3 text-primary" />
+                            <span className="truncate">{trailer.name}</span>
+                            <ExternalLink className="size-3 text-muted-foreground/50 flex-shrink-0" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {cast.length > 0 && (
                 <div className="space-y-3">
                   <p
@@ -364,87 +690,81 @@ function MovieDetailContent({
                 </div>
               )}
 
-              <div className="h-px w-full bg-border" />
-            </div>
-          </div>
-        </div>
-      </div>
+              {/* Reviews */}
+              <div className="space-y-6">
+                <div>
+                  <p
+                    className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground"
+                    style={{ fontFamily: 'var(--font-cinema)' }}
+                  >
+                    Club Reviews
+                  </p>
+                  {reviews.length > 0 ? (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {reviews.length} review
+                      {reviews.length === 1 ? '' : 's'} from the club
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      No reviews yet. Be the first to share what you thought.
+                    </p>
+                  )}
+                </div>
 
-      <div className="border-t border-border/30">
-        <div
-          className={
-            backdropUrl && !isMobile
-              ? 'container mx-auto px-6 py-10'
-              : 'container mx-auto px-4 py-10'
-          }
-        >
-          <div className={isMobile ? '' : 'ml-[320px] max-w-2xl'}>
-            {reviews.length > 0 ? (
-              <div className="mb-10">
-                <ReviewList
-                  reviews={reviews}
-                  averageRating={averageRating}
-                  reviewCount={reviews.length}
-                  currentUserId={currentUser.id}
-                  onEditReview={(reviewId) => setEditingReviewId(reviewId)}
-                  onDeleteReview={(reviewId) =>
-                    deleteReviewMutation.mutate(reviewId)
-                  }
-                />
-              </div>
-            ) : (
-              <div className="mb-10">
-                <p
-                  className="text-2xl font-bold mb-2"
-                  style={{ fontFamily: 'var(--font-cinema-caps)' }}
-                >
-                  Club Reviews
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  No reviews yet. Be the first to share what you thought.
-                </p>
-              </div>
-            )}
-
-            {(!userReview || editingReviewId) && (
-              <div
-                key={editingReviewId ?? 'new'}
-                className="rounded-xl p-6 bg-card border border-border/50"
-              >
-                <ReviewForm
-                  currentUser={currentUser}
-                  onSubmit={(data) => {
-                    if (editingReview) {
-                      updateReviewMutation.mutate({
-                        reviewId: editingReview.id,
-                        content: data.content,
-                        rating: data.rating,
-                      })
-                      setEditingReviewId(null)
-                    } else {
-                      createReviewMutation.mutate({
-                        movieId,
-                        content: data.content,
-                        rating: data.rating,
-                      })
+                {reviews.length > 0 && (
+                  <ReviewList
+                    reviews={reviews}
+                    averageRating={averageRating}
+                    reviewCount={reviews.length}
+                    currentUserId={currentUser.id}
+                    onEditReview={(reviewId) => setEditingReviewId(reviewId)}
+                    onDeleteReview={(reviewId) =>
+                      deleteReviewMutation.mutate(reviewId)
                     }
-                  }}
-                  isSubmitting={
-                    createReviewMutation.isPending ||
-                    updateReviewMutation.isPending
-                  }
-                  editReview={editingReview}
-                  onCancelEdit={() => setEditingReviewId(null)}
-                />
-              </div>
-            )}
+                  />
+                )}
 
-            {userReview && !editingReviewId && (
-              <p className="text-xs text-muted-foreground/50 text-center italic">
-                You&apos;ve already shared your thoughts. Hover over your review
-                to edit or delete it.
-              </p>
-            )}
+                {(!userReview || editingReviewId) && (
+                  <div
+                    key={editingReviewId ?? 'new'}
+                    className="rounded-xl p-6 bg-card border border-border/50"
+                  >
+                    <ReviewForm
+                      currentUser={currentUser}
+                      onSubmit={(data) => {
+                        if (editingReview) {
+                          updateReviewMutation.mutate({
+                            reviewId: editingReview.id,
+                            content: data.content,
+                            rating: data.rating,
+                          })
+                          setEditingReviewId(null)
+                        } else {
+                          createReviewMutation.mutate({
+                            movieId,
+                            content: data.content,
+                            rating: data.rating,
+                          })
+                        }
+                      }}
+                      isSubmitting={
+                        createReviewMutation.isPending ||
+                        updateReviewMutation.isPending
+                      }
+                      editReview={editingReview}
+                      onCancelEdit={() => setEditingReviewId(null)}
+                    />
+                  </div>
+                )}
+
+                {userReview && !editingReviewId && (
+                  <p className="text-xs text-muted-foreground/50 text-center italic">
+                    You&apos;ve already shared your thoughts. Hover over your
+                    review to edit or delete it.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
