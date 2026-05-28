@@ -301,7 +301,7 @@ function RouteComponent() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="md:pl-14">
-        <div className="container mx-auto px-4 py-4 md:py-8">
+        <div className="container px-4 py-4 md:py-8">
           <PageTitleBar
             title="Watch History"
             description="A timeline of all the movies watched"
