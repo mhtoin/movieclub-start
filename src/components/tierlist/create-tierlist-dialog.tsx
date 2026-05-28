@@ -96,11 +96,11 @@ export function CreateTierlistDialog({ userId }: { userId: string }) {
   const [toYear, setToYear] = useState<string>('')
   const [selectedGenres, setSelectedGenres] = useState<Array<string>>([])
   const [tiers, setTiers] = useState([
-    { label: 'S', value: 0 },
-    { label: 'A', value: 1 },
-    { label: 'B', value: 2 },
-    { label: 'C', value: 3 },
-    { label: 'D', value: 4 },
+    { label: 'S', value: 1 },
+    { label: 'A', value: 2 },
+    { label: 'B', value: 3 },
+    { label: 'C', value: 4 },
+    { label: 'D', value: 5 },
   ])
 
   const { data: genresData = [] } = useQuery(tmdbQueries.genres())

@@ -16,12 +16,11 @@ interface TierContainerProps {
 const getTierColors = (value: number) => {
   const numberValue = value <= 5 ? value : 'default'
   const colorSchemes: Record<string, { text: string }> = {
-    '5': { text: 'text-emerald-500' },
-    '4': { text: 'text-lime-500' },
-    '3': { text: 'text-amber-500' },
-    '2': { text: 'text-orange-500' },
-    '1': { text: 'text-red-500' },
-    '0': { text: 'text-violet-500' },
+    '5': { text: 'text-lime-500' },
+    '4': { text: 'text-amber-500' },
+    '3': { text: 'text-orange-500' },
+    '2': { text: 'text-red-500' },
+    '1': { text: 'text-violet-500' },
     default: { text: 'text-primary' },
   }
 

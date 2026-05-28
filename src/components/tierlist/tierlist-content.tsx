@@ -11,6 +11,8 @@ import {
 } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
+import { Toast } from '@base-ui/react/toast'
 import { format } from 'date-fns'
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import {
@@ -71,6 +73,7 @@ export function TierlistContent({
   userName,
 }: TierlistContentProps) {
   const queryClient = useQueryClient()
+  const toastManager = Toast.useToastManager()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -330,13 +333,50 @@ export function TierlistContent({
       setIsSaving(true)
       ;(async () => {
         try {
+          const results: Array<{
+            movieId: string
+            reviewId: string
+            tierLabel: string
+            stars: number
+            movieTitle: string
+          }> = []
           if (updates.length > 0) {
-            await batchUpdateTierMoviePositions({ data: updates })
+            const updateResult = await batchUpdateTierMoviePositions({
+              data: updates,
+            })
+            if (updateResult.autoReviews.length) {
+              results.push(...updateResult.autoReviews)
+            }
           }
           if (inserts.length > 0) {
-            await batchInsertMoviesOnTiers({ data: inserts })
+            const insertResult = await batchInsertMoviesOnTiers({
+              data: inserts,
+            })
+            if (insertResult.autoReviews.length) {
+              results.push(...insertResult.autoReviews)
+            }
           }
           await queryClient.invalidateQueries({ queryKey: ['tierlists'] })
+
+          for (const review of results) {
+            toastManager.add({
+              title: review.movieTitle,
+              description: (
+                <span>
+                  Ranked in {review.tierLabel} &mdash; {review.stars}{' '}
+                  {review.stars === 1 ? 'star' : 'stars'}.{' '}
+                  <Link
+                    to="/watched/$movieId"
+                    params={{ movieId: review.movieId }}
+                    className="text-primary underline underline-offset-2 font-medium hover:text-primary/80"
+                  >
+                    Write your thoughts?
+                  </Link>
+                </span>
+              ),
+              type: 'default',
+            })
+          }
         } finally {
           setIsSaving(false)
         }

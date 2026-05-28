@@ -15,7 +15,7 @@ import { z } from 'zod'
 import { movieQueries } from './movies'
 import type { InferSelectModel } from 'drizzle-orm'
 import { authMiddleware } from '@/middleware/auth'
-import { movie, moviesOnTiers, tier, tierlist, user } from '@/db/schema'
+import { movie, moviesOnTiers, review, tier, tierlist, user } from '@/db/schema'
 import { db } from '@/db/db'
 
 type Tierlist = InferSelectModel<typeof tierlist>
@@ -131,6 +131,94 @@ async function assertOwnedMovieOnTierIds(
   }
 }
 
+interface AutoReviewResult {
+  movieId: string
+  reviewId: string
+  tierLabel: string
+  stars: number
+  movieTitle: string
+}
+
+async function handleAutoReviews(
+  userId: string,
+  items: Array<{ movieId: string; tierId: string }>,
+): Promise<Array<AutoReviewResult>> {
+  if (items.length === 0) return []
+
+  const tierIds = [...new Set(items.map((i) => i.tierId))]
+  const movieIds = [...new Set(items.map((i) => i.movieId))]
+
+  const [tiers, existingReviews, movies] = await Promise.all([
+    db
+      .select({ id: tier.id, value: tier.value, label: tier.label })
+      .from(tier)
+      .where(inArray(tier.id, tierIds)),
+    db
+      .select()
+      .from(review)
+      .where(
+        and(dbEq(review.userId, userId), inArray(review.movieId, movieIds)),
+      ),
+    db
+      .select({ id: movie.id, title: movie.title })
+      .from(movie)
+      .where(inArray(movie.id, movieIds)),
+  ])
+
+  const tierMap = new Map(tiers.map((t) => [t.id, t]))
+  const reviewMap = new Map(existingReviews.map((r) => [r.movieId, r]))
+  const movieMap = new Map(movies.map((m) => [m.id, m.title]))
+
+  const results: Array<AutoReviewResult> = []
+
+  for (const item of items) {
+    const tierInfo = tierMap.get(item.tierId)
+    if (!tierInfo) continue
+
+    const existingReview = reviewMap.get(item.movieId)
+    const stars = 6 - tierInfo.value
+
+    if (!existingReview) {
+      const [newReview] = await db
+        .insert(review)
+        .values({
+          id: crypto.randomUUID(),
+          content: `Ranked this in ${tierInfo.label}…`,
+          rating: stars,
+          movieId: item.movieId,
+          userId,
+        })
+        .returning()
+
+      results.push({
+        movieId: item.movieId,
+        reviewId: newReview.id,
+        tierLabel: tierInfo.label,
+        stars,
+        movieTitle: movieMap.get(item.movieId) ?? 'Unknown',
+      })
+    } else if (existingReview.content.startsWith('Ranked this in')) {
+      await db
+        .update(review)
+        .set({
+          content: `Ranked this in ${tierInfo.label}…`,
+          rating: stars,
+        })
+        .where(dbEq(review.id, existingReview.id))
+
+      results.push({
+        movieId: item.movieId,
+        reviewId: existingReview.id,
+        tierLabel: tierInfo.label,
+        stars,
+        movieTitle: movieMap.get(item.movieId) ?? 'Unknown',
+      })
+    }
+  }
+
+  return results
+}
+
 export const updateTierMoviePosition = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(updateTierMoviePositionSchema)
@@ -171,7 +259,7 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(batchUpdateTierMoviePositionsSchema)
   .handler(async ({ context, data }) => {
-    if (data.length === 0) return { txid: 0 }
+    if (data.length === 0) return { txid: 0, autoReviews: [] }
 
     if (!context.user) throw new Error('Unauthorized')
     const currentUser = context.user
@@ -203,14 +291,39 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
       return result.txid as string
     })
 
-    return { txid }
+    const movieIds = await db
+      .select({ id: moviesOnTiers.movieId })
+      .from(moviesOnTiers)
+      .where(
+        inArray(
+          moviesOnTiers.id,
+          data.map((d) => d.movieOnTierId),
+        ),
+      )
+
+    const movieOnTierMovieMap = new Map(
+      data.map((d, i) => [d.movieOnTierId, movieIds[i]?.id ?? null]),
+    )
+
+    const items = data
+      .map((d) => ({
+        movieId: movieOnTierMovieMap.get(d.movieOnTierId) ?? null,
+        tierId: d.tierId,
+      }))
+      .filter((item): item is { movieId: string; tierId: string } =>
+        Boolean(item.movieId),
+      )
+
+    const autoReviews = await handleAutoReviews(currentUser.userId, items)
+
+    return { txid, autoReviews }
   })
 
 export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(batchInsertMoviesOnTiersSchema)
   .handler(async ({ context, data }) => {
-    if (data.length === 0) return { txid: 0 }
+    if (data.length === 0) return { txid: 0, autoReviews: [] }
 
     if (!context.user) throw new Error('Unauthorized')
     const currentUser = context.user
@@ -238,7 +351,12 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
       return result.txid as string
     })
 
-    return { txid }
+    const autoReviews = await handleAutoReviews(
+      currentUser.userId,
+      data.map((d) => ({ movieId: d.movieId, tierId: d.tierId })),
+    )
+
+    return { txid, autoReviews }
   })
 
 export const getSingleTierlist = createServerFn({ method: 'GET' })
