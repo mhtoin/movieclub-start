@@ -196,8 +196,8 @@ function MovieDetailContent({
     ml: 'Malayalam',
   }
   const languageName = movie.originalLanguage
-    ? (languageNames[movie.originalLanguage] ??
-      movie.originalLanguage.toUpperCase())
+    ? languageNames[movie.originalLanguage] ||
+      movie.originalLanguage.toUpperCase()
     : null
 
   return (
