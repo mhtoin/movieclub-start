@@ -127,7 +127,7 @@ async function exportTable(
 }
 
 async function main() {
-  if (!process.env.OLD_DATABASE_URL) {
+  if (!process.env.DATABASE_URL) {
     throw new Error(
       'DATABASE_URL environment variable is required (should point to Neon)',
     )
@@ -140,7 +140,7 @@ async function main() {
   fs.mkdirSync(EXPORT_DIR, { recursive: true })
 
   // Connect to Neon
-  const sql = postgres(process.env.OLD_DATABASE_URL, {
+  const sql = postgres(process.env.DATABASE_URL, {
     ssl: 'require',
   })
 

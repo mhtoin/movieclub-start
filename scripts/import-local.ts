@@ -17,7 +17,7 @@ const EXPORT_DIR = path.join(process.cwd(), 'data', 'exports')
 
 // Local database URL (uses docker-compose defaults if not set)
 const LOCAL_DATABASE_URL =
-  process.env.LOCAL_DATABASE_URL ||
+  process.env.DATABASE_URL ||
   'postgresql://movieclub:movieclub_dev_password@localhost:5432/movieclub_dev'
 
 // Columns to drop from Movie table
