@@ -268,7 +268,6 @@ function MovieDetailContent({
 
               {!isMobile && (
                 <div className="rounded-xl p-5 bg-card border border-border/50">
-                  {/* Core Info */}
                   <div className="space-y-2.5">
                     {releaseYear && (
                       <div className="flex items-center gap-2 text-sm">
@@ -654,7 +653,7 @@ function MovieDetailContent({
                   >
                     Cast
                   </p>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                  <div className="flex flex-wrap gap-8">
                     {cast.map((member: any) => {
                       const profileUrl = member.profile_path
                         ? getImageUrl(member.profile_path, 'w185')
@@ -677,10 +676,10 @@ function MovieDetailContent({
                               </div>
                             )}
                           </div>
-                          <p className="text-[10px] font-medium leading-tight line-clamp-1">
+                          <p className="text-[12px] font-medium leading-tight line-clamp-1">
                             {member.name}
                           </p>
-                          <p className="text-[9px] text-muted-foreground leading-tight line-clamp-1">
+                          <p className="text-[11px] text-muted-foreground leading-tight line-clamp-1">
                             {member.character}
                           </p>
                         </div>
