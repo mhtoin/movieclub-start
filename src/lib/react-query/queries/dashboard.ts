@@ -29,10 +29,18 @@ export interface RatingBucket {
   count: number
 }
 
+export interface PersonMovie {
+  id: string
+  title: string
+  year: string
+  posterPath: string | null
+}
+
 export interface PersonCount {
   name: string
   count: number
   profilePath: string | null
+  movies?: Array<PersonMovie>
 }
 
 export interface DecadeBucket {
@@ -322,44 +330,78 @@ export const getDashboardInsights = createServerFn({ method: 'POST' })
       // Top directors (from crew JSON)
       const directorMap = new Map<
         string,
-        { count: number; profilePath: string | null }
+        {
+          count: number
+          profilePath: string | null
+          movies: Array<PersonMovie>
+        }
       >()
       watchedMovies.forEach((m) => {
         if (Array.isArray(m.crew)) {
           for (const c of m.crew) {
             if (c.job === 'Director') {
               const existing = directorMap.get(c.name)
+              const movies = existing?.movies ?? []
+              movies.push({
+                id: m.id,
+                title: m.title,
+                year: m.releaseDate?.substring(0, 4) || '',
+                posterPath: (m.images as any)?.posters?.[0]?.file_path || null,
+              })
               directorMap.set(c.name, {
                 count: (existing?.count || 0) + 1,
                 profilePath: c.profile_path || existing?.profilePath || null,
+                movies,
               })
             }
           }
         }
       })
       const topDirectors = Array.from(directorMap.entries())
-        .map(([name, { count, profilePath }]) => ({ name, count, profilePath }))
+        .map(([name, { count, profilePath, movies }]) => ({
+          name,
+          count,
+          profilePath,
+          movies,
+        }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
 
       // Top cast (from cast JSON)
       const castMap = new Map<
         string,
-        { count: number; profilePath: string | null }
+        {
+          count: number
+          profilePath: string | null
+          movies: Array<PersonMovie>
+        }
       >()
       watchedMovies.forEach((m) => {
         if (Array.isArray(m.cast)) {
           m.cast.slice(0, 5).forEach((c: any) => {
             const existing = castMap.get(c.name)
+            const movies = existing?.movies ?? []
+            movies.push({
+              id: m.id,
+              title: m.title,
+              year: m.releaseDate?.substring(0, 4) || '',
+              posterPath: (m.images as any)?.posters?.[0]?.file_path || null,
+            })
             castMap.set(c.name, {
               count: (existing?.count || 0) + 1,
               profilePath: c.profile_path || existing?.profilePath || null,
+              movies,
             })
           })
         }
       })
       const topCast = Array.from(castMap.entries())
-        .map(([name, { count, profilePath }]) => ({ name, count, profilePath }))
+        .map(([name, { count, profilePath, movies }]) => ({
+          name,
+          count,
+          profilePath,
+          movies,
+        }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
 
