@@ -23,6 +23,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:export": "tsx scripts/export-neon.ts",
     "db:import": "tsx scripts/import-local.ts",
+    "db:backfill": "tsx scripts/backfill-credits.ts",
     "prepare": "husky"
   },
   "dependencies": {
