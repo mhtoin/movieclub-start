@@ -333,14 +333,8 @@ async function importMovieCredits(sql: postgres.Sql): Promise<number> {
 
   const creditResults = await Promise.allSettled(
     creditsRows.map(async (row) => {
-      const cast =
-        typeof row.cast === 'object' && row.cast !== null
-          ? JSON.stringify(row.cast)
-          : row.cast
-      const crew =
-        typeof row.crew === 'object' && row.crew !== null
-          ? JSON.stringify(row.crew)
-          : row.crew
+      const cast = row.cast
+      const crew = row.crew
 
       await sql.unsafe(
         `INSERT INTO "movie_credits" ("id", "cast", "crew") VALUES ($1, $2, $3) ON CONFLICT ("id") DO NOTHING`,
