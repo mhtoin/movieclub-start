@@ -22,7 +22,7 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
     return (
       <button
         type="button"
-        className="overflow-hidden rounded-md bg-card h-full w-full text-left"
+        className="group overflow-hidden rounded-md bg-card h-full w-full text-left focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
         onClick={handleOpenMovie}
       >
         <div className="h-full overflow-hidden">
@@ -30,7 +30,7 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
             <img
               src={posterUrl}
               alt={movie.title}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -47,16 +47,16 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
   return (
     <button
       type="button"
-      className="cursor-pointer text-left w-full bg-transparent border-none p-0 appearance-none"
+      className="group cursor-pointer text-left w-full bg-transparent border-none p-0 appearance-none focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-lg"
       onClick={handleOpenMovie}
     >
-      <div className="relative overflow-hidden rounded-lg bg-card">
+      <div className="relative overflow-hidden rounded-lg bg-card border border-border/40 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:border-primary/30">
         <div className="aspect-[2/3] overflow-hidden">
           {posterUrl ? (
             <img
               src={posterUrl}
               alt={movie.title}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -66,7 +66,7 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
         </div>
       </div>
       <div className="mt-1.5 px-0.5">
-        <h3 className="text-sm font-medium text-foreground/90 line-clamp-1 leading-snug">
+        <h3 className="text-sm font-medium text-foreground/90 line-clamp-1 leading-snug transition-colors duration-200 group-hover:text-primary">
           {movie.title}
         </h3>
         <div className="flex items-center gap-1.5 mt-0.5">
