@@ -107,7 +107,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
         </TabsList>
 
         <TabsPanel value="overview" variant="underlined">
-          <div className="space-y-10">
+          <div className="space-y-10 animate-fade-in-up">
             <Suspense fallback={<InsightsSkeleton />}>
               <MoviesByUserSection userId={userId} scope={scope} />
             </Suspense>
@@ -118,21 +118,27 @@ export function DashboardContent({ user }: DashboardContentProps) {
         </TabsPanel>
 
         <TabsPanel value="genres" variant="underlined">
-          <Suspense fallback={<InsightsSkeleton />}>
-            <GenresTabContent userId={userId} scope={scope} />
-          </Suspense>
+          <div className="animate-fade-in-up">
+            <Suspense fallback={<InsightsSkeleton />}>
+              <GenresTabContent userId={userId} scope={scope} />
+            </Suspense>
+          </div>
         </TabsPanel>
 
         <TabsPanel value="people" variant="underlined">
-          <Suspense fallback={<InsightsSkeleton />}>
-            <PeopleTabContent userId={userId} scope={scope} />
-          </Suspense>
+          <div className="animate-fade-in-up">
+            <Suspense fallback={<InsightsSkeleton />}>
+              <PeopleTabContent userId={userId} scope={scope} />
+            </Suspense>
+          </div>
         </TabsPanel>
 
         <TabsPanel value="deep-dive" variant="underlined">
-          <Suspense fallback={<InsightsSkeleton />}>
-            <DeepDiveTabContent userId={userId} scope={scope} />
-          </Suspense>
+          <div className="animate-fade-in-up">
+            <Suspense fallback={<InsightsSkeleton />}>
+              <DeepDiveTabContent userId={userId} scope={scope} />
+            </Suspense>
+          </div>
         </TabsPanel>
       </TabsRoot>
     </div>

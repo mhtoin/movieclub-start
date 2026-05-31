@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import type { PersonCount } from '@/lib/react-query/queries/dashboard'
 import { getImageUrl } from '@/lib/tmdb-api'
@@ -59,12 +59,10 @@ function PersonItem({
                 {person.count} {person.count === 1 ? 'film' : 'films'}
               </span>
               {hasMovies && (
-                <span className="p-0.5 rounded transition-colors">
-                  {expanded ? (
-                    <ChevronDown className="size-3.5 text-muted-foreground/50" />
-                  ) : (
-                    <ChevronRight className="size-3.5 text-muted-foreground/50" />
-                  )}
+                <span className="p-0.5 rounded">
+                  <ChevronRight
+                    className={`size-3.5 text-muted-foreground/50 transition-transform duration-200 ease-out ${expanded ? 'rotate-90' : ''}`}
+                  />
                 </span>
               )}
             </div>
@@ -77,38 +75,47 @@ function PersonItem({
           </div>
         </div>
       </button>
-      {expanded && hasMovies && (
-        <div className="ml-[4.25rem] mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          {person.movies!.map((movie) => (
-            <Link
-              key={movie.id}
-              to="/watched/$movieId"
-              params={{ movieId: movie.id }}
-              className="flex-shrink-0 group"
-            >
-              <div className="w-16 aspect-[2/3] rounded-md overflow-hidden bg-muted border border-border shadow-sm transition-shadow group-hover:shadow-md">
-                {movie.posterPath ? (
-                  <img
-                    src={getImageUrl(movie.posterPath, 'w185') || ''}
-                    alt={movie.title}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center p-1">
-                    <span className="text-[10px] text-muted-foreground text-center leading-tight line-clamp-3">
-                      {movie.title}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-1 truncate max-w-16 text-center leading-tight group-hover:text-foreground transition-colors">
-                {movie.year || movie.title}
-              </p>
-            </Link>
-          ))}
+      <div
+        className="grid transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: expanded && hasMovies ? '1fr' : '0fr' }}
+      >
+        <div className="overflow-hidden">
+          <div className="ml-[4.25rem] mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+            {person.movies?.map((movie, idx) => (
+              <Link
+                key={movie.id}
+                to="/watched/$movieId"
+                params={{ movieId: movie.id }}
+                className="flex-shrink-0 group animate-fade-in"
+                style={{
+                  animationDelay: `${idx * 50}ms`,
+                  animationFillMode: 'backwards',
+                }}
+              >
+                <div className="w-16 aspect-[2/3] rounded-md overflow-hidden bg-muted border border-border shadow-sm transition-shadow group-hover:shadow-md">
+                  {movie.posterPath ? (
+                    <img
+                      src={getImageUrl(movie.posterPath, 'w185') || ''}
+                      alt={movie.title}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center p-1">
+                      <span className="text-[10px] text-muted-foreground text-center leading-tight line-clamp-3">
+                        {movie.title}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1 truncate max-w-16 text-center leading-tight group-hover:text-foreground transition-colors">
+                  {movie.year || movie.title}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
