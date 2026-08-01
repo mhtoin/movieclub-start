@@ -37,6 +37,7 @@ import {
 import type { ColorScheme } from '@/lib/color-scheme'
 import { COLOR_SCHEMES, setSchemeServerFn } from '@/lib/color-scheme'
 import { logoutFn } from '@/lib/auth/logout-action'
+import { canAccessAdminPanel } from '@/lib/auth/permissions'
 
 const schemes = Object.entries(COLOR_SCHEMES).map(([value, config]) => ({
   value: value as ColorScheme,
@@ -77,7 +78,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ userRole }: SidebarProps) {
-  const isAdmin = userRole === 'admin'
+  const canAccessAdmin = canAccessAdminPanel(userRole)
   const { theme, setTheme } = useTheme()
   const routerState = useRouterState()
   const router = useRouter()
@@ -213,7 +214,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
             })}
           </div>
 
-          {isAdmin && (
+          {canAccessAdmin && (
             <>
               <div className="h-px bg-sidebar-border/20 mx-1 my-1" />
               <Link
@@ -510,7 +511,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
                   </div>
                 </Link>
 
-                {isAdmin && (
+                {canAccessAdmin && (
                   <>
                     <div className="h-px bg-border/50 my-2" />
                     <Link

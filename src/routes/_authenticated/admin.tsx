@@ -31,15 +31,22 @@ import {
   RichTextContent,
   RichTextEditor,
 } from '@/components/ui/rich-text-editor'
+import { Tab, TabsList, TabsPanel, TabsRoot } from '@/components/ui/tabs'
+import { AddWatchedMovie } from '@/components/admin/add-watched-movie'
+import { canAccessAdminPanel } from '@/lib/auth/permissions'
+import { adminQueries } from '@/lib/react-query/queries/admin'
 
 export const Route = createFileRoute('/_authenticated/admin')({
   beforeLoad: ({ context }) => {
-    if (context.user.role !== 'admin') {
+    if (!canAccessAdminPanel(context.user.role)) {
       throw redirect({ to: '/home' })
     }
   },
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(announcementQueries.admin())
+    await Promise.all([
+      context.queryClient.ensureQueryData(announcementQueries.admin()),
+      context.queryClient.ensureQueryData(adminQueries.shortlists()),
+    ])
   },
   component: AdminPage,
 })
@@ -87,93 +94,119 @@ function AdminPage() {
       />
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 py-10 md:py-14">
-        {/* Header */}
-        <header className="mb-12 md:mb-16">
-          <div className="flex items-start justify-between gap-6">
-            <div>
-              <p
-                className="text-xs font-semibold tracking-[0.2em] uppercase mb-3"
-                style={{ color: 'var(--primary)' }}
-              >
-                Projection Booth
-              </p>
-              <h1
-                className="text-4xl md:text-5xl font-bold tracking-tight"
-                style={{ fontFamily: 'var(--font-cinema), Oswald, sans-serif' }}
-              >
-                Announcements
-              </h1>
-              <p className="text-muted-foreground mt-2 text-base md:text-lg max-w-lg leading-relaxed">
-                Manage What&apos;s New announcements for your crew. What&apos;s
-                on the marquee?
-              </p>
-            </div>
-            <Button
-              variant="primary"
-              size="default"
-              onClick={handleNew}
-              className="shrink-0 shadow-lg shadow-primary/20"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Posting
-            </Button>
-          </div>
-
-          {/* Stats row */}
-          {announcements.length > 0 && (
-            <div className="flex items-center gap-6 mt-8 pt-6 border-t border-border/40">
-              <div className="flex items-center gap-2">
-                <Eye className="h-3.5 w-3.5 text-muted-foreground/70" />
-                <span className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">
-                    {publishedCount}
-                  </span>{' '}
-                  published
-                </span>
-              </div>
-              <div className="w-px h-4 bg-border/60" />
-              <div className="flex items-center gap-2">
-                <EyeOff className="h-3.5 w-3.5 text-muted-foreground/70" />
-                <span className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">
-                    {draftCount}
-                  </span>{' '}
-                  draft
-                </span>
-              </div>
-            </div>
-          )}
+        <header className="mb-8 md:mb-10">
+          <p
+            className="mb-3 text-xs font-semibold uppercase tracking-[0.2em]"
+            style={{ color: 'var(--primary)' }}
+          >
+            Projection Booth
+          </p>
+          <h1
+            className="text-4xl font-bold tracking-tight md:text-5xl"
+            style={{ fontFamily: 'var(--font-cinema), Oswald, sans-serif' }}
+          >
+            Club Administration
+          </h1>
+          <p className="mt-2 max-w-lg text-base leading-relaxed text-muted-foreground md:text-lg">
+            Keep the club&apos;s shared movie night running smoothly.
+          </p>
         </header>
 
-        {/* List */}
-        <LazyMotion features={domAnimation}>
-          <AnimatePresence mode="popLayout">
-            {announcements.length > 0 ? (
-              <div className="space-y-4">
-                {announcements.map((announcement) => (
-                  <m.div
-                    key={announcement.id}
-                    layout
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                    <AnnouncementCard
-                      announcement={announcement}
-                      onEdit={() => handleEdit(announcement)}
-                      onDelete={() =>
-                        deleteMutation.mutate({ id: announcement.id })
-                      }
-                    />
-                  </m.div>
-                ))}
+        <TabsRoot defaultValue="announcements" variant="underlined">
+          <TabsList
+            variant="underlined"
+            className="gap-8 border-b border-border/40"
+          >
+            <Tab value="announcements" variant="underlined">
+              <Megaphone className="mr-2 size-4" />
+              Announcements
+            </Tab>
+            <Tab value="watched" variant="underlined">
+              <Film className="mr-2 size-4" />
+              Record watched movie
+            </Tab>
+          </TabsList>
+
+          <TabsPanel value="watched" variant="underlined">
+            <AddWatchedMovie />
+          </TabsPanel>
+
+          <TabsPanel value="announcements" variant="underlined">
+            <header className="mb-12 flex items-start justify-between gap-6 md:mb-16">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                  Announcements
+                </h2>
+                <p className="mt-2 max-w-lg text-base leading-relaxed text-muted-foreground">
+                  Manage What&apos;s New announcements for your crew.
+                  What&apos;s on the marquee?
+                </p>
               </div>
-            ) : (
-              <EmptyState onCreate={handleNew} />
+              <Button
+                variant="primary"
+                size="default"
+                onClick={handleNew}
+                className="shrink-0 shadow-lg shadow-primary/20"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                New Posting
+              </Button>
+            </header>
+
+            {announcements.length > 0 && (
+              <div className="mb-8 flex items-center gap-6 border-t border-border/40 pt-6">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-3.5 w-3.5 text-muted-foreground/70" />
+                  <span className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      {publishedCount}
+                    </span>{' '}
+                    published
+                  </span>
+                </div>
+                <div className="h-4 w-px bg-border/60" />
+                <div className="flex items-center gap-2">
+                  <EyeOff className="h-3.5 w-3.5 text-muted-foreground/70" />
+                  <span className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      {draftCount}
+                    </span>{' '}
+                    draft
+                  </span>
+                </div>
+              </div>
             )}
-          </AnimatePresence>
-        </LazyMotion>
+
+            <LazyMotion features={domAnimation}>
+              <AnimatePresence mode="popLayout">
+                {announcements.length > 0 ? (
+                  <div className="space-y-4">
+                    {announcements.map((announcement) => (
+                      <m.div
+                        key={announcement.id}
+                        layout
+                        variants={itemVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        <AnnouncementCard
+                          announcement={announcement}
+                          onEdit={() => handleEdit(announcement)}
+                          onDelete={() =>
+                            deleteMutation.mutate({ id: announcement.id })
+                          }
+                        />
+                      </m.div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState onCreate={handleNew} />
+                )}
+              </AnimatePresence>
+            </LazyMotion>
+          </TabsPanel>
+        </TabsRoot>
       </div>
 
       <AdminForm
