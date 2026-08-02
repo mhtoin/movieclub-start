@@ -115,7 +115,7 @@ export function RaffleBlockersToast({
                 }
                 transition={{
                   duration: prefersReducedMotion ? 0.12 : 0.3,
-                  ease: [0.16, 1, 0.3, 1],
+                  ease: [0.23, 1, 0.32, 1],
                 }}
                 className={cn(
                   'absolute bottom-full left-1/2 mb-2 translate-x-2',

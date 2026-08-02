@@ -82,6 +82,30 @@
   }
 }
 
+@keyframes raffle-winning-flash {
+  0% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.raffle-winning-flash {
+  animation: raffle-winning-flash 200ms var(--ease-out) both;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .raffle-winning-flash {
+    animation-duration: 120ms;
+    animation-timing-function: ease-out;
+  }
+}
+
 @keyframes shortlist-card-enter {
   from {
     opacity: 0;
@@ -105,7 +129,24 @@
 }
 
 .animate-ticket-print {
-  animation: ticket-print 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: ticket-print 240ms var(--ease-out) both;
+}
+
+@keyframes ticket-print-reduced {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticket-print {
+    animation: ticket-print-reduced 120ms ease-out both;
+  }
 }
 
 .animate-shortlist-card-enter {
@@ -120,7 +161,7 @@
 
 .animate-ticket-lift {
   transition:
-    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.25s var(--ease-out),
     box-shadow 0.25s ease;
 }
 
@@ -134,5 +175,5 @@
 }
 
 .animate-stamp {
-  animation: stamp-wiggle 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: stamp-wiggle 0.4s var(--ease-out) both;
 }

@@ -59,7 +59,7 @@ export function ParticipantTicket({
       <button
         type="button"
         onClick={onToggleParticipating}
-        className={`absolute -top-1.5 -left-1.5 z-10 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-all shadow-sm ${
+        className={`absolute -top-1.5 -left-1.5 z-10 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-[background-color,color,transform] duration-150 shadow-sm fine-hover:hover:scale-110 ${
           participating
             ? 'bg-success/20 text-success hover:bg-success/40 hover:scale-110'
             : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:scale-110'

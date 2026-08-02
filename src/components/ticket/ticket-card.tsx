@@ -21,9 +21,9 @@ export function TicketCard({
 
   return (
     <div
-      className={`ticket-card relative rounded-lg border border-border/20 bg-card/60 shadow-sm overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`ticket-card relative rounded-lg border border-border/20 bg-card/60 shadow-sm overflow-hidden transition-[border-color,opacity] duration-150 ease-out ${
         interactive
-          ? 'hover:-translate-y-1 hover:shadow-lg hover:border-border/40 cursor-pointer'
+          ? 'fine-hover:hover:-translate-y-1 fine-hover:hover:shadow-lg hover:border-border/40 cursor-pointer'
           : ''
       } ${className}`}
       style={{ animationDelay: `${delay}s` }}

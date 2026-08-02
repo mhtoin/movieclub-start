@@ -1,5 +1,5 @@
 import { Suspense, useMemo, useRef, useState } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
@@ -59,6 +59,7 @@ function RaffleSetup() {
     cast: Array<any> | null
     crew: Array<any> | null
   } | null>(null)
+  const prefersReducedMotion = useReducedMotion() ?? false
 
   const startMutation = useStartRaffleMutation()
   const finalizeMutation = useFinalizeRaffleMutation()
@@ -182,75 +183,80 @@ function RaffleSetup() {
 
   return (
     <div className="flex-1 py-6 space-y-6">
-      {phase === 'setup' && (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {shortlists.map((shortlist, index) => (
-              <ParticipantTicket
-                key={shortlist.id}
-                shortlist={shortlist}
-                colorIndex={index}
-                onToggleReady={() =>
-                  handleToggleReady(shortlist.user.id, shortlist.isReady)
-                }
-                onToggleParticipating={() =>
-                  handleToggleParticipating(
-                    shortlist.user.id,
-                    shortlist.participating,
-                  )
-                }
-                onSelectMovie={(movieIndex: number) =>
-                  handleSelectMovie(shortlist.user.id, movieIndex)
-                }
-                isUpdating={
-                  updateStatusMutation.isPending &&
-                  updateStatusMutation.variables.userId === shortlist.user.id
-                }
-                isSelecting={
-                  updateSelectedIndexMutation.isPending &&
-                  updateSelectedIndexMutation.variables.userId ===
-                    shortlist.user.id
-                }
-                delay={index * 0.06}
-              />
-            ))}
-          </div>
-          <RaffleControlBar
-            watchDate={watchDate}
-            onDateSelect={setWatchDate}
-            dryRun={dryRun}
-            onDryRunChange={setDryRun}
-            onStartRaffle={handleStartRaffle}
-            onSetAllReady={handleSetAllReady}
-            canStart={canStart}
-            readyCount={readyCount}
-            totalCount={participating.length}
-            hasUnreadyParticipants={hasUnreadyParticipants}
-            isSettingAllReady={setAllReadyMutation.isPending}
-            pendingUsers={pendingSelections.map((s) => ({ name: s.user.name }))}
+      <AnimatePresence mode="wait" initial={false}>
+        {phase === 'setup' ? (
+          <m.div
+            key="setup"
+            initial={
+              prefersReducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, transform: 'scale(0.97)' }
+            }
+            animate={
+              prefersReducedMotion
+                ? { opacity: 1 }
+                : { opacity: 1, transform: 'scale(1)' }
+            }
+            exit={
+              prefersReducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, transform: 'scale(0.99)' }
+            }
+            transition={
+              prefersReducedMotion
+                ? { duration: 0.12, ease: 'easeOut' }
+                : { duration: 0.2, ease: [0.23, 1, 0.32, 1] }
+            }
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {shortlists.map((shortlist, index) => (
+                <ParticipantTicket
+                  key={shortlist.id}
+                  shortlist={shortlist}
+                  colorIndex={index}
+                  onToggleReady={() =>
+                    handleToggleReady(shortlist.user.id, shortlist.isReady)
+                  }
+                  onToggleParticipating={() =>
+                    handleToggleParticipating(
+                      shortlist.user.id,
+                      shortlist.participating,
+                    )
+                  }
+                  onSelectMovie={(movieIndex: number) =>
+                    handleSelectMovie(shortlist.user.id, movieIndex)
+                  }
+                  isUpdating={
+                    updateStatusMutation.isPending &&
+                    updateStatusMutation.variables.userId === shortlist.user.id
+                  }
+                  isSelecting={
+                    updateSelectedIndexMutation.isPending &&
+                    updateSelectedIndexMutation.variables.userId ===
+                      shortlist.user.id
+                  }
+                  delay={index * 0.06}
+                />
+              ))}
+            </div>
+          </m.div>
+        ) : phase === 'countdown' ? (
+          <RaffleCountdown
+            key="countdown"
+            onComplete={handleCountdownComplete}
           />
-        </>
-      )}
-      <AnimatePresence>
-        {phase === 'countdown' && (
-          <RaffleCountdown onComplete={handleCountdownComplete} />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {phase === 'spinning' &&
+        ) : phase === 'spinning' &&
           winningMovie &&
-          participatingMovies.length > 0 && (
-            <RaffleSpinner
-              movies={participatingMovies}
-              winningMovie={winningMovie}
-              onSpinComplete={handleSpinComplete}
-            />
-          )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {phase === 'winner' && winningMovie && (
+          participatingMovies.length > 0 ? (
+          <RaffleSpinner
+            key="spinning"
+            movies={participatingMovies}
+            winningMovie={winningMovie}
+            onSpinComplete={handleSpinComplete}
+          />
+        ) : phase === 'winner' && winningMovie ? (
           <RaffleWinner
+            key="winner"
             movie={winningMovie}
             credits={winningCredits}
             winnerUser={winnerUser}
@@ -260,8 +266,41 @@ function RaffleSetup() {
             onRerun={handleRerun}
             isLoading={finalizeMutation.isPending && !dryRun}
           />
-        )}
+        ) : null}
       </AnimatePresence>
+
+      {phase === 'setup' && (
+        <RaffleControlBar
+          watchDate={watchDate}
+          onDateSelect={setWatchDate}
+          dryRun={dryRun}
+          onDryRunChange={setDryRun}
+          onStartRaffle={handleStartRaffle}
+          onSetAllReady={handleSetAllReady}
+          canStart={canStart}
+          readyCount={readyCount}
+          totalCount={participating.length}
+          hasUnreadyParticipants={hasUnreadyParticipants}
+          isSettingAllReady={setAllReadyMutation.isPending}
+          pendingUsers={pendingSelections.map((s) => ({
+            name: s.user.name,
+          }))}
+        />
+      )}
+
+      <p
+        key={phase}
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {phase === 'countdown' && 'Raffle countdown started.'}
+        {phase === 'spinning' && 'Drawing the winning movie.'}
+        {phase === 'winner' && winningMovie
+          ? `${winningMovie.title} was selected.`
+          : null}
+      </p>
     </div>
   )
 }

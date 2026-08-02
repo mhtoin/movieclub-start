@@ -34,7 +34,7 @@ export function TicketMovieRow({
     : null
 
   const baseClass = interactive
-    ? 'flex items-center gap-3 p-2 rounded-md border border-transparent hover:translate-x-1 transition-all duration-200 cursor-pointer group bg-transparent hover:bg-muted/30 hover:border-border/30'
+    ? 'flex items-center gap-3 p-2 rounded-md border border-transparent fine-hover:hover:translate-x-1 transition-[transform,background-color,border-color] duration-150 ease-out cursor-pointer group bg-transparent hover:bg-muted/30 hover:border-border/30'
     : 'flex items-center gap-3 p-2 rounded-md bg-transparent'
 
   const selectedClass =
@@ -51,6 +51,8 @@ export function TicketMovieRow({
   return (
     <div
       className={`${baseClass} ${selectedClass} relative`}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
       onClick={handleRowClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -67,7 +69,7 @@ export function TicketMovieRow({
             onSelect?.()
           }}
           disabled={isLoading}
-          className={`absolute top-2 left-2 z-10 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
+          className={`absolute top-2 left-2 z-10 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-[background-color,border-color] duration-150 ease-out ${
             isSelected
               ? 'bg-primary border-primary text-primary-foreground shadow-sm'
               : 'bg-card/80 border-border/60 text-transparent hover:border-primary/50 hover:bg-accent'

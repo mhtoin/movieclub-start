@@ -45,7 +45,7 @@ export function StubParticipantTicket({
       <button
         type="button"
         onClick={onToggleParticipating}
-        className={`absolute -left-1.5 -top-1.5 z-10 flex size-6 items-center justify-center rounded-full shadow-sm transition-transform duration-150 hover:scale-110 ${
+        className={`absolute -left-1.5 -top-1.5 z-10 flex size-6 items-center justify-center rounded-full shadow-sm transition-transform duration-150 fine-hover:hover:scale-110 ${
           participating
             ? 'bg-success/20 text-success hover:bg-success/40'
             : 'bg-muted text-muted-foreground hover:bg-muted/80'

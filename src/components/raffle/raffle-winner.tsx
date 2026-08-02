@@ -1,5 +1,11 @@
 import { format } from 'date-fns'
-import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
+import {
+  AnimatePresence,
+  LazyMotion,
+  domAnimation,
+  m,
+  useReducedMotion,
+} from 'framer-motion'
 import {
   ChevronLeft,
   ChevronRight,
@@ -93,10 +99,10 @@ function PageDots({
           onClick={() => onSelect(i)}
           aria-label={`Page ${i + 1}`}
           className={cn(
-            'h-1 rounded-full transition-all duration-300',
+            'h-1 w-5 origin-left rounded-full transition-[transform,background-color] duration-200',
             i === page
-              ? 'w-5 bg-primary'
-              : 'w-1.5 bg-foreground/20 hover:bg-foreground/40',
+              ? 'scale-x-100 bg-primary'
+              : 'scale-x-[0.3] bg-foreground/20 hover:bg-foreground/40',
           )}
         />
       ))}
@@ -110,12 +116,14 @@ const VictoryPage = memo(function VictoryPage({
   watchDate,
   dryRun,
   posterUrl,
+  prefersReducedMotion,
 }: {
   movie: Movie
   winnerUser: WinnerUser | null
   watchDate: Date | undefined
   dryRun: boolean
   posterUrl: string | null
+  prefersReducedMotion: boolean
 }) {
   const formattedDate = watchDate ? format(watchDate, 'd MMMM yyyy') : null
 
@@ -123,13 +131,25 @@ const VictoryPage = memo(function VictoryPage({
     <div className="min-h-full flex items-center justify-center px-6 py-10">
       <div className="w-full max-w-4xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
         <m.div
-          initial={{ opacity: 0, scale: 0.85, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
+          initial={
+            prefersReducedMotion
+              ? { opacity: 0 }
+              : { opacity: 0, scale: 0.85, y: 20 }
+          }
+          animate={
+            prefersReducedMotion
+              ? { opacity: 1 }
+              : { opacity: 1, scale: 1, y: 0 }
+          }
           transition={{
-            delay: 0.4,
-            type: 'spring',
-            stiffness: 250,
-            damping: 20,
+            ...(prefersReducedMotion
+              ? { duration: 0.12, ease: 'easeOut' }
+              : {
+                  delay: 0.4,
+                  type: 'spring' as const,
+                  stiffness: 250,
+                  damping: 20,
+                }),
           }}
           className="w-44 sm:w-52 lg:w-72 xl:w-80 rounded-2xl overflow-hidden shadow-2xl border border-border/40 ring-4 ring-primary/30 shrink-0 relative"
         >
@@ -158,22 +178,40 @@ const VictoryPage = memo(function VictoryPage({
         </m.div>
         <div className="flex flex-col items-center lg:items-start gap-5 text-center lg:text-left flex-1">
           <m.div
-            initial={{ scale: 0.95, opacity: 0, rotate: -20 }}
-            animate={{ scale: 1, rotate: 0 }}
+            initial={
+              prefersReducedMotion
+                ? { opacity: 0 }
+                : { scale: 0.95, opacity: 0, rotate: -20 }
+            }
+            animate={
+              prefersReducedMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }
+            }
             transition={{
-              delay: 0.2,
-              type: 'spring',
-              stiffness: 400,
-              damping: 18,
+              ...(prefersReducedMotion
+                ? { duration: 0.12, ease: 'easeOut' }
+                : {
+                    delay: 0.2,
+                    type: 'spring' as const,
+                    stiffness: 400,
+                    damping: 18,
+                  }),
             }}
             className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-primary/20 border-2 border-primary/50 flex items-center justify-center shadow-xl shadow-primary/20 shrink-0"
           >
             <Ticket className="w-8 h-8 lg:w-10 lg:h-10 text-primary" />
           </m.div>
           <m.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            initial={
+              prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 16 }
+            }
+            animate={
+              prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }
+            }
+            transition={
+              prefersReducedMotion
+                ? { duration: 0.12, ease: 'easeOut' }
+                : { delay: 0.3, duration: 0.2, ease: 'easeOut' }
+            }
           >
             <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 mb-1">
               Next pick
@@ -189,9 +227,17 @@ const VictoryPage = memo(function VictoryPage({
             )}
           </m.div>
           <m.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55 }}
+            initial={
+              prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }
+            }
+            animate={
+              prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }
+            }
+            transition={
+              prefersReducedMotion
+                ? { duration: 0.12, ease: 'easeOut' }
+                : { delay: 0.55, duration: 0.2, ease: 'easeOut' }
+            }
             className="flex flex-col items-center lg:items-start gap-2.5"
           >
             {winnerUser && (
@@ -440,12 +486,20 @@ export function RaffleWinner({
 }: Props) {
   const [page, setPage] = useState(0)
   const [direction, setDirection] = useState(1)
+  const prefersReducedMotion = useReducedMotion() ?? false
 
   const posterUrl = useMemo(() => getMoviePosterUrl(movie, 'w500'), [movie])
   const backdropUrl = useMemo(
     () => getMovieBackdropUrl(movie, 'w1280'),
     [movie],
   )
+  const pageVariants = prefersReducedMotion
+    ? {
+        enter: { opacity: 0 },
+        center: { opacity: 1 },
+        exit: { opacity: 0 },
+      }
+    : SLIDE_VARIANTS
 
   const goTo = (next: number) => {
     setDirection(next > page ? 1 : -1)
@@ -458,7 +512,10 @@ export function RaffleWinner({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{
+          duration: prefersReducedMotion ? 0.12 : 0.25,
+          ease: 'easeOut',
+        }}
         className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background"
       >
         {backdropUrl && (
@@ -495,11 +552,15 @@ export function RaffleWinner({
             <m.div
               key={page}
               custom={direction}
-              variants={SLIDE_VARIANTS}
+              variants={pageVariants}
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+              transition={
+                prefersReducedMotion
+                  ? { duration: 0.12, ease: 'easeOut' }
+                  : { duration: 0.25, ease: [0.32, 0.72, 0, 1] }
+              }
               className="absolute inset-0 overflow-y-auto"
             >
               {page === 0 ? (
@@ -509,6 +570,7 @@ export function RaffleWinner({
                   watchDate={watchDate}
                   dryRun={dryRun}
                   posterUrl={posterUrl}
+                  prefersReducedMotion={prefersReducedMotion}
                 />
               ) : (
                 <DetailsPage

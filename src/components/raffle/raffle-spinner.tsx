@@ -3,8 +3,7 @@ import {
   domAnimation,
   m,
   useAnimate,
-  useMotionValue,
-  useTransform,
+  useReducedMotion,
 } from 'framer-motion'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import type { Movie } from '@/db/schema/movies'
@@ -25,10 +24,6 @@ const SPROCKET_WIDTH = 36
 const IMAGE_H = ITEM_HEIGHT - 20
 const IMAGE_W = REEL_WIDTH - SPROCKET_WIDTH * 2 - 8
 const FRAME_COUNT = 8
-
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3)
-}
 
 const FilmPerforations = memo(function FilmPerforations() {
   return (
@@ -59,10 +54,12 @@ const FilmPerforations = memo(function FilmPerforations() {
 const ReelFrame = memo(function ReelFrame({
   movie,
   isWinner,
+  isLocked,
   frameNumber,
 }: {
   movie: Movie
   isWinner: boolean
+  isLocked: boolean
   frameNumber: number
 }) {
   const imgUrl = getMovieBackdropUrl(movie, 'w500')
@@ -99,6 +96,12 @@ const ReelFrame = memo(function ReelFrame({
             {movie.title}
           </div>
         )}
+        {isWinner && isLocked && (
+          <div
+            aria-hidden="true"
+            className="raffle-winning-flash absolute inset-0 rounded-sm bg-primary/25"
+          />
+        )}
         <div
           className="absolute bottom-[10px] left-[4px] right-[4px] rounded-b flex items-end justify-center overflow-hidden"
           style={{ height: IMAGE_H / 2 }}
@@ -133,19 +136,22 @@ const ReelFrame = memo(function ReelFrame({
 const ReelStrip = memo(function ReelStrip({
   movies,
   winningMovieId,
+  locked,
   stripRef,
 }: {
   movies: Array<Movie>
   winningMovieId: string
+  locked: boolean
   stripRef: React.RefObject<HTMLDivElement | null>
 }) {
   return (
-    <div ref={stripRef} className="will-change-transform">
+    <div ref={stripRef}>
       {movies.map((movie, i) => (
         <ReelFrame
           key={movie.id}
           movie={movie}
           isWinner={movie.id === winningMovieId}
+          isLocked={locked}
           frameNumber={i + 1}
         />
       ))}
@@ -184,21 +190,21 @@ export function RaffleSpinner({
     }
   }, [winningMovie.id, movies.length])
 
-  const animFrameRef = useRef<number>(0)
   const settleTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const stripRef = useRef<HTMLDivElement | null>(null)
+  const progressRef = useRef<HTMLDivElement | null>(null)
+  const stripAnimationRef = useRef<Animation | null>(null)
+  const progressAnimationRef = useRef<Animation | null>(null)
   const completedRef = useRef(false)
   const [locked, setLocked] = useState(false)
   const [settling, setSettling] = useState(false)
   const [drumRef, animateDrum] = useAnimate()
+  const prefersReducedMotion = useReducedMotion() ?? false
 
   const onSpinCompleteRef = useRef(onSpinComplete)
   useEffect(() => {
     onSpinCompleteRef.current = onSpinComplete
   })
-
-  const speedProgress = useMotionValue(0)
-  const barWidth = useTransform(speedProgress, [0, 1], ['100%', '0%'])
 
   const repeated = useMemo(
     () => Array.from({ length: spinParams.laps + 2 }, () => movies).flat(),
@@ -214,60 +220,92 @@ export function RaffleSpinner({
 
   useEffect(() => {
     const { duration } = spinParams
-    const start = performance.now()
     const startOffset = Math.random() * movies.length * ITEM_HEIGHT
 
     if (stripRef.current) {
       stripRef.current.style.transform = `translateY(-${startOffset}px)`
     }
+    if (progressRef.current) {
+      progressRef.current.style.transform = 'scaleX(1)'
+    }
 
-    const totalDistance = targetOffset - startOffset
-
-    const tick = (now: number) => {
-      const elapsed = now - start
-      const t = Math.min(elapsed / duration, 1)
-
-      const eased = easeOutCubic(t)
-
-      speedProgress.set(eased)
-      const offset = startOffset + totalDistance * eased
-
+    if (prefersReducedMotion) {
       if (stripRef.current) {
-        stripRef.current.style.transform = `translateY(-${offset}px)`
+        stripRef.current.style.transform = `translateY(-${targetOffset}px)`
       }
-
-      if (t < 1) {
-        animFrameRef.current = requestAnimationFrame(tick)
-      } else {
-        if (stripRef.current) {
-          stripRef.current.style.transform = `translateY(-${targetOffset}px)`
-        }
+      if (progressRef.current) {
+        progressRef.current.style.transform = 'scaleX(0)'
+      }
+      const reducedMotionStateTimeout = setTimeout(() => {
         setSettling(true)
         setLocked(true)
+      }, 0)
+      const reducedMotionTimeout = setTimeout(() => {
+        if (!completedRef.current) {
+          completedRef.current = true
+          onSpinCompleteRef.current()
+        }
+      }, 120)
 
-        animateDrum(
-          drumRef.current,
-          {
-            rotate: [0, -1.5, 1.5, -1, 0.8, -0.5, 0],
-          },
-          {
-            duration: 0.6,
-            ease: [0.25, 0.1, 0.25, 1],
-          },
-        )
-
-        settleTimeoutRef.current = setTimeout(() => {
-          if (!completedRef.current) {
-            completedRef.current = true
-            onSpinCompleteRef.current()
-          }
-        }, 800)
+      return () => {
+        clearTimeout(reducedMotionStateTimeout)
+        clearTimeout(reducedMotionTimeout)
       }
     }
 
-    animFrameRef.current = requestAnimationFrame(tick)
+    const animationOptions: KeyframeAnimationOptions = {
+      duration,
+      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+      fill: 'forwards',
+    }
+
+    stripAnimationRef.current =
+      stripRef.current?.animate(
+        [
+          { transform: `translateY(-${startOffset}px)` },
+          { transform: `translateY(-${targetOffset}px)` },
+        ],
+        animationOptions,
+      ) ?? null
+    progressAnimationRef.current =
+      progressRef.current?.animate(
+        [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
+        animationOptions,
+      ) ?? null
+
+    const finish = () => {
+      if (stripRef.current) {
+        stripRef.current.style.transform = `translateY(-${targetOffset}px)`
+      }
+      if (progressRef.current) {
+        progressRef.current.style.transform = 'scaleX(0)'
+      }
+      setSettling(true)
+      setLocked(true)
+
+      animateDrum(
+        drumRef.current,
+        {
+          rotate: [0, -1.5, 1.5, -1, 0.8, -0.5, 0],
+        },
+        {
+          duration: 0.6,
+          ease: [0.25, 0.1, 0.25, 1],
+        },
+      )
+
+      settleTimeoutRef.current = setTimeout(() => {
+        if (!completedRef.current) {
+          completedRef.current = true
+          onSpinCompleteRef.current()
+        }
+      }, 800)
+    }
+
+    stripAnimationRef.current?.finished.then(finish).catch(() => {})
     return () => {
-      cancelAnimationFrame(animFrameRef.current)
+      stripAnimationRef.current?.cancel()
+      progressAnimationRef.current?.cancel()
       if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current)
     }
   }, [
@@ -275,7 +313,7 @@ export function RaffleSpinner({
     drumRef,
     movies,
     movies.length,
-    speedProgress,
+    prefersReducedMotion,
     spinParams,
     targetOffset,
   ])
@@ -321,14 +359,35 @@ export function RaffleSpinner({
         <m.div
           ref={drumRef}
           className="relative z-20"
-          animate={settling ? { scale: [1, 1.02, 1] } : {}}
+          animate={
+            settling
+              ? { transform: ['scale(1)', 'scale(1.02)', 'scale(1)'] }
+              : {}
+          }
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-4">
             <m.div
               className="pointer-events-none flex-shrink-0"
               animate={{
-                x: locked ? [0, 8, -8, 6, -4, 2, 0] : [0, 4, -4, 3, -2, 0],
+                transform: locked
+                  ? [
+                      'translateX(0px)',
+                      'translateX(8px)',
+                      'translateX(-8px)',
+                      'translateX(6px)',
+                      'translateX(-4px)',
+                      'translateX(2px)',
+                      'translateX(0px)',
+                    ]
+                  : [
+                      'translateX(0px)',
+                      'translateX(4px)',
+                      'translateX(-4px)',
+                      'translateX(3px)',
+                      'translateX(-2px)',
+                      'translateX(0px)',
+                    ],
                 opacity: locked ? [1, 0.7, 1] : 1,
               }}
               transition={{
@@ -367,6 +426,7 @@ export function RaffleSpinner({
                 <ReelStrip
                   movies={repeated}
                   winningMovieId={winningMovie.id}
+                  locked={locked}
                   stripRef={stripRef}
                 />
               </div>
@@ -399,7 +459,24 @@ export function RaffleSpinner({
             <m.div
               className="pointer-events-none flex-shrink-0"
               animate={{
-                x: locked ? [0, -8, 8, -6, 4, -2, 0] : [0, -4, 4, -3, 2, 0],
+                transform: locked
+                  ? [
+                      'translateX(0px)',
+                      'translateX(-8px)',
+                      'translateX(8px)',
+                      'translateX(-6px)',
+                      'translateX(4px)',
+                      'translateX(-2px)',
+                      'translateX(0px)',
+                    ]
+                  : [
+                      'translateX(0px)',
+                      'translateX(-4px)',
+                      'translateX(4px)',
+                      'translateX(-3px)',
+                      'translateX(2px)',
+                      'translateX(0px)',
+                    ],
                 opacity: locked ? [1, 0.7, 1] : 1,
               }}
               transition={{
@@ -422,10 +499,12 @@ export function RaffleSpinner({
             }}
           >
             <m.div
+              ref={progressRef}
               className="h-full rounded-full"
               style={{
                 background: `linear-gradient(90deg, color-mix(in oklch, var(--primary) 60%, transparent), var(--primary))`,
-                width: locked ? undefined : barWidth,
+                transform: locked ? 'scaleX(0)' : 'scaleX(1)',
+                transformOrigin: 'left',
               }}
               animate={locked ? { opacity: [1, 0.6, 1] } : {}}
               transition={{ duration: 0.4 }}

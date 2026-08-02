@@ -24,6 +24,7 @@
   --font-serif: serif;
   --font-mono: JetBrains Mono, monospace;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --radius: 0.75rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -139,13 +140,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
+    html {
+      scroll-behavior: auto;
     }
   }
 }
