@@ -29,14 +29,6 @@ export function ParticipantTicket({
   isSelecting = false,
   delay = 0,
 }: Props) {
-  console.log(
-    'isStubShortlistCardEnabled',
-    isStubShortlistCardEnabled,
-    'VITE_SHORTLIST_CARD_VARIANT',
-    import.meta.env.VITE_SHORTLIST_CARD_VARIANT,
-    'meta',
-    import.meta.env,
-  )
   if (isStubShortlistCardEnabled) {
     return (
       <StubParticipantTicket
