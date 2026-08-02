@@ -57,7 +57,7 @@ export function RaffleControlPanel({
           className="flex items-center gap-2 rounded-full px-3"
         >
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">
+          <span className="text-sm" suppressHydrationWarning>
             {watchDate
               ? watchDate.toLocaleDateString('en-US', {
                   month: 'short',
@@ -66,21 +66,29 @@ export function RaffleControlPanel({
               : 'Pick date'}
           </span>
         </Button>
-        {showDatePicker && (
-          <div className="absolute bottom-full mb-2 left-0 bg-card border border-border rounded-lg p-2 shadow-lg">
-            <input
-              type="date"
-              onChange={(e) => {
-                const date = new Date(e.target.value)
-                onDateSelect(date)
-                setShowDatePicker(false)
-              }}
-              value={watchDate ? watchDate.toISOString().split('T')[0] : ''}
-              className="px-3 py-2 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
-              min={new Date().toISOString().split('T')[0]}
-            />
-          </div>
-        )}
+        <div
+          className="shortlist-date-picker absolute bottom-full left-0 mb-2 rounded-lg border border-border bg-card p-2 shadow-lg"
+          data-open={showDatePicker}
+          aria-hidden={!showDatePicker}
+        >
+          <label htmlFor="raffle-watch-date" className="sr-only">
+            Raffle watch date
+          </label>
+          <input
+            id="raffle-watch-date"
+            type="date"
+            suppressHydrationWarning
+            tabIndex={showDatePicker ? 0 : -1}
+            onChange={(e) => {
+              const date = new Date(e.target.value)
+              onDateSelect(date)
+              setShowDatePicker(false)
+            }}
+            value={watchDate ? watchDate.toISOString().split('T')[0] : ''}
+            className="px-3 py-2 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+            min={new Date().toISOString().split('T')[0]}
+          />
+        </div>
       </div>
 
       <div className="w-px h-6 bg-border" />

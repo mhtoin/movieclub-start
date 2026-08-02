@@ -39,10 +39,10 @@ export function ShortlistOverviewGrid() {
   if (shortlists.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-        <div className="size-16 rounded-full bg-muted flex items-center justify-center">
+        <div className="empty-state-icon-enter size-16 rounded-full bg-muted flex items-center justify-center">
           <Users className="size-8 text-muted-foreground" />
         </div>
-        <div>
+        <div className="empty-state-content-enter">
           <p className="text-base font-semibold text-foreground">
             No shortlists yet
           </p>

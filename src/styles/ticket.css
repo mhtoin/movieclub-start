@@ -82,8 +82,40 @@
   }
 }
 
+@keyframes shortlist-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shortlist-card-enter-reduced {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .animate-ticket-print {
   animation: ticket-print 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-shortlist-card-enter {
+  animation: shortlist-card-enter 240ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shortlist-card-enter {
+    animation: shortlist-card-enter-reduced 120ms ease-out both;
+  }
 }
 
 .animate-ticket-lift {

@@ -23,6 +23,7 @@
   --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-serif: serif;
   --font-mono: JetBrains Mono, monospace;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --radius: 0.75rem;
   --shadow-x: 0px;
   --shadow-y: 1px;

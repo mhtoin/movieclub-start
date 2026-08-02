@@ -1,9 +1,13 @@
+import { StubShortlistCard } from './stub-shortlist-card'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import type { Movie } from '@/db/schema/movies'
 import { TicketCard } from '@/components/ticket/ticket-card'
 import { TicketEmptyRow } from '@/components/ticket/ticket-empty-row'
 import { TicketMovieRow } from '@/components/ticket/ticket-movie-row'
 import { TicketStub } from '@/components/ticket/ticket-stub'
+
+const useStubShortlistCard =
+  import.meta.env.VITE_SHORTLIST_CARD_VARIANT === 'stub'
 
 interface Props {
   shortlist: ShortlistWithUserMovies
@@ -18,6 +22,17 @@ export function ShortlistUserCard({
   onMovieClick,
   delay = 0,
 }: Props) {
+  if (useStubShortlistCard) {
+    return (
+      <StubShortlistCard
+        shortlist={shortlist}
+        colorIndex={colorIndex}
+        onMovieClick={onMovieClick}
+        delay={delay}
+      />
+    )
+  }
+
   const { movies } = shortlist
 
   const handleMovieClick = (
@@ -28,7 +43,7 @@ export function ShortlistUserCard({
   }
 
   return (
-    <TicketCard delay={delay}>
+    <TicketCard delay={delay} className="animate-shortlist-card-enter">
       <TicketStub shortlist={shortlist} colorIndex={colorIndex} />
 
       <div className="relative ml-[88px] p-4 min-h-[160px]">

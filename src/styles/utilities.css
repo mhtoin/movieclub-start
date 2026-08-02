@@ -261,6 +261,31 @@
       0.06s both;
   }
 
+  .shortlist-date-picker {
+    transform-origin: bottom left;
+    transition:
+      transform 180ms var(--ease-out),
+      opacity 180ms var(--ease-out);
+  }
+
+  .shortlist-date-picker[data-open='false'] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px) scale(0.97);
+  }
+
+  .shortlist-date-picker[data-open='true'] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shortlist-date-picker {
+      transition: opacity 120ms ease-out;
+      transform: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .empty-state-icon-enter,
     .empty-state-content-enter {
