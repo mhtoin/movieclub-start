@@ -5,9 +5,7 @@ import { TicketCard } from '@/components/ticket/ticket-card'
 import { TicketEmptyRow } from '@/components/ticket/ticket-empty-row'
 import { TicketMovieRow } from '@/components/ticket/ticket-movie-row'
 import { TicketStub } from '@/components/ticket/ticket-stub'
-
-const useStubShortlistCard =
-  import.meta.env.VITE_SHORTLIST_CARD_VARIANT === 'stub'
+import { isStubShortlistCardEnabled } from '@/lib/feature-flags'
 
 interface Props {
   shortlist: ShortlistWithUserMovies
@@ -22,7 +20,7 @@ export function ShortlistUserCard({
   onMovieClick,
   delay = 0,
 }: Props) {
-  if (useStubShortlistCard) {
+  if (isStubShortlistCardEnabled) {
     return (
       <StubShortlistCard
         shortlist={shortlist}

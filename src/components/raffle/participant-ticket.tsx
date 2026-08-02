@@ -1,10 +1,12 @@
 import { XCircle } from 'lucide-react'
+import { StubParticipantTicket } from './stub-participant-ticket'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import type { Movie } from '@/db/schema/movies'
 import { TicketCard } from '@/components/ticket/ticket-card'
 import { TicketEmptyRow } from '@/components/ticket/ticket-empty-row'
 import { TicketMovieRow } from '@/components/ticket/ticket-movie-row'
 import { TicketStub } from '@/components/ticket/ticket-stub'
+import { isStubShortlistCardEnabled } from '@/lib/feature-flags'
 
 interface Props {
   shortlist: ShortlistWithUserMovies
@@ -27,6 +29,21 @@ export function ParticipantTicket({
   isSelecting = false,
   delay = 0,
 }: Props) {
+  if (isStubShortlistCardEnabled) {
+    return (
+      <StubParticipantTicket
+        shortlist={shortlist}
+        colorIndex={colorIndex}
+        onToggleReady={onToggleReady}
+        onToggleParticipating={onToggleParticipating}
+        onSelectMovie={onSelectMovie}
+        isUpdating={isUpdating}
+        isSelecting={isSelecting}
+        delay={delay}
+      />
+    )
+  }
+
   const { movies, isReady, participating, selectedIndex } = shortlist
   const requiresSelection = shortlist.requiresSelection ?? false
 
@@ -40,6 +57,7 @@ export function ParticipantTicket({
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={onToggleParticipating}
         className={`absolute -top-1.5 -left-1.5 z-10 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-all shadow-sm ${
           participating
