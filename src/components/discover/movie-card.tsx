@@ -30,7 +30,7 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
             <img
               src={posterUrl}
               alt={movie.title}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-[180ms] ease-[cubic-bezier(0.23,1,0.32,1)] fine-hover:group-hover:scale-[1.02]"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -50,13 +50,13 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
       className="group cursor-pointer text-left w-full bg-transparent border-none p-0 appearance-none focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-lg"
       onClick={handleOpenMovie}
     >
-      <div className="relative overflow-hidden rounded-lg bg-card border border-border/40 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:border-primary/30">
+      <div className="relative overflow-hidden rounded-lg bg-card border border-border/40 shadow-sm transition-transform duration-[180ms] ease-[cubic-bezier(0.23,1,0.32,1)] fine-hover:group-hover:-translate-y-0.5">
         <div className="aspect-[2/3] overflow-hidden">
           {posterUrl ? (
             <img
               src={posterUrl}
               alt={movie.title}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-[180ms] ease-[cubic-bezier(0.23,1,0.32,1)] fine-hover:group-hover:scale-[1.02]"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -66,7 +66,7 @@ export function MovieCard({ movie, onClick, compact = false }: MovieCardProps) {
         </div>
       </div>
       <div className="mt-1.5 px-0.5">
-        <h3 className="text-sm font-medium text-foreground/90 line-clamp-1 leading-snug transition-colors duration-200 group-hover:text-primary">
+        <h3 className="text-sm font-medium text-foreground/90 line-clamp-1 leading-snug">
           {movie.title}
         </h3>
         <div className="flex items-center gap-1.5 mt-0.5">
