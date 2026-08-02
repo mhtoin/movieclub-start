@@ -17,25 +17,27 @@ export function EmptyState({
     <div className="min-h-[400px] flex items-center justify-center">
       <div className="max-w-sm text-center space-y-6">
         <div className="relative">
-          <div className="size-24 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center border-2 border-dashed border-primary/30">
+          <div className="empty-state-icon-enter size-24 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center border-2 border-dashed border-primary/30">
             <Clapperboard className="h-10 w-10 text-primary opacity-60" />
           </div>
         </div>
 
-        <div className="space-y-3">
-          <h3 className="text-xl font-semibold">{title}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {description}
-          </p>
-        </div>
+        <div className="empty-state-content-enter space-y-6">
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold">{title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {description}
+            </p>
+          </div>
 
-        <a
-          href={actionHref}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
-        >
-          {actionText}
-          <ArrowRight className="h-4 w-4" />
-        </a>
+          <a
+            href={actionHref}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            {actionText}
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
       </div>
     </div>
   )

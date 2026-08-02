@@ -6,6 +6,13 @@ import {
   Users,
   X,
 } from 'lucide-react'
+import {
+  AnimatePresence,
+  LazyMotion,
+  domAnimation,
+  m,
+  useReducedMotion,
+} from 'framer-motion'
 import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
 import { cn } from '@/lib/utils'
@@ -30,6 +37,7 @@ export function RaffleBlockersToast({
   totalCount,
   pendingUsers,
 }: Props) {
+  const prefersReducedMotion = useReducedMotion()
   const blockers = useMemo(() => {
     const result: Array<Blocker> = []
 
@@ -89,97 +97,113 @@ export function RaffleBlockersToast({
   )
   const isOpen = dismissedSignature !== blockersSignature
 
-  if (blockers.length === 0) return null
-
   return (
-    <div className="absolute bottom-full right-0 mb-3 pointer-events-auto">
-      <div className="relative flex items-end justify-end">
-        {isOpen ? (
-          <div
-            className={cn(
-              'absolute bottom-full left-1/2 mb-2 translate-x-2',
-              'animate-in fade-in slide-in-from-bottom-2 duration-300',
-            )}
-          >
-            <div
-              className={cn(
-                'relative overflow-visible rounded-xl border border-warning/30',
-                'bg-card/98 backdrop-blur-md shadow-2xl',
-                'before:absolute before:-bottom-2 before:left-3',
-                'before:border-8 before:border-transparent before:border-t-warning/30',
-                'after:absolute after:-bottom-[10px] after:left-[10px]',
-                'after:border-[9px] after:border-transparent after:border-t-card/98',
-              )}
-            >
-              <div className="px-4 py-3 w-80 max-w-[calc(100vw-2rem)] sm:w-[22rem]">
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="size-6 rounded-lg bg-warning/15 flex items-center justify-center">
-                      <AlertTriangle
-                        className="size-3.5 text-warning"
-                        strokeWidth={2.5}
-                      />
-                    </div>
-                    <span className="text-xs font-semibold text-warning uppercase tracking-wide">
-                      Cannot start
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setDismissedSignature(blockersSignature)}
-                    className="rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted"
-                    aria-label="Dismiss blockers"
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                </div>
-
-                <ul className="space-y-1.5">
-                  {blockers.map((blocker) => (
-                    <li
-                      key={blocker.id}
-                      className="flex items-start gap-2 text-xs"
-                    >
-                      <div className="flex items-center justify-center size-4 rounded-sm bg-warning/10 mt-0.5 shrink-0">
-                        <blocker.icon className="size-2.5 text-warning/80" />
-                      </div>
-                      <span className="text-muted-foreground">
-                        <span className="text-foreground/90 font-medium">
-                          {blocker.title}
+    <LazyMotion features={domAnimation}>
+      <div className="absolute bottom-full right-0 mb-3 pointer-events-auto">
+        <div className="relative flex items-end justify-end">
+          <AnimatePresence initial={false}>
+            {blockers.length > 0 && isOpen ? (
+              <m.div
+                initial={
+                  prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }
+                }
+                animate={
+                  prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }
+                }
+                exit={
+                  prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }
+                }
+                transition={{
+                  duration: prefersReducedMotion ? 0.12 : 0.3,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className={cn(
+                  'absolute bottom-full left-1/2 mb-2 translate-x-2',
+                )}
+              >
+                <div
+                  className={cn(
+                    'relative overflow-visible rounded-xl border border-warning/30',
+                    'bg-card/98 backdrop-blur-md shadow-2xl',
+                    'before:absolute before:-bottom-2 before:left-3',
+                    'before:border-8 before:border-transparent before:border-t-warning/30',
+                    'after:absolute after:-bottom-[10px] after:left-[10px]',
+                    'after:border-[9px] after:border-transparent after:border-t-card/98',
+                  )}
+                >
+                  <div className="px-4 py-3 w-80 max-w-[calc(100vw-2rem)] sm:w-[22rem]">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="size-6 rounded-lg bg-warning/15 flex items-center justify-center">
+                          <AlertTriangle
+                            className="size-3.5 text-warning"
+                            strokeWidth={2.5}
+                          />
+                        </div>
+                        <span className="text-xs font-semibold text-warning uppercase tracking-wide">
+                          Cannot start
                         </span>
-                        {' — '}
-                        {blocker.description}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        ) : null}
+                      </div>
 
-        <button
-          type="button"
-          onClick={() =>
-            setDismissedSignature((prev) =>
-              prev === blockersSignature ? null : blockersSignature,
-            )
-          }
-          className={cn(
-            'relative flex h-9 w-9 items-center justify-center rounded-full border border-warning/40',
-            'bg-card/95 text-warning shadow-lg shadow-warning/15',
-            'transition-colors hover:bg-warning/10',
+                      <button
+                        type="button"
+                        onClick={() => setDismissedSignature(blockersSignature)}
+                        className="rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted"
+                        aria-label="Dismiss blockers"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+
+                    <ul className="space-y-1.5">
+                      {blockers.map((blocker) => (
+                        <li
+                          key={blocker.id}
+                          className="flex items-start gap-2 text-xs"
+                        >
+                          <div className="flex items-center justify-center size-4 rounded-sm bg-warning/10 mt-0.5 shrink-0">
+                            <blocker.icon className="size-2.5 text-warning/80" />
+                          </div>
+                          <span className="text-muted-foreground">
+                            <span className="text-foreground/90 font-medium">
+                              {blocker.title}
+                            </span>
+                            {' — '}
+                            {blocker.description}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </m.div>
+            ) : null}
+          </AnimatePresence>
+
+          {blockers.length > 0 && (
+            <button
+              type="button"
+              onClick={() =>
+                setDismissedSignature((prev) =>
+                  prev === blockersSignature ? null : blockersSignature,
+                )
+              }
+              className={cn(
+                'relative flex h-9 w-9 items-center justify-center rounded-full border border-warning/40',
+                'bg-card/95 text-warning shadow-lg shadow-warning/15',
+                'transition-colors hover:bg-warning/10',
+              )}
+              aria-expanded={isOpen}
+              aria-label={isOpen ? 'Hide blockers' : 'Show blockers'}
+            >
+              <AlertTriangle className="h-4 w-4" strokeWidth={2.3} />
+              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-warning text-[10px] leading-none text-warning-foreground font-semibold flex items-center justify-center">
+                {blockers.length}
+              </span>
+            </button>
           )}
-          aria-expanded={isOpen}
-          aria-label={isOpen ? 'Hide blockers' : 'Show blockers'}
-        >
-          <AlertTriangle className="h-4 w-4" strokeWidth={2.3} />
-          <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-warning text-[10px] leading-none text-warning-foreground font-semibold flex items-center justify-center">
-            {blockers.length}
-          </span>
-        </button>
+        </div>
       </div>
-    </div>
+    </LazyMotion>
   )
 }

@@ -221,6 +221,55 @@
     }
   }
 
+  @keyframes empty-state-icon-enter {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes empty-state-content-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes empty-state-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .empty-state-icon-enter {
+    animation: empty-state-icon-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .empty-state-content-enter {
+    animation: empty-state-content-enter 0.25s cubic-bezier(0.16, 1, 0.3, 1)
+      0.06s both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .empty-state-icon-enter,
+    .empty-state-content-enter {
+      animation-name: empty-state-fade-in;
+      animation-duration: 0.12s !important;
+      animation-delay: 0s;
+    }
+  }
+
   .animate-pulse-dot {
     animation: pulse-dot 2.5s ease-in-out infinite;
   }

@@ -1,4 +1,5 @@
 import { DragOverlay, useDndContext } from '@dnd-kit/core'
+import { useReducedMotion } from 'framer-motion'
 import { MemoizedMovieCard } from '../discover/movie-card'
 import type { Movie as TMDBMovie } from '@/lib/tmdb-api'
 import type { InferSelectModel } from 'drizzle-orm'
@@ -37,10 +38,16 @@ const mapDbMovieToTmdbMovie = (dbMovie: Movie): TMDBMovie => {
 
 export default function DragOverlayPortal() {
   const { active } = useDndContext()
+  const prefersReducedMotion = useReducedMotion()
   const movie = active?.data.current?.movie as Movie | undefined
 
   return (
-    <DragOverlay>
+    <DragOverlay
+      dropAnimation={{
+        duration: prefersReducedMotion ? 120 : 250,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+    >
       {movie ? (
         <div className="w-32 cursor-grabbing">
           <MemoizedMovieCard movie={mapDbMovieToTmdbMovie(movie)} />
