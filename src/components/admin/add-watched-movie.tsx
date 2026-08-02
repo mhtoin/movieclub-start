@@ -11,7 +11,10 @@ import type { Movie as TmdbMovie } from '@/lib/tmdb-api'
 import { getImageUrl } from '@/lib/tmdb-api'
 import { Button } from '@/components/ui/button'
 import Input from '@/components/ui/input'
-import { useAddWatchedMovieMutation } from '@/lib/react-query/mutations/admin'
+import {
+  MOVIE_ALREADY_WATCHED_ERROR,
+  useAddWatchedMovieMutation,
+} from '@/lib/react-query/mutations/admin'
 import { adminQueries } from '@/lib/react-query/queries/admin'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
@@ -27,6 +30,7 @@ export function AddWatchedMovie() {
   const [watchDate, setWatchDate] = useState(today)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [alreadyWatchedWarning, setAlreadyWatchedWarning] = useState(false)
   const mutation = useAddWatchedMovieMutation()
 
   useEffect(() => {
@@ -41,6 +45,10 @@ export function AddWatchedMovie() {
   const searchResults =
     searchQuery.data?.pages.flatMap((page) => page.results).slice(0, 8) ?? []
   const selectedShortlist = shortlists.find((entry) => entry.user.id === userId)
+  const selectedMovie = selectedShortlist?.movies.find(
+    (movie) => movie.id === movieId,
+  )
+  const selectedMovieAlreadyWatched = Boolean(selectedMovie?.watchDate)
   const canSubmit = Boolean(userId && (movieId || tmdbMovie) && watchDate)
 
   const handleUserChange = (nextUserId: string) => {
@@ -50,16 +58,22 @@ export function AddWatchedMovie() {
     setUserId(nextUserId)
     setMovieId(nextShortlist?.movies[0]?.id ?? '')
     setTmdbMovie(null)
+    setAlreadyWatchedWarning(false)
   }
 
   const handleShortlistMovieChange = (nextMovieId: string) => {
     setMovieId(nextMovieId)
     setTmdbMovie(null)
+    setAlreadyWatchedWarning(false)
   }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!canSubmit) return
+    if (selectedMovieAlreadyWatched && !alreadyWatchedWarning) {
+      setAlreadyWatchedWarning(true)
+      return
+    }
 
     mutation.mutate(
       {
@@ -67,12 +81,22 @@ export function AddWatchedMovie() {
         tmdbId: tmdbMovie?.id,
         userId,
         watchDate: new Date(`${watchDate}T12:00:00.000Z`),
+        allowAlreadyWatched: alreadyWatchedWarning,
       },
       {
         onSuccess: () => {
           setMovieId('')
           setTmdbMovie(null)
           setSearch('')
+          setAlreadyWatchedWarning(false)
+        },
+        onError: (error) => {
+          if (
+            error instanceof Error &&
+            error.message === MOVIE_ALREADY_WATCHED_ERROR
+          ) {
+            setAlreadyWatchedWarning(true)
+          }
         },
       },
     )
@@ -142,6 +166,21 @@ export function AddWatchedMovie() {
             </div>
           </div>
 
+          {alreadyWatchedWarning && (
+            <div
+              className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100"
+              role="alert"
+            >
+              <p className="font-medium">
+                This movie is already marked as watched.
+              </p>
+              <p className="mt-1 text-xs opacity-80">
+                Submit again to replace its watch date and record this as
+                another raffle result.
+              </p>
+            </div>
+          )}
+
           <div className="grid gap-5 border-t border-border/30 pt-5 lg:grid-cols-2">
             <div className="space-y-2">
               <label
@@ -194,7 +233,10 @@ export function AddWatchedMovie() {
                   <button
                     type="button"
                     className="ml-3 shrink-0 text-xs text-muted-foreground hover:text-foreground"
-                    onClick={() => setTmdbMovie(null)}
+                    onClick={() => {
+                      setTmdbMovie(null)
+                      setAlreadyWatchedWarning(false)
+                    }}
                   >
                     Clear
                   </button>
@@ -220,6 +262,7 @@ export function AddWatchedMovie() {
                       onClick={() => {
                         setTmdbMovie(result)
                         setMovieId('')
+                        setAlreadyWatchedWarning(false)
                       }}
                     >
                       {getImageUrl(result.poster_path, 'w92') ? (
@@ -261,7 +304,11 @@ export function AddWatchedMovie() {
               variant="primary"
               disabled={!canSubmit || mutation.isPending}
             >
-              {mutation.isPending ? 'Recording...' : 'Record movie'}
+              {mutation.isPending
+                ? 'Recording...'
+                : alreadyWatchedWarning
+                  ? 'Record anyway'
+                  : 'Record movie'}
             </Button>
           </div>
         </form>

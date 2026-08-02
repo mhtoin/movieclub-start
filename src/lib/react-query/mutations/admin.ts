@@ -16,12 +16,15 @@ import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
 import { fetchMovieDetails } from '@/lib/tmdb-api'
 import { adminMiddleware } from '@/middleware/admin'
 
+export const MOVIE_ALREADY_WATCHED_ERROR = 'MOVIE_ALREADY_WATCHED'
+
 const addWatchedMovieSchema = z
   .object({
     movieId: z.string().min(1).optional(),
     tmdbId: z.number().int().positive().optional(),
     userId: z.string().min(1),
     watchDate: z.string().min(1),
+    allowAlreadyWatched: z.boolean().default(false),
   })
   .refine((data) => Boolean(data.movieId) !== Boolean(data.tmdbId), {
     message: 'Provide either a shortlist movie or a TMDB movie',
@@ -92,8 +95,8 @@ export const addWatchedMovie = createServerFn({ method: 'POST' })
       if (existingMovie.length === 0) {
         throw new Error('Movie not found')
       }
-      if (existingMovie[0].watchDate) {
-        throw new Error('Movie has already been marked as watched')
+      if (existingMovie[0].watchDate && !data.allowAlreadyWatched) {
+        throw new Error(MOVIE_ALREADY_WATCHED_ERROR)
       }
 
       const raffleId = crypto.randomUUID()
@@ -153,9 +156,14 @@ export function useAddWatchedMovieMutation() {
       tmdbId?: number
       userId: string
       watchDate: Date
+      allowAlreadyWatched?: boolean
     }) =>
       addWatchedMovie({
-        data: { ...data, watchDate: data.watchDate.toISOString() },
+        data: {
+          ...data,
+          watchDate: data.watchDate.toISOString(),
+          allowAlreadyWatched: data.allowAlreadyWatched ?? false,
+        },
       }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlists'] })
@@ -171,6 +179,12 @@ export function useAddWatchedMovieMutation() {
       })
     },
     onError: (error) => {
+      if (
+        error instanceof Error &&
+        error.message === MOVIE_ALREADY_WATCHED_ERROR
+      ) {
+        return
+      }
       toastManager.add({
         title: 'Could not record movie',
         description: error instanceof Error ? error.message : 'Try again.',
