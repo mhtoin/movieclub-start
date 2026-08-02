@@ -9,6 +9,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY}
+        VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
+        VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
+        VITE_SHORTLIST_CARD_VARIANT: ${VITE_SHORTLIST_CARD_VARIANT}
     container_name: movieclub-app-prod
     restart: unless-stopped
     deploy:
@@ -28,5 +33,6 @@ services:
       VITE_TMDB_API_KEY: ${VITE_TMDB_API_KEY:?TMDB API key required}
       VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
       VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
+      VITE_SHORTLIST_CARD_VARIANT: ${VITE_SHORTLIST_CARD_VARIANT}
     ports:
       - '3001:3001'
