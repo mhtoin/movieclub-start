@@ -75,6 +75,7 @@ const batchUpdateTierMoviePositionsSchema = z.array(
     movieOnTierId: z.string().min(1),
     newPosition: z.number().int().min(0),
     tierId: z.string().min(1),
+    autoReview: z.boolean(),
   }),
 )
 
@@ -83,6 +84,7 @@ const batchInsertMoviesOnTiersSchema = z.array(
     movieId: z.string().min(1),
     tierId: z.string().min(1),
     position: z.number().int().min(0),
+    autoReview: z.boolean(),
   }),
 )
 
@@ -291,8 +293,11 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
       return result.txid as string
     })
 
-    const movieIds = await db
-      .select({ id: moviesOnTiers.movieId })
+    const movieOnTierRows = await db
+      .select({
+        movieOnTierId: moviesOnTiers.id,
+        movieId: moviesOnTiers.movieId,
+      })
       .from(moviesOnTiers)
       .where(
         inArray(
@@ -302,10 +307,11 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
       )
 
     const movieOnTierMovieMap = new Map(
-      data.map((d, i) => [d.movieOnTierId, movieIds[i]?.id ?? null]),
+      movieOnTierRows.map((row) => [row.movieOnTierId, row.movieId]),
     )
 
     const items = data
+      .filter((d) => d.autoReview)
       .map((d) => ({
         movieId: movieOnTierMovieMap.get(d.movieOnTierId) ?? null,
         tierId: d.tierId,
@@ -353,7 +359,9 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
 
     const autoReviews = await handleAutoReviews(
       currentUser.userId,
-      data.map((d) => ({ movieId: d.movieId, tierId: d.tierId })),
+      data
+        .filter((d) => d.autoReview)
+        .map((d) => ({ movieId: d.movieId, tierId: d.tierId })),
     )
 
     return { txid, autoReviews }

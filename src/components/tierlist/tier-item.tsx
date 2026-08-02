@@ -1,5 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { Link } from '@tanstack/react-router'
+import { ExternalLink } from 'lucide-react'
 import { memo } from 'react'
 import { MemoizedMovieCard } from '../discover/movie-card'
 import type { InferSelectModel } from 'drizzle-orm'
@@ -72,7 +74,7 @@ function TierItem({
   return (
     <div
       key={movie.id}
-      className={`transition-all duration-200 ${
+      className={`relative transition-all duration-200 ${
         compact ? 'w-full h-full' : 'w-32'
       } ${
         isDragging
@@ -97,6 +99,17 @@ function TierItem({
           compact={compact}
         />
       </div>
+      <Link
+        to="/watched/$movieId"
+        params={{ movieId: movie.id }}
+        aria-label={`Open ${movie.title} in watched movies`}
+        title="Open watched movie"
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+        className="absolute right-1.5 top-1.5 z-10 flex size-7 items-center justify-center rounded-md bg-background/90 text-foreground shadow-sm ring-1 ring-border/50 transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+      >
+        <ExternalLink className="size-3.5" aria-hidden="true" />
+      </Link>
     </div>
   )
 }

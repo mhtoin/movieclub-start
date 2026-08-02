@@ -294,12 +294,14 @@ export function TierlistContent({
       movieOnTierId: string
       tierId: string
       newPosition: number
+      autoReview: boolean
     }> = []
 
     const inserts: Array<{
       movieId: string
       tierId: string
       position: number
+      autoReview: boolean
     }> = []
 
     finalTiers.forEach((tier) => {
@@ -312,6 +314,7 @@ export function TierlistContent({
             movieId: movie.id,
             tierId: tier.id,
             position: index,
+            autoReview: movie.id === activeId,
           })
           return
         }
@@ -324,6 +327,7 @@ export function TierlistContent({
             movieOnTierId: original.movieOnTierId,
             tierId: tier.id,
             newPosition: index,
+            autoReview: movie.id === activeId,
           })
         }
       })
