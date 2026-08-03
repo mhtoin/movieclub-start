@@ -53,7 +53,7 @@ const RecommendationCard = memo(function RecommendationCard({
   isAdding,
   alreadyInShortlist,
 }: RecommendationCardProps) {
-  const cardRef = useRef<HTMLButtonElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const posterUrl = getImageUrl(movie.poster_path, 'w342')
   const year = movie.release_date
     ? new Date(movie.release_date).getFullYear()
@@ -76,14 +76,21 @@ const RecommendationCard = memo(function RecommendationCard({
   )
 
   return (
-    <button
+    <div
       ref={cardRef}
-      type="button"
       onClick={handleClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          handleClick()
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className="group relative flex-shrink-0 w-[140px] sm:w-[160px] md:w-[180px] text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-lg"
     >
       {/* Film frame border */}
-      <div className="relative overflow-hidden rounded-lg bg-card border border-border/40 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:border-primary/30">
+      <div className="relative overflow-hidden rounded-lg bg-card border border-border/40 shadow-sm transition-[transform,box-shadow,border-color] duration-200 ease-out group-hover:-translate-y-1 group-hover:shadow-lg group-hover:border-primary/30">
         <div className="aspect-[2/3] overflow-hidden">
           {posterUrl ? (
             <img
@@ -106,7 +113,7 @@ const RecommendationCard = memo(function RecommendationCard({
                 type="button"
                 onClick={handleAdd}
                 disabled={isAdding}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary/90 px-3 py-1.5 text-xs font-semibold text-primary-foreground backdrop-blur-sm transition-all hover:bg-primary active:scale-95 disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary/90 px-3 py-1.5 text-xs font-semibold text-primary-foreground backdrop-blur-sm transition-[background-color,transform,opacity] duration-150 ease-out hover:bg-primary active:scale-95 disabled:opacity-50"
               >
                 <Plus className="size-3" />
                 {isAdding ? 'Adding...' : 'Shortlist'}
@@ -143,7 +150,7 @@ const RecommendationCard = memo(function RecommendationCard({
           )}
         </div>
       </div>
-    </button>
+    </div>
   )
 })
 
@@ -234,6 +241,10 @@ const SeedGroup = memo(function SeedGroup({
 
       {/* Horizontal scroll of recommendations */}
       <div className="relative -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
+        <div
+          className="pointer-events-none absolute right-0 top-0 bottom-4 z-10 w-10 bg-gradient-to-l from-background to-transparent sm:w-16"
+          aria-hidden="true"
+        />
         <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory">
           {recommendations.map((movie, mIndex) => (
             <div
@@ -314,11 +325,14 @@ export const RecommendationsStrip = memo(function RecommendationsStrip({
   const [dialogOpen, setDialogOpen] = useState(false)
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
 
-  const handleMovieClick = useCallback((movie: Movie, rect: DOMRect) => {
-    setSelectedMovie(movie)
-    setTriggerRect(rect)
-    setDialogOpen(true)
-  }, [])
+  const handleMovieClick = useCallback(
+    (movie: Movie, rect: DOMRect) => {
+      setSelectedMovie(movie)
+      setTriggerRect(rect)
+      setDialogOpen(true)
+    },
+    [setDialogOpen],
+  )
 
   const handleAddToShortlist = useCallback(
     (movieId: number) => {
@@ -334,12 +348,18 @@ export const RecommendationsStrip = memo(function RecommendationsStrip({
   const isRecsLoading = seedQueries.some((q) => q.isLoading)
 
   // Build seed + recommendation pairs
-  const seedGroups = seeds
-    .map((seed, index) => ({
-      seed,
-      recommendations: seedQueries[index]?.data ?? [],
-    }))
-    .filter((group) => group.recommendations.length > 0)
+  const seedGroups = seeds.reduce<
+    Array<{
+      seed: (typeof seeds)[number]
+      recommendations: Array<TMDBMovie>
+    }>
+  >((groups, seed, index) => {
+    const recommendations = seedQueries[index]?.data ?? []
+    if (recommendations.length > 0) {
+      groups.push({ seed, recommendations })
+    }
+    return groups
+  }, [])
 
   // Still loading recommendations — show inline skeleton
   if (isRecsLoading || (seeds.length > 0 && seedQueries.length === 0)) {
@@ -432,7 +452,7 @@ export const RecommendationsStrip = memo(function RecommendationsStrip({
             <Link
               to="/tierlist/$userId"
               params={{ userId }}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-[transform,box-shadow] duration-150 ease-out hover:scale-[1.02] active:scale-[0.98]"
             >
               <Sparkles className="size-3.5" />
               Create a tierlist

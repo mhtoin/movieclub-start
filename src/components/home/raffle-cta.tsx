@@ -20,7 +20,7 @@ export const RaffleCTA = memo(function RaffleCTA({
     <div className="max-w-xl">
       <Link
         to="/raffle"
-        className="group flex items-center gap-6 rounded-2xl border border-primary/15 bg-[color-mix(in_oklch,var(--card)_97%,var(--primary)_3%)] px-7 py-6 transition-all
+        className="group flex items-center gap-6 rounded-2xl border border-primary/15 bg-[color-mix(in_oklch,var(--card)_97%,var(--primary)_3%)] px-7 py-6 transition-[border-color,box-shadow,background-color] duration-200 ease-out
         hover:border-primary/30 hover:shadow-md hover:shadow-primary/[0.04] hover:bg-[color-mix(in_oklch,var(--card)_94%,var(--primary)_6%)]"
       >
         <div className="flex size-14 items-center justify-center rounded-full bg-primary/[0.08] transition-colors group-hover:bg-primary/[0.12] flex-shrink-0">
@@ -40,7 +40,7 @@ export const RaffleCTA = memo(function RaffleCTA({
             {readyCount} of {totalMembers} members ready
           </p>
         </div>
-        <ArrowRight className="size-6 text-primary/50 transition-all group-hover:translate-x-1 group-hover:text-primary flex-shrink-0" />
+        <ArrowRight className="size-6 text-primary/50 transition-[transform,color] duration-150 ease-out group-hover:translate-x-1 group-hover:text-primary flex-shrink-0" />
       </Link>
     </div>
   )

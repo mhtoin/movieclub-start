@@ -55,7 +55,9 @@ export const MarqueeHero = memo(function MarqueeHero({
         <div className="max-w-lg">
           <div className="flex items-center gap-3 mb-5">
             <span className="relative flex size-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/40" />
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full bg-primary/40 ${shouldReduceMotion ? '' : 'animate-ping'}`}
+              />
               <span className="relative inline-flex size-2.5 rounded-full bg-primary/60" />
             </span>
             <span className="text-xs font-semibold tracking-widest text-primary uppercase">
@@ -122,7 +124,9 @@ export const MarqueeHero = memo(function MarqueeHero({
         >
           <div className="flex items-center gap-3 mb-5">
             <span className="relative flex size-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/50" />
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full bg-primary/50 ${shouldReduceMotion ? '' : 'animate-ping'}`}
+              />
               <span className="relative inline-flex size-2.5 rounded-full bg-primary" />
             </span>
             <span className="text-xs font-semibold tracking-widest text-primary uppercase">
@@ -227,7 +231,7 @@ export const MarqueeHero = memo(function MarqueeHero({
             <Link
               to="/tierlist/$userId"
               params={{ userId }}
-              className="group inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
+              className="group inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-[transform,box-shadow] duration-150 ease-out hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
             >
               <Trophy className="size-4" />
               Rank it
@@ -236,7 +240,7 @@ export const MarqueeHero = memo(function MarqueeHero({
             <Link
               to="/watched/$movieId"
               params={{ movieId: movie.id }}
-              className="group inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-6 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-primary/10 hover:border-primary/50 active:scale-[0.98]"
+              className="group inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-6 py-2.5 text-sm font-semibold text-primary transition-[background-color,border-color,transform] duration-150 ease-out hover:bg-primary/10 hover:border-primary/50 active:scale-[0.98]"
             >
               <MessageCircle className="size-4" />
               Club reviews
@@ -244,7 +248,7 @@ export const MarqueeHero = memo(function MarqueeHero({
             </Link>
             <Link
               to="/watched"
-              className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full px-2 py-2.5 text-sm font-medium text-muted-foreground transition-[color,transform] duration-150 ease-out hover:text-foreground active:scale-[0.98]"
             >
               <Film className="size-4 text-foreground/60" />
               Watch history

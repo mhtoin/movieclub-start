@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import '@/styles/polaroid.css'
 import { Link } from '@tanstack/react-router'
@@ -143,6 +143,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
 }: ShortlistStripProps) {
   const shouldReduceMotion = useReducedMotion()
   const movies = shortlist?.movies ?? []
+  const [flippedMovieId, setFlippedMovieId] = useState<string | null>(null)
 
   if (movies.length === 0) {
     return (
@@ -283,6 +284,10 @@ export const ShortlistStrip = memo(function ShortlistStrip({
             'linear-gradient(to bottom, transparent 30px, var(--border) 30px, var(--border) 31px, transparent 31px)',
         }}
       >
+        <div
+          className="pointer-events-none absolute right-0 top-0 bottom-8 z-10 w-10 bg-gradient-to-l from-background to-transparent sm:w-16"
+          aria-hidden="true"
+        />
         <div className="flex gap-6 md:gap-8">
           {movies.map((movie, index) => {
             const posterPath =
@@ -296,10 +301,19 @@ export const ShortlistStrip = memo(function ShortlistStrip({
             const rotation = ROTATIONS[index % ROTATIONS.length]
 
             return (
-              <div
+              <button
                 key={movie.id}
                 suppressHydrationWarning
-                className="snap-start flex-shrink-0 relative group cursor-pointer hover:z-50 focus-within:z-50"
+                type="button"
+                data-flipped={flippedMovieId === movie.id}
+                aria-label={`${flippedMovieId === movie.id ? 'Show poster' : 'Show details'} for ${movie.title}`}
+                aria-pressed={flippedMovieId === movie.id}
+                onClick={() =>
+                  setFlippedMovieId((current) =>
+                    current === movie.id ? null : movie.id,
+                  )
+                }
+                className="snap-start flex-shrink-0 relative group cursor-pointer hover:z-50 focus-visible:z-50 appearance-none border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
                 style={
                   {
                     transformOrigin: 'top center',
@@ -317,7 +331,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
                     <div className="polaroid-front relative">
                       <div className="polaroid-peek" />
                       <span className="polaroid-hint">Flip</span>
-                      <div className="w-40 sm:w-48 md:w-56 lg:w-64 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
+                      <div className="w-40 sm:w-48 md:w-56 lg:w-64 pt-2.5 px-2.5 pb-10 rounded-sm shadow-md transition-[box-shadow,transform] duration-200 ease-out group-hover:shadow-2xl group-hover:-translate-y-1 bg-[color-mix(in_oklch,white_95%,var(--primary)_5%)]">
                         <div className="aspect-[2/3] overflow-hidden rounded-[1px] bg-black/5">
                           {posterUrl ? (
                             <img
@@ -348,7 +362,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
                     <PolaroidBack movie={movie} />
                   </div>
                 </div>
-              </div>
+              </button>
             )
           })}
         </div>

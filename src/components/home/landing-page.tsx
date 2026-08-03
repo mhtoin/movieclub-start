@@ -54,7 +54,8 @@ export const LandingPage = memo(function LandingPage({
             <Suspense fallback={<RaffleCTASkeleton />}>
               <m.section
                 initial={shouldReduceMotion ? false : 'hidden'}
-                animate="show"
+                whileInView="show"
+                viewport={{ once: true, margin: '-80px' }}
                 variants={sectionVariants}
               >
                 <RaffleCTASuspense />
@@ -64,7 +65,8 @@ export const LandingPage = memo(function LandingPage({
             <Suspense fallback={<ShortlistStripSkeleton />}>
               <m.section
                 initial={shouldReduceMotion ? false : 'hidden'}
-                animate="show"
+                whileInView="show"
+                viewport={{ once: true, margin: '-80px' }}
                 variants={sectionVariants}
               >
                 <ShortlistStripSuspense userId={userId} />
@@ -74,7 +76,8 @@ export const LandingPage = memo(function LandingPage({
             <Suspense fallback={<ClubSnapshotSkeleton />}>
               <m.section
                 initial={shouldReduceMotion ? false : 'hidden'}
-                animate="show"
+                whileInView="show"
+                viewport={{ once: true, margin: '-80px' }}
                 variants={sectionVariants}
               >
                 <ClubSnapshotSuspense userId={userId} />
@@ -84,7 +87,8 @@ export const LandingPage = memo(function LandingPage({
             <Suspense fallback={<RecommendationsStripSkeleton />}>
               <m.section
                 initial={shouldReduceMotion ? false : 'hidden'}
-                animate="show"
+                whileInView="show"
+                viewport={{ once: true, margin: '-80px' }}
                 variants={sectionVariants}
               >
                 <RecommendationsStripSuspense userId={userId} />
@@ -94,7 +98,8 @@ export const LandingPage = memo(function LandingPage({
             <Suspense fallback={<HistoryStripSkeleton />}>
               <m.section
                 initial={shouldReduceMotion ? false : 'hidden'}
-                animate="show"
+                whileInView="show"
+                viewport={{ once: true, margin: '-80px' }}
                 variants={sectionVariants}
                 className="pb-8"
               >

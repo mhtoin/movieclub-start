@@ -123,7 +123,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                   delay: index * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="transition-all duration-300 hover:-translate-y-1"
+                className="transition-transform duration-300 ease-out hover:-translate-y-1"
               >
                 <div
                   className="ticket-card group flex items-center gap-4 pl-3 pr-4 py-4 rounded-xl
@@ -182,10 +182,13 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                         : null
 
                       return (
-                        <div
+                        <Link
+                          to="/watched/$movieId"
+                          params={{ movieId: movie.id }}
                           key={movie.id}
+                          aria-label={`Open ${movie.title}`}
                           className="relative h-24 w-16 rounded-sm bg-muted border border-white/60 dark:border-white/10 shadow-sm
-                          transition-all duration-200 hover:z-10 hover:scale-125 hover:-translate-y-1 hover:shadow-md cursor-pointer flex-shrink-0"
+                           transition-[transform,z-index,box-shadow] duration-200 ease-out hover:z-10 hover:scale-125 hover:-translate-y-1 hover:shadow-md cursor-pointer flex-shrink-0"
                           title={movie.title}
                         >
                           {posterUrl ? (
@@ -200,7 +203,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                               <Ticket className="size-4 text-muted-foreground/25" />
                             </div>
                           )}
-                        </div>
+                        </Link>
                       )
                     })}
                     {shortlist.movies.length > 3 && (
@@ -291,15 +294,15 @@ export function ClubSnapshotSkeleton() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+        {Array.from({ length: 4 }).map((_skeleton, skeletonIndex) => (
           <div
-            key={i}
+            key={skeletonIndex}
             className="flex items-center gap-4 px-3 py-4 rounded-xl border border-border/10 bg-muted/30"
           >
             <div className="flex flex-col gap-2">
-              {Array.from({ length: 3 }).map((_, j) => (
+              {Array.from({ length: 3 }).map((_hole, holeIndex) => (
                 <div
-                  key={j}
+                  key={holeIndex}
                   className="w-2 h-2.5 rounded-[3px] animate-pulse bg-muted"
                 />
               ))}
@@ -310,9 +313,9 @@ export function ClubSnapshotSkeleton() {
               <div className="h-3 w-12 animate-pulse rounded bg-muted" />
             </div>
             <div className="flex items-center -space-x-2">
-              {Array.from({ length: 3 }).map((_, j) => (
+              {Array.from({ length: 3 }).map((_poster, posterIndex) => (
                 <div
-                  key={j}
+                  key={posterIndex}
                   className="h-24 w-16 rounded-sm animate-pulse bg-muted flex-shrink-0 border border-white/50"
                 />
               ))}
