@@ -18,6 +18,155 @@ import { adminMiddleware } from '@/middleware/admin'
 
 export const MOVIE_ALREADY_WATCHED_ERROR = 'MOVIE_ALREADY_WATCHED'
 
+const adminShortlistMovieSchema = z.object({
+  userId: z.string().min(1),
+  tmdbId: z.number().int().positive(),
+})
+
+export const addMovieToUserShortlist = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data) => adminShortlistMovieSchema.parse(data))
+  .handler(async ({ data }) => {
+    const targetShortlist = await db
+      .select()
+      .from(shortlist)
+      .where(eq(shortlist.userId, data.userId))
+      .limit(1)
+      .then((rows) => rows[0])
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!targetShortlist) throw new Error('Shortlist not found')
+
+    const currentMovies = await db
+      .select({ id: movie.id, watchDate: movie.watchDate })
+      .from(movieToShortlist)
+      .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+      .where(eq(movieToShortlist.b, targetShortlist.id))
+
+    if (currentMovies.length >= 3) {
+      throw new Error('This shortlist is full (maximum 3 movies)')
+    }
+
+    const existingMovie = await db
+      .select()
+      .from(movie)
+      .where(eq(movie.tmdbId, data.tmdbId))
+      .limit(1)
+      .then((rows) => rows[0])
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (existingMovie?.watchDate) {
+      throw new Error('This movie has already been watched')
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    let movieId = existingMovie?.id
+    if (!movieId) {
+      const movieData = createDbMovie(await fetchMovieDetails(data.tmdbId))
+      const { credits, ...movieInsertFields } = movieData
+      movieId = crypto.randomUUID()
+      await db.insert(movie).values({ id: movieId, ...movieInsertFields })
+      await db.insert(movieCredits).values({
+        id: movieId,
+        cast: credits.cast,
+        crew: credits.crew,
+      })
+      generateAndUpdateBlurData(movieId, movieData.images).catch((error) =>
+        console.error('Background blur generation failed:', error),
+      )
+    }
+
+    if (currentMovies.some((entry) => entry.id === movieId)) {
+      throw new Error('This movie is already in the shortlist')
+    }
+
+    await db.insert(movieToShortlist).values({
+      a: movieId,
+      b: targetShortlist.id,
+    })
+
+    return { success: true, userId: data.userId }
+  })
+
+export const removeMovieFromUserShortlist = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data) =>
+    z
+      .object({ userId: z.string().min(1), movieId: z.string().min(1) })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const targetShortlist = await db
+      .select({ id: shortlist.id })
+      .from(shortlist)
+      .where(eq(shortlist.userId, data.userId))
+      .limit(1)
+      .then((rows) => rows[0])
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!targetShortlist) throw new Error('Shortlist not found')
+
+    await db
+      .delete(movieToShortlist)
+      .where(
+        and(
+          eq(movieToShortlist.a, data.movieId),
+          eq(movieToShortlist.b, targetShortlist.id),
+        ),
+      )
+
+    return { success: true, userId: data.userId }
+  })
+
+export function useAdminShortlistMutation() {
+  const queryClient = useQueryClient()
+  const toastManager = Toast.useToastManager()
+
+  const invalidate = (userId: string) => {
+    queryClient.invalidateQueries({ queryKey: ['admin', 'shortlists'] })
+    queryClient.invalidateQueries({ queryKey: ['shortlist', userId] })
+    queryClient.invalidateQueries({ queryKey: ['shortlists'] })
+  }
+
+  const add = useMutation({
+    mutationFn: ({ userId, tmdbId }: { userId: string; tmdbId: number }) =>
+      addMovieToUserShortlist({ data: { userId, tmdbId } }),
+    onSettled: (_data, _error, variables) => invalidate(variables.userId),
+    onSuccess: () =>
+      toastManager.add({
+        title: 'Movie added',
+        description: "The user's shortlist was updated.",
+        type: 'success',
+      }),
+    onError: (error) =>
+      toastManager.add({
+        title: 'Could not add movie',
+        description: error instanceof Error ? error.message : 'Try again.',
+        type: 'error',
+      }),
+  })
+
+  const remove = useMutation({
+    mutationFn: ({ userId, movieId }: { userId: string; movieId: string }) =>
+      removeMovieFromUserShortlist({ data: { userId, movieId } }),
+    onSettled: (_data, _error, variables) => invalidate(variables.userId),
+    onSuccess: () =>
+      toastManager.add({
+        title: 'Movie removed',
+        description: "The user's shortlist was updated.",
+        type: 'success',
+      }),
+    onError: (error) =>
+      toastManager.add({
+        title: 'Could not remove movie',
+        description: error instanceof Error ? error.message : 'Try again.',
+        type: 'error',
+      }),
+  })
+
+  return { add, remove }
+}
+
 const addWatchedMovieSchema = z
   .object({
     movieId: z.string().min(1).optional(),

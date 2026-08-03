@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   Film,
+  ListPlus,
   Megaphone,
   Pencil,
   Plus,
@@ -33,6 +34,7 @@ import {
 } from '@/components/ui/rich-text-editor'
 import { Tab, TabsList, TabsPanel, TabsRoot } from '@/components/ui/tabs'
 import { AddWatchedMovie } from '@/components/admin/add-watched-movie'
+import { ManageShortlists } from '@/components/admin/manage-shortlists'
 import { canAccessAdminPanel } from '@/lib/auth/permissions'
 import { adminQueries } from '@/lib/react-query/queries/admin'
 
@@ -125,10 +127,18 @@ function AdminPage() {
               <Film className="mr-2 size-4" />
               Record watched movie
             </Tab>
+            <Tab value="shortlists" variant="underlined">
+              <ListPlus className="mr-2 size-4" />
+              Manage shortlists
+            </Tab>
           </TabsList>
 
           <TabsPanel value="watched" variant="underlined">
             <AddWatchedMovie />
+          </TabsPanel>
+
+          <TabsPanel value="shortlists" variant="underlined">
+            <ManageShortlists />
           </TabsPanel>
 
           <TabsPanel value="announcements" variant="underlined">
