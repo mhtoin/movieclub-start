@@ -48,7 +48,11 @@ export const LandingPage = memo(function LandingPage({
               animate="show"
               variants={sectionVariants}
             >
-              <MarqueeHero movie={latestMovie} userId={userId} />
+              <MarqueeHero
+                movie={latestMovie}
+                userId={userId}
+                pickedBy={latestMovieData?.user.name ?? null}
+              />
             </m.section>
 
             <Suspense fallback={<RaffleCTASkeleton />}>
