@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { m, useReducedMotion } from 'framer-motion'
+import { format } from 'date-fns'
 import {
   ArrowRight,
   Calendar,
@@ -190,12 +191,13 @@ export const MarqueeHero = memo(function MarqueeHero({
             )}
 
             <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-card-foreground/60">
-              {releaseYear && (
+              {movie.watchDate && (
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="size-3.5 text-primary" />
-                  {releaseYear}
+                  {format(movie.watchDate, 'MMM d, yyyy')}
                 </span>
               )}
+              {releaseYear && <span>{releaseYear}</span>}
               {formattedRuntime && (
                 <span className="inline-flex items-center gap-1.5">
                   <Clock className="size-3.5 text-primary" />
