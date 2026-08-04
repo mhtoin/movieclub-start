@@ -192,9 +192,7 @@ export function RaffleSpinner({
 
   const settleTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const stripRef = useRef<HTMLDivElement | null>(null)
-  const progressRef = useRef<HTMLDivElement | null>(null)
   const stripAnimationRef = useRef<Animation | null>(null)
-  const progressAnimationRef = useRef<Animation | null>(null)
   const completedRef = useRef(false)
   const [locked, setLocked] = useState(false)
   const [settling, setSettling] = useState(false)
@@ -225,16 +223,9 @@ export function RaffleSpinner({
     if (stripRef.current) {
       stripRef.current.style.transform = `translateY(-${startOffset}px)`
     }
-    if (progressRef.current) {
-      progressRef.current.style.transform = 'scaleX(1)'
-    }
-
     if (prefersReducedMotion) {
       if (stripRef.current) {
         stripRef.current.style.transform = `translateY(-${targetOffset}px)`
-      }
-      if (progressRef.current) {
-        progressRef.current.style.transform = 'scaleX(0)'
       }
       const reducedMotionStateTimeout = setTimeout(() => {
         setSettling(true)
@@ -267,18 +258,9 @@ export function RaffleSpinner({
         ],
         animationOptions,
       ) ?? null
-    progressAnimationRef.current =
-      progressRef.current?.animate(
-        [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
-        animationOptions,
-      ) ?? null
-
     const finish = () => {
       if (stripRef.current) {
         stripRef.current.style.transform = `translateY(-${targetOffset}px)`
-      }
-      if (progressRef.current) {
-        progressRef.current.style.transform = 'scaleX(0)'
       }
       setSettling(true)
       setLocked(true)
@@ -305,7 +287,6 @@ export function RaffleSpinner({
     stripAnimationRef.current?.finished.then(finish).catch(() => {})
     return () => {
       stripAnimationRef.current?.cancel()
-      progressAnimationRef.current?.cancel()
       if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current)
     }
   }, [
@@ -490,56 +471,7 @@ export function RaffleSpinner({
               </svg>
             </m.div>
           </div>
-
-          <div
-            className="mt-5 mx-2 h-1.5 rounded-full overflow-hidden"
-            style={{
-              background: 'var(--border)',
-              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)',
-            }}
-          >
-            <m.div
-              ref={progressRef}
-              className="h-full rounded-full"
-              style={{
-                background: `linear-gradient(90deg, color-mix(in oklch, var(--primary) 60%, transparent), var(--primary))`,
-                transform: locked ? 'scaleX(0)' : 'scaleX(1)',
-                transformOrigin: 'left',
-              }}
-              animate={locked ? { opacity: [1, 0.6, 1] } : {}}
-              transition={{ duration: 0.4 }}
-            />
-          </div>
-
-          <p
-            className="text-center text-[10px] uppercase tracking-[0.2em] mt-2 font-medium"
-            style={{
-              color: 'var(--muted-foreground)',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {locked ? (settling ? 'locked in' : 'settling…') : 'spinning'}
-          </p>
         </m.div>
-
-        {locked && (
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="absolute bottom-16 text-center"
-          >
-            <div
-              className="px-4 py-2 rounded-full text-xs font-semibold"
-              style={{
-                background: 'var(--primary)',
-                color: 'var(--primary-foreground)',
-              }}
-            >
-              Watch the screen!
-            </div>
-          </m.div>
-        )}
       </m.div>
     </LazyMotion>
   )
