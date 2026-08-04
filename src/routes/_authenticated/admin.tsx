@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 
-import { Film, ListPlus, Megaphone, Plus } from 'lucide-react'
+import { Dices, Film, ListPlus, Megaphone, Plus } from 'lucide-react'
 import type { Announcement } from '@/db/schema/announcements'
 import { Button } from '@/components/ui/button'
 import { announcementQueries } from '@/lib/react-query/queries/announcements'
@@ -19,6 +19,7 @@ import {
 import { ManageShortlists } from '@/components/admin/manage-shortlists'
 import { canAccessAdminPanel } from '@/lib/auth/permissions'
 import { adminQueries } from '@/lib/react-query/queries/admin'
+import { RaffleRandomnessCheck } from '@/components/admin/raffle-randomness-check'
 
 export const Route = createFileRoute('/_authenticated/admin')({
   beforeLoad: ({ context }) => {
@@ -47,6 +48,7 @@ const itemVariants = {
 
 function AdminPage() {
   const { data: announcements } = useSuspenseQuery(announcementQueries.admin())
+  const { data: shortlists } = useSuspenseQuery(adminQueries.shortlists())
   const [editing, setEditing] = useState<Announcement | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -110,6 +112,10 @@ function AdminPage() {
               <ListPlus className="mr-2 size-4" />
               Manage shortlists
             </Tab>
+            <Tab value="randomness" variant="underlined">
+              <Dices className="mr-2 size-4" />
+              Raffle randomness
+            </Tab>
           </TabsList>
 
           <TabsPanel value="watched" variant="underlined">
@@ -118,6 +124,10 @@ function AdminPage() {
 
           <TabsPanel value="shortlists" variant="underlined">
             <ManageShortlists />
+          </TabsPanel>
+
+          <TabsPanel value="randomness" variant="underlined">
+            <RaffleRandomnessCheck shortlists={shortlists} />
           </TabsPanel>
 
           <TabsPanel value="announcements" variant="underlined">
