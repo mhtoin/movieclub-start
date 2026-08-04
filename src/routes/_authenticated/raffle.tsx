@@ -1,7 +1,7 @@
 import { Suspense, useMemo, useRef, useState } from 'react'
-import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import type { Movie } from '@/db/schema/movies'
 import { PageTitleBar } from '@/components/page-titlebar'
@@ -59,13 +59,12 @@ function RaffleSetup() {
     cast: Array<any> | null
     crew: Array<any> | null
   } | null>(null)
-  const prefersReducedMotion = useReducedMotion() ?? false
-
   const startMutation = useStartRaffleMutation()
   const finalizeMutation = useFinalizeRaffleMutation()
   const updateStatusMutation = useUpdateUserShortlistStatusMutation()
   const updateSelectedIndexMutation = useUpdateUserSelectedIndexMutation()
   const setAllReadyMutation = useSetAllReadyMutation()
+  const queryClient = useQueryClient()
 
   const pendingDraw = useRef<Promise<{
     movie: Movie
@@ -159,19 +158,19 @@ function RaffleSetup() {
     setPhase('winner')
   }
 
-  const handleFinalize = () => {
+  const returnToSetup = async () => {
+    await queryClient.refetchQueries({
+      queryKey: shortlistQueries.all().queryKey,
+      type: 'active',
+    })
     setPhase('setup')
     setWinningMovie(null)
     setWinningUserId(null)
     setWinningCredits(null)
   }
 
-  const handleRerun = () => {
-    setPhase('setup')
-    setWinningMovie(null)
-    setWinningUserId(null)
-    setWinningCredits(null)
-  }
+  const handleFinalize = returnToSetup
+  const handleRerun = returnToSetup
 
   const handleSelectMovie = (userId: string, index: number) => {
     updateSelectedIndexMutation.mutate({ userId, selectedIndex: index })
@@ -185,29 +184,7 @@ function RaffleSetup() {
     <div className="flex-1 py-6 space-y-6">
       <AnimatePresence mode="wait" initial={false}>
         {phase === 'setup' ? (
-          <m.div
-            key="setup"
-            initial={
-              prefersReducedMotion
-                ? { opacity: 0 }
-                : { opacity: 0, transform: 'scale(0.97)' }
-            }
-            animate={
-              prefersReducedMotion
-                ? { opacity: 1 }
-                : { opacity: 1, transform: 'scale(1)' }
-            }
-            exit={
-              prefersReducedMotion
-                ? { opacity: 0 }
-                : { opacity: 0, transform: 'scale(0.99)' }
-            }
-            transition={
-              prefersReducedMotion
-                ? { duration: 0.12, ease: 'easeOut' }
-                : { duration: 0.2, ease: [0.23, 1, 0.32, 1] }
-            }
-          >
+          <div key="setup">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {shortlists.map((shortlist, index) => (
                 <ParticipantTicket
@@ -239,7 +216,7 @@ function RaffleSetup() {
                 />
               ))}
             </div>
-          </m.div>
+          </div>
         ) : phase === 'countdown' ? (
           <RaffleCountdown
             key="countdown"

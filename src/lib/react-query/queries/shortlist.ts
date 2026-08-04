@@ -57,8 +57,8 @@ export const getAllShortlists = createServerFn({ method: 'POST' })
         .select()
         .from(shortlist)
         .innerJoin(user, eq(shortlist.userId, user.id))
-        .innerJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
-        .innerJoin(movie, eq(movieToShortlist.a, movie.id))
+        .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
+        .leftJoin(movie, eq(movieToShortlist.a, movie.id))
         .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
 
       const shortlistsMap = new Map<string, ShortlistWithUserMovies>()
@@ -72,11 +72,13 @@ export const getAllShortlists = createServerFn({ method: 'POST' })
             movies: [],
           })
         }
-        shortlistsMap.get(shortlistId)!.movies.push({
-          ...row.movie,
-          cast: row.movie_credits?.cast ?? null,
-          crew: row.movie_credits?.crew ?? null,
-        })
+        if (row.movie) {
+          shortlistsMap.get(shortlistId)!.movies.push({
+            ...row.movie,
+            cast: row.movie_credits?.cast ?? null,
+            crew: row.movie_credits?.crew ?? null,
+          })
+        }
       }
 
       return Array.from(shortlistsMap.values())
