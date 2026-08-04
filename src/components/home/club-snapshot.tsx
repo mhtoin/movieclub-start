@@ -92,13 +92,28 @@ export const ClubSnapshot = memo(function ClubSnapshot({
 
   return (
     <div>
-      <div className="mb-8">
-        <div className="inline-flex items-center gap-2.5 rounded-full border border-primary/15 bg-primary/[0.04] px-4 py-1.5">
-          <Users className="size-4 text-primary flex-shrink-0" />
-          <span className="font-cinema-caps text-sm md:text-base tracking-[0.15em] text-primary uppercase leading-none">
-            The Club
-          </span>
+      <div className="mb-7 flex flex-col gap-3 border-b border-border/60 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="mb-2 inline-flex items-center gap-2 text-primary">
+            <Users className="size-4" aria-hidden="true" />
+            <span className="font-cinema-caps text-sm tracking-[0.18em] uppercase leading-none">
+              The Club
+            </span>
+          </div>
+          <h2 className="font-cinema text-2xl tracking-wide text-foreground md:text-3xl">
+            What everyone is lining up
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            A quick look at the club&apos;s current picks.
+          </p>
         </div>
+        <Link
+          to="/shortlists"
+          className="group inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary transition-colors duration-150 ease-out hover:text-primary/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          Browse all picks
+          <ArrowRight className="size-4 transition-transform duration-150 ease-out group-hover:translate-x-1" />
+        </Link>
       </div>
 
       {otherShortlists.length === 0 ? (
@@ -119,23 +134,25 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.5,
+                  duration: 0.36,
                   delay: index * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="transition-transform duration-300 ease-out hover:-translate-y-1"
+                className="transition-transform duration-200 ease-out fine-hover:hover:-translate-y-1"
               >
                 <div
-                  className="ticket-card group flex items-center gap-4 pl-3 pr-4 py-4 rounded-xl
-                  bg-[color-mix(in_oklch,var(--card)_96%,var(--primary)_4%)]
-                  border border-[color-mix(in_oklch,var(--border)_90%,var(--primary)_10%)]"
+                  className="ticket-card group flex items-center gap-3 rounded-xl py-3.5 pl-3 pr-3.5
+                   bg-[color-mix(in_oklch,var(--card)_96%,var(--primary)_4%)]
+                   border border-[color-mix(in_oklch,var(--border)_90%,var(--primary)_10%)]
+                   transition-[border-color,box-shadow] duration-200 ease-out
+                   fine-hover:group-hover:border-primary/30"
                   style={{
                     boxShadow:
                       '0 1px 3px rgba(0,0,0,0.03), 0 4px 8px rgba(0,0,0,0.02)',
                   }}
                 >
                   {/* Ticket punch holes — vertical */}
-                  <div className="flex flex-col gap-2 flex-shrink-0">
+                  <div className="ml-2 flex flex-shrink-0 flex-col gap-2">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <div
                         key={i}
@@ -152,7 +169,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                     src={shortlist.user.image}
                     alt={shortlist.user.name}
                     name={shortlist.user.name}
-                    size={48}
+                    size={44}
                   />
 
                   <div className="min-w-0 flex-1">
@@ -187,8 +204,9 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                           params={{ movieId: movie.id }}
                           key={movie.id}
                           aria-label={`Open ${movie.title}`}
-                          className="relative h-24 w-16 rounded-sm bg-muted border border-white/60 dark:border-white/10 shadow-sm
-                           transition-[transform,z-index,box-shadow] duration-200 ease-out hover:z-10 hover:scale-125 hover:-translate-y-1 hover:shadow-md cursor-pointer flex-shrink-0"
+                          className="relative h-20 w-12 flex-shrink-0 cursor-pointer rounded-sm border border-white/60 bg-muted shadow-sm
+                            transition-[transform,z-index,box-shadow] duration-200 ease-out fine-hover:hover:z-10 fine-hover:hover:scale-125 fine-hover:hover:-translate-y-1 fine-hover:hover:shadow-md
+                            md:h-24 md:w-16"
                           title={movie.title}
                         >
                           {posterUrl ? (
@@ -207,7 +225,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
                       )
                     })}
                     {shortlist.movies.length > 3 && (
-                      <div className="relative z-10 flex h-24 w-16 flex-shrink-0 items-center justify-center rounded-sm bg-muted/80 border border-white/60 dark:border-white/10 shadow-sm">
+                      <div className="relative z-10 flex h-20 w-12 flex-shrink-0 items-center justify-center rounded-sm border border-white/60 bg-muted/80 shadow-sm md:h-24 md:w-16">
                         <span className="text-sm font-bold text-muted-foreground">
                           +{shortlist.movies.length - 3}
                         </span>
@@ -228,10 +246,10 @@ export const ClubSnapshot = memo(function ClubSnapshot({
             >
               <Link
                 to="/shortlists"
-                className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors pl-2"
+                className="group inline-flex items-center gap-2 pl-2 text-sm font-semibold text-primary transition-colors duration-150 ease-out hover:text-primary/80"
               >
                 View all {otherShortlists.length} members
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="size-4 transition-transform duration-150 ease-out group-hover:translate-x-1" />
               </Link>
             </m.div>
           )}
@@ -240,7 +258,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
 
       {/* Compact stats bar */}
       {stats && (
-        <div className="mt-8 flex items-center gap-2 sm:gap-4 flex-wrap">
+        <div className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-2 border-t border-border/60 pt-5 sm:gap-3">
           <div className="flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2">
             <Film className="size-3.5 text-muted-foreground/45" />
             <span className="text-xs text-muted-foreground/70">Watched</span>
@@ -272,7 +290,7 @@ export const ClubSnapshot = memo(function ClubSnapshot({
 
           <Link
             to={getUserTierlistHref(currentUserId)}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors duration-150 ease-out hover:bg-accent/60 hover:text-foreground sm:ml-auto"
           >
             <Trophy className="size-3.5" />
             Rank movies
@@ -287,11 +305,16 @@ export const ClubSnapshot = memo(function ClubSnapshot({
 export function ClubSnapshotSkeleton() {
   return (
     <div>
-      <div className="mb-4">
-        <div className="inline-flex items-center gap-2.5 rounded-full border border-border/10 bg-muted/30 px-4 py-1.5">
-          <div className="size-4 rounded-full animate-pulse bg-muted" />
-          <div className="h-5 w-24 animate-pulse rounded bg-muted" />
+      <div className="mb-7 flex flex-col gap-3 border-b border-border/60 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="size-4 rounded-full animate-pulse bg-muted" />
+            <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+          </div>
+          <div className="h-8 w-64 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-48 animate-pulse rounded bg-muted" />
         </div>
+        <div className="h-5 w-28 animate-pulse rounded bg-muted" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {Array.from({ length: 4 }).map((_skeleton, skeletonIndex) => (
@@ -299,7 +322,7 @@ export function ClubSnapshotSkeleton() {
             key={skeletonIndex}
             className="flex items-center gap-4 px-3 py-4 rounded-xl border border-border/10 bg-muted/30"
           >
-            <div className="flex flex-col gap-2">
+            <div className="ml-2 flex flex-col gap-2">
               {Array.from({ length: 3 }).map((_hole, holeIndex) => (
                 <div
                   key={holeIndex}
@@ -316,7 +339,7 @@ export function ClubSnapshotSkeleton() {
               {Array.from({ length: 3 }).map((_poster, posterIndex) => (
                 <div
                   key={posterIndex}
-                  className="h-24 w-16 rounded-sm animate-pulse bg-muted flex-shrink-0 border border-white/50"
+                  className="h-20 w-12 flex-shrink-0 animate-pulse rounded-sm border border-white/50 bg-muted md:h-24 md:w-16"
                 />
               ))}
             </div>
