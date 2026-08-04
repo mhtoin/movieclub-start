@@ -184,8 +184,8 @@ export function RaffleSpinner({
     seed = Math.abs(seed) + movies.length
 
     return {
-      laps: Math.floor(seededRandom(seed, 0) * 3) + 6,
-      duration: 6000 + seededRandom(seed, 1) * 3000,
+      laps: Math.floor(seededRandom(seed, 0) * 3) + 8,
+      duration: 9000 + seededRandom(seed, 1) * 4000,
       landingJitter: (seededRandom(seed, 2) - 0.5) * ITEM_HEIGHT * 0.6,
     }
   }, [winningMovie.id, movies.length])
@@ -255,7 +255,7 @@ export function RaffleSpinner({
 
     const animationOptions: KeyframeAnimationOptions = {
       duration,
-      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+      easing: 'cubic-bezier(0.1, 0.6, 0.15, 1)',
       fill: 'forwards',
     }
 
