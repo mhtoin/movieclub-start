@@ -1,5 +1,5 @@
 # Dockerfile
-FROM node:23-alpine AS base
+FROM node:24-alpine AS base
 RUN corepack enable
 WORKDIR /app
 
@@ -29,6 +29,10 @@ FROM base AS runner
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3001
+# Cap the V8 heap so Node GCs early instead of ratcheting RSS up to its
+# high-water mark - hosting bills average memory, and this app fits
+# comfortably in 256 MB of old space.
+ENV NODE_OPTIONS="--max-old-space-size=256"
 
 # Reuse node_modules from deps stage — no need to reinstall
 COPY --from=deps /app/node_modules ./node_modules

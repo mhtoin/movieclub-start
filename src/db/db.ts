@@ -7,7 +7,9 @@ if (!process.env.DATABASE_URL) {
 }
 
 const client = postgres(process.env.DATABASE_URL, {
-  max: 20,
+  // Small pool: each connection is a backend process on the Postgres
+  // service (~5-10 MB RSS). 5 is generous for a single small app instance.
+  max: 5,
   idle_timeout: 30,
   max_lifetime: 3600,
   connect_timeout: 10,
