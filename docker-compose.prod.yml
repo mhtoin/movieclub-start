@@ -10,13 +10,27 @@ services:
         limits:
           cpus: '1.0'
           memory: 768M
+    shm_size: 128mb
     env_file:
-      - .env.production
+      - ${MOVIECLUB_ENV_FILE:-.env.production}
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-movieclub}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
       POSTGRES_DB: ${POSTGRES_DB:-movieclub}
-    command: ['postgres', '-c', 'wal_level=logical']
+    command:
+      [
+        'postgres',
+        '-c',
+        'wal_level=logical',
+        '-c',
+        'shared_buffers=64MB',
+        '-c',
+        'max_connections=20',
+        '-c',
+        'work_mem=4MB',
+        '-c',
+        'client_connection_check_interval=30s',
+      ]
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -42,13 +56,14 @@ services:
         VITE_SHORTLIST_CARD_VARIANT: ${VITE_SHORTLIST_CARD_VARIANT}
     container_name: movieclub-app-prod
     restart: unless-stopped
+    init: true
     deploy:
       resources:
         limits:
           cpus: '1.0'
           memory: 512M
     env_file:
-      - .env.production
+      - ${MOVIECLUB_ENV_FILE:-.env.production}
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-movieclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movieclub}?sslmode=disable

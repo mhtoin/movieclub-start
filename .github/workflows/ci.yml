@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 23
+          node-version: 24
 
       - name: Enable Corepack
         run: corepack enable
@@ -33,3 +33,23 @@ jobs:
 
       - name: Type check
         run: pnpm run typecheck
+
+  deploy:
+    name: Deploy to Mac mini
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, macOS, ARM64, movieclub-production]
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Keep the untracked .env.production on the Mac.
+          clean: false
+          persist-credentials: false
+
+      - name: Deploy production stack
+        env:
+          DEPLOY_PULL: '0'
+        run: MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" bash scripts/deploy.sh --skip-pull

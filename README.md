@@ -297,51 +297,147 @@ Files prefixed with `demo` can be safely deleted. They are there to provide a st
 You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
 
 
-# Deployment (Home Server)
+# Deployment (M1 Mac Mini)
 
-Every push to `main` automatically deploys via GitHub Actions using a **self-hosted runner** installed on the server.
+The production stack runs in Docker on an Apple Silicon Mac mini:
 
-## One-time: install the self-hosted runner
-
-1. Go to **GitHub → repo → Settings → Actions → Runners → New self-hosted runner**.
-2. Select **Linux** and follow the download/configure steps shown there (they include a unique token for your repo).
-3. Start the runner as a background service so it survives reboots:
-
-```bash
-sudo ./svc.sh install
-sudo ./svc.sh start
+```text
+Nginx Proxy Manager on Proxmox -> Mac mini:3001 -> MovieClub app -> PostgreSQL
 ```
 
-The runner will connect to GitHub and pick up workflow jobs when code is pushed.
+The production Compose file uses ARM64-compatible `node:24-alpine` and `postgres:16-alpine` images. Both containers use `restart: unless-stopped`, so Docker restarts them after crashes or reboots. The Mac launch agent starts the Compose stack after login.
 
-## One-time: set GitHub Actions secrets & variables
+## First-time Mac setup
 
-In **GitHub → repo → Settings → Environments → production**, add:
-
-| Type | Name | Value |
-|------|------|-------|
-| Secret | `VITE_ELECTRIC_URL` | your Electric endpoint |
-| Secret | `VITE_ELECTRIC_SECRET` | your Electric secret |
-| Secret | `VITE_TMDB_API_KEY` | your TMDB API key |
-| Variable | `VITE_TMDB_BASE_URL` | e.g. `https://api.themoviedb.org/3` |
-| Variable | `VITE_TMDB_IMAGE_BASE_URL` | e.g. `https://image.tmdb.org/t/p` |
-
-Runtime secrets (database password, auth secret, etc.) are read from `.env.production` on the server — that file is **not** committed to the repo and will never be touched by the workflow.
-
-## Repo must be checked out on the server
-
-The workflow uses `actions/checkout` with `clean: false` (to preserve `.env.production`), so the repo needs to exist at least once before the first run:
+Install Docker Desktop and start it:
 
 ```bash
-git clone https://github.com/mhtoin/movieclub-start.git
-cd movieclub-start
-# fill in .env.production with your values
+brew install --cask docker
+open -a Docker
 ```
 
-## Manual deploy
+In Docker Desktop, enable **Start Docker Desktop when you sign in**. Give Docker at least 4 GB of memory; 6 GB is reasonable if the AI workload is light.
 
-You can also trigger a deploy by hand from the repo root:
+Clone the repository and create a private production environment file outside the repository:
 
 ```bash
-bash scripts/deploy.sh
+mkdir -p ~/src ~/.config/movieclub
+git clone https://github.com/mhtoin/movieclub-start.git ~/src/movieclub-start
+cd ~/src/movieclub-start
+cp .env.production.example ~/.config/movieclub/.env.production
+chmod 600 ~/.config/movieclub/.env.production
+```
+
+Edit `~/.config/movieclub/.env.production`. At minimum, set:
+
+```dotenv
+POSTGRES_USER=movieclub
+POSTGRES_PASSWORD=<strong-database-password>
+POSTGRES_DB=movieclub
+SESSION_PASSWORD=<at-least-32-character-secret>
+BASE_URL=https://movieclub.example.com
+RESEND_API_KEY=<resend-api-key>
+EMAIL_FROM=MovieClub <noreply@movieclub.example.com>
+VITE_TMDB_API_KEY=<tmdb-api-key>
+VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
+VITE_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
+VITE_SHORTLIST_CARD_VARIANT=default
+```
+
+Generate a session secret with:
+
+```bash
+openssl rand -hex 32
+```
+
+Start and migrate the stack manually for the first time:
+
+```bash
+cd ~/src/movieclub-start
+MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" bash scripts/deploy.sh --skip-pull
+```
+
+Check it locally:
+
+```bash
+curl http://127.0.0.1:3001/api/health
+```
+
+## Automatic restart after login
+
+Install the launch agent:
+
+```bash
+cd ~/src/movieclub-start
+bash scripts/install-mac-launchd.sh
+```
+
+Check its status and logs:
+
+```bash
+launchctl print "gui/$(id -u)/com.movieclub.production"
+tail -f ~/Library/Logs/movieclub/stderr.log
+docker compose --env-file ~/.config/movieclub/.env.production -f docker-compose.prod.yml ps
+```
+
+The launch agent starts the containers once Docker Desktop is ready. Docker's `unless-stopped` policy then handles container crashes and Docker restarts.
+
+`LaunchAgents` run after the Mac user logs in. For a fully unattended setup after power loss, enable automatic login for the dedicated Mac account, or replace this with a root `LaunchDaemon` after confirming Docker Desktop is available before the daemon starts.
+
+## Nginx Proxy Manager
+
+Keeping Nginx Proxy Manager on Proxmox is recommended. Give the Mac mini a DHCP reservation or static LAN address, then create a Proxy Host:
+
+| Setting | Value |
+|---------|-------|
+| Domain | `movieclub.example.com` |
+| Scheme | `http` |
+| Forward hostname/IP | Mac mini LAN address, for example `192.168.1.50` |
+| Forward port | `3001` |
+| Websockets Support | Enabled |
+
+Request a Let's Encrypt certificate in Nginx Proxy Manager and enable HTTP-to-HTTPS redirection. Do not expose port `3001` directly to the public internet. Update `BASE_URL` to the HTTPS domain and redeploy.
+
+## PostgreSQL backups
+
+The Docker volume is not a backup. Create a compressed dump outside the repository:
+
+```bash
+cd ~/src/movieclub-start
+MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" \
+  bash scripts/backup-postgres.sh "$HOME/movieclub-backups"
+```
+
+Schedule it with macOS launchd or cron, then copy the backup directory to another machine or cloud storage. A local-only backup does not protect against disk failure.
+
+## GitHub Actions deployment
+
+The workflow runs checks on GitHub-hosted infrastructure, then deploys only after a successful push to `main`.
+
+Install a GitHub Actions self-hosted runner on the Mac:
+
+1. Open **GitHub -> repository -> Settings -> Actions -> Runners -> New self-hosted runner**.
+2. Select **macOS** and **ARM64**.
+3. Follow GitHub's generated download and configuration commands.
+4. Add the custom label `movieclub-production` when running `config.sh`.
+5. Test it with `./run.sh`, then install it as a service:
+
+```bash
+./svc.sh install
+./svc.sh start
+```
+
+The runner must be able to access Docker Desktop without `sudo`. Store the production environment file at:
+
+```text
+~/.config/movieclub/.env.production
+```
+
+The workflow uses that path and does not put secrets in GitHub or the repository. It checks out code with `clean: false`, runs `scripts/deploy.sh --skip-pull`, rebuilds the app image, waits for `/api/health`, and runs migrations.
+
+For a manual deployment:
+
+```bash
+cd ~/src/movieclub-start
+MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" bash scripts/deploy.sh
 ```
