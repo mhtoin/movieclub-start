@@ -11,12 +11,79 @@ import {
   raffle as raffleTable,
   raffleToUser,
   shortlist,
+  siteConfig,
 } from '@/db/schema'
 import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
 import { fetchMovieDetails } from '@/lib/tmdb-api'
 import { adminMiddleware } from '@/middleware/admin'
 
 export const MOVIE_ALREADY_WATCHED_ERROR = 'MOVIE_ALREADY_WATCHED'
+
+const siteConfigSchema = z.object({
+  watchWeekDay: z.enum([
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
+  ]),
+  watchProviders: z.record(z.string(), z.json()).nullable(),
+})
+
+export const updateSiteConfig = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data) => siteConfigSchema.parse(data))
+  .handler(async ({ data }) => {
+    const existing = await db
+      .select({ id: siteConfig.id })
+      .from(siteConfig)
+      .limit(1)
+
+    if (existing[0]) {
+      return db
+        .update(siteConfig)
+        .set(data)
+        .where(eq(siteConfig.id, existing[0].id))
+        .returning()
+        .then((rows) => rows[0])
+    }
+
+    return db
+      .insert(siteConfig)
+      .values({ id: crypto.randomUUID(), ...data })
+      .returning()
+      .then((rows) => rows[0])
+  })
+
+export function useUpdateSiteConfig() {
+  const queryClient = useQueryClient()
+  const toastManager = Toast.useToastManager()
+
+  return useMutation({
+    mutationFn: (data: z.infer<typeof siteConfigSchema>) =>
+      updateSiteConfig({ data }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'site-config'] })
+      queryClient.invalidateQueries({
+        queryKey: ['site-config', 'provider-ids'],
+      })
+    },
+    onSuccess: () =>
+      toastManager.add({
+        title: 'Site configuration saved',
+        description: 'The shared site settings were updated.',
+        type: 'success',
+      }),
+    onError: (error) =>
+      toastManager.add({
+        title: 'Could not save site configuration',
+        description: error instanceof Error ? error.message : 'Try again.',
+        type: 'error',
+      }),
+  })
+}
 
 const adminShortlistMovieSchema = z.object({
   userId: z.string().min(1),

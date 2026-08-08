@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { fallback, zodValidator } from '@tanstack/zod-adapter'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Loader2, SlidersHorizontal, X } from 'lucide-react'
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { z } from 'zod'
 
 import DiscoverMoviesList from '@/components/discover/discover-movie-list'
@@ -23,11 +24,15 @@ import {
 } from '@/components/ui/drawer'
 import { useMediaQuery } from '@/lib/hooks'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+import {
+  DEFAULT_PROVIDER_FILTER,
+  siteConfigQueries,
+} from '@/lib/react-query/queries/site-config'
 
 const discoverSearchSchema = z.object({
   search: fallback(z.string(), '').default(''),
   genres: fallback(z.string(), '').default(''),
-  providers: fallback(z.string(), '').default('8|323|496'),
+  providers: fallback(z.string(), '').default(DEFAULT_PROVIDER_FILTER),
   originalLanguage: fallback(z.string(), '').default(''),
   minRating: fallback(z.number(), 0).default(0),
   maxRating: fallback(z.number(), 10).default(10),
@@ -37,7 +42,15 @@ const discoverSearchSchema = z.object({
 export const Route = createFileRoute('/_authenticated/discover')({
   validateSearch: zodValidator(discoverSearchSchema),
   loaderDeps: ({ search }) => search,
-  loader: ({ context, deps }) => {
+  loader: async ({ context, deps }) => {
+    const configuredProviderIds = await context.queryClient.ensureQueryData(
+      siteConfigQueries.providerIds(),
+    )
+    const providerFilter =
+      deps.providers === DEFAULT_PROVIDER_FILTER
+        ? configuredProviderIds.join('|') || DEFAULT_PROVIDER_FILTER
+        : deps.providers
+
     context.queryClient.prefetchQuery(tmdbQueries.genres())
     context.queryClient.prefetchQuery(tmdbQueries.watchProviders())
     const isSearchActive =
@@ -50,7 +63,7 @@ export const Route = createFileRoute('/_authenticated/discover')({
       context.queryClient.prefetchInfiniteQuery(
         tmdbQueries.discover({
           with_genres: deps.genres || undefined,
-          with_watch_providers: deps.providers || undefined,
+          with_watch_providers: providerFilter || undefined,
           with_original_language: deps.originalLanguage || undefined,
           'vote_average.gte': deps.minRating,
           'vote_average.lte': deps.maxRating,
@@ -69,6 +82,26 @@ function RouteComponent() {
   const [totalResults, setTotalResults] = useState<number | null>(null)
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const isSearchActive = search.search.trim().length >= MIN_SEARCH_LENGTH
+  const { data: configuredProviderIds } = useSuspenseQuery(
+    siteConfigQueries.providerIds(),
+  )
+  const providerFilter =
+    search.providers === DEFAULT_PROVIDER_FILTER
+      ? configuredProviderIds.join('|') || DEFAULT_PROVIDER_FILTER
+      : search.providers
+
+  const shouldApplyConfiguredProviders =
+    search.providers === DEFAULT_PROVIDER_FILTER &&
+    providerFilter !== search.providers
+
+  useEffect(() => {
+    if (!shouldApplyConfiguredProviders) return
+
+    navigate({
+      search: (prev) => ({ ...prev, providers: providerFilter }),
+      resetScroll: false,
+    })
+  }, [navigate, providerFilter, shouldApplyConfiguredProviders])
 
   const handleSearchChange = (value: string) => {
     navigate({
@@ -85,7 +118,7 @@ function RouteComponent() {
   }
 
   const selectedGenres = search.genres ? search.genres.split(',') : []
-  const selectedProviders = search.providers ? search.providers.split('|') : []
+  const selectedProviders = providerFilter ? providerFilter.split('|') : []
   const selectedLanguages = search.originalLanguage
     ? search.originalLanguage.split(',')
     : []
@@ -246,12 +279,18 @@ function RouteComponent() {
                   </div>
                 }
               >
-                <DiscoverMoviesList
-                  onTotalResults={setTotalResults}
-                  searchQuery={
-                    isSearchActive ? search.search.trim() : undefined
-                  }
-                />
+                {shouldApplyConfiguredProviders ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <DiscoverMoviesList
+                    onTotalResults={setTotalResults}
+                    searchQuery={
+                      isSearchActive ? search.search.trim() : undefined
+                    }
+                  />
+                )}
               </Suspense>
             </div>
           </div>

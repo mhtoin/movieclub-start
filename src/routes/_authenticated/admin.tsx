@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 
-import { Dices, Film, ListPlus, Megaphone, Plus } from 'lucide-react'
+import { Cog, Dices, Film, ListPlus, Megaphone, Plus } from 'lucide-react'
 import type { Announcement } from '@/db/schema/announcements'
 import { Button } from '@/components/ui/button'
 import { announcementQueries } from '@/lib/react-query/queries/announcements'
@@ -20,6 +20,7 @@ import { ManageShortlists } from '@/components/admin/manage-shortlists'
 import { canAccessAdminPanel } from '@/lib/auth/permissions'
 import { adminQueries } from '@/lib/react-query/queries/admin'
 import { RaffleRandomnessCheck } from '@/components/admin/raffle-randomness-check'
+import { SiteConfigForm } from '@/components/admin/site-config-form'
 
 export const Route = createFileRoute('/_authenticated/admin')({
   beforeLoad: ({ context }) => {
@@ -31,6 +32,7 @@ export const Route = createFileRoute('/_authenticated/admin')({
     await Promise.all([
       context.queryClient.ensureQueryData(announcementQueries.admin()),
       context.queryClient.ensureQueryData(adminQueries.shortlists()),
+      context.queryClient.ensureQueryData(adminQueries.siteConfig()),
     ])
   },
   component: AdminPage,
@@ -116,6 +118,10 @@ function AdminPage() {
               <Dices className="mr-2 size-4" />
               Raffle randomness
             </Tab>
+            <Tab value="site-config" variant="underlined">
+              <Cog className="mr-2 size-4" />
+              Site configuration
+            </Tab>
           </TabsList>
 
           <TabsPanel value="watched" variant="underlined">
@@ -128,6 +134,10 @@ function AdminPage() {
 
           <TabsPanel value="randomness" variant="underlined">
             <RaffleRandomnessCheck shortlists={shortlists} />
+          </TabsPanel>
+
+          <TabsPanel value="site-config" variant="underlined">
+            <SiteConfigForm />
           </TabsPanel>
 
           <TabsPanel value="announcements" variant="underlined">

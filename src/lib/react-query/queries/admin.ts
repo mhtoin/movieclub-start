@@ -8,6 +8,7 @@ import {
   movieCredits,
   movieToShortlist,
   shortlist,
+  siteConfig,
   user,
 } from '@/db/schema'
 import { adminMiddleware } from '@/middleware/admin'
@@ -57,11 +58,30 @@ export const getAdminShortlists = createServerFn({ method: 'GET' })
     return Array.from(shortlists.values())
   })
 
+export const getAdminSiteConfig = createServerFn({ method: 'GET' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: Record<string, never>) => data)
+  .handler(async () => {
+    const row = await db.select().from(siteConfig).limit(1)
+    return (
+      row[0] ?? {
+        id: '',
+        watchProviders: null,
+        watchWeekDay: 'saturday',
+      }
+    )
+  })
+
 export const adminQueries = {
   shortlists: () =>
     queryOptions({
       queryKey: ['admin', 'shortlists'],
       queryFn: () => getAdminShortlists({ data: {} }),
       staleTime: 1000 * 60 * 5,
+    }),
+  siteConfig: () =>
+    queryOptions({
+      queryKey: ['admin', 'site-config'],
+      queryFn: () => getAdminSiteConfig({ data: {} }),
     }),
 }
