@@ -3,7 +3,12 @@ import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import { db } from '@/db/db'
-import { movieCredits, movieToShortlist, shortlist } from '@/db/schema'
+import {
+  movieCredits,
+  movieToShortlist,
+  shortlist,
+  siteConfig,
+} from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
 import { authMiddleware } from '@/middleware/auth'
@@ -27,8 +32,16 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
         return null
       }
 
+      const config = await db
+        .select({ requireWinnerSelection: siteConfig.requireWinnerSelection })
+        .from(siteConfig)
+        .limit(1)
+      const requiresSelectionEnabled = config[0]?.requireWinnerSelection ?? true
+
       return {
         ...rows[0].shortlist,
+        requiresSelection:
+          requiresSelectionEnabled && rows[0].shortlist.requiresSelection,
         movies: rows.flatMap((row) =>
           row.movie
             ? [
@@ -53,6 +66,12 @@ export const getAllShortlists = createServerFn({ method: 'POST' })
     if (!context.user) throw new Error('Unauthorized')
 
     try {
+      const config = await db
+        .select({ requireWinnerSelection: siteConfig.requireWinnerSelection })
+        .from(siteConfig)
+        .limit(1)
+      const requiresSelectionEnabled = config[0]?.requireWinnerSelection ?? true
+
       const allShortlists = await db
         .select()
         .from(shortlist)
@@ -68,6 +87,8 @@ export const getAllShortlists = createServerFn({ method: 'POST' })
         if (!shortlistsMap.has(shortlistId)) {
           shortlistsMap.set(shortlistId, {
             ...row.shortlist,
+            requiresSelection:
+              requiresSelectionEnabled && row.shortlist.requiresSelection,
             user: row.user,
             movies: [],
           })

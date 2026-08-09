@@ -68,6 +68,7 @@ export const getAdminSiteConfig = createServerFn({ method: 'GET' })
         id: '',
         watchProviders: null,
         watchWeekDay: 'saturday',
+        requireWinnerSelection: true,
       }
     )
   })

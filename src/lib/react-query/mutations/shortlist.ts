@@ -4,7 +4,13 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, eq } from 'drizzle-orm'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import { db } from '@/db/db'
-import { movie, movieCredits, movieToShortlist, shortlist } from '@/db/schema'
+import {
+  movie,
+  movieCredits,
+  movieToShortlist,
+  shortlist,
+  siteConfig,
+} from '@/db/schema'
 import { user } from '@/db/schema/users'
 import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
 import { fetchMovieDetails } from '@/lib/tmdb-api'
@@ -676,6 +682,14 @@ export const updateSelectedIndex = createServerFn({ method: 'POST' })
       throw new Error('Unauthorized')
     }
 
+    const config = await db
+      .select({ requireWinnerSelection: siteConfig.requireWinnerSelection })
+      .from(siteConfig)
+      .limit(1)
+    if (config[0]?.requireWinnerSelection === false) {
+      throw new Error('Winner selection is disabled')
+    }
+
     const userShortlist = await db
       .select()
       .from(shortlist)
@@ -807,6 +821,14 @@ export const updateUserSelectedIndex = createServerFn({ method: 'POST' })
 
     if (!context.user) {
       throw new Error('Unauthorized')
+    }
+
+    const config = await db
+      .select({ requireWinnerSelection: siteConfig.requireWinnerSelection })
+      .from(siteConfig)
+      .limit(1)
+    if (config[0]?.requireWinnerSelection === false) {
+      throw new Error('Winner selection is disabled')
     }
 
     const targetShortlist = await db

@@ -15,6 +15,7 @@ interface Props {
   isUpdating?: boolean
   isSelecting?: boolean
   delay?: number
+  selectionEnabled?: boolean
 }
 
 export function StubParticipantTicket({
@@ -26,9 +27,11 @@ export function StubParticipantTicket({
   isUpdating = false,
   isSelecting = false,
   delay = 0,
+  selectionEnabled = true,
 }: Props) {
   const { movies, user, isReady, participating, selectedIndex } = shortlist
-  const requiresSelection = shortlist.requiresSelection ?? false
+  const requiresSelection =
+    selectionEnabled && (shortlist.requiresSelection ?? false)
   const status = !participating
     ? 'Not participating'
     : isReady

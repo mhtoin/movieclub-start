@@ -10,6 +10,7 @@ import {
   raffle as raffleTable,
   raffleToUser,
   shortlist,
+  siteConfig,
 } from '@/db/schema'
 import { db } from '@/db/db'
 
@@ -19,6 +20,12 @@ export const startRaffle = createServerFn({ method: 'POST' })
     if (!context.user) throw new Error('Unauthorized')
 
     try {
+      const config = await db
+        .select({ requireWinnerSelection: siteConfig.requireWinnerSelection })
+        .from(siteConfig)
+        .limit(1)
+      const requireWinnerSelection = config[0]?.requireWinnerSelection ?? true
+
       const eligibleShortlists = await db
         .select()
         .from(shortlist)
@@ -31,7 +38,10 @@ export const startRaffle = createServerFn({ method: 'POST' })
       }
 
       const pendingSelections = eligibleShortlists.filter(
-        (s) => s.requiresSelection && s.selectedIndex === null,
+        (s) =>
+          requireWinnerSelection &&
+          s.requiresSelection &&
+          s.selectedIndex === null,
       )
 
       if (pendingSelections.length > 0) {
@@ -40,10 +50,13 @@ export const startRaffle = createServerFn({ method: 'POST' })
         )
       }
 
-      const eligibleMovies = await db
+      const eligibleMovieRows = await db
         .select({
           movie: movie,
           userId: shortlist.userId,
+          shortlistId: shortlist.id,
+          requiresSelection: shortlist.requiresSelection,
+          selectedIndex: shortlist.selectedIndex,
           credits: movieCredits,
         })
         .from(movieToShortlist)
@@ -53,6 +66,15 @@ export const startRaffle = createServerFn({ method: 'POST' })
         .where(
           and(eq(shortlist.isReady, true), eq(shortlist.participating, true)),
         )
+
+      const movieIndexes = new Map<string, number>()
+      const eligibleMovies = eligibleMovieRows.filter((entry) => {
+        if (!requireWinnerSelection || !entry.requiresSelection) return true
+
+        const index = movieIndexes.get(entry.shortlistId) ?? 0
+        movieIndexes.set(entry.shortlistId, index + 1)
+        return entry.selectedIndex === index
+      })
 
       if (eligibleMovies.length === 0) {
         throw new Error('No movies found in eligible shortlists')
@@ -89,6 +111,12 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
     const { movieId, watchDate, userId } = data
 
     try {
+      const config = await db
+        .select({ requireWinnerSelection: siteConfig.requireWinnerSelection })
+        .from(siteConfig)
+        .limit(1)
+      const requireWinnerSelection = config[0]?.requireWinnerSelection ?? true
+
       const raffleId = crypto.randomUUID()
       await db.transaction(async (tx) => {
         await tx.insert(raffleTable).values({
@@ -108,25 +136,35 @@ export const finalizeRaffle = createServerFn({ method: 'POST' })
             .update(shortlist)
             .set({ isReady: false })
             .where(eq(shortlist.participating, true)),
-          tx
-            .update(shortlist)
-            .set({ requiresSelection: true, selectedIndex: null })
-            .where(
-              and(
-                eq(shortlist.userId, userId),
-                eq(shortlist.participating, true),
+        ])
+
+        if (requireWinnerSelection) {
+          await Promise.all([
+            tx
+              .update(shortlist)
+              .set({ requiresSelection: true, selectedIndex: null })
+              .where(
+                and(
+                  eq(shortlist.userId, userId),
+                  eq(shortlist.participating, true),
+                ),
               ),
-            ),
-          tx
+            tx
+              .update(shortlist)
+              .set({ requiresSelection: false, selectedIndex: null })
+              .where(
+                and(
+                  ne(shortlist.userId, userId),
+                  eq(shortlist.participating, true),
+                ),
+              ),
+          ])
+        } else {
+          await tx
             .update(shortlist)
             .set({ requiresSelection: false, selectedIndex: null })
-            .where(
-              and(
-                ne(shortlist.userId, userId),
-                eq(shortlist.participating, true),
-              ),
-            ),
-        ])
+            .where(eq(shortlist.participating, true))
+        }
       })
 
       return { success: true }

@@ -17,6 +17,7 @@ interface Props {
   isUpdating?: boolean
   isSelecting?: boolean
   delay?: number
+  selectionEnabled?: boolean
 }
 
 export function ParticipantTicket({
@@ -28,6 +29,7 @@ export function ParticipantTicket({
   isUpdating = false,
   isSelecting = false,
   delay = 0,
+  selectionEnabled = true,
 }: Props) {
   if (isStubShortlistCardEnabled) {
     return (
@@ -37,6 +39,7 @@ export function ParticipantTicket({
         onToggleReady={onToggleReady}
         onToggleParticipating={onToggleParticipating}
         onSelectMovie={onSelectMovie}
+        selectionEnabled={selectionEnabled}
         isUpdating={isUpdating}
         isSelecting={isSelecting}
         delay={delay}
@@ -45,7 +48,8 @@ export function ParticipantTicket({
   }
 
   const { movies, isReady, participating, selectedIndex } = shortlist
-  const requiresSelection = shortlist.requiresSelection ?? false
+  const requiresSelection =
+    selectionEnabled && (shortlist.requiresSelection ?? false)
 
   const handleStampClick = (e: React.MouseEvent) => {
     e.stopPropagation()

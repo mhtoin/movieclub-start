@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Save } from 'lucide-react'
-import type { SiteConfig } from '@/db/schema/siteconfig'
+import type { JsonValue, SiteConfig } from '@/db/schema/siteconfig'
 import { Button } from '@/components/ui/button'
 import { ProviderFilter } from '@/components/discover/provider-filter'
+import { Switch } from '@/components/ui/switch'
 import { adminQueries } from '@/lib/react-query/queries/admin'
 import { useUpdateSiteConfig } from '@/lib/react-query/mutations/admin'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
@@ -44,6 +45,30 @@ function getConfiguredProviderIds(
 export function SiteConfigForm() {
   const { data: config } = useSuspenseQuery(adminQueries.siteConfig())
   const { data: providers } = useSuspenseQuery(tmdbQueries.watchProviders())
+  const configKey = `${config.id}:${config.watchWeekDay}:${config.requireWinnerSelection}:${JSON.stringify(config.watchProviders)}`
+
+  return (
+    <SiteConfigFormFields
+      key={configKey}
+      config={config}
+      providers={providers}
+    />
+  )
+}
+
+function SiteConfigFormFields({
+  config,
+  providers,
+}: {
+  config: SiteConfig
+  providers: Array<{
+    provider_id: number
+    provider_name: string
+    logo_path: string
+    display_priority: number
+    display_priorities: { [key: string]: number }
+  }>
+}) {
   const mutation = useUpdateSiteConfig()
   const [selectedProviders, setSelectedProviders] = useState(() =>
     getConfiguredProviderIds(config.watchProviders),
@@ -54,30 +79,41 @@ export function SiteConfigForm() {
       ? (value as WatchWeekDay)
       : 'saturday'
   })
+  const [requireWinnerSelection, setRequireWinnerSelection] = useState(
+    () => config.requireWinnerSelection,
+  )
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const selectedProviderIds = new Set(selectedProviders)
     mutation.mutate({
       watchWeekDay,
+      requireWinnerSelection,
       watchProviders:
         selectedProviders.length > 0
           ? {
-              providers: providers
-                .filter((provider) =>
-                  selectedProviders.includes(provider.provider_id.toString()),
-                )
-                .map((provider) => ({
-                  provider_id: provider.provider_id,
-                  provider_name: provider.provider_name,
-                  logo_path: provider.logo_path,
-                  display_priority:
-                    (
-                      provider.display_priorities as Record<
-                        string,
-                        number | undefined
-                      >
-                    ).FI ?? provider.display_priority,
-                })),
+              providers: providers.reduce<Array<Record<string, JsonValue>>>(
+                (selected, provider) => {
+                  if (
+                    selectedProviderIds.has(provider.provider_id.toString())
+                  ) {
+                    selected.push({
+                      provider_id: provider.provider_id,
+                      provider_name: provider.provider_name,
+                      logo_path: provider.logo_path,
+                      display_priority:
+                        (
+                          provider.display_priorities as Record<
+                            string,
+                            number | undefined
+                          >
+                        ).FI ?? provider.display_priority,
+                    })
+                  }
+                  return selected
+                },
+                [],
+              ),
             }
           : null,
     })
@@ -134,6 +170,26 @@ export function SiteConfigForm() {
             Select the providers that should be included in the shared site
             configuration.
           </p>
+        </div>
+
+        <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-card/60 p-4 md:p-5">
+          <Switch
+            id="requireWinnerSelection"
+            checked={requireWinnerSelection}
+            onCheckedChange={setRequireWinnerSelection}
+          />
+          <div>
+            <label
+              htmlFor="requireWinnerSelection"
+              className="text-sm font-semibold text-foreground"
+            >
+              Require the previous winner to choose
+            </label>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              When enabled, the winner&apos;s next raffle entry is limited to
+              one movie from their shortlist.
+            </p>
+          </div>
         </div>
 
         <Button type="submit" variant="primary" loading={mutation.isPending}>

@@ -30,6 +30,7 @@ const siteConfigSchema = z.object({
     'sunday',
   ]),
   watchProviders: z.record(z.string(), z.json()).nullable(),
+  requireWinnerSelection: z.boolean(),
 })
 
 export const updateSiteConfig = createServerFn({ method: 'POST' })
@@ -69,6 +70,9 @@ export function useUpdateSiteConfig() {
       queryClient.invalidateQueries({
         queryKey: ['site-config', 'provider-ids'],
       })
+      queryClient.invalidateQueries({ queryKey: ['site-config', 'settings'] })
+      queryClient.invalidateQueries({ queryKey: ['shortlist'] })
+      queryClient.invalidateQueries({ queryKey: ['shortlists', 'all'] })
     },
     onSuccess: () =>
       toastManager.add({
@@ -255,6 +259,12 @@ export const addWatchedMovie = createServerFn({ method: 'POST' })
       throw new Error('Invalid watch date')
     }
 
+    const config = await db
+      .select({ requireWinnerSelection: siteConfig.requireWinnerSelection })
+      .from(siteConfig)
+      .limit(1)
+    const requireWinnerSelection = config[0]?.requireWinnerSelection ?? true
+
     const movieData = data.tmdbId
       ? createDbMovie(await fetchMovieDetails(data.tmdbId))
       : null
@@ -331,24 +341,31 @@ export const addWatchedMovie = createServerFn({ method: 'POST' })
         .update(shortlist)
         .set({ isReady: false })
         .where(eq(shortlist.participating, true))
-      await tx
-        .update(shortlist)
-        .set({ requiresSelection: true, selectedIndex: null })
-        .where(
-          and(
-            eq(shortlist.userId, data.userId),
-            eq(shortlist.participating, true),
-          ),
-        )
-      await tx
-        .update(shortlist)
-        .set({ requiresSelection: false, selectedIndex: null })
-        .where(
-          and(
-            ne(shortlist.userId, data.userId),
-            eq(shortlist.participating, true),
-          ),
-        )
+      if (requireWinnerSelection) {
+        await tx
+          .update(shortlist)
+          .set({ requiresSelection: true, selectedIndex: null })
+          .where(
+            and(
+              eq(shortlist.userId, data.userId),
+              eq(shortlist.participating, true),
+            ),
+          )
+        await tx
+          .update(shortlist)
+          .set({ requiresSelection: false, selectedIndex: null })
+          .where(
+            and(
+              ne(shortlist.userId, data.userId),
+              eq(shortlist.participating, true),
+            ),
+          )
+      } else {
+        await tx
+          .update(shortlist)
+          .set({ requiresSelection: false, selectedIndex: null })
+          .where(eq(shortlist.participating, true))
+      }
 
       return { success: true, raffleId, movieId: movieId! }
     })

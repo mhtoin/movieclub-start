@@ -21,10 +21,12 @@ import {
   useUpdateUserShortlistStatusMutation,
 } from '@/lib/react-query/mutations/shortlist'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
+import { siteConfigQueries } from '@/lib/react-query/queries/site-config'
 
 export const Route = createFileRoute('/_authenticated/raffle')({
   loader: ({ context }) => {
     context.queryClient.prefetchQuery(shortlistQueries.all())
+    context.queryClient.prefetchQuery(siteConfigQueries.settings())
   },
   component: RafflePage,
 })
@@ -74,9 +76,22 @@ function RaffleSetup() {
   }> | null>(null)
 
   const { data: shortlists = [] } = useSuspenseQuery(shortlistQueries.all())
+  const { data: siteConfig } = useSuspenseQuery(siteConfigQueries.settings())
+  const selectionEnabled = siteConfig.requireWinnerSelection
   const participatingMovies = useMemo(
-    () => shortlists.flatMap((s) => (s.participating ? s.movies : [])),
-    [shortlists],
+    () =>
+      shortlists.flatMap((s) => {
+        if (!s.participating) return []
+        if (
+          selectionEnabled &&
+          s.requiresSelection &&
+          s.selectedIndex !== null
+        ) {
+          return s.movies.slice(s.selectedIndex, s.selectedIndex + 1)
+        }
+        return s.movies
+      }),
+    [shortlists, selectionEnabled],
   )
   const winnerUser = useMemo(
     () =>
@@ -103,9 +118,10 @@ function RaffleSetup() {
   const pendingSelections = useMemo(
     () =>
       participating.filter(
-        (s) => s.requiresSelection && s.selectedIndex === null,
+        (s) =>
+          selectionEnabled && s.requiresSelection && s.selectedIndex === null,
       ),
-    [participating],
+    [participating, selectionEnabled],
   )
 
   const canStart = useMemo(
@@ -190,6 +206,7 @@ function RaffleSetup() {
                 <ParticipantTicket
                   key={shortlist.id}
                   shortlist={shortlist}
+                  selectionEnabled={selectionEnabled}
                   colorIndex={index}
                   onToggleReady={() =>
                     handleToggleReady(shortlist.user.id, shortlist.isReady)

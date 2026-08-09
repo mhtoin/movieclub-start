@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { jsonb, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core'
+import { boolean, jsonb, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core'
 
 export type JsonValue =
   | string
@@ -17,6 +17,7 @@ export const siteConfig = pgTable(
       [key: string]: JsonValue
     } | null>(),
     watchWeekDay: text().notNull(),
+    requireWinnerSelection: boolean().default(true).notNull(),
   },
   () => [uniqueIndex('site_config_singleton').using('btree', sql`(TRUE)`)],
 )
