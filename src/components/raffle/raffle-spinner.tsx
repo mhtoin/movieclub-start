@@ -175,6 +175,25 @@ export function RaffleSpinner({
   onSpinComplete,
   arrowColor = 'var(--primary)',
 }: Props) {
+  const visuallyShuffledMovies = useMemo(() => {
+    const shuffled = [...movies]
+    const seedInput = `${winningMovie.id}:${movies.map((movie) => movie.id).join('|')}`
+    let seed = 0
+    for (let i = 0; i < seedInput.length; i++) {
+      seed = (seed << 5) - seed + seedInput.charCodeAt(i)
+      seed |= 0
+    }
+    seed = Math.abs(seed) + shuffled.length
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(seededRandom(seed, i) * (i + 1))
+      const current = shuffled[i]
+      shuffled[i] = shuffled[j]
+      shuffled[j] = current
+    }
+    return shuffled
+  }, [movies, winningMovie.id])
+
   const spinParams = useMemo(() => {
     let seed = 0
     for (let i = 0; i < winningMovie.id.length; i++) {
@@ -205,13 +224,20 @@ export function RaffleSpinner({
   })
 
   const repeated = useMemo(
-    () => Array.from({ length: spinParams.laps + 2 }, () => movies).flat(),
-    [movies, spinParams.laps],
+    () =>
+      Array.from(
+        { length: spinParams.laps + 2 },
+        () => visuallyShuffledMovies,
+      ).flat(),
+    [visuallyShuffledMovies, spinParams.laps],
   )
 
-  const winningIndex = movies.findIndex((movie) => movie.id === winningMovie.id)
+  const winningIndex = visuallyShuffledMovies.findIndex(
+    (movie) => movie.id === winningMovie.id,
+  )
   const targetOffset =
-    (spinParams.laps * movies.length + winningIndex) * ITEM_HEIGHT -
+    (spinParams.laps * visuallyShuffledMovies.length + winningIndex) *
+      ITEM_HEIGHT -
     WINDOW_HEIGHT / 2 +
     ITEM_HEIGHT / 2 +
     spinParams.landingJitter
@@ -293,7 +319,7 @@ export function RaffleSpinner({
     animateDrum,
     drumRef,
     movies,
-    movies.length,
+    visuallyShuffledMovies.length,
     prefersReducedMotion,
     spinParams,
     targetOffset,
