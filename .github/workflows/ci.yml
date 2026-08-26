@@ -50,24 +50,22 @@ jobs:
           clean: false
           persist-credentials: false
 
-      # OrbStack's network path to registry-1.docker.io can stall under load.
-      # Pre-pull base images with retries so the deploy script uses the cache
-      # instead of triggering fresh pulls over flaky networking.
-      - name: Pre-pull base images
+      # Diagnose the runner's Docker context. OrbStack's daemon socket and
+      # wrapper require env vars (PATH, ORBSTACK_HOME, ...) that the runner's
+      # LaunchDaemon worker may not inherit. If `docker info` fails, the
+      # deploy will fail anyway — fail fast with a useful message.
+      - name: Verify Docker context
         run: |
-          for img in postgres:16-alpine node:24-alpine; do
-            for attempt in 1 2 3 4 5; do
-              echo "Pulling $img (attempt $attempt)..."
-              if docker pull "$img"; then
-                break
-              fi
-              if [[ $attempt -eq 5 ]]; then
-                echo "::warning::Failed to pull $img after 5 attempts"
-              else
-                sleep $((attempt * 5))
-              fi
-            done
-          done
+          echo "User: $(whoami)"
+          echo "HOME: $HOME"
+          echo "PATH: $PATH"
+          echo "--- docker context ls ---"
+          docker context ls
+          echo "--- docker info (first 20 lines, 15s timeout) ---"
+          timeout 15 docker info | head -20 || {
+            echo "::error::Docker daemon unreachable from runner context. Check OrbStack is running and the runner service has access to ~/.orbstack and ~/.docker."
+            exit 1
+          }
 
       - name: Deploy production stack
         env:
