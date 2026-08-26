@@ -45,7 +45,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Keep the untracked .env.production on the Mac.
+          # Production env file lives outside the repo at ~/.config/movieclub/.env.production
+          # (referenced by MOVIECLUB_ENV_FILE below). Don't clean untracked files.
           clean: false
           persist-credentials: false
 
@@ -53,3 +54,21 @@ jobs:
         env:
           DEPLOY_PULL: '0'
         run: MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" bash scripts/deploy.sh --skip-pull
+
+      - name: Smoke test (public URL)
+        run: |
+          sleep 5
+          curl -fsS --retry 5 --retry-delay 5 https://beta.leffaseura.club/api/health
+
+      - name: Notify Discord (failure)
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          title: 'Deploy failed'
+          description: |
+            Branch: `${{ github.ref }}`
+            Commit: `${{ github.sha }}`
+            Author: ${{ github.actor }}
+          color: 0xff0000
+          url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
