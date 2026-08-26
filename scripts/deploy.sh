@@ -13,20 +13,23 @@ ENV_FILE="${MOVIECLUB_ENV_FILE:-.env.production}"
 COMPOSE=(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE")
 
 if [[ "${1:-}" == "--skip-pull" ]]; then
-  echo "==> Skipping git pull (CI checkout already updated the worktree)..."
+  echo "==> Skipping git pull, image pull, and base-image pull (CI mode)..."
+  BUILD_FLAGS=()
 else
   echo "==> Pulling latest code..."
   git pull origin main
+
+  echo "==> Pulling latest base images..."
+  "${COMPOSE[@]}" pull --ignore-buildable
+
+  BUILD_FLAGS=(--pull)
 fi
 
 echo "==> Validating Compose configuration..."
 "${COMPOSE[@]}" config --quiet
 
-echo "==> Pulling latest base images..."
-"${COMPOSE[@]}" pull --ignore-buildable
-
 echo "==> Rebuilding app image..."
-"${COMPOSE[@]}" build --pull app
+"${COMPOSE[@]}" build "${BUILD_FLAGS[@]}" app
 
 echo "==> Restarting containers..."
 "${COMPOSE[@]}" up -d --remove-orphans

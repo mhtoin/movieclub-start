@@ -50,6 +50,25 @@ jobs:
           clean: false
           persist-credentials: false
 
+      # OrbStack's network path to registry-1.docker.io can stall under load.
+      # Pre-pull base images with retries so the deploy script uses the cache
+      # instead of triggering fresh pulls over flaky networking.
+      - name: Pre-pull base images
+        run: |
+          for img in postgres:16-alpine node:24-alpine; do
+            for attempt in 1 2 3 4 5; do
+              echo "Pulling $img (attempt $attempt)..."
+              if docker pull "$img"; then
+                break
+              fi
+              if [[ $attempt -eq 5 ]]; then
+                echo "::warning::Failed to pull $img after 5 attempts"
+              else
+                sleep $((attempt * 5))
+              fi
+            done
+          done
+
       - name: Deploy production stack
         env:
           DEPLOY_PULL: '0'
