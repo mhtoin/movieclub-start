@@ -14,22 +14,23 @@ COMPOSE=(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE")
 
 if [[ "${1:-}" == "--skip-pull" ]]; then
   echo "==> Skipping git pull, image pull, and base-image pull (CI mode)..."
-  BUILD_FLAGS=()
 else
   echo "==> Pulling latest code..."
   git pull origin main
 
   echo "==> Pulling latest base images..."
   "${COMPOSE[@]}" pull --ignore-buildable
-
-  BUILD_FLAGS=(--pull)
 fi
 
 echo "==> Validating Compose configuration..."
 "${COMPOSE[@]}" config --quiet
 
 echo "==> Rebuilding app image..."
-"${COMPOSE[@]}" build "${BUILD_FLAGS[@]}" app
+if [[ "${1:-}" == "--skip-pull" ]]; then
+  "${COMPOSE[@]}" build app
+else
+  "${COMPOSE[@]}" build --pull app
+fi
 
 echo "==> Restarting containers..."
 "${COMPOSE[@]}" up -d --remove-orphans
