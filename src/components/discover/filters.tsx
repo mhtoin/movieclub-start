@@ -6,15 +6,22 @@ import {
   RotateCcw,
   Star,
   Tv,
+  User,
   X,
 } from 'lucide-react'
 import { GenreFilter } from './genre-filter'
 import { LanguageFilter } from './language-filter'
+import { PersonFilter } from './person-filter'
 import { ProviderFilter } from './provider-filter'
 import { RatingFilter } from './rating-filter'
 import { SortByFilter } from './sort-by-filter'
 import { COMMON_LANGUAGES } from '@/lib/tmdb-api'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
+
+export interface FacetEntry {
+  id: number
+  name: string
+}
 
 interface DiscoverFiltersProps {
   selectedGenres: Array<string>
@@ -23,6 +30,8 @@ interface DiscoverFiltersProps {
   onProvidersChange: (providers: Array<string>) => void
   selectedLanguages: Array<string>
   onLanguagesChange: (languages: Array<string>) => void
+  selectedPeople: ReadonlyArray<FacetEntry>
+  onPeopleChange: (people: Array<FacetEntry>) => void
   voteRange: [number, number]
   onVoteRangeChange: (range: [number, number]) => void
   sortBy: string
@@ -46,6 +55,8 @@ export function DiscoverFilters({
   onProvidersChange,
   selectedLanguages,
   onLanguagesChange,
+  selectedPeople,
+  onPeopleChange,
   voteRange,
   onVoteRangeChange,
   sortBy,
@@ -57,6 +68,7 @@ export function DiscoverFilters({
     selectedGenres.length > 0 ||
     (selectedProviders.length > 0 && !isSearchActive) ||
     selectedLanguages.length > 0 ||
+    selectedPeople.length > 0 ||
     voteRange[0] !== 0 ||
     voteRange[1] !== 10
 
@@ -64,6 +76,7 @@ export function DiscoverFilters({
     onGenresChange([])
     onProvidersChange([])
     onLanguagesChange([])
+    onPeopleChange([])
     onVoteRangeChange([0, 10])
     onSortByChange('popularity.desc')
   }
@@ -174,6 +187,29 @@ export function DiscoverFilters({
         </div>
 
         <div className="relative">
+          <PersonFilter
+            selectedPeople={selectedPeople}
+            onPeopleChange={onPeopleChange}
+            chipContent={
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
+                  selectedPeople.length > 0
+                    ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                <User size={14} className="flex-shrink-0" />
+                <span>
+                  {selectedPeople.length > 0
+                    ? `${selectedPeople.length} ${selectedPeople.length > 1 ? 'people' : 'person'}`
+                    : 'People'}
+                </span>
+              </div>
+            }
+          />
+        </div>
+
+        <div className="relative">
           <RatingFilter
             voteRange={voteRange}
             onVoteRangeChange={onVoteRangeChange}
@@ -233,6 +269,8 @@ export function DiscoverFilters({
           onProvidersChange={onProvidersChange}
           selectedLanguages={selectedLanguages}
           onLanguagesChange={onLanguagesChange}
+          selectedPeople={selectedPeople}
+          onPeopleChange={onPeopleChange}
           voteRange={voteRange}
           onVoteRangeChange={onVoteRangeChange}
           isRatingModified={isRatingModified}
@@ -250,6 +288,8 @@ function ActiveFilterPills({
   onProvidersChange,
   selectedLanguages,
   onLanguagesChange,
+  selectedPeople,
+  onPeopleChange,
   voteRange,
   onVoteRangeChange,
   isRatingModified,
@@ -261,6 +301,8 @@ function ActiveFilterPills({
   onProvidersChange: (providers: Array<string>) => void
   selectedLanguages: Array<string>
   onLanguagesChange: (languages: Array<string>) => void
+  selectedPeople: ReadonlyArray<FacetEntry>
+  onPeopleChange: (people: Array<FacetEntry>) => void
   voteRange: [number, number]
   onVoteRangeChange: (range: [number, number]) => void
   isRatingModified: boolean
@@ -308,6 +350,15 @@ function ActiveFilterPills({
           label={languageMap.get(iso) ?? iso}
           onRemove={() =>
             onLanguagesChange(selectedLanguages.filter((id) => id !== iso))
+          }
+        />
+      ))}
+      {selectedPeople.map((person) => (
+        <FilterPill
+          key={`person-${person.id}`}
+          label={person.name || `Person #${person.id}`}
+          onRemove={() =>
+            onPeopleChange(selectedPeople.filter((p) => p.id !== person.id))
           }
         />
       ))}

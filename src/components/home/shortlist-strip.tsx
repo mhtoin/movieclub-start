@@ -1,11 +1,13 @@
 import { memo, useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import '@/styles/polaroid.css'
 import { Link } from '@tanstack/react-router'
 import { m, useReducedMotion } from 'framer-motion'
 import { Clapperboard, Clock, Plus, Star, Ticket } from 'lucide-react'
 import type { Shortlist } from '@/db/schema/shortlists'
 import type { MovieWithCredits } from '@/db/schema/movies'
+import { discoverSearchFor, findGenreIdByName } from '@/lib/discover-params'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { shortlistQueries } from '@/lib/react-query/queries/shortlist'
 
 type ShortlistWithMovies = Shortlist & {
@@ -40,14 +42,25 @@ function Clothespin() {
 }
 
 function PolaroidBack({ movie }: { movie: MovieWithCredits }) {
+  const { data: genreOptions = [] } = useQuery({
+    ...tmdbQueries.genres(),
+    select: (g) => g ?? [],
+  })
   const crewArray = Array.isArray(movie.crew) ? movie.crew : []
   const foundDirector = crewArray.find((c: any) => c.job === 'Director')
-  const director = foundDirector != null ? (foundDirector.name ?? null) : null
+  const directorRecord =
+    foundDirector != null
+      ? { id: foundDirector.id as number, name: foundDirector.name as string }
+      : null
+  const director = directorRecord?.name ?? null
 
   const castArray = Array.isArray(movie.cast) ? movie.cast : []
   const topCast = castArray
     .slice(0, 3)
-    .flatMap((c: any) => (c.name ? [c.name] : []))
+    .filter((c: any) => c.id && c.name) as Array<{
+    id: number
+    name: string
+  }>
 
   const genres = movie.genres ?? []
   const runtime = movie.runtime
@@ -82,9 +95,23 @@ function PolaroidBack({ movie }: { movie: MovieWithCredits }) {
               <p className="text-[9px] font-cinema-caps tracking-wider uppercase text-black/40">
                 Directed by
               </p>
-              <p className="text-xs font-semibold text-black/80 leading-tight mt-0.5">
-                {director}
-              </p>
+              {directorRecord ? (
+                <Link
+                  to="/discover"
+                  search={discoverSearchFor({
+                    kind: 'person',
+                    id: directorRecord.id,
+                    name: directorRecord.name,
+                  })}
+                  className="block text-xs font-semibold text-black/80 leading-tight mt-0.5 hover:text-black hover:underline"
+                >
+                  {director}
+                </Link>
+              ) : (
+                <p className="text-xs font-semibold text-black/80 leading-tight mt-0.5">
+                  {director}
+                </p>
+              )}
             </div>
           )}
 
@@ -94,13 +121,19 @@ function PolaroidBack({ movie }: { movie: MovieWithCredits }) {
                 Starring
               </p>
               <div className="mt-0.5 space-y-0.5">
-                {topCast.map((name) => (
-                  <p
-                    key={name}
-                    className="text-[11px] text-black/70 leading-snug"
+                {topCast.map((member) => (
+                  <Link
+                    key={member.id}
+                    to="/discover"
+                    search={discoverSearchFor({
+                      kind: 'person',
+                      id: member.id,
+                      name: member.name,
+                    })}
+                    className="block text-[11px] text-black/70 leading-snug hover:text-black hover:underline"
                   >
-                    {name}
-                  </p>
+                    {member.name}
+                  </Link>
                 ))}
               </div>
             </div>
@@ -108,14 +141,33 @@ function PolaroidBack({ movie }: { movie: MovieWithCredits }) {
 
           {genres.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {genres.slice(0, 3).map((g) => (
-                <span
-                  key={g}
-                  className="text-[9px] px-1.5 py-0.5 bg-black/10 rounded-sm text-black/50 font-medium"
-                >
-                  {g}
-                </span>
-              ))}
+              {genres.slice(0, 3).map((g) => {
+                const genreId = findGenreIdByName(g, genreOptions)
+                if (genreId === undefined) {
+                  return (
+                    <span
+                      key={g}
+                      className="text-[9px] px-1.5 py-0.5 bg-black/10 rounded-sm text-black/50 font-medium"
+                    >
+                      {g}
+                    </span>
+                  )
+                }
+                return (
+                  <Link
+                    key={g}
+                    to="/discover"
+                    search={discoverSearchFor({
+                      kind: 'genre',
+                      id: genreId,
+                      name: g,
+                    })}
+                    className="text-[9px] px-1.5 py-0.5 bg-black/10 rounded-sm text-black/50 font-medium hover:bg-black/20 transition-colors"
+                  >
+                    {g}
+                  </Link>
+                )
+              })}
             </div>
           )}
 
@@ -299,21 +351,43 @@ export const ShortlistStrip = memo(function ShortlistStrip({
               ? new Date(movie.releaseDate).getFullYear()
               : null
             const rotation = ROTATIONS[index % ROTATIONS.length]
+            const isFlipped = flippedMovieId === movie.id
+
+            const toggleFlip = () =>
+              setFlippedMovieId((current) =>
+                current === movie.id ? null : movie.id,
+              )
+
+            const handleCardClick = (
+              event: React.MouseEvent<HTMLDivElement>,
+            ) => {
+              // Don't flip when the click was on an inner link — let the
+              // link navigate instead.
+              if ((event.target as HTMLElement).closest('a')) return
+              toggleFlip()
+            }
+
+            const handleCardKeyDown = (
+              event: React.KeyboardEvent<HTMLDivElement>,
+            ) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                toggleFlip()
+              }
+            }
 
             return (
-              <button
+              <div
                 key={movie.id}
                 suppressHydrationWarning
-                type="button"
-                data-flipped={flippedMovieId === movie.id}
-                aria-label={`${flippedMovieId === movie.id ? 'Show poster' : 'Show details'} for ${movie.title}`}
-                aria-pressed={flippedMovieId === movie.id}
-                onClick={() =>
-                  setFlippedMovieId((current) =>
-                    current === movie.id ? null : movie.id,
-                  )
-                }
-                className="snap-start flex-shrink-0 relative group cursor-pointer hover:z-50 focus-visible:z-50 appearance-none border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
+                data-flipped={isFlipped}
+                role="button"
+                tabIndex={0}
+                aria-label={`${isFlipped ? 'Show poster' : 'Show details'} for ${movie.title}`}
+                aria-pressed={isFlipped}
+                onClick={handleCardClick}
+                onKeyDown={handleCardKeyDown}
+                className="snap-start flex-shrink-0 relative group cursor-pointer hover:z-50 focus-visible:z-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
                 style={
                   {
                     transformOrigin: 'top center',
@@ -362,7 +436,7 @@ export const ShortlistStrip = memo(function ShortlistStrip({
                     <PolaroidBack movie={movie} />
                   </div>
                 </div>
-              </button>
+              </div>
             )
           })}
         </div>

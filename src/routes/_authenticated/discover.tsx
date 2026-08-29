@@ -5,6 +5,7 @@ import { Loader2, SlidersHorizontal, X } from 'lucide-react'
 import { Suspense, useEffect, useState } from 'react'
 import { z } from 'zod'
 
+import type { FacetEntry } from '@/lib/discover-params'
 import DiscoverMoviesList from '@/components/discover/discover-movie-list'
 import {
   DiscoverSearchInput,
@@ -12,6 +13,11 @@ import {
   SearchBanner,
 } from '@/components/discover/discover-search'
 import { DiscoverFilters } from '@/components/discover/filters'
+import {
+  facetIds,
+  parseFacetCsv,
+  serializeFacetCsv,
+} from '@/lib/discover-params'
 import { Button } from '@/components/ui/button'
 import {
   DrawerClose,
@@ -37,6 +43,9 @@ const discoverSearchSchema = z.object({
   minRating: fallback(z.number(), 0).default(0),
   maxRating: fallback(z.number(), 10).default(10),
   sortBy: fallback(z.string(), 'popularity.desc').default('popularity.desc'),
+  people: fallback(z.string(), '').default(''),
+  keywords: fallback(z.string(), '').default(''),
+  companies: fallback(z.string(), '').default(''),
 })
 
 export const Route = createFileRoute('/_authenticated/discover')({
@@ -62,12 +71,15 @@ export const Route = createFileRoute('/_authenticated/discover')({
     } else {
       context.queryClient.prefetchInfiniteQuery(
         tmdbQueries.discover({
-          with_genres: deps.genres || undefined,
+          with_genres: facetIds(deps.genres) || undefined,
           with_watch_providers: providerFilter || undefined,
           with_original_language: deps.originalLanguage || undefined,
           'vote_average.gte': deps.minRating,
           'vote_average.lte': deps.maxRating,
           sort_by: deps.sortBy,
+          with_people: facetIds(deps.people) || undefined,
+          with_keywords: facetIds(deps.keywords) || undefined,
+          with_companies: facetIds(deps.companies) || undefined,
         }),
       )
     }
@@ -122,6 +134,7 @@ function RouteComponent() {
   const selectedLanguages = search.originalLanguage
     ? search.originalLanguage.split(',')
     : []
+  const selectedPeople = parseFacetCsv(search.people)
   const voteRange: [number, number] = [search.minRating, search.maxRating]
   const sortBy = search.sortBy
 
@@ -148,6 +161,15 @@ function RouteComponent() {
       search: (prev) => ({
         ...prev,
         originalLanguage: languages.length > 0 ? languages.join(',') : '',
+      }),
+    })
+  }
+
+  const handlePeopleChange = (people: Array<FacetEntry>) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        people: serializeFacetCsv(people),
       }),
     })
   }
@@ -186,6 +208,8 @@ function RouteComponent() {
         onProvidersChange={handleProvidersChange}
         selectedLanguages={selectedLanguages}
         onLanguagesChange={handleLanguagesChange}
+        selectedPeople={selectedPeople}
+        onPeopleChange={handlePeopleChange}
         voteRange={voteRange}
         onVoteRangeChange={handleVoteRangeChange}
         sortBy={sortBy}

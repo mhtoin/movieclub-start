@@ -193,6 +193,9 @@ export interface DiscoverParams {
   'vote_average.lte'?: number
   watch_region?: string
   sort_by?: string
+  with_people?: string
+  with_keywords?: string
+  with_companies?: string
 }
 
 export async function discoverMovies(
@@ -236,6 +239,18 @@ export async function discoverMovies(
       'vote_average.lte',
       params['vote_average.lte'].toString(),
     )
+  }
+
+  if (params.with_people) {
+    queryParams.append('with_people', params.with_people)
+  }
+
+  if (params.with_keywords) {
+    queryParams.append('with_keywords', params.with_keywords)
+  }
+
+  if (params.with_companies) {
+    queryParams.append('with_companies', params.with_companies)
   }
 
   const url = `${TMDB_CONFIG.BASE_URL}/discover/movie?${queryParams.toString()}`
@@ -352,6 +367,49 @@ export async function fetchMovieDetails(
   }
 }
 
+export interface TMDBPersonSearchResult {
+  id: number
+  name: string
+  known_for_department: string
+  profile_path: string | null
+  popularity: number
+}
+
+export interface TMDBPersonSearchResponse {
+  page: number
+  results: Array<TMDBPersonSearchResult>
+  total_pages: number
+  total_results: number
+}
+
+export async function searchPeople(
+  query: string,
+): Promise<TMDBPersonSearchResponse> {
+  if (!TMDB_CONFIG.API_KEY) {
+    throw new Error('TMDB API key is not configured')
+  }
+  const params = new URLSearchParams({
+    api_key: TMDB_CONFIG.API_KEY,
+    query,
+    include_adult: 'false',
+    language: 'en-US',
+    page: '1',
+  })
+  const url = `${TMDB_CONFIG.BASE_URL}/search/person?${params.toString()}`
+  try {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(
+        `TMDB API error: ${response.status} ${response.statusText}`,
+      )
+    }
+    return (await response.json()) as TMDBPersonSearchResponse
+  } catch (error) {
+    console.error('Error searching people:', error)
+    throw error
+  }
+}
+
 export const FALLBACK_POSTERS: Array<Movie> = [
   {
     id: 155,
@@ -367,6 +425,22 @@ export const FALLBACK_POSTERS: Array<Movie> = [
     original_language: 'en',
     original_title: 'The Dark Knight',
     popularity: 500,
+    video: false,
+  },
+  {
+    id: 157336,
+    title: 'Interstellar',
+    overview: '',
+    poster_path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+    backdrop_path: null,
+    release_date: '2014-11-05',
+    vote_average: 8.4,
+    vote_count: 35000,
+    genre_ids: [],
+    adult: false,
+    original_language: 'en',
+    original_title: 'Interstellar',
+    popularity: 400,
     video: false,
   },
   {

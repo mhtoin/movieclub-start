@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MovieCard } from './movie-card'
 import { MovieDetailsDialog } from './movie-details-dialog'
 import type { Movie } from '@/lib/tmdb-api'
+import { facetIds } from '@/lib/discover-params'
 import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 
 interface DiscoverMoviesListProps {
@@ -168,6 +169,9 @@ function BrowseMoviesList({ onTotalResults }: MovieListSharedProps) {
         'vote_average.gte': search.minRating,
         'vote_average.lte': search.maxRating,
         sort_by: search.sortBy,
+        with_people: facetIds(search.people) || undefined,
+        with_keywords: facetIds(search.keywords) || undefined,
+        with_companies: facetIds(search.companies) || undefined,
       }),
     )
 

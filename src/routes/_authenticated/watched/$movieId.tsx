@@ -14,12 +14,14 @@ import { Suspense, useMemo, useState } from 'react'
 import { ReviewForm } from '@/components/reviews/review-form'
 import { ReviewList } from '@/components/reviews/review-list'
 import Avatar from '@/components/ui/avatar'
+import { discoverSearchFor, findGenreIdByName } from '@/lib/discover-params'
 import { useMediaQuery } from '@/lib/hooks'
 import {
   useCreateReviewMutation,
   useDeleteReviewMutation,
   useUpdateReviewMutation,
 } from '@/lib/react-query/mutations/reviews'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import {
   movieDetailQuery,
   reviewQueries,
@@ -84,6 +86,10 @@ function MovieDetailContent({
 }) {
   const { data: movieDetail } = useSuspenseQuery(movieDetailQuery(movieId))
   const { data: reviews } = useSuspenseQuery(reviewQueries.byMovie(movieId))
+  const { data: genreOptions = [] } = useSuspenseQuery({
+    ...tmdbQueries.genres(),
+    select: (g) => g ?? [],
+  })
 
   const createReviewMutation = useCreateReviewMutation()
   const updateReviewMutation = useUpdateReviewMutation()
@@ -303,9 +309,17 @@ function MovieDetailContent({
                         <span className="text-xs text-muted-foreground/60 mt-0.5">
                           Dir.
                         </span>
-                        <span className="text-sm text-foreground/80">
+                        <Link
+                          to="/discover"
+                          search={discoverSearchFor({
+                            kind: 'person',
+                            id: director.id,
+                            name: director.name,
+                          })}
+                          className="text-sm text-foreground/80 hover:text-foreground hover:underline transition-colors"
+                        >
                           {director.name}
-                        </span>
+                        </Link>
                       </div>
                     )}
                     {movie.originalTitle &&
@@ -514,14 +528,33 @@ function MovieDetailContent({
 
               {movie.genres && movie.genres.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {movie.genres.map((genre: string) => (
-                    <span
-                      key={genre}
-                      className="px-2.5 py-1 rounded-full text-[11px] font-medium border border-primary/20 text-primary"
-                    >
-                      {genre}
-                    </span>
-                  ))}
+                  {movie.genres.map((genre: string) => {
+                    const genreId = findGenreIdByName(genre, genreOptions)
+                    if (genreId === undefined) {
+                      return (
+                        <span
+                          key={genre}
+                          className="px-2.5 py-1 rounded-full text-[11px] font-medium border border-primary/20 text-primary"
+                        >
+                          {genre}
+                        </span>
+                      )
+                    }
+                    return (
+                      <Link
+                        key={genre}
+                        to="/discover"
+                        search={discoverSearchFor({
+                          kind: 'genre',
+                          id: genreId,
+                          name: genre,
+                        })}
+                        className="px-2.5 py-1 rounded-full text-[11px] font-medium border border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/40 transition-colors"
+                      >
+                        {genre}
+                      </Link>
+                    )
+                  })}
                 </div>
               )}
 
@@ -659,11 +692,17 @@ function MovieDetailContent({
                         ? getImageUrl(member.profile_path, 'w185')
                         : null
                       return (
-                        <div
+                        <Link
                           key={member.id}
-                          className="flex flex-col items-center gap-1 text-center"
+                          to="/discover"
+                          search={discoverSearchFor({
+                            kind: 'person',
+                            id: member.id,
+                            name: member.name,
+                          })}
+                          className="flex flex-col items-center gap-1 text-center group"
                         >
-                          <div className="size-14 rounded-full overflow-hidden bg-muted border border-border/40">
+                          <div className="size-14 rounded-full overflow-hidden bg-muted border border-border/40 transition-all group-hover:border-primary/60 group-hover:scale-105">
                             {profileUrl ? (
                               <img
                                 src={profileUrl}
@@ -676,13 +715,13 @@ function MovieDetailContent({
                               </div>
                             )}
                           </div>
-                          <p className="text-[12px] font-medium leading-tight line-clamp-1">
+                          <p className="text-[12px] font-medium leading-tight line-clamp-1 group-hover:text-foreground transition-colors">
                             {member.name}
                           </p>
                           <p className="text-[11px] text-muted-foreground leading-tight line-clamp-1">
                             {member.character}
                           </p>
-                        </div>
+                        </Link>
                       )
                     })}
                   </div>

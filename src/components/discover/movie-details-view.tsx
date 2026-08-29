@@ -1,6 +1,8 @@
 import { ArrowLeft, Plus } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import type { TMDBMovieResponse } from '@/types/tmdb'
 import { Button } from '@/components/ui/button'
+import { discoverSearchFor } from '@/lib/discover-params'
 import { getImageUrl } from '@/lib/tmdb-api'
 
 const usdFormat = new Intl.NumberFormat('en-US', {
@@ -67,9 +69,15 @@ export function MovieDetailsView({
                 {movieDetails.credits.cast
                   .slice(0, compact ? 6 : 8)
                   .map((person) => (
-                    <div
+                    <Link
                       key={person.credit_id}
-                      className={`flex gap-2.5 rounded-lg bg-secondary/30 ${compact ? 'p-2' : 'p-2.5'}`}
+                      to="/discover"
+                      search={discoverSearchFor({
+                        kind: 'person',
+                        id: person.id,
+                        name: person.name,
+                      })}
+                      className={`flex gap-2.5 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors group ${compact ? 'p-2' : 'p-2.5'}`}
                     >
                       {person.profile_path ? (
                         <img
@@ -102,7 +110,7 @@ export function MovieDetailsView({
                           {person.character}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   ))}
               </div>
             </div>
@@ -132,9 +140,15 @@ export function MovieDetailsView({
                   )
                   .slice(0, compact ? 4 : 6)
                   .map((person) => (
-                    <div
+                    <Link
                       key={person.credit_id}
-                      className={`flex gap-2.5 rounded-lg bg-secondary/30 ${compact ? 'p-2' : 'p-2.5'}`}
+                      to="/discover"
+                      search={discoverSearchFor({
+                        kind: 'person',
+                        id: person.id,
+                        name: person.name,
+                      })}
+                      className={`flex gap-2.5 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors ${compact ? 'p-2' : 'p-2.5'}`}
                     >
                       {person.profile_path ? (
                         <img
@@ -167,7 +181,7 @@ export function MovieDetailsView({
                           {person.job}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   ))}
               </div>
             </div>

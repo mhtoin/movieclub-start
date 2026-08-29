@@ -1,8 +1,12 @@
 import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import { AnimatedPoster } from '../discover/animated-poster'
 import { useDialogAnimation } from '../discover/use-dialog-animation'
+import { discoverSearchFor, findGenreIdByName } from '@/lib/discover-params'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { getResponsiveImageProps } from '@/lib/tmdb-api'
 
 interface MovieDetailsDialogProps {
@@ -39,6 +43,11 @@ export function MovieDetailsDialog({
     open,
     triggerRect,
     onClose,
+  })
+
+  const { data: genreOptions = [] } = useQuery({
+    ...tmdbQueries.genres(),
+    select: (g) => g ?? [],
   })
 
   if (!movie || !open) return null
@@ -182,14 +191,33 @@ export function MovieDetailsDialog({
               </div>
               {movie.genres && movie.genres.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
-                  {movie.genres.slice(0, 4).map((genre: string) => (
-                    <span
-                      key={genre}
-                      className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground"
-                    >
-                      {genre}
-                    </span>
-                  ))}
+                  {movie.genres.slice(0, 4).map((genre: string) => {
+                    const genreId = findGenreIdByName(genre, genreOptions)
+                    if (genreId === undefined) {
+                      return (
+                        <span
+                          key={genre}
+                          className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground"
+                        >
+                          {genre}
+                        </span>
+                      )
+                    }
+                    return (
+                      <Link
+                        key={genre}
+                        to="/discover"
+                        search={discoverSearchFor({
+                          kind: 'genre',
+                          id: genreId,
+                          name: genre,
+                        })}
+                        className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground hover:bg-secondary/60 transition-colors"
+                      >
+                        {genre}
+                      </Link>
+                    )
+                  })}
                   {movie.genres.length > 4 && (
                     <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground">
                       +{movie.genres.length - 4}

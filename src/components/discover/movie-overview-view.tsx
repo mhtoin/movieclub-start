@@ -1,10 +1,12 @@
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { MovieMetadata } from './movie-metadata'
 import { WatchProvidersList } from './watch-providers'
 import type { TMDBMovieResponse } from '@/types/tmdb'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { discoverSearchFor } from '@/lib/discover-params'
 
 interface MovieOverviewViewProps {
   title: string
@@ -63,12 +65,18 @@ export function MovieOverviewView({
         {movieDetails?.genres && movieDetails.genres.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {movieDetails.genres.slice(0, 4).map((genre) => (
-              <span
+              <Link
                 key={genre.id}
-                className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground"
+                to="/discover"
+                search={discoverSearchFor({
+                  kind: 'genre',
+                  id: genre.id,
+                  name: genre.name,
+                })}
+                className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground hover:bg-secondary/60 transition-colors"
               >
                 {genre.name}
-              </span>
+              </Link>
             ))}
             {movieDetails.genres.length > 4 && (
               <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-secondary/40 text-secondary-foreground">

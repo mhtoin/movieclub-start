@@ -7,6 +7,7 @@ import {
   fetchWatchProviders,
   getFilters,
   searchMovies,
+  searchPeople,
 } from '@/lib/tmdb-api'
 
 export const tmdbQueries = {
@@ -62,6 +63,14 @@ export const tmdbQueries = {
         return undefined
       },
       staleTime: 1000 * 60 * 15,
+      gcTime: 1000 * 60 * 30,
+    }),
+  personSearch: (query: string) =>
+    queryOptions({
+      queryKey: ['tmdb', 'personSearch', query],
+      queryFn: () => searchPeople(query),
+      enabled: query.trim().length >= 2,
+      staleTime: 1000 * 60 * 10,
       gcTime: 1000 * 60 * 30,
     }),
 }

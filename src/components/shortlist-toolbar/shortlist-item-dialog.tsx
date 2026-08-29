@@ -1,4 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import {
   Calendar,
   Check,
@@ -14,6 +16,8 @@ import {
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import type { MovieWithCredits } from '@/db/schema/movies'
+import { discoverSearchFor, findGenreIdByName } from '@/lib/discover-params'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import {
   useRemoveFromShortlistMutation,
   useUpdateSelectedIndexMutation,
@@ -44,6 +48,11 @@ export function ShortlistItemDialog({
     useUpdateSelectedIndexMutation()
 
   const isSelected = requiresSelection && selectedIndex === index
+
+  const { data: genreOptions = [] } = useQuery({
+    ...tmdbQueries.genres(),
+    select: (g) => g ?? [],
+  })
 
   useEffect(() => {
     if (open) {
@@ -230,14 +239,33 @@ export function ShortlistItemDialog({
                   </div>
                   {genres.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {genres.map((genre) => (
-                        <span
-                          key={genre}
-                          className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20"
-                        >
-                          {genre}
-                        </span>
-                      ))}
+                      {genres.map((genre) => {
+                        const genreId = findGenreIdByName(genre, genreOptions)
+                        if (genreId === undefined) {
+                          return (
+                            <span
+                              key={genre}
+                              className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20"
+                            >
+                              {genre}
+                            </span>
+                          )
+                        }
+                        return (
+                          <Link
+                            key={genre}
+                            to="/discover"
+                            search={discoverSearchFor({
+                              kind: 'genre',
+                              id: genreId,
+                              name: genre,
+                            })}
+                            className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-colors"
+                          >
+                            {genre}
+                          </Link>
+                        )
+                      })}
                     </div>
                   )}
                   {movie.tagline && (
@@ -308,8 +336,14 @@ export function ShortlistItemDialog({
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         {cast.map((member) => (
-                          <div
+                          <Link
                             key={member.id}
+                            to="/discover"
+                            search={discoverSearchFor({
+                              kind: 'person',
+                              id: member.id,
+                              name: member.name,
+                            })}
                             className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
                           >
                             {member.profile_path ? (
@@ -333,7 +367,7 @@ export function ShortlistItemDialog({
                                 {member.character}
                               </p>
                             </div>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     </div>

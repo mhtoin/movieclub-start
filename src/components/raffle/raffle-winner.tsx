@@ -6,6 +6,8 @@ import {
   m,
   useReducedMotion,
 } from 'framer-motion'
+import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import {
   ChevronLeft,
   ChevronRight,
@@ -20,6 +22,8 @@ import {
 } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
 import type { Movie } from '@/db/schema/movies'
+import { discoverSearchFor, findGenreIdByName } from '@/lib/discover-params'
+import { tmdbQueries } from '@/lib/react-query/queries/tmdb'
 import { cn, getMovieBackdropUrl, getMoviePosterUrl } from '@/lib/utils'
 import { getImageUrl } from '@/lib/tmdb-api'
 import { Button } from '@/components/ui/button'
@@ -289,12 +293,23 @@ const DetailsPage = memo(function DetailsPage({
   posterUrl: string | null
   credits: { cast: Array<any> | null; crew: Array<any> | null } | null
 }) {
+  const { data: genreOptions = [] } = useQuery({
+    ...tmdbQueries.genres(),
+    select: (g) => g ?? [],
+  })
   const year = useMemo(
     () =>
       movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : null,
     [movie.releaseDate],
   )
   const director = useMemo(() => getDirector(credits?.crew ?? null), [credits])
+  const directorRecord = useMemo(
+    () =>
+      Array.isArray(credits?.crew)
+        ? (credits.crew.find((c: any) => c.job === 'Director') ?? null)
+        : null,
+    [credits],
+  )
   const topCast = useMemo(() => getTopCast(credits?.cast ?? null), [credits])
   const providers = useMemo(
     () => getProviders(movie.watchProviders),
@@ -347,20 +362,53 @@ const DetailsPage = memo(function DetailsPage({
               {director && (
                 <span className="flex items-center gap-1">
                   <Info className="size-3.5" />
-                  {director}
+                  {directorRecord ? (
+                    <Link
+                      to="/discover"
+                      search={discoverSearchFor({
+                        kind: 'person',
+                        id: directorRecord.id,
+                        name: directorRecord.name,
+                      })}
+                      className="hover:text-foreground hover:underline transition-colors"
+                    >
+                      {director}
+                    </Link>
+                  ) : (
+                    director
+                  )}
                 </span>
               )}
             </div>
             {movie.genres && movie.genres.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-0.5">
-                {movie.genres.map((g: string) => (
-                  <span
-                    key={g}
-                    className="text-[11px] bg-primary/10 text-primary rounded-full px-2.5 py-0.5 font-medium"
-                  >
-                    {g}
-                  </span>
-                ))}
+                {movie.genres.map((g: string) => {
+                  const genreId = findGenreIdByName(g, genreOptions)
+                  if (genreId === undefined) {
+                    return (
+                      <span
+                        key={g}
+                        className="text-[11px] bg-primary/10 text-primary rounded-full px-2.5 py-0.5 font-medium"
+                      >
+                        {g}
+                      </span>
+                    )
+                  }
+                  return (
+                    <Link
+                      key={g}
+                      to="/discover"
+                      search={discoverSearchFor({
+                        kind: 'genre',
+                        id: genreId,
+                        name: g,
+                      })}
+                      className="text-[11px] bg-primary/10 text-primary rounded-full px-2.5 py-0.5 font-medium hover:bg-primary/20 transition-colors"
+                    >
+                      {g}
+                    </Link>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -387,11 +435,17 @@ const DetailsPage = memo(function DetailsPage({
                   ? getImageUrl(member.profile_path, 'w185')
                   : null
                 return (
-                  <div
+                  <Link
                     key={member.id}
-                    className="flex flex-col items-center gap-1 text-center"
+                    to="/discover"
+                    search={discoverSearchFor({
+                      kind: 'person',
+                      id: member.id,
+                      name: member.name,
+                    })}
+                    className="flex flex-col items-center gap-1 text-center group"
                   >
-                    <div className="size-12 rounded-full overflow-hidden bg-muted border border-border/40 shrink-0">
+                    <div className="size-12 rounded-full overflow-hidden bg-muted border border-border/40 shrink-0 transition-all group-hover:border-primary/60 group-hover:scale-105">
                       {profileUrl ? (
                         <img
                           src={profileUrl}
@@ -404,13 +458,13 @@ const DetailsPage = memo(function DetailsPage({
                         </div>
                       )}
                     </div>
-                    <p className="text-[10px] font-medium leading-tight text-foreground line-clamp-1">
+                    <p className="text-[10px] font-medium leading-tight text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                       {member.name}
                     </p>
                     <p className="text-[9px] text-muted-foreground leading-tight line-clamp-1">
                       {member.character}
                     </p>
-                  </div>
+                  </Link>
                 )
               })}
             </div>
