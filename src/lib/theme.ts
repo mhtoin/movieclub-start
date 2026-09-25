@@ -4,6 +4,7 @@ import * as z from 'zod'
 
 const themeValidator = z.union([z.literal('light'), z.literal('dark')])
 export type Theme = z.infer<typeof themeValidator>
+const preferenceCookieOptions = { maxAge: 60 * 60 * 24 * 365, path: '/' }
 
 export const getThemeServerFn = createServerFn().handler(
   () => (getCookie('theme') || 'light') as Theme,
@@ -11,4 +12,4 @@ export const getThemeServerFn = createServerFn().handler(
 
 export const setThemeServerFn = createServerFn({ method: 'POST' })
   .inputValidator(themeValidator)
-  .handler(({ data }) => setCookie('theme', data))
+  .handler(({ data }) => setCookie('theme', data, preferenceCookieOptions))

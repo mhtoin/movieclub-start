@@ -8,6 +8,7 @@ import { db } from '@/db/db'
 
 const schemeValidator = z.enum(['default', 'mono', 'teal', 'tokyo'])
 export type ColorScheme = z.infer<typeof schemeValidator>
+const preferenceCookieOptions = { maxAge: 60 * 60 * 24 * 365, path: '/' }
 
 export const COLOR_SCHEMES = {
   default: {
@@ -55,7 +56,7 @@ export const getSchemeServerFn = createServerFn()
         schemeValidator.safeParse(user.colorScheme).success
       ) {
         if (user.colorScheme !== cookieScheme) {
-          setCookie('color-scheme', user.colorScheme)
+          setCookie('color-scheme', user.colorScheme, preferenceCookieOptions)
         }
         return user.colorScheme
       }
@@ -83,7 +84,7 @@ export const setSchemeServerFn = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .inputValidator(schemeValidator)
   .handler(async ({ context, data }) => {
-    setCookie('color-scheme', data)
+    setCookie('color-scheme', data, preferenceCookieOptions)
 
     try {
       const user = context.user
