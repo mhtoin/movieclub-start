@@ -292,6 +292,33 @@ You can find out everything you need to know on how to use TanStack Store in the
 
 Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
 
+## IMDb ratings dataset
+
+Download and decompress IMDb's public ratings snapshot (one row per IMDb title ID) with:
+
+```bash
+pnpm imdb:ratings:download
+```
+
+The default output is `data/imdb/title.ratings.tsv` (`tconst`, `averageRating`, and `numVotes` columns). The downloader streams the gzip directly into a temporary TSV, checks the gzip and expected TSV header, then replaces the previous file only after a successful download. `data/` is git-ignored.
+
+Configure it with environment variables or a `.env` file in the project root:
+
+```dotenv
+IMDB_RATINGS_URL=https://datasets.imdbws.com/title.ratings.tsv.gz
+IMDB_RATINGS_FILE=data/imdb/title.ratings.tsv
+```
+
+`IMDB_RATINGS_FILE` can be an absolute path or a path relative to the project root. The script uses Node.js built-ins and the project's existing dotenv dependency; it doesn't require `curl`, `gunzip`, or platform-specific tooling. It can also be run directly with `node scripts/download-imdb-ratings.mjs`.
+
+IMDb refreshes its datasets regularly; schedule the command daily (or at whatever cadence suits the app). For example, on a machine with cron, edit `crontab -e` and add:
+
+```cron
+0 6 * * * cd /path/to/movieclub-start && pnpm imdb:ratings:download >> "$HOME/Library/Logs/movieclub/imdb-ratings.log" 2>&1
+```
+
+Create the log directory first if using that macOS path (`mkdir -p ~/Library/Logs/movieclub`). On macOS you can instead run it from a LaunchAgent; on Windows use Task Scheduler. Keep the scheduled command's working directory at the project root so a local `.env` is loaded. The generated TSV is a local snapshot for future IMDb-ID lookups; this downloader does not import it into the database.
+
 # Learn More
 
 You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
