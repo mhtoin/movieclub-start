@@ -14,8 +14,10 @@ const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const projectDirectory = resolve(scriptDirectory, '..')
 dotenv.config({ path: join(projectDirectory, '.env') })
 const datasetUrl =
-  process.env.IMDB_RATINGS_URL ?? 'https://datasets.imdbws.com/title.ratings.tsv.gz'
-const configuredPath = process.env.IMDB_RATINGS_FILE ?? 'data/imdb/title.ratings.tsv'
+  process.env.IMDB_RATINGS_URL ??
+  'https://datasets.imdbws.com/title.ratings.tsv.gz'
+const configuredPath =
+  process.env.IMDB_RATINGS_FILE ?? 'data/imdb/title.ratings.tsv'
 const outputPath = isAbsolute(configuredPath)
   ? configuredPath
   : resolve(projectDirectory, configuredPath)
@@ -32,7 +34,9 @@ async function main() {
   })
 
   if (!response.ok || !response.body) {
-    throw new Error(`IMDb download failed: HTTP ${response.status} ${response.statusText}`)
+    throw new Error(
+      `IMDb download failed: HTTP ${response.status} ${response.statusText}`,
+    )
   }
 
   let decompressedBytes = 0
@@ -54,9 +58,14 @@ async function main() {
   try {
     const header = Buffer.alloc(128)
     const { bytesRead } = await downloadedFile.read(header, 0, header.length, 0)
-    const firstLine = header.subarray(0, bytesRead).toString('utf8').split('\n', 1)[0]
+    const firstLine = header
+      .subarray(0, bytesRead)
+      .toString('utf8')
+      .split('\n', 1)[0]
     if (firstLine !== 'tconst\taverageRating\tnumVotes') {
-      throw new Error(`Unexpected IMDb ratings TSV header: ${JSON.stringify(firstLine)}`)
+      throw new Error(
+        `Unexpected IMDb ratings TSV header: ${JSON.stringify(firstLine)}`,
+      )
     }
   } finally {
     await downloadedFile.close()
