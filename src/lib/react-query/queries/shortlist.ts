@@ -15,7 +15,7 @@ import { authMiddleware } from '@/middleware/auth'
 
 export const getUserShortlist = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((userId: string) => userId)
+  .validator((userId: string) => userId)
   .handler(async ({ context, data: userId }) => {
     if (!context.user) throw new Error('Unauthorized')
 

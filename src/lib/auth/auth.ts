@@ -1,5 +1,11 @@
-import { useSession } from '@tanstack/react-start/server'
+import {
+  deleteCookie,
+  getCookie,
+  setCookie,
+} from '@tanstack/react-start/server'
+import { getIronSession } from 'iron-session'
 import { eq } from 'drizzle-orm'
+import type { SessionOptions } from 'iron-session'
 import type { Session, SessionWithToken, UserSession } from '@/types/auth'
 import { db } from '@/db/db'
 import { getUserById } from '@/db/queries/user'
@@ -7,6 +13,12 @@ import { sessionsTable } from '@/db/schema/sessions'
 
 const sessionDurationInDays = 30
 const sessionExpiresInSeconds = 60 * 60 * 24 * sessionDurationInDays
+
+// `app-session` was written by Start's old sealed-session helper. Those
+// cookies cannot be read by iron-session, so we start fresh under a new name
+// and remove the legacy cookie whenever we set or clear a session.
+const appSessionCookieName = 'app-session-v2'
+const legacyAppSessionCookieName = 'app-session'
 
 function generateSecureRandomString(): string {
   // Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion)
@@ -225,7 +237,7 @@ export async function getSessionUser(
 }
 
 export async function requireAuthenticatedUser(): Promise<UserSession> {
-  const session = await useAppSession()
+  const session = await getAppSession()
   const user = await getSessionUser(session.data.sessionToken)
 
   if (!user) {
@@ -251,19 +263,133 @@ export async function deleteSessionById(id: string): Promise<void> {
   await db.delete(sessionsTable).where(eq(sessionsTable.id, id))
 }
 
-export function useAppSession() {
+type AppSessionData = {
+  sessionToken?: string
+}
+
+// Callers still pass the full UserSession-shaped object for compatibility,
+// but only `sessionToken` is persisted. The database remains the source of
+// truth for validating that token.
+type AppSessionUpdate = Partial<UserSession> & { sessionToken: string }
+
+export type AppSession = {
+  data: Readonly<AppSessionData>
+  update: (data: AppSessionUpdate) => Promise<void>
+  clear: () => Promise<void>
+}
+
+// Shape of the cookie objects iron-session passes to its cookie store adapter.
+type AppSessionCookie = {
+  name: string
+  value: string
+  domain?: string
+  path?: string
+  sameSite?: boolean | 'lax' | 'strict' | 'none'
+  secure?: boolean
+  httpOnly?: boolean
+  maxAge?: number
+  priority?: 'low' | 'medium' | 'high'
+  expires?: Date | number
+}
+
+type AppSessionCookieStore = {
+  get: (name: string) => { name: string; value: string } | undefined
+  set: {
+    (name: string, value: string, options?: Partial<AppSessionCookie>): void
+    (options: AppSessionCookie): void
+  }
+}
+
+function getAppSessionOptions(): SessionOptions {
   const password = process.env.SESSION_PASSWORD
   if (!password) {
     throw new Error('SESSION_PASSWORD environment variable is required')
   }
-  return useSession<UserSession>({
-    name: 'app-session',
+
+  return {
+    cookieName: appSessionCookieName,
     password,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
+    ttl: sessionExpiresInSeconds,
+    cookieOptions: {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: sessionExpiresInSeconds,
+      path: '/',
     },
-  })
+  }
 }
+
+function createAppSessionCookieStore(): AppSessionCookieStore {
+  return {
+    get(name) {
+      const value = getCookie(name)
+      return value === undefined ? undefined : { name, value }
+    },
+    set(
+      nameOrOptions: string | AppSessionCookie,
+      value?: string,
+      options?: Partial<AppSessionCookie>,
+    ) {
+      const cookie =
+        typeof nameOrOptions === 'string'
+          ? { ...options, name: nameOrOptions, value: value ?? '' }
+          : nameOrOptions
+
+      setCookie(cookie.name, cookie.value, {
+        domain: cookie.domain,
+        expires:
+          typeof cookie.expires === 'number'
+            ? new Date(cookie.expires)
+            : cookie.expires,
+        httpOnly: cookie.httpOnly,
+        maxAge: cookie.maxAge,
+        path: cookie.path,
+        sameSite: cookie.sameSite,
+        secure: cookie.secure,
+        priority: cookie.priority,
+      })
+    },
+  }
+}
+
+export async function getAppSession(): Promise<AppSession> {
+  const session = await getIronSession<AppSessionData>(
+    createAppSessionCookieStore(),
+    getAppSessionOptions(),
+  )
+
+  const data: AppSessionData = {
+    sessionToken: session.sessionToken || undefined,
+  }
+
+  // Keep the sealed payload to the single field we trust, even if an older
+  // cookie somehow contains additional keys.
+  for (const key of Object.keys(session)) {
+    if (key !== 'sessionToken') {
+      delete (session as Record<string, unknown>)[key]
+    }
+  }
+
+  return {
+    data,
+    async update(next) {
+      session.sessionToken = next.sessionToken
+      data.sessionToken = next.sessionToken
+      await session.save()
+      deleteCookie(legacyAppSessionCookieName, { path: '/' })
+    },
+    clear() {
+      session.destroy()
+      delete data.sessionToken
+      deleteCookie(legacyAppSessionCookieName, { path: '/' })
+      return Promise.resolve()
+    },
+  }
+}
+
+/**
+ * Kept for existing call sites. The old Start session helper exposed this
+ * name, but it is a server session accessor rather than a React hook.
+ */
+export const useAppSession = getAppSession

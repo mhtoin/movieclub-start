@@ -19,7 +19,7 @@ const slideSchema = z.object({
 
 export const dismissAnnouncementFn = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(
+  .validator(
     z.object({
       announcementId: z.string(),
     }),
@@ -49,7 +49,7 @@ const announcementSchema = z.object({
 
 export const createAnnouncementFn = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator(announcementSchema)
+  .validator(announcementSchema)
   .handler(async ({ data }) => {
     return createAnnouncement({
       ...data,
@@ -60,7 +60,7 @@ export const createAnnouncementFn = createServerFn({ method: 'POST' })
 
 export const updateAnnouncementFn = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator(
+  .validator(
     z.object({
       id: z.string(),
       title: z.string().min(1).optional(),
@@ -81,7 +81,7 @@ export const updateAnnouncementFn = createServerFn({ method: 'POST' })
 
 export const deleteAnnouncementFn = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator(z.object({ id: z.string() }))
+  .validator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     await deleteAnnouncement(data.id)
     return { success: true }

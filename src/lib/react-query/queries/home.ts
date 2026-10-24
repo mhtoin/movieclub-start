@@ -108,7 +108,7 @@ export interface RecommendationSeed {
  */
 export const getRecommendationSeeds = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((userId: string) => userId)
+  .validator((userId: string) => userId)
   .handler(
     async ({ context, data: userId }): Promise<Array<RecommendationSeed>> => {
       if (!context.user || context.user.userId !== userId)
@@ -224,7 +224,7 @@ async function isAvailableInTargetProviders(movieId: number): Promise<boolean> {
  */
 export const getRecommendationsForSeed = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator(
+  .validator(
     (input: {
       seedTmdbId: number
       seedTitle: string

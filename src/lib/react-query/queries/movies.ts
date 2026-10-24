@@ -81,7 +81,7 @@ const watchedByMonthSchema = z.object({
 
 export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((data: z.infer<typeof watchedByMonthSchema>) => data)
+  .validator((data: z.infer<typeof watchedByMonthSchema>) => data)
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
 

@@ -102,7 +102,7 @@ export const startRaffle = createServerFn({ method: 'POST' })
 
 export const finalizeRaffle = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(
+  .validator(
     (data: { movieId: string; watchDate: string; userId: string }) => data,
   )
   .handler(async ({ context, data }) => {

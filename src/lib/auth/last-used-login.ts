@@ -49,7 +49,7 @@ export const getLastUsedLoginMethod = createServerFn().handler(() => {
 })
 
 export const setLastUsedLoginMethod = createServerFn({ method: 'POST' })
-  .inputValidator(loginMethodSchema)
+  .validator(loginMethodSchema)
   .handler(({ data }) => {
     setCookie(
       LAST_USED_LOGIN_COOKIE,

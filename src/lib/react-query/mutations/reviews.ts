@@ -27,7 +27,7 @@ export type ReviewInput = z.infer<typeof reviewInputSchema>
 
 export const createReview = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(reviewInputSchema)
+  .validator(reviewInputSchema)
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
 
@@ -47,7 +47,7 @@ export const createReview = createServerFn({ method: 'POST' })
 
 export const updateReview = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(updateReviewInputSchema)
+  .validator(updateReviewInputSchema)
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
 
@@ -72,7 +72,7 @@ export const updateReview = createServerFn({ method: 'POST' })
 
 export const deleteReview = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(deleteReviewInputSchema)
+  .validator(deleteReviewInputSchema)
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
 

@@ -37,7 +37,7 @@ function getProviderIds(value: unknown): Array<string> {
 
 export const getSiteConfigSettings = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((data: Record<string, never>) => data)
+  .validator((data: Record<string, never>) => data)
   .handler(async ({ context }) => {
     if (!context.user) throw new Error('Unauthorized')
 

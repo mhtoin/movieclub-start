@@ -223,7 +223,7 @@ async function handleAutoReviews(
 
 export const updateTierMoviePosition = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(updateTierMoviePositionSchema)
+  .validator(updateTierMoviePositionSchema)
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
     const currentUser = context.user
@@ -259,7 +259,7 @@ export const updateTierMoviePosition = createServerFn({ method: 'POST' })
 
 export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(batchUpdateTierMoviePositionsSchema)
+  .validator(batchUpdateTierMoviePositionsSchema)
   .handler(async ({ context, data }) => {
     if (data.length === 0) return { txid: 0, autoReviews: [] }
 
@@ -327,7 +327,7 @@ export const batchUpdateTierMoviePositions = createServerFn({ method: 'POST' })
 
 export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(batchInsertMoviesOnTiersSchema)
+  .validator(batchInsertMoviesOnTiersSchema)
   .handler(async ({ context, data }) => {
     if (data.length === 0) return { txid: 0, autoReviews: [] }
 
@@ -369,7 +369,7 @@ export const batchInsertMoviesOnTiers = createServerFn({ method: 'POST' })
 
 export const getSingleTierlist = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((id: string) => id)
+  .validator((id: string) => id)
   .handler(async ({ context, data: tierlistId }) => {
     if (!context.user) throw new Error('Unauthorized')
 
@@ -517,7 +517,7 @@ export const getTierlistIndex = createServerFn({ method: 'POST' })
 
 export const getUserTierlists = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((userId: string) => userId)
+  .validator((userId: string) => userId)
   .handler(async ({ context, data: userId }) => {
     if (!context.user) throw new Error('Unauthorized')
 
@@ -546,7 +546,7 @@ export const getUserTierlists = createServerFn({ method: 'GET' })
 
 export const getUserTierlistsSummary = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((userId: string) => userId)
+  .validator((userId: string) => userId)
   .handler(async ({ context, data: userId }) => {
     if (!context.user) throw new Error('Unauthorized')
 

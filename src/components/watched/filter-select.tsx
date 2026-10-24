@@ -17,7 +17,10 @@ export default function FilterSelect({
   const { user } = routeApi.useSearch()
 
   return (
-    <SelectRoot onValueChange={onChange} value={user || null}>
+    <SelectRoot
+      onValueChange={(value) => onChange(value ?? '')}
+      value={user || null}
+    >
       <SelectTrigger
         placeholder="User"
         className={'w-fit whitespace-nowrap min-w-46'}

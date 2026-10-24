@@ -15,7 +15,7 @@ import { adminMiddleware } from '@/middleware/admin'
 
 export const getAdminShortlists = createServerFn({ method: 'GET' })
   .middleware([adminMiddleware])
-  .inputValidator((data: Record<string, never>) => data)
+  .validator((data: Record<string, never>) => data)
   .handler(async (): Promise<Array<ShortlistWithUserMovies>> => {
     const rows = await db
       .select()
@@ -60,7 +60,7 @@ export const getAdminShortlists = createServerFn({ method: 'GET' })
 
 export const getAdminSiteConfig = createServerFn({ method: 'GET' })
   .middleware([adminMiddleware])
-  .inputValidator((data: Record<string, never>) => data)
+  .validator((data: Record<string, never>) => data)
   .handler(async () => {
     const row = await db.select().from(siteConfig).limit(1)
     return (

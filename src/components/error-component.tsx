@@ -11,12 +11,19 @@ const DB_ERROR_PATTERNS = [
 
 const RATE_LIMIT_MESSAGES = ['Too many attempts', 'rate limit', '429']
 
-function classifyError(error: Error | undefined): {
+function classifyError(error: unknown): {
   type: 'database' | 'rate-limit' | 'not-found' | 'unauthorized' | 'generic'
   userMessage: string
   detail: string
 } {
-  const msg = error?.message ?? ''
+  const msg =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'object' && error !== null && 'message' in error
+        ? String(error.message)
+        : typeof error === 'string'
+          ? error
+          : ''
 
   if (DB_ERROR_PATTERNS.some((p) => msg.includes(p))) {
     return {
@@ -68,6 +75,7 @@ function classifyError(error: Error | undefined): {
 
 export function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const { type, userMessage, detail } = classifyError(error)
+  const stack = error instanceof Error ? error.stack : undefined
 
   return (
     <div
@@ -111,13 +119,13 @@ export function ErrorComponent({ error, reset }: ErrorComponentProps) {
             </div>
           )}
 
-          {process.env.NODE_ENV === 'development' && error.stack && (
+          {process.env.NODE_ENV === 'development' && stack && (
             <details className="text-xs">
               <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
                 Error details
               </summary>
               <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-words rounded-md bg-muted p-2 text-xs">
-                {error.stack}
+                {stack}
               </pre>
             </details>
           )}

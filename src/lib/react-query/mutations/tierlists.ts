@@ -20,7 +20,7 @@ const createTierlistSchema = z.object({
 
 export const createTierlist = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(createTierlistSchema)
+  .validator(createTierlistSchema)
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
     const currentUser = context.user
@@ -52,7 +52,7 @@ export const createTierlist = createServerFn({ method: 'POST' })
 
 export const deleteTierlist = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(z.object({ id: z.string() }))
+  .validator(z.object({ id: z.string() }))
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
     const currentUser = context.user
@@ -74,7 +74,7 @@ export const deleteTierlist = createServerFn({ method: 'POST' })
 
 export const updateTierlist = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(
+  .validator(
     z.object({
       id: z.string(),
       title: z.string().min(1).optional(),

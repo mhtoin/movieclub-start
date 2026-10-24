@@ -206,7 +206,7 @@ async function getWatchedMoviesForDashboard(
 
 export const getDashboardStats = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator((data: { userId: string }) => data)
+  .validator((data: { userId: string }) => data)
   .handler(async ({ context, data }): Promise<DashboardStats> => {
     if (!context.user || context.user.userId !== data.userId)
       throw new Error('Forbidden')
@@ -286,7 +286,7 @@ export const getDashboardStats = createServerFn({ method: 'GET' })
 
 export const getDashboardInsights = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: { userId?: string }) => data)
+  .validator((data: { userId?: string }) => data)
   .handler(async ({ context, data }): Promise<DashboardInsights> => {
     if (data.userId) {
       if (!context.user || context.user.userId !== data.userId)
@@ -658,7 +658,7 @@ export const getNextMovieToWatch = createServerFn({ method: 'GET' })
 
 export const getMoviesByUser = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(
+  .validator(
     (data: {
       scope: 'everyone' | 'mine'
       userId?: string

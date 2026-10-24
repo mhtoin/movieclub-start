@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { fallback, zodValidator } from '@tanstack/zod-adapter'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Loader2, SlidersHorizontal, X } from 'lucide-react'
 import { Suspense, useEffect, useState } from 'react'
@@ -36,20 +35,20 @@ import {
 } from '@/lib/react-query/queries/site-config'
 
 const discoverSearchSchema = z.object({
-  search: fallback(z.string(), '').default(''),
-  genres: fallback(z.string(), '').default(''),
-  providers: fallback(z.string(), '').default(DEFAULT_PROVIDER_FILTER),
-  originalLanguage: fallback(z.string(), '').default(''),
-  minRating: fallback(z.number(), 0).default(0),
-  maxRating: fallback(z.number(), 10).default(10),
-  sortBy: fallback(z.string(), 'popularity.desc').default('popularity.desc'),
-  people: fallback(z.string(), '').default(''),
-  keywords: fallback(z.string(), '').default(''),
-  companies: fallback(z.string(), '').default(''),
+  search: z.string().default('').catch(''),
+  genres: z.string().default('').catch(''),
+  providers: z.string().default(DEFAULT_PROVIDER_FILTER).catch(''),
+  originalLanguage: z.string().default('').catch(''),
+  minRating: z.number().default(0).catch(0),
+  maxRating: z.number().default(10).catch(10),
+  sortBy: z.string().default('popularity.desc').catch('popularity.desc'),
+  people: z.string().default('').catch(''),
+  keywords: z.string().default('').catch(''),
+  companies: z.string().default('').catch(''),
 })
 
 export const Route = createFileRoute('/_authenticated/discover')({
-  validateSearch: zodValidator(discoverSearchSchema),
+  validateSearch: discoverSearchSchema,
   loaderDeps: ({ search }) => search,
   loader: async ({ context, deps }) => {
     const configuredProviderIds = await context.queryClient.ensureQueryData(

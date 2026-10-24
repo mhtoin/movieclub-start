@@ -1,9 +1,9 @@
 import tailwindcss from '@tailwindcss/vite'
+import babel from '@rolldown/plugin-babel'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-import viteReact from '@vitejs/plugin-react'
+import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
 import { defineConfig } from 'vite'
-import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 const BUILD_TIMESTAMP = Date.now()
 
@@ -11,8 +11,11 @@ const config = defineConfig({
   define: {
     __BUILD_TIMESTAMP__: JSON.stringify(BUILD_TIMESTAMP),
   },
+  resolve: {
+    tsconfigPaths: true,
+  },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         assetFileNames: (assetInfo) => {
           const name = assetInfo.names[0] ?? ''
@@ -21,35 +24,34 @@ const config = defineConfig({
           }
           return 'assets/[name]-[hash][extname]'
         },
-        manualChunks(id) {
-          // React core must be its own chunk so Rollup uses it (not framer-motion)
-          // as the shared JSX runtime for all other chunks.
-          if (
-            id.includes('/node_modules/react/') ||
-            id.includes('/node_modules/react-dom/') ||
-            id.includes('/node_modules/react-is/') ||
-            id.includes('/node_modules/scheduler/')
-          ) {
-            return 'vendor-react'
-          }
-          if (id.includes('recharts') || id.includes('d3-')) {
-            return 'vendor-recharts'
-          }
-          if (id.includes('framer-motion')) {
-            return 'vendor-framer-motion'
-          }
-          if (id.includes('@dnd-kit')) {
-            return 'vendor-dnd-kit'
-          }
+        codeSplitting: {
+          groups: [
+            {
+              name: 'vendor-react',
+              test: /node_modules[\\/](react|react-dom|react-is|scheduler)[\\/]/,
+              priority: 20,
+            },
+            {
+              name: 'vendor-recharts',
+              test: /recharts|d3-/,
+              priority: 10,
+            },
+            {
+              name: 'vendor-framer-motion',
+              test: /framer-motion/,
+              priority: 10,
+            },
+            {
+              name: 'vendor-dnd-kit',
+              test: /@dnd-kit/,
+              priority: 10,
+            },
+          ],
         },
       },
     },
   },
   plugins: [
-    // this is the plugin that enables path aliases
-    viteTsConfigPaths({
-      projects: ['./tsconfig.json'],
-    }),
     tailwindcss(),
     tanstackStart(),
     nitro({
@@ -63,17 +65,18 @@ const config = defineConfig({
           headers: { 'Cache-Control': 'no-store, no-cache' },
         },
       },
-      externals: {
+      noExternals: [
         // Bundle recharts' transitive deps instead of externalizing them.
         // These are needed at runtime but aren't in the output node_modules.
-        inline: ['decimal.js-light', 'recharts-scale', 'react-smooth'],
-      },
+        'decimal.js-light',
+        'recharts-scale',
+        'react-smooth',
+      ],
     }),
-    viteReact({
-      babel: {
-        plugins: ['babel-plugin-react-compiler'],
-      },
-    }),
+    viteReact(),
+    // Keep React Compiler as a Babel transform; plugin-react 6 no longer
+    // accepts inline Babel configuration.
+    babel({ presets: [reactCompilerPreset()] }),
   ],
   ssr: {
     // Bundle recharts' transitive dependencies that would otherwise be

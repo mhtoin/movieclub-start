@@ -83,7 +83,7 @@ function clearRateLimit(key: string) {
 }
 
 export const requestPasswordResetFn = createServerFn({ method: 'POST' })
-  .inputValidator(requestPasswordResetSchema)
+  .validator(requestPasswordResetSchema)
   .handler(async ({ data }) => {
     const email = normalizeEmail(data.email)
     enforceRateLimit(`password-reset:${email}`, {
@@ -122,7 +122,7 @@ export const requestPasswordResetFn = createServerFn({ method: 'POST' })
   })
 
 export const resetPasswordFn = createServerFn({ method: 'POST' })
-  .inputValidator(resetPasswordSchema)
+  .validator(resetPasswordSchema)
   .handler(async ({ data }) => {
     enforceRateLimit(`reset-password:${data.token}`, {
       maxAttempts: 5,
@@ -156,7 +156,7 @@ export const resetPasswordFn = createServerFn({ method: 'POST' })
   })
 
 export const registerFn = createServerFn({ method: 'POST' })
-  .inputValidator(registerSchema)
+  .validator(registerSchema)
   .handler(async ({ data }) => {
     const email = normalizeEmail(data.email)
     enforceRateLimit(`register:${email}`, {
@@ -196,7 +196,7 @@ export const registerFn = createServerFn({ method: 'POST' })
     throw redirect({ to: '/home' })
   })
 export const loginFn = createServerFn({ method: 'POST' })
-  .inputValidator(loginSchema)
+  .validator(loginSchema)
   .handler(async ({ data }) => {
     const email = normalizeEmail(data.email)
     enforceRateLimit(`login:${email}`, {

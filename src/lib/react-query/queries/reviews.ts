@@ -11,7 +11,7 @@ const THIRTY_MINUTES = 1000 * 60 * 30
 
 export const getMovieById = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator(z.object({ movieId: z.string() }))
+  .validator(z.object({ movieId: z.string() }))
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
 
@@ -38,7 +38,7 @@ export const getMovieById = createServerFn({ method: 'GET' })
 
 export const getMovieReviews = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .inputValidator(z.object({ movieId: z.string() }))
+  .validator(z.object({ movieId: z.string() }))
   .handler(async ({ context, data }) => {
     if (!context.user) throw new Error('Unauthorized')
 

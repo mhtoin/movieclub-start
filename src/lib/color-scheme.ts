@@ -82,7 +82,7 @@ export const getThemeAndSchemeServerFn = createServerFn().handler(() => {
 
 export const setSchemeServerFn = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(schemeValidator)
+  .validator(schemeValidator)
   .handler(async ({ context, data }) => {
     setCookie('color-scheme', data, preferenceCookieOptions)
 

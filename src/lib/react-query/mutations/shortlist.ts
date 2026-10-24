@@ -18,7 +18,7 @@ import { authMiddleware } from '@/middleware/auth'
 
 export const removeFromShortlist = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: { movieId: string }) => data)
+  .validator((data: { movieId: string }) => data)
   .handler(async ({ context, data }) => {
     const { movieId } = data
     const currentUser = context.user
@@ -69,7 +69,7 @@ export const removeFromShortlist = createServerFn({ method: 'POST' })
 
 export const addToShortlist = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: { movieId: number }) => data)
+  .validator((data: { movieId: number }) => data)
   .handler(async ({ context, data }) => {
     const { movieId } = data
     const currentUser = context.user
@@ -251,7 +251,7 @@ export const useAddToShortlistMutation = () => {
 
 export const toggleIsReady = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: { isReady: boolean }) => data)
+  .validator((data: { isReady: boolean }) => data)
   .handler(async ({ context, data }) => {
     const { isReady } = data
     const currentUser = context.user
@@ -299,7 +299,7 @@ export const toggleIsReady = createServerFn({ method: 'POST' })
 
 export const toggleParticipating = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: { participating: boolean }) => data)
+  .validator((data: { participating: boolean }) => data)
   .handler(async ({ context, data }) => {
     const { participating } = data
     const currentUser = context.user
@@ -511,7 +511,7 @@ export const useToggleParticipatingMutation = () => {
 
 export const updateUserShortlistStatus = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(
+  .validator(
     (data: { userId: string; isReady?: boolean; participating?: boolean }) =>
       data,
   )
@@ -673,7 +673,7 @@ export const useUpdateUserShortlistStatusMutation = () => {
 
 export const updateSelectedIndex = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: { selectedIndex: number | null }) => data)
+  .validator((data: { selectedIndex: number | null }) => data)
   .handler(async ({ context, data }) => {
     const { selectedIndex } = data
     const currentUser = context.user
@@ -813,9 +813,7 @@ export const useUpdateSelectedIndexMutation = () => {
 
 export const updateUserSelectedIndex = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator(
-    (data: { userId: string; selectedIndex: number | null }) => data,
-  )
+  .validator((data: { userId: string; selectedIndex: number | null }) => data)
   .handler(async ({ context, data }) => {
     const { userId, selectedIndex } = data
 
@@ -941,7 +939,7 @@ export const useUpdateUserSelectedIndexMutation = () => {
 
 export const setAllParticipatingReady = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .inputValidator((data: Record<string, never>) => data)
+  .validator((data: Record<string, never>) => data)
   .handler(async ({ context }) => {
     const sessionUser = context.user
     if (!sessionUser) {

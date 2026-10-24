@@ -4,7 +4,6 @@ import {
   retainSearchParams,
   stripSearchParams,
 } from '@tanstack/react-router'
-import { fallback, zodValidator } from '@tanstack/zod-adapter'
 import { format } from 'date-fns'
 import { Filter, Search, X } from 'lucide-react'
 import { Suspense, useState } from 'react'
@@ -39,14 +38,14 @@ const defaultValues = {
 }
 
 const watchedSearchSchema = z.object({
-  search: fallback(z.string(), '').default(defaultValues.search),
-  user: fallback(z.string(), '').default(defaultValues.user),
-  genre: fallback(z.string(), '').default(defaultValues.genre),
-  month: fallback(z.string(), '').default(defaultValues.month),
+  search: z.string().default(defaultValues.search).catch(defaultValues.search),
+  user: z.string().default(defaultValues.user).catch(defaultValues.user),
+  genre: z.string().default(defaultValues.genre).catch(defaultValues.genre),
+  month: z.string().default(defaultValues.month).catch(defaultValues.month),
 })
 
 export const Route = createFileRoute('/_authenticated/watched/')({
-  validateSearch: zodValidator(watchedSearchSchema),
+  validateSearch: watchedSearchSchema,
   search: {
     middlewares: [
       stripSearchParams(defaultValues),

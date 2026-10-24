@@ -35,7 +35,7 @@ const siteConfigSchema = z.object({
 
 export const updateSiteConfig = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator((data) => siteConfigSchema.parse(data))
+  .validator((data) => siteConfigSchema.parse(data))
   .handler(async ({ data }) => {
     const existing = await db
       .select({ id: siteConfig.id })
@@ -96,7 +96,7 @@ const adminShortlistMovieSchema = z.object({
 
 export const addMovieToUserShortlist = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator((data) => adminShortlistMovieSchema.parse(data))
+  .validator((data) => adminShortlistMovieSchema.parse(data))
   .handler(async ({ data }) => {
     const targetShortlist = await db
       .select()
@@ -161,7 +161,7 @@ export const addMovieToUserShortlist = createServerFn({ method: 'POST' })
 
 export const removeMovieFromUserShortlist = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator((data) =>
+  .validator((data) =>
     z
       .object({ userId: z.string().min(1), movieId: z.string().min(1) })
       .parse(data),
@@ -252,7 +252,7 @@ const addWatchedMovieSchema = z
 
 export const addWatchedMovie = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator((data) => addWatchedMovieSchema.parse(data))
+  .validator((data) => addWatchedMovieSchema.parse(data))
   .handler(async ({ data }) => {
     const watchDate = new Date(data.watchDate)
     if (Number.isNaN(watchDate.getTime())) {

@@ -248,7 +248,6 @@ export function ShortlistSearch({
             <div className="pt-2">
               <Link
                 to="/discover"
-                search={{ adding: true }}
                 className="block w-full py-2 text-center text-xs text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent/50"
               >
                 Browse all movies →
