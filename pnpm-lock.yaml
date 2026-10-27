@@ -93,8 +93,8 @@ importers:
         specifier: ^17.2.3
         version: 17.2.3
       drizzle-orm:
-        specifier: ^0.44.6
-        version: 0.44.6(@neondatabase/serverless@1.0.2)(@types/pg@8.15.5)(postgres@3.4.7)
+        specifier: ^0.45.2
+        version: 0.45.2(@neondatabase/serverless@1.0.2)(@types/pg@8.15.5)(postgres@3.4.7)
       embla-carousel:
         specifier: ^8.6.0
         version: 8.6.0
@@ -2426,8 +2426,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  acorn@8.16.0:
-    resolution: {integrity: sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==}
+  acorn@8.19.0:
+    resolution: {integrity: sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -2725,8 +2725,8 @@ packages:
     resolution: {integrity: sha512-+CHgPFzuoTQTt7cOYCV6MOw2w8vqEn/ap1yv4bpZOWL03u7rlVRQhUY0WYT3rHsgVTXwYQDZaSUJSQrMBUKuWg==}
     hasBin: true
 
-  drizzle-orm@0.44.6:
-    resolution: {integrity: sha512-uy6uarrrEOc9K1u5/uhBFJbdF5VJ5xQ/Yzbecw3eAYOunv5FDeYkR2m8iitocdHBOHbvorviKOW5GVw0U1j4LQ==}
+  drizzle-orm@0.45.2:
+    resolution: {integrity: sha512-kY0BSaTNYWnoDMVoyY8uxmyHjpJW1geOmBMdSSicKo9CIIWkSxMIj2rkeSR51b8KAPB7m+qysjuHme5nKP+E5Q==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -6364,7 +6364,7 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  acorn@8.16.0:
+  acorn@8.19.0:
     optional: true
 
   agent-base@7.1.4: {}
@@ -6622,7 +6622,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@types/pg@8.15.5)(postgres@3.4.7):
+  drizzle-orm@0.45.2(@neondatabase/serverless@1.0.2)(@types/pg@8.15.5)(postgres@3.4.7):
     optionalDependencies:
       '@neondatabase/serverless': 1.0.2
       '@types/pg': 8.15.5
@@ -7853,7 +7853,7 @@ snapshots:
   terser@5.46.0:
     dependencies:
       '@jridgewell/source-map': 0.3.11
-      acorn: 8.16.0
+      acorn: 8.19.0
       commander: 2.20.3
       source-map-support: 0.5.21
     optional: true
