@@ -9,8 +9,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Builder stage
-FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+FROM deps AS builder
 COPY . .
 # Bake Vite public env vars into the client bundle at build time
 ARG VITE_TMDB_API_KEY
