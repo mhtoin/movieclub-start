@@ -40,6 +40,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, macOS, ARM64, movieclub-production]
     environment: production
+    env:
+      DOCKER_CONTEXT: colima
 
     steps:
       - name: Checkout

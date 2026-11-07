@@ -326,24 +326,30 @@ You can learn more about all of the offerings from TanStack in the [TanStack doc
 
 # Deployment (M1 Mac Mini)
 
-The production stack runs in Docker on an Apple Silicon Mac mini:
+The production stack runs in Colima on an Apple Silicon Mac mini:
 
 ```text
 Nginx Proxy Manager on Proxmox -> Mac mini:3001 -> MovieClub app -> PostgreSQL
 ```
 
-The production Compose file uses ARM64-compatible `node:24-alpine` and `postgres:16-alpine` images. Both containers use `restart: unless-stopped`, so Docker restarts them after crashes or reboots. The Mac launch agent starts the Compose stack after login.
+The production Compose file uses ARM64-compatible `node:24-alpine` and `postgres:17-alpine` images. Both containers use `restart: unless-stopped`. The Mac launch agent starts Colima, waits for its Docker daemon, then starts the Compose stack after login. Docker Desktop may remain installed, but production uses the separate `colima` context.
 
 ## First-time Mac setup
 
-Install Docker Desktop and start it:
+Install Colima and the Docker CLI/Compose plugin:
 
 ```bash
-brew install --cask docker
-open -a Docker
+brew install colima docker docker-compose
 ```
 
-In Docker Desktop, enable **Start Docker Desktop when you sign in**. Give Docker at least 4 GB of memory; 6 GB is reasonable if the AI workload is light.
+Start the Colima Docker VM (the production profile uses 4 CPUs and 6 GiB RAM):
+
+```bash
+colima start --cpu 4 --memory 6 --disk 100 --activate=false
+DOCKER_CONTEXT=colima docker info
+```
+
+Colima runs headlessly and does not require Docker Desktop's GUI or license prompt. Keep the production commands on `DOCKER_CONTEXT=colima`; its VM and Docker volumes are separate from Docker Desktop's.
 
 Clone the repository and create a private production environment file outside the repository:
 
@@ -371,6 +377,11 @@ VITE_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
 VITE_SHORTLIST_CARD_VARIANT=default
 ```
 
+To enable Discord login, set `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET` in
+the production environment file. In the Discord Developer Portal, add
+`https://movieclub.example.com/login/discord/callback` as an OAuth2 redirect URL
+(replace the host with the value of `BASE_URL`).
+
 Generate a session secret with:
 
 ```bash
@@ -381,7 +392,7 @@ Start and migrate the stack manually for the first time:
 
 ```bash
 cd ~/src/movieclub-start
-MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" bash scripts/deploy.sh --skip-pull
+DOCKER_CONTEXT=colima MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" bash scripts/deploy.sh --skip-pull
 ```
 
 Check it locally:
@@ -404,12 +415,12 @@ Check its status and logs:
 ```bash
 launchctl print "gui/$(id -u)/com.movieclub.production"
 tail -f ~/Library/Logs/movieclub/stderr.log
-docker compose --env-file ~/.config/movieclub/.env.production -f docker-compose.prod.yml ps
+DOCKER_CONTEXT=colima docker compose --env-file ~/.config/movieclub/.env.production -f docker-compose.prod.yml ps
 ```
 
-The launch agent starts the containers once Docker Desktop is ready. Docker's `unless-stopped` policy then handles container crashes and Docker restarts.
+The launch agent starts Colima when needed, waits up to five minutes for its Docker daemon, then starts the containers. Docker's `unless-stopped` policy handles container crashes and Colima restarts.
 
-`LaunchAgents` run after the Mac user logs in. For a fully unattended setup after power loss, enable automatic login for the dedicated Mac account, or replace this with a root `LaunchDaemon` after confirming Docker Desktop is available before the daemon starts.
+`LaunchAgents` run after the Mac user logs in. For a fully unattended setup after power loss, enable automatic login for the dedicated Mac account.
 
 ## Nginx Proxy Manager
 
@@ -431,7 +442,7 @@ The Docker volume is not a backup. Create a compressed dump outside the reposito
 
 ```bash
 cd ~/src/movieclub-start
-MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" \
+DOCKER_CONTEXT=colima MOVIECLUB_ENV_FILE="$HOME/.config/movieclub/.env.production" \
   bash scripts/backup-postgres.sh "$HOME/movieclub-backups"
 ```
 
@@ -454,7 +465,7 @@ Install a GitHub Actions self-hosted runner on the Mac:
 ./svc.sh start
 ```
 
-The runner must be able to access Docker Desktop without `sudo`. Store the production environment file at:
+The runner must be able to access Colima without `sudo`. Store the production environment file at:
 
 ```text
 ~/.config/movieclub/.env.production

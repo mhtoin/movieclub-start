@@ -30,6 +30,8 @@ cat > "$PLIST" <<EOF
   <dict>
     <key>MOVIECLUB_ENV_FILE</key>
     <string>$HOME/.config/movieclub/.env.production</string>
+    <key>DOCKER_CONTEXT</key>
+    <string>colima</string>
   </dict>
   <key>RunAtLoad</key>
   <true/>

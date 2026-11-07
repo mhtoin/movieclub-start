@@ -6,24 +6,39 @@ if (!baseUrl) {
   throw new Error('BASE_URL environment variable is not set')
 }
 
-export const discord = new Discord(
-  process.env.DISCORD_CLIENT_ID!,
-  process.env.DISCORD_CLIENT_SECRET!,
-  `${baseUrl}/login/discord/callback`,
-)
+function getDiscordClient() {
+  const clientId = process.env.DISCORD_CLIENT_ID
+  const clientSecret = process.env.DISCORD_CLIENT_SECRET
+
+  if (!clientId || !clientSecret) {
+    throw new Error(
+      'Discord OAuth is not configured. Set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET.',
+    )
+  }
+
+  return new Discord(
+    clientId,
+    clientSecret,
+    `${baseUrl}/login/discord/callback`,
+  )
+}
 
 export const DISCORD_SCOPES = ['identify', 'email']
 
 export function createDiscordAuthorizationURL() {
   const state = generateState()
-  const url = discord.createAuthorizationURL(state, null, DISCORD_SCOPES)
+  const url = getDiscordClient().createAuthorizationURL(
+    state,
+    null,
+    DISCORD_SCOPES,
+  )
   return { state, url }
 }
 
 export async function validateDiscordAuthorizationCode(
   code: string,
 ): Promise<OAuth2Tokens> {
-  return discord.validateAuthorizationCode(code, null)
+  return getDiscordClient().validateAuthorizationCode(code, null)
 }
 
 export interface DiscordUser {
