@@ -1,5 +1,28 @@
-import { createStart } from '@tanstack/react-start'
+import { createMiddleware, createStart } from '@tanstack/react-start'
 import { authMiddleware } from '@/middleware/auth'
+import {
+  isThrownResponse,
+  logUnexpectedRequestError,
+} from '@/lib/server/logger'
+
+/**
+ * Emits a structured diagnostic to stderr when request handling throws an
+ * unexpected error, then rethrows so TanStack Start's normal error handling is
+ * unchanged. Thrown `Response` values (redirects and other control flow) are
+ * skipped deliberately.
+ */
+const requestErrorLoggingMiddleware = createMiddleware({
+  type: 'request',
+}).server(async ({ request, pathname, next }) => {
+  try {
+    return await next()
+  } catch (error) {
+    if (!isThrownResponse(error)) {
+      logUnexpectedRequestError({ request, pathname, error })
+    }
+    throw error
+  }
+})
 
 /**
  * TanStack Start application entry-point configuration.
@@ -10,5 +33,6 @@ import { authMiddleware } from '@/middleware/auth'
  * many server functions are called during that cycle (SSR prefetches, etc.).
  */
 export const startInstance = createStart(() => ({
+  requestMiddleware: [requestErrorLoggingMiddleware],
   functionMiddleware: [authMiddleware],
 }))

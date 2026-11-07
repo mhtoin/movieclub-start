@@ -34,5 +34,22 @@ services:
       VITE_TMDB_BASE_URL: ${VITE_TMDB_BASE_URL:-https://api.themoviedb.org/3}
       VITE_TMDB_IMAGE_BASE_URL: ${VITE_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
       VITE_SHORTLIST_CARD_VARIANT: ${VITE_SHORTLIST_CARD_VARIANT}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3001/api/health').then((res) => process.exit(res.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
     ports:
       - '3001:3001'

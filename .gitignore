@@ -15,4 +15,5 @@ src/routeTree.gen.ts
 drizzle/meta/*_snapshot.json
 data/*
 *.md
+!docs/monitoring.md
 */package-lock.json
