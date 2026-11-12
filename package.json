@@ -43,11 +43,11 @@
     "@tanstack/react-router-devtools": "^1.167.2",
     "@tanstack/react-router-ssr-query": "^1.167.3",
     "@tanstack/react-start": "^1.169.3",
-    "@tiptap/extension-link": "^3.23.4",
-    "@tiptap/extension-underline": "^3.23.4",
-    "@tiptap/pm": "^3.23.4",
-    "@tiptap/react": "^3.23.4",
-    "@tiptap/starter-kit": "^3.23.4",
+    "@tiptap/extension-link": "^3.33.1",
+    "@tiptap/extension-underline": "^3.33.1",
+    "@tiptap/pm": "^3.33.1",
+    "@tiptap/react": "^3.33.1",
+    "@tiptap/starter-kit": "^3.33.1",
     "@unpic/react": "^1.0.2",
     "arctic": "^3.7.0",
     "bcryptjs": "^3.0.2",
@@ -56,7 +56,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.44.6",
+    "drizzle-orm": "^0.45.4",
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "embla-carousel-wheel-gestures": "^8.1.0",
@@ -69,16 +69,16 @@
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.0.0",
     "recharts": "^3.7.0",
-    "resend": "^6.9.2",
-    "tailwindcss": "^4.0.6",
+    "resend": "^6.38.0",
+    "tailwindcss": "^4.3.5",
     "tailwindcss-fade": "^0.1.2",
     "vaul": "^1.1.2",
-    "zod": "^4.1.12"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@rolldown/plugin-babel": "^0.2.4",
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.5",
     "@tanstack/eslint-config": "^0.3.0",
     "@tanstack/router-generator": "1.167.45",
     "@testing-library/dom": "^10.4.0",
@@ -89,7 +89,7 @@
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^6.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
-    "baseline-browser-mapping": "^2.9.14",
+    "baseline-browser-mapping": "^2.11.35",
     "csv-parse": "^7.0.2",
     "csv-stringify": "^6.6.0",
     "drizzle-kit": "^0.31.5",
@@ -121,7 +121,19 @@
       "@tailwindcss/oxide",
       "esbuild",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "@esbuild-kit/core-utils>esbuild": ">=0.25.0 <0.26",
+      "@humanfs/node": ">=0.16.8 <0.17",
+      "@tanstack/eslint-config>eslint-plugin-import-x": "^4.18.1",
+      "@tanstack/eslint-config>typescript-eslint": "8.58.2",
+      "@typescript-eslint/typescript-estree@^8.58.2>minimatch": "^11.0.1",
+      "eslint-plugin-import-x@^4.18.1>minimatch": "^11.0.1",
+      "js-yaml": ">=4.3.2 <5",
+      "postcss-selector-parser": ">=6.1.6 <7",
+      "source-map-js": ">=1.2.2 <2",
+      "ws": ">=8.21.0 <9"
+    }
   },
   "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc"
 }
