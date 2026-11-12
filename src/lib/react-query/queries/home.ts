@@ -123,7 +123,11 @@ export const getRecommendationSeeds = createServerFn({ method: 'GET' })
             tiers: {
               with: {
                 moviesOnTiers: {
-                  with: { movie: true },
+                  with: {
+                    movie: {
+                      columns: { tmdbId: true, title: true },
+                    },
+                  },
                 },
               },
               orderBy: (tiers: any, { asc }: any) => [asc(tiers.value)],

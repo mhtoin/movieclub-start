@@ -286,3 +286,140 @@ Optionally remove the state file:
 ```bash
 rm -f ~/.local/state/movieclub/komodo-health.state
 ```
+
+## Web Vitals telemetry
+
+Production builds collect document-level Core Web Vitals and store a small,
+privacy-safe sample in Postgres. Collection runs only in production builds
+(`import.meta.env.PROD`) and is skipped entirely when the browser sends Do Not
+Track or Global Privacy Control. The reporter dynamically imports
+[`web-vitals`](https://github.com/GoogleChrome/web-vitals), captures the route
+bucket once from the initial document load (SPA navigations cannot change it),
+and sends at most five samples per request with `fetch` (`keepalive`,
+`credentials: "omit"`). Every failure is ignored so telemetry cannot affect the
+page.
+
+### What is stored
+
+The `web_vital_metric` table stores only:
+
+| Column            | Meaning                                                                |
+| ----------------- | ---------------------------------------------------------------------- |
+| `id`              | Opaque row identifier, not linked to a person or metric run.           |
+| `name`            | `CLS`, `FCP`, `INP`, `LCP`, or `TTFB`.                                 |
+| `value`           | Metric value in milliseconds, or unitless for `CLS`.                   |
+| `rating`          | Server-derived `good`, `needs-improvement`, or `poor`.                 |
+| `route_key`       | Allowlisted coarse route bucket (`landing`, `home`, `discover`, etc.). |
+| `navigation_type` | Navigation Timing value (`navigate`, `reload`, and so on).             |
+| `bucket_start`    | Server-derived start of the UTC hour when the sample arrived.          |
+
+The following are never collected or stored: full pathname, query string,
+referrer, user ID, session ID, IP address, user agent, viewport, web-vitals
+metric instance `id`, metric entries, or attribution data. Dynamic route IDs are
+discarded when the pathname is reduced to a coarse bucket.
+
+### Endpoint behaviour
+
+`POST /api/web-vitals` is public but deliberately narrow:
+
+- Request `Content-Type` must be `application/json`.
+- The body is read as a stream and hard-capped at 4 KiB; a batch holds 1–5
+  samples.
+- Validation is a strict Zod allowlist with per-metric ranges and no extra
+  properties.
+- Same-origin protection compares the `Origin` host to the first
+  `X-Forwarded-Host` value (or `Host` when no proxy header exists), so it works
+  behind the configured reverse proxy without accepting either header as an
+  alternate. Requests whose `Sec-Fetch-Site` is `cross-site` (or `same-site`)
+  are rejected.
+- No CORS headers are returned.
+- A process-wide fixed-window limit allows 600 requests per minute. It is not
+  keyed by IP, user, session, or any other client identifier.
+- A second process-wide guard caps persisted observations at 10,000 per UTC day;
+  over-budget samples are silently dropped to bound storage growth.
+- Both guards are process-local and reset when the app process restarts. This is
+  appropriate for the current single-container deployment; if the app is scaled
+  to multiple instances, move the limits to shared storage or an edge proxy.
+- A successful request returns `204` with `Cache-Control: no-store`, including
+  when database persistence fails. Rejections return `400`, `403`, `413`, `415`,
+  or `429` with a JSON `{ "error": "..." }` body and no CORS headers.
+
+Telemetry is best effort. During the deploy window where the app restarts
+before migrations run, the table may not exist yet: the insert fails, the sample
+is dropped, and the error is logged at most once per process. The same applies
+to any other database insert failure. A rejected request or a dropped sample
+never affects page rendering.
+
+### Retention
+
+The POST handler opportunistically deletes rows older than 30 days, at most
+once per process per hour. Prune failures are caught and logged at most once
+per process. The `bucket_start` index keeps both the range scan and the delete
+bounded.
+
+### Migration
+
+Apply the hand-written migration with the normal command:
+
+```bash
+pnpm db:migrate
+# or
+pnpm exec drizzle-kit migrate
+```
+
+**Migration metadata caveat:** `drizzle/meta/_journal.json` previously ended at
+`0016`, while a stale, git-ignored `drizzle/meta/0018_snapshot.json` exists in
+some working copies. This change adds the next journal entry, `0017` (idx `16`),
+and the hand-written SQL file `drizzle/0017_web_vital_metric.sql`. Snapshots were
+intentionally **not** regenerated. Do not run `drizzle-kit generate` until that
+stale snapshot is removed or the metadata is reconciled; `drizzle-kit migrate`
+only needs the journal and SQL files.
+
+### Example queries
+
+LCP p75 by route for the last seven days:
+
+```sql
+SELECT
+  route_key,
+  count(*) AS samples,
+  percentile_cont(0.75) WITHIN GROUP (ORDER BY value) AS p75_lcp_ms
+FROM web_vital_metric
+WHERE name = 'LCP'
+  AND bucket_start >= now() - interval '7 days'
+GROUP BY route_key
+ORDER BY p75_lcp_ms DESC;
+```
+
+Rating distribution for every metric in the last 24 hours:
+
+```sql
+SELECT
+  name,
+  rating,
+  count(*) AS samples
+FROM web_vital_metric
+WHERE bucket_start >= now() - interval '24 hours'
+GROUP BY name, rating
+ORDER BY name, rating;
+```
+
+Slowest routes by INP p75:
+
+```sql
+SELECT
+  route_key,
+  percentile_cont(0.75) WITHIN GROUP (ORDER BY value) AS p75_inp_ms
+FROM web_vital_metric
+WHERE name = 'INP'
+  AND bucket_start >= now() - interval '7 days'
+GROUP BY route_key
+ORDER BY p75_inp_ms DESC;
+```
+
+Manual retention sweep (the app performs this hourly on its own):
+
+```sql
+DELETE FROM web_vital_metric
+WHERE bucket_start < now() - interval '30 days';
+```

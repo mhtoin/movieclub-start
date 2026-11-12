@@ -18,6 +18,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { ErrorComponent } from '@/components/error-component'
 import { ThemeProvider } from '@/components/theme-provider'
 import ToastList from '@/components/ui/toast-list'
+import { WebVitalsReporter } from '@/components/web-vitals-reporter'
 import { getThemeAndSchemeServerFn } from '@/lib/color-scheme'
 import { persister } from '@/lib/query-client'
 
@@ -104,6 +105,16 @@ export const Route = createRootRouteWithContext<{
     ],
     links: [
       { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Oswald:wght@400;500;600;700&display=swap',
+      },
       { rel: 'preconnect', href: 'https://image.tmdb.org' },
       { rel: 'preconnect', href: 'https://api.themoviedb.org' },
       { rel: 'dns-prefetch', href: 'https://image.tmdb.org' },
@@ -116,6 +127,7 @@ export const Route = createRootRouteWithContext<{
 function AppChildren({ children }: { children: React.ReactNode }) {
   return (
     <>
+      {import.meta.env.PROD && <WebVitalsReporter />}
       <Toast.Provider>
         {children}
         <Toast.Portal>

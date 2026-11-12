@@ -1,13 +1,13 @@
-import { memo, useMemo } from 'react'
+import { memo } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useReducedMotion } from 'framer-motion'
 import { ArrowRight, Calendar, Film, Ticket } from 'lucide-react'
-import type { Movie } from '@/db/schema/movies'
+import type { RecentWatchedMovie } from '@/lib/react-query/queries/movies'
 import { movieQueries } from '@/lib/react-query/queries/movies'
 
 interface HistoryStripProps {
-  movies: Array<Movie>
+  movies: Array<RecentWatchedMovie>
 }
 
 export const HistoryStrip = memo(function HistoryStrip({
@@ -52,10 +52,8 @@ export const HistoryStrip = memo(function HistoryStrip({
           />
           <div className="flex gap-5 md:gap-7 overflow-x-auto pb-6 -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8 no-scrollbar snap-x snap-mandatory">
             {movies.map((movie, index) => {
-              const posterPath =
-                (movie.images as any)?.posters?.[0]?.file_path ?? null
-              const posterUrl = posterPath
-                ? `https://image.tmdb.org/t/p/w154${posterPath}`
+              const posterUrl = movie.posterPath
+                ? `https://image.tmdb.org/t/p/w154${movie.posterPath}`
                 : null
               const watchDate = movie.watchDate
                 ? new Date(movie.watchDate).toLocaleDateString('en-US', {
@@ -158,7 +156,8 @@ export function HistoryStripSkeleton() {
 }
 
 export function HistoryStripSuspense() {
-  const { data: allWatched = [] } = useSuspenseQuery(movieQueries.allWatched())
-  const recentWatches = useMemo(() => allWatched.slice(0, 6), [allWatched])
-  return <HistoryStrip movies={recentWatches} />
+  const { data: recentWatched = [] } = useSuspenseQuery(
+    movieQueries.recentWatched(),
+  )
+  return <HistoryStrip movies={recentWatched} />
 }

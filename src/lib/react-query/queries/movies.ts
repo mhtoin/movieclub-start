@@ -1,41 +1,49 @@
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { format } from 'date-fns'
-import { and, arrayContains, desc, eq, isNotNull, like, sql } from 'drizzle-orm'
+import {
+  and,
+  arrayContains,
+  desc,
+  eq,
+  getTableColumns,
+  isNotNull,
+  like,
+  sql,
+} from 'drizzle-orm'
 import { z } from 'zod'
 import type { SQL } from 'drizzle-orm'
-import type { MovieWithCredits, MovieWithUser } from '@/db/schema/movies'
 import { db } from '@/db/db'
-import { movie, movieCredits } from '@/db/schema/movies'
+import { movie } from '@/db/schema/movies'
+import { compactMovieImages, firstMoviePosterPath } from '@/db/sql/movie-images'
 import { user } from '@/db/schema/users'
 import { groupBy } from '@/lib/utils'
 import { authMiddleware } from '@/middleware/auth'
 
 export const getLatestMovies = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
-  .handler(async ({ context }): Promise<MovieWithUser | null> => {
+  .handler(async ({ context }) => {
     if (!context.user) throw new Error('Unauthorized')
 
     try {
       const rows = await db
-        .select()
+        .select({
+          movie: {
+            ...getTableColumns(movie),
+            images: compactMovieImages(movie.images),
+          },
+          user: { name: user.name },
+        })
         .from(movie)
         .innerJoin(user, eq(user.id, movie.userId))
-        .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
         .where(isNotNull(movie.watchDate))
         .orderBy(desc(movie.watchDate))
         .limit(1)
 
       if (rows.length === 0) return null
 
-      const movieData = rows[0].movie
-
       return {
-        movie: {
-          ...movieData,
-          cast: rows[0].movie_credits?.cast ?? null,
-          crew: rows[0].movie_credits?.crew ?? null,
-        },
+        movie: rows[0].movie,
         user: rows[0].user,
       }
     } catch (error) {
@@ -111,20 +119,26 @@ export const getWatchedMoviesByMonth = createServerFn({ method: 'GET' })
 
     // Fetch movies with combined filters
     const movies = await db
-      .select()
+      .select({
+        movie: {
+          id: movie.id,
+          title: movie.title,
+          releaseDate: movie.releaseDate,
+          overview: movie.overview,
+          runtime: movie.runtime,
+          watchDate: movie.watchDate,
+          images: compactMovieImages(movie.images),
+        },
+        user: { id: user.id, name: user.name, image: user.image },
+      })
       .from(movie)
       .innerJoin(user, eq(user.id, movie.userId))
-      .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
       .where(and(...conditions))
       .orderBy(desc(movie.watchDate))
 
     return groupBy(
       movies.map((row) => ({
-        movie: {
-          ...row.movie,
-          cast: row.movie_credits?.cast ?? null,
-          crew: row.movie_credits?.crew ?? null,
-        } as MovieWithCredits,
+        movie: row.movie,
         user: row.user,
       })),
       (item) => {
@@ -144,11 +158,43 @@ export const getAllWatchedMovies = createServerFn({ method: 'GET' })
     if (!context.user) throw new Error('Unauthorized')
 
     return db
-      .select()
+      .select({
+        ...getTableColumns(movie),
+        images: compactMovieImages(movie.images),
+      })
       .from(movie)
       .where(isNotNull(movie.watchDate))
       .orderBy(desc(movie.watchDate))
       .limit(WATCHED_MOVIES_CAP)
+  })
+
+const RECENT_WATCHED_LIMIT = 6
+
+export type RecentWatchedMovie = {
+  id: string
+  title: string
+  watchDate: Date | null
+  releaseDate: string | null
+  posterPath: string | null
+}
+
+export const getRecentWatchedMovies = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<Array<RecentWatchedMovie>> => {
+    if (!context.user) throw new Error('Unauthorized')
+
+    return db
+      .select({
+        id: movie.id,
+        title: movie.title,
+        watchDate: movie.watchDate,
+        releaseDate: movie.releaseDate,
+        posterPath: firstMoviePosterPath(movie.images),
+      })
+      .from(movie)
+      .where(isNotNull(movie.watchDate))
+      .orderBy(desc(movie.watchDate))
+      .limit(RECENT_WATCHED_LIMIT)
   })
 
 const THIRTY_MINUTES = 1000 * 60 * 30
@@ -194,6 +240,14 @@ export const movieQueries = {
     queryOptions({
       queryKey: [...movieQueries.all(), 'allWatched'],
       queryFn: getAllWatchedMovies,
+      staleTime: THIRTY_MINUTES,
+    }),
+  // Keep this under the allWatched prefix so existing movie invalidations
+  // (SSE + mutations) also refresh the history strip.
+  recentWatched: () =>
+    queryOptions({
+      queryKey: [...movieQueries.all(), 'allWatched', 'recent'],
+      queryFn: getRecentWatchedMovies,
       staleTime: THIRTY_MINUTES,
     }),
 

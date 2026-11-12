@@ -10,8 +10,8 @@ interface NextMovieCardProps {
 export function NextMovieCard({ movieData }: NextMovieCardProps) {
   const { movie, user } = movieData
 
-  const backdropPath = movie.images?.backdrops?.[0]?.file_path
-  const posterPath = movie.images?.posters?.[0]?.file_path
+  const backdropPath = movie.images?.backdrops[0]?.file_path
+  const posterPath = movie.images?.posters[0]?.file_path
   const backdropUrl = backdropPath
     ? getImageUrl(backdropPath, 'w1280')
     : posterPath

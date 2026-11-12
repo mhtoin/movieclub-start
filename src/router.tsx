@@ -11,7 +11,9 @@ export const getRouter = () => {
     scrollRestoration: true,
     context: { queryClient },
     defaultPreload: 'intent',
-    defaultPreloadStaleTime: 1000 * 60 * 5, // 5 min preload cache — React Query's staleTime still governs refetching
+    // React Query owns data freshness; don't let the Router cache suppress a
+    // loader that needs to kick off a fresh external-cache query.
+    defaultPreloadStaleTime: 0,
     defaultViewTransition: true,
     defaultPendingMs: 500,
     defaultPendingMinMs: 200,

@@ -32,8 +32,8 @@ export function createQueryClient() {
       },
       dehydrate: {
         shouldDehydrateQuery: (query) =>
-          defaultShouldDehydrateQuery(query) &&
-          query.state.status === 'success',
+          defaultShouldDehydrateQuery(query) ||
+          query.state.status === 'pending',
       },
     },
   })
