@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
+import { eq, getTableColumns } from 'drizzle-orm'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import { db } from '@/db/db'
 import {
@@ -11,7 +11,18 @@ import {
 } from '@/db/schema'
 import { movie } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { compactMovieImages } from '@/db/sql/movie-images'
 import { authMiddleware } from '@/middleware/auth'
+
+/**
+ * All movie columns except the full `images` JSON, which carries large base64
+ * blur placeholders. Consumers only render TMDB file paths, so project just
+ * those paths.
+ */
+const compactMovieSelection = {
+  ...getTableColumns(movie),
+  images: compactMovieImages(movie.images),
+}
 
 export const getUserShortlist = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
@@ -21,7 +32,14 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
 
     try {
       const rows = await db
-        .select()
+        .select({
+          shortlist,
+          movie: compactMovieSelection,
+          credits: {
+            cast: movieCredits.cast,
+            crew: movieCredits.crew,
+          },
+        })
         .from(shortlist)
         .where(eq(shortlist.userId, userId))
         .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
@@ -42,17 +60,35 @@ export const getUserShortlist = createServerFn({ method: 'GET' })
         ...rows[0].shortlist,
         requiresSelection:
           requiresSelectionEnabled && rows[0].shortlist.requiresSelection,
-        movies: rows.flatMap((row) =>
-          row.movie
-            ? [
-                {
-                  ...row.movie,
-                  cast: row.movie_credits?.cast ?? null,
-                  crew: row.movie_credits?.crew ?? null,
-                },
-              ]
-            : [],
-        ),
+        movies: rows.flatMap((row) => {
+          if (!row.movie) return []
+
+          const cast = Array.isArray(row.credits?.cast)
+            ? row.credits.cast
+                .slice(0, 3)
+                .filter((member: any) => member.id && member.name)
+                .map((member: any) => ({ id: member.id, name: member.name }))
+            : []
+          const director = Array.isArray(row.credits?.crew)
+            ? row.credits.crew.find((member: any) => member.job === 'Director')
+            : null
+
+          return [
+            {
+              ...row.movie,
+              cast,
+              crew: director
+                ? [
+                    {
+                      id: director.id,
+                      name: director.name,
+                      job: 'Director',
+                    },
+                  ]
+                : [],
+            },
+          ]
+        }),
       }
     } catch (error) {
       console.error('Error fetching shortlist:', error)
@@ -73,12 +109,19 @@ export const getAllShortlists = createServerFn({ method: 'POST' })
       const requiresSelectionEnabled = config[0]?.requireWinnerSelection ?? true
 
       const allShortlists = await db
-        .select()
+        .select({
+          shortlist,
+          user: {
+            id: user.id,
+            name: user.name,
+            image: user.image,
+          },
+          movie: compactMovieSelection,
+        })
         .from(shortlist)
         .innerJoin(user, eq(shortlist.userId, user.id))
         .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
         .leftJoin(movie, eq(movieToShortlist.a, movie.id))
-        .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
 
       const shortlistsMap = new Map<string, ShortlistWithUserMovies>()
 
@@ -94,11 +137,7 @@ export const getAllShortlists = createServerFn({ method: 'POST' })
           })
         }
         if (row.movie) {
-          shortlistsMap.get(shortlistId)!.movies.push({
-            ...row.movie,
-            cast: row.movie_credits?.cast ?? null,
-            crew: row.movie_credits?.crew ?? null,
-          })
+          shortlistsMap.get(shortlistId)!.movies.push(row.movie)
         }
       }
 

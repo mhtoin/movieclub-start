@@ -17,6 +17,7 @@ import type { InferSelectModel } from 'drizzle-orm'
 import { authMiddleware } from '@/middleware/auth'
 import { movie, moviesOnTiers, review, tier, tierlist, user } from '@/db/schema'
 import { db } from '@/db/db'
+import { compactTierlistMovieImages } from '@/db/sql/movie-images'
 
 type Tierlist = InferSelectModel<typeof tierlist>
 type Tier = InferSelectModel<typeof tier>
@@ -24,7 +25,7 @@ type MovieOnTier = InferSelectModel<typeof moviesOnTiers>
 type Movie = InferSelectModel<typeof movie>
 type User = InferSelectModel<typeof user>
 
-export type UserWithTierlists = User & {
+export type UserWithTierlists = Pick<User, 'id' | 'name' | 'image'> & {
   tierlists: Array<
     Tierlist & {
       tiers: Array<
@@ -387,8 +388,9 @@ export const getSingleTierlist = createServerFn({ method: 'GET' })
           },
         },
       })
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      return (result as TierlistWithDetails) ?? null
+      return result
+        ? compactTierlistMovieImages(result as TierlistWithDetails)
+        : null
     } catch (error) {
       console.error('Error fetching single tierlist:', error)
       throw error
@@ -404,6 +406,11 @@ export const getTierlists = createServerFn({ method: 'GET' })
 
     try {
       const users = await (db as any).query.user.findMany({
+        columns: {
+          id: true,
+          name: true,
+          image: true,
+        },
         limit: TIERLISTS_USER_CAP,
         with: {
           tierlists: {
@@ -421,7 +428,12 @@ export const getTierlists = createServerFn({ method: 'GET' })
           },
         },
       })
-      return users.filter((u: UserWithTierlists) => u.tierlists.length > 0)
+      return users
+        .filter((u: UserWithTierlists) => u.tierlists.length > 0)
+        .map((u: UserWithTierlists) => ({
+          ...u,
+          tierlists: u.tierlists.map(compactTierlistMovieImages),
+        }))
     } catch (error) {
       console.error('Error fetching tierlists:', error)
       throw error
@@ -537,7 +549,9 @@ export const getUserTierlists = createServerFn({ method: 'GET' })
           },
         },
       })
-      return userTierlists
+      return userTierlists.map((userTierlist: TierlistWithDetails) =>
+        compactTierlistMovieImages(userTierlist),
+      )
     } catch (error) {
       console.error('Error fetching user tierlists:', error)
       throw error

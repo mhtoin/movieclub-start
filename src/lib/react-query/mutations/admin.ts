@@ -13,7 +13,7 @@ import {
   shortlist,
   siteConfig,
 } from '@/db/schema'
-import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
+import { createDbMovie } from '@/lib/createDbMovie'
 import { fetchMovieDetails } from '@/lib/tmdb-api'
 import { adminMiddleware } from '@/middleware/admin'
 
@@ -142,9 +142,6 @@ export const addMovieToUserShortlist = createServerFn({ method: 'POST' })
         cast: credits.cast,
         crew: credits.crew,
       })
-      generateAndUpdateBlurData(movieId, movieData.images).catch((error) =>
-        console.error('Background blur generation failed:', error),
-      )
     }
 
     if (currentMovies.some((entry) => entry.id === movieId)) {
@@ -369,12 +366,6 @@ export const addWatchedMovie = createServerFn({ method: 'POST' })
 
       return { success: true, raffleId, movieId: movieId! }
     })
-
-    if (movieData) {
-      generateAndUpdateBlurData(result.movieId, movieData.images).catch(
-        (error) => console.error('Background blur generation failed:', error),
-      )
-    }
 
     return result
   })

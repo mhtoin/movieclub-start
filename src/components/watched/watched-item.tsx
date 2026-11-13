@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { Calendar, Clock } from 'lucide-react'
 import { useRef } from 'react'
 import Avatar from '../ui/avatar'
-import type { MovieWithCredits } from '@/db/schema/movies'
+import type { Movie } from '@/db/schema/movies'
 import type { User } from '@/db/schema/users'
 import { useElementInView } from '@/lib/hooks'
 
@@ -12,8 +12,17 @@ export function WatchedItem({
   user,
   compact = false,
 }: {
-  movie: MovieWithCredits
-  user: User
+  movie: Pick<
+    Movie,
+    | 'id'
+    | 'title'
+    | 'releaseDate'
+    | 'overview'
+    | 'runtime'
+    | 'watchDate'
+    | 'images'
+  >
+  user: Pick<User, 'id' | 'name' | 'image'>
   compact?: boolean
 }) {
   const itemRef = useRef<HTMLAnchorElement>(null)

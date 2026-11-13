@@ -5,6 +5,7 @@ import { and, desc, eq, gte, inArray, isNotNull, lte, sql } from 'drizzle-orm'
 import { db } from '@/db/db'
 import { movie, movieCredits } from '@/db/schema/movies'
 import { user } from '@/db/schema/users'
+import { compactMovieImages } from '@/db/sql/movie-images'
 import { getCached, setCache } from '@/lib/tmdb-cache'
 import { authMiddleware } from '@/middleware/auth'
 
@@ -116,15 +117,14 @@ export interface NextMovieToWatch {
     tmdbId: number
     imdbId: string | null
     images: {
-      backdrops?: Array<{ file_path: string; [key: string]: any }>
-      posters?: Array<{ file_path: string; [key: string]: any }>
+      backdrops: Array<{ file_path: string }>
+      posters: Array<{ file_path: string }>
     } | null
     watchProviders: Record<string, any> | null
   }
   user: {
     id: string
     name: string
-    email: string
     image: string
   }
 }
@@ -634,7 +634,24 @@ export const getNextMovieToWatch = createServerFn({ method: 'GET' })
 
     try {
       const rows = await db
-        .select()
+        .select({
+          movie: {
+            id: movie.id,
+            title: movie.title,
+            originalTitle: movie.originalTitle,
+            overview: movie.overview,
+            releaseDate: movie.releaseDate,
+            runtime: movie.runtime,
+            voteAverage: movie.voteAverage,
+            genres: movie.genres,
+            tagline: movie.tagline,
+            tmdbId: movie.tmdbId,
+            imdbId: movie.imdbId,
+            images: compactMovieImages(movie.images),
+            watchProviders: movie.watchProviders,
+          },
+          user: { id: user.id, name: user.name, image: user.image },
+        })
         .from(movie)
         .innerJoin(user, eq(user.id, movie.userId))
         .where(isNotNull(movie.watchDate))

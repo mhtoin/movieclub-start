@@ -15,13 +15,9 @@ export const Route = createFileRoute('/_authenticated/home')({
     // Everything else can stream in via prefetchQuery.
     await context.queryClient.ensureQueryData(movieQueries.latest())
 
-    if (userId) {
-      await context.queryClient.ensureQueryData(shortlistQueries.byUser(userId))
-    }
-
     // Fire-and-forget secondary data so the page can start rendering sooner.
     context.queryClient.prefetchQuery(shortlistQueries.all())
-    context.queryClient.prefetchQuery(movieQueries.allWatched())
+    context.queryClient.prefetchQuery(movieQueries.recentWatched())
     if (userId) {
       context.queryClient.prefetchQuery(dashboardQueries.stats(userId))
       context.queryClient.prefetchQuery(homeQueries.seeds(userId))

@@ -9,7 +9,7 @@ interface NextMovieCompactProps {
 export function NextMovieCompact({ movieData }: NextMovieCompactProps) {
   const { movie, user } = movieData
 
-  const posterPath = movie.images?.posters?.[0]?.file_path
+  const posterPath = movie.images?.posters[0]?.file_path
   const posterUrl = posterPath ? getImageUrl(posterPath, 'w185') : null
 
   const tmdbUrl = `https://www.themoviedb.org/movie/${movie.tmdbId}`

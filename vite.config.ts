@@ -32,11 +32,6 @@ const config = defineConfig({
               priority: 20,
             },
             {
-              name: 'vendor-recharts',
-              test: /recharts|d3-/,
-              priority: 10,
-            },
-            {
               name: 'vendor-framer-motion',
               test: /framer-motion/,
               priority: 10,

@@ -1,16 +1,16 @@
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
+import { eq, getTableColumns } from 'drizzle-orm'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import { db } from '@/db/db'
 import {
   movie,
-  movieCredits,
   movieToShortlist,
   shortlist,
   siteConfig,
   user,
 } from '@/db/schema'
+import { compactMovieImages } from '@/db/sql/movie-images'
 import { adminMiddleware } from '@/middleware/admin'
 
 export const getAdminShortlists = createServerFn({ method: 'GET' })
@@ -18,12 +18,18 @@ export const getAdminShortlists = createServerFn({ method: 'GET' })
   .validator((data: Record<string, never>) => data)
   .handler(async (): Promise<Array<ShortlistWithUserMovies>> => {
     const rows = await db
-      .select()
+      .select({
+        shortlist,
+        user: { id: user.id, name: user.name, image: user.image },
+        movie: {
+          ...getTableColumns(movie),
+          images: compactMovieImages(movie.images),
+        },
+      })
       .from(shortlist)
       .innerJoin(user, eq(shortlist.userId, user.id))
       .leftJoin(movieToShortlist, eq(shortlist.id, movieToShortlist.b))
       .leftJoin(movie, eq(movieToShortlist.a, movie.id))
-      .leftJoin(movieCredits, eq(movieCredits.id, movie.id))
 
     const shortlists = new Map<string, ShortlistWithUserMovies>()
 
@@ -33,8 +39,6 @@ export const getAdminShortlists = createServerFn({ method: 'GET' })
         if (row.movie) {
           current.movies.push({
             ...row.movie,
-            cast: row.movie_credits?.cast ?? null,
-            crew: row.movie_credits?.crew ?? null,
           })
         }
         continue
@@ -47,8 +51,6 @@ export const getAdminShortlists = createServerFn({ method: 'GET' })
           ? [
               {
                 ...row.movie,
-                cast: row.movie_credits?.cast ?? null,
-                crew: row.movie_credits?.crew ?? null,
               },
             ]
           : [],

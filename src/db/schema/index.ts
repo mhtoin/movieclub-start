@@ -5,6 +5,7 @@ export * from './raffles'
 export * from './sessions'
 export * from './shortlists'
 export * from './siteconfig'
+export * from './telemetry'
 export * from './tierlists'
 export * from './users'
 

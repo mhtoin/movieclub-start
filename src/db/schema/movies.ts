@@ -220,5 +220,5 @@ export type MovieWithCredits = Movie & {
 }
 export type MovieWithUser = {
   movie: MovieWithCredits
-  user: typeof user.$inferSelect
+  user: Pick<typeof user.$inferSelect, 'name'>
 }

@@ -1,7 +1,7 @@
 import { Toast } from '@base-ui/react/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, getTableColumns } from 'drizzle-orm'
 import type { ShortlistWithUserMovies } from '@/db/schema'
 import { db } from '@/db/db'
 import {
@@ -12,9 +12,15 @@ import {
   siteConfig,
 } from '@/db/schema'
 import { user } from '@/db/schema/users'
-import { createDbMovie, generateAndUpdateBlurData } from '@/lib/createDbMovie'
+import { compactMovieImages } from '@/db/sql/movie-images'
+import { createDbMovie } from '@/lib/createDbMovie'
 import { fetchMovieDetails } from '@/lib/tmdb-api'
 import { authMiddleware } from '@/middleware/auth'
+
+const compactMovieSelection = {
+  ...getTableColumns(movie),
+  images: compactMovieImages(movie.images),
+}
 
 export const removeFromShortlist = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
@@ -149,16 +155,6 @@ export const addToShortlist = createServerFn({ method: 'POST' })
           .insert(movieCredits)
           .values({ id: movieEntry.id, cast: credits.cast, crew: credits.crew })
           .onConflictDoNothing()
-      }
-
-      // Generate blur data asynchronously in the background
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (movieData.images) {
-        generateAndUpdateBlurData(movieEntry.id, movieData.images).catch(
-          (error) => {
-            console.error('Background blur generation failed:', error)
-          },
-        )
       }
     }
 
@@ -544,9 +540,19 @@ export const updateUserShortlistStatus = createServerFn({ method: 'POST' })
       .set(updates)
       .where(eq(shortlist.id, targetShortlist.id))
 
-    // Get the updated shortlist with all its movies
+    // Get the updated shortlist with all its movies. Only expose public user
+    // fields and compact image paths — this response is written into client
+    // caches, so it must never carry credentials or base64 blur data.
     const rows = await db
-      .select()
+      .select({
+        shortlist,
+        user: {
+          id: user.id,
+          name: user.name,
+          image: user.image,
+        },
+        movie: compactMovieSelection,
+      })
       .from(shortlist)
       .where(eq(shortlist.userId, userId))
       .leftJoin(user, eq(shortlist.userId, user.id))

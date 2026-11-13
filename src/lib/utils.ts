@@ -33,18 +33,6 @@ export function formatRaffleDate(date: string | Date): string {
   }
 }
 
-export async function getBlurDataUrl(imageUrl: string): Promise<string> {
-  try {
-    const response = await fetch(imageUrl)
-    const buffer = await response.arrayBuffer()
-    const base64 = Buffer.from(buffer).toString('base64')
-    return `data:image/jpeg;base64,${base64}`
-  } catch (error) {
-    console.error('Error generating blur data URL:', error)
-    return '' // Return empty string as fallback
-  }
-}
-
 export function groupBy<T>(
   items: Array<T>,
   keyFn: (item: T) => string | undefined,
