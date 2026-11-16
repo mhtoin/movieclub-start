@@ -15,7 +15,23 @@ export function DiscoverSearchInput({
   onSearchChange,
 }: DiscoverSearchInputProps) {
   const [localSearch, setLocalSearch] = useState(searchQuery)
+  const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // While the field is focused, show the user's in-progress text; otherwise
+  // mirror the URL-backed value so clearing / switching modes never leaves
+  // stale visible text.
+  const displayedSearch = isFocused ? localSearch : searchQuery
+
+  const handleFocus = () => {
+    setLocalSearch(searchQuery)
+    setIsFocused(true)
+  }
+
+  const handleBlur = () => {
+    setIsFocused(false)
+    setLocalSearch(searchQuery)
+  }
 
   const debouncedNavigate = useDebouncedCallback((value: string) => {
     const trimmed = value.trim()
@@ -60,15 +76,17 @@ export function DiscoverSearchInput({
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50 pointer-events-none" />
       <Input
         placeholder="Search movies..."
-        value={localSearch}
+        value={displayedSearch}
         onChange={handleSearchChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         className="pl-9 pr-8 h-8 text-sm bg-muted/50 border-muted-foreground/10 focus-visible:bg-background"
         size="sm"
         ref={inputRef}
         aria-label="Search movies"
         maxLength={200}
       />
-      {localSearch && (
+      {displayedSearch && (
         <button
           onClick={handleClearSearch}
           className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center rounded-full hover:bg-muted-foreground/10 text-muted-foreground/50 hover:text-foreground transition-colors"

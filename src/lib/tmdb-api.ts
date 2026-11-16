@@ -246,7 +246,12 @@ export async function discoverMovies(
   }
 
   if (params.with_keywords) {
-    queryParams.append('with_keywords', params.with_keywords)
+    // A user selecting several matching keyword labels expects any of them to
+    // match. TMDB uses `|` for OR and `,` for AND within this parameter.
+    queryParams.append(
+      'with_keywords',
+      params.with_keywords.replaceAll(',', '|'),
+    )
   }
 
   if (params.with_companies) {
@@ -406,6 +411,44 @@ export async function searchPeople(
     return (await response.json()) as TMDBPersonSearchResponse
   } catch (error) {
     console.error('Error searching people:', error)
+    throw error
+  }
+}
+
+export interface TMDBKeywordSearchResult {
+  id: number
+  name: string
+}
+
+export interface TMDBKeywordSearchResponse {
+  page: number
+  results: Array<TMDBKeywordSearchResult>
+  total_pages: number
+  total_results: number
+}
+
+export async function searchKeywords(
+  query: string,
+): Promise<TMDBKeywordSearchResponse> {
+  if (!TMDB_CONFIG.API_KEY) {
+    throw new Error('TMDB API key is not configured')
+  }
+  const params = new URLSearchParams({
+    api_key: TMDB_CONFIG.API_KEY,
+    query,
+    page: '1',
+  })
+  const url = `${TMDB_CONFIG.BASE_URL}/search/keyword?${params.toString()}`
+  try {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(
+        `TMDB API error: ${response.status} ${response.statusText}`,
+      )
+    }
+    return (await response.json()) as TMDBKeywordSearchResponse
+  } catch (error) {
+    console.error('Error searching keywords:', error)
     throw error
   }
 }

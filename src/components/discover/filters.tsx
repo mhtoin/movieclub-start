@@ -5,11 +5,13 @@ import {
   Languages,
   RotateCcw,
   Star,
+  Tag,
   Tv,
   User,
   X,
 } from 'lucide-react'
 import { GenreFilter } from './genre-filter'
+import { KeywordFilter } from './keyword-filter'
 import { LanguageFilter } from './language-filter'
 import { PersonFilter } from './person-filter'
 import { ProviderFilter } from './provider-filter'
@@ -32,6 +34,8 @@ interface DiscoverFiltersProps {
   onLanguagesChange: (languages: Array<string>) => void
   selectedPeople: ReadonlyArray<FacetEntry>
   onPeopleChange: (people: Array<FacetEntry>) => void
+  selectedKeywords: ReadonlyArray<FacetEntry>
+  onKeywordsChange: (keywords: Array<FacetEntry>) => void
   voteRange: [number, number]
   onVoteRangeChange: (range: [number, number]) => void
   sortBy: string
@@ -57,6 +61,8 @@ export function DiscoverFilters({
   onLanguagesChange,
   selectedPeople,
   onPeopleChange,
+  selectedKeywords,
+  onKeywordsChange,
   voteRange,
   onVoteRangeChange,
   sortBy,
@@ -69,6 +75,7 @@ export function DiscoverFilters({
     (selectedProviders.length > 0 && !isSearchActive) ||
     selectedLanguages.length > 0 ||
     selectedPeople.length > 0 ||
+    (selectedKeywords.length > 0 && !isSearchActive) ||
     voteRange[0] !== 0 ||
     voteRange[1] !== 10
 
@@ -77,6 +84,7 @@ export function DiscoverFilters({
     onProvidersChange([])
     onLanguagesChange([])
     onPeopleChange([])
+    onKeywordsChange([])
     onVoteRangeChange([0, 10])
     onSortByChange('popularity.desc')
   }
@@ -209,6 +217,31 @@ export function DiscoverFilters({
           />
         </div>
 
+        {!isSearchActive && (
+          <div className="relative">
+            <KeywordFilter
+              selectedKeywords={selectedKeywords}
+              onKeywordsChange={onKeywordsChange}
+              chipContent={
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 text-xs font-medium whitespace-nowrap ${
+                    selectedKeywords.length > 0
+                      ? 'text-primary bg-primary/10 ring-1 ring-primary/20'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Tag size={14} className="shrink-0" />
+                  <span>
+                    {selectedKeywords.length > 0
+                      ? `${selectedKeywords.length} keyword${selectedKeywords.length > 1 ? 's' : ''}`
+                      : 'Keyword'}
+                  </span>
+                </div>
+              }
+            />
+          </div>
+        )}
+
         <div className="relative">
           <RatingFilter
             voteRange={voteRange}
@@ -271,6 +304,8 @@ export function DiscoverFilters({
           onLanguagesChange={onLanguagesChange}
           selectedPeople={selectedPeople}
           onPeopleChange={onPeopleChange}
+          selectedKeywords={selectedKeywords}
+          onKeywordsChange={onKeywordsChange}
           voteRange={voteRange}
           onVoteRangeChange={onVoteRangeChange}
           isRatingModified={isRatingModified}
@@ -290,6 +325,8 @@ function ActiveFilterPills({
   onLanguagesChange,
   selectedPeople,
   onPeopleChange,
+  selectedKeywords,
+  onKeywordsChange,
   voteRange,
   onVoteRangeChange,
   isRatingModified,
@@ -303,6 +340,8 @@ function ActiveFilterPills({
   onLanguagesChange: (languages: Array<string>) => void
   selectedPeople: ReadonlyArray<FacetEntry>
   onPeopleChange: (people: Array<FacetEntry>) => void
+  selectedKeywords: ReadonlyArray<FacetEntry>
+  onKeywordsChange: (keywords: Array<FacetEntry>) => void
   voteRange: [number, number]
   onVoteRangeChange: (range: [number, number]) => void
   isRatingModified: boolean
@@ -362,6 +401,18 @@ function ActiveFilterPills({
           }
         />
       ))}
+      {!isSearchActive &&
+        selectedKeywords.map((keyword) => (
+          <FilterPill
+            key={`keyword-${keyword.id}`}
+            label={keyword.name || `Keyword #${keyword.id}`}
+            onRemove={() =>
+              onKeywordsChange(
+                selectedKeywords.filter((k) => k.id !== keyword.id),
+              )
+            }
+          />
+        ))}
       {isRatingModified ? (
         <FilterPill
           label={`Rating ${voteRange[0].toFixed(0)}–${voteRange[1].toFixed(0)}`}

@@ -114,9 +114,28 @@ function RouteComponent() {
     })
   }, [navigate, providerFilter, shouldApplyConfiguredProviders])
 
-  const handleSearchChange = (value: string) => {
+  // A shared/bookmarked URL may contain both modes; title search wins so a
+  // stale keyword facet never looks like it applies to `/search/movie`.
+  useEffect(() => {
+    if (!isSearchActive || !search.keywords) return
+
     navigate({
-      search: (prev) => ({ ...prev, search: value }),
+      search: (prev) => ({ ...prev, keywords: '' }),
+      replace: true,
+      resetScroll: false,
+    })
+  }, [isSearchActive, navigate, search.keywords])
+
+  const handleSearchChange = (value: string) => {
+    const isTitleSearch = value.trim().length >= MIN_SEARCH_LENGTH
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        search: value,
+        // Keyword discovery and title search are mutually exclusive modes so
+        // keyword facets never appear to apply to `/search/movie`.
+        keywords: isTitleSearch ? '' : prev.keywords,
+      }),
       resetScroll: false,
     })
   }
@@ -134,6 +153,7 @@ function RouteComponent() {
     ? search.originalLanguage.split(',')
     : []
   const selectedPeople = parseFacetCsv(search.people)
+  const selectedKeywords = parseFacetCsv(search.keywords)
   const voteRange: [number, number] = [search.minRating, search.maxRating]
   const sortBy = search.sortBy
 
@@ -169,6 +189,18 @@ function RouteComponent() {
       search: (prev) => ({
         ...prev,
         people: serializeFacetCsv(people),
+      }),
+    })
+  }
+
+  const handleKeywordsChange = (keywords: Array<FacetEntry>) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        keywords: serializeFacetCsv(keywords),
+        // Selecting a keyword leaves title-search mode; clear the title query
+        // so the two modes are never active at the same time.
+        search: keywords.length > 0 ? '' : prev.search,
       }),
     })
   }
@@ -209,6 +241,8 @@ function RouteComponent() {
         onLanguagesChange={handleLanguagesChange}
         selectedPeople={selectedPeople}
         onPeopleChange={handlePeopleChange}
+        selectedKeywords={selectedKeywords}
+        onKeywordsChange={handleKeywordsChange}
         voteRange={voteRange}
         onVoteRangeChange={handleVoteRangeChange}
         sortBy={sortBy}
@@ -261,12 +295,14 @@ function RouteComponent() {
                 {(selectedGenres.length > 0 ||
                   (selectedProviders.length > 0 && !isSearchActive) ||
                   selectedLanguages.length > 0 ||
+                  (selectedKeywords.length > 0 && !isSearchActive) ||
                   voteRange[0] !== 0 ||
                   voteRange[1] !== 10) && (
                   <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold bg-primary text-primary-foreground rounded-full">
                     {selectedGenres.length +
                       (isSearchActive ? 0 : selectedProviders.length) +
                       selectedLanguages.length +
+                      (isSearchActive ? 0 : selectedKeywords.length) +
                       (voteRange[0] !== 0 || voteRange[1] !== 10 ? 1 : 0)}
                   </span>
                 )}
